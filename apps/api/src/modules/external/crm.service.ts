@@ -46,7 +46,7 @@ export class CrmService {
             crm_id: { not: null },
           },
           {
-            status: { not: { equals: 'COMPLETED' } },
+            status: { not: { in: ['COMPLETED', 'CANCELLED'] } },
           },
         ],
       },
@@ -162,20 +162,28 @@ export class CrmService {
     return response;
   }
 
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async updateMockIncident(id: number, data: IncidentCreateUpdateInput) {}
+
+  async resetMockData() {}
+
   async getIncident(id: number) {
     const response = await firstValueFrom(
-      this.httpService
-        .get(`${this.configService.get('CRM_URL')}/${Endpoint.Incidents}/${id}`, { headers: this.headers })
-        .pipe(
-          map((r) => r.data),
-          retry(3),
-          catchError((err) => {
-            throw new Error(err);
-          }),
-        ),
+      this.request(
+        Endpoint.Query,
+        `query=USE REPORT;SELECT id,lookupName,statusWithType.status.lookupName, category.lookupName FROM incidents WHERE id = (${id})`,
+      ).pipe(
+        map((r) => {
+          return r.data;
+        }),
+        retry(3),
+        catchError((err) => {
+          throw new Error(err);
+        }),
+      ),
     );
-
-    return response;
+    const [crm_id, crm_lookup_name, crm_status, crm_category] = response.items[0].rows[0];
+    return { crm_id, crm_lookup_name, crm_status, crm_category };
   }
 
   async updateIncidentStatus(incidentId: number, newStatus: number) {

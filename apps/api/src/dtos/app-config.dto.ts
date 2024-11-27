@@ -1,21 +1,10 @@
 import { IsEnum, IsNotEmpty, IsString } from 'class-validator';
 import { Environment } from '../enums/environment.enum';
+import { SSOEnvironment } from '../enums/sso-environment.enum';
 
 export class AppConfigDto {
   @IsEnum(Environment)
   NODE_ENV: Environment;
-
-  @IsNotEmpty()
-  @IsString()
-  BI_URL: string;
-
-  @IsNotEmpty()
-  @IsString()
-  BI_USERNAME: string;
-
-  @IsNotEmpty()
-  @IsString()
-  BI_PASSWORD: string;
 
   @IsNotEmpty()
   @IsString()
@@ -33,9 +22,8 @@ export class AppConfigDto {
   @IsString()
   CRM_PASSWORD: string;
 
-  @IsNotEmpty()
   @IsString()
-  DATABASE_URL: string;
+  DATABASE_URL: string; // can be empty when doing e2e testing
 
   @IsNotEmpty()
   @IsString()
@@ -48,6 +36,21 @@ export class AppConfigDto {
   @IsNotEmpty() //
   @IsString()
   ELASTIC_PASSWORD: string;
+
+  @IsNotEmpty()
+  @IsString()
+  CSS_API_CLIENT_ID: string;
+
+  @IsNotEmpty()
+  @IsString()
+  CSS_API_CLIENT_SECRET: string;
+
+  @IsNotEmpty()
+  @IsString()
+  SSO_INTEGRATION_ID: string;
+
+  @IsEnum(SSOEnvironment)
+  SSO_ENVIRONMENT: SSOEnvironment;
 
   @IsNotEmpty()
   @IsString()
@@ -72,4 +75,10 @@ export class AppConfigDto {
   @IsNotEmpty()
   @IsString()
   PEOPLESOFT_PASSWORD: string;
+
+  @IsString()
+  USE_MOCKS: string;
+
+  @IsString()
+  E2E_TESTING: string;
 }

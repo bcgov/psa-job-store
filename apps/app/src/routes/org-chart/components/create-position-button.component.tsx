@@ -10,6 +10,8 @@ const NaiveCreatePositionButton = ({
   supervisorId,
 }: CreatePositionButtonProps) => {
   const { createNewPosition } = usePosition();
+  // const { getNodes } = useReactFlow();
+  // const [isLoading, setIsLoading] = useState(false);
 
   return (
     <Tooltip
@@ -17,12 +19,30 @@ const NaiveCreatePositionButton = ({
     >
       <Button
         // eslint-disable-next-line @typescript-eslint/no-explicit-any
-        onClick={async () => await createNewPosition(supervisorId as any, departmentId, elements)}
+        onClick={async () => {
+          // setIsLoading(true);
+          try {
+            // await new Promise((resolve) => setTimeout(resolve, 300));
+            // const png = await generatePNGBase64(getNodes);
+            await createNewPosition({
+              // eslint-disable-next-line @typescript-eslint/no-explicit-any
+              reportingPositionId: supervisorId as any,
+              selectedDepartment: departmentId,
+              orgChartData: elements,
+              // svg: png,
+            });
+          } finally {
+            // setIsLoading(false);
+          }
+        }}
+        id={`create-button-${supervisorId}`}
         disabled={positionIsVacant}
-        icon={<UserAddOutlined />}
+        icon={<UserAddOutlined aria-hidden />}
         data-testid="create-direct-report-button"
         style={{ borderRadius: 0, border: 'none', width: '100%' }}
         type="default"
+        tabIndex={-1}
+        // loading={isLoading}
       >
         Create new direct report
       </Button>

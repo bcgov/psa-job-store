@@ -1,15 +1,24 @@
-import { UseGuards } from '@nestjs/common';
-import { Args, Field, Int, Mutation, ObjectType, Query, Resolver } from '@nestjs/graphql';
+import {
+  Args,
+  Field,
+  InputType,
+  Int,
+  Mutation,
+  ObjectType,
+  OmitType,
+  Query,
+  Resolver,
+  registerEnumType,
+} from '@nestjs/graphql';
 import { UUID } from 'crypto';
 import {
   PositionRequest,
   PositionRequestCreateInput,
   PositionRequestUpdateInput,
+  UserCreateNestedOneWithoutPositionRequestInput,
 } from '../../@generated/prisma-nestjs-graphql';
 import { CurrentUser } from '../auth/decorators/current-user.decorator';
 import { Roles } from '../auth/decorators/roles.decorator';
-import { AllowNoRoles } from '../auth/guards/role-global.guard';
-import { RoleGuard } from '../auth/guards/role.guard';
 import { ExtendedFindManyPositionRequestWithSearch } from './args/find-many-position-request-with-search.args';
 import {
   PositionRequestApiService,
@@ -30,6 +39,12 @@ export class PositionNeedsReviewResult {
 export class PositionRequestUserClassification {
   @Field(() => String, { nullable: false })
   id!: string;
+
+  @Field(() => String, { nullable: false })
+  employee_group_id!: string;
+
+  @Field(() => String, { nullable: false })
+  peoplesoft_id!: string;
 
   @Field(() => String, { nullable: false })
   code!: string;
@@ -56,6 +71,22 @@ export class PositionRequestSubmittedBy {
   name: string;
 }
 
+@InputType()
+export class PositionRequestCreateInputWithoutUser extends OmitType(PositionRequestCreateInput, ['user'] as const) {
+  @Field(() => UserCreateNestedOneWithoutPositionRequestInput, { nullable: true })
+  user?: UserCreateNestedOneWithoutPositionRequestInput;
+}
+
+export enum RequestingFeature {
+  totalCompApprovedRequests = 'totalCompApprovedRequests',
+  classificationTasks = 'classificationTasks',
+  myPositions = 'myPositions',
+}
+
+registerEnumType(RequestingFeature, {
+  name: 'RequestingFeature',
+});
+
 @Resolver()
 export class PositionRequestApiResolver {
   constructor(private positionRequestService: PositionRequestApiService) {}
@@ -63,59 +94,69 @@ export class PositionRequestApiResolver {
   @Mutation(() => Int)
   async createPositionRequest(
     @CurrentUser() { id: userId }: Express.User,
-    @Args({ name: 'data', type: () => PositionRequestCreateInput }) data: PositionRequestCreateInput,
+    @Args({ name: 'data', type: () => PositionRequestCreateInputWithoutUser })
+    data: PositionRequestCreateInputWithoutUser,
   ) {
-    // console.log('create DATA: ', data);
+    data.user = { connect: { id: userId } };
 
-    // TODO: AL-146
-    // data.user = { connect: { id: userId } };
-
-    // TODO: AL-146 - replace below with above
-    data.user_id = userId;
-
-    const newPositionRequest = await this.positionRequestService.createPositionRequest(data, userId);
+    const newPositionRequest = await this.positionRequestService.createPositionRequest(data);
     return newPositionRequest.id;
   }
 
   @Mutation(() => PositionRequest)
   async submitPositionRequest(
     @Args('id', { type: () => Int }) id: number,
+    @CurrentUser() user: Express.User,
     @Args('comment', { nullable: true }) comment?: string,
+    @Args('orgchart_png', { nullable: true }) orgchart_png?: string,
   ) {
-    return this.positionRequestService.submitPositionRequest(id, comment);
+    await this.positionRequestService.submitPositionRequest(id, comment, user.id, orgchart_png);
+
+    // this ensures that returned object is the same as the one returned by getPositionRequest
+    return this.positionRequestService.getPositionRequest(id, user.id, user.roles);
   }
 
-  @Mutation(() => PositionRequestResponse)
+  @Mutation(() => PositionRequest)
   async updatePositionRequest(
     @Args('id', { type: () => Int }) id: number,
     @Args('updateInput') updateInput: PositionRequestUpdateInput,
+    @Args('returnFullObject', { type: () => Boolean, defaultValue: false }) returnFullObject: boolean,
+    @CurrentUser() user: Express.User,
   ) {
-    return this.positionRequestService.updatePositionRequest(id, updateInput);
+    const updatedPositionRequest = await this.positionRequestService.updatePositionRequest(id, updateInput, user.id);
+
+    if (returnFullObject) {
+      return this.positionRequestService.getPositionRequest(id, user.id, user.roles);
+    }
+
+    return updatedPositionRequest;
   }
 
   @Query(() => PositionRequestStatusCounts, { name: 'positionRequestsCount' })
   async positionRequestsCount(
     @CurrentUser() user: Express.User,
     @Args() args?: ExtendedFindManyPositionRequestWithSearch,
+    @Args('requestingFeature', { type: () => RequestingFeature, nullable: true }) requestingFeature?: RequestingFeature,
   ) {
-    return await this.positionRequestService.getPositionRequestCount(args, user.id, user.roles);
+    return await this.positionRequestService.getPositionRequestCount(args, user.id, user.roles, requestingFeature);
   }
 
+  @Roles('classification', 'hiring-manager', 'total-compensation')
   @Query(() => [PositionRequest], { name: 'positionRequests' })
   async getPositionRequests(
     @CurrentUser() user: Express.User,
     @Args() args?: ExtendedFindManyPositionRequestWithSearch,
+    @Args('requestingFeature', { type: () => RequestingFeature, nullable: true }) requestingFeature?: RequestingFeature,
   ) {
-    return this.positionRequestService.getPositionRequests(args, user.id, user.roles);
+    return this.positionRequestService.getPositionRequests(args, user.id, user.roles, requestingFeature);
   }
 
-  @Query(() => PositionRequest, { name: 'positionRequest' })
+  @Query(() => PositionRequest, { name: 'positionRequest', nullable: true })
   async getPositionRequest(@CurrentUser() user: Express.User, @Args('id') id: number) {
     return this.positionRequestService.getPositionRequest(+id, user.id, user.roles);
   }
 
-  @Query(() => PositionRequest, { name: 'sharedPositionRequest' })
-  @AllowNoRoles()
+  @Query(() => PositionRequest, { name: 'sharedPositionRequest', nullable: true })
   async getSharedPositionRequest(@Args('uuid') uuid: string) {
     return this.positionRequestService.getSharedPositionRequest(uuid);
   }
@@ -143,34 +184,34 @@ export class PositionRequestApiResolver {
   }
 
   @Roles('total-compensation', 'classification')
-  @UseGuards(RoleGuard)
   @Query(() => [PositionRequestUserClassification], { name: 'positionRequestClassifications' })
   async getPositionRequestClassifications() {
     return this.positionRequestService.getPositionRequestClassifications();
   }
 
   @Roles('total-compensation', 'classification')
-  @UseGuards(RoleGuard)
   @Query(() => [Int], { name: 'positionRequestJobStoreNumbers' })
   async getPositionRequestJobStoreNumbers() {
     return this.positionRequestService.getPositionRequestJobStoreNumbers();
   }
 
   @Roles('total-compensation', 'classification')
-  @UseGuards(RoleGuard)
   @Query(() => [String], { name: 'positionRequestStatuses' })
   async getPositionRequestStatuses() {
     return this.positionRequestService.getPositionRequestStatuses();
   }
 
   @Roles('total-compensation', 'classification')
-  @UseGuards(RoleGuard)
   @Query(() => [UserBasicInfo], { name: 'positionRequestSubmittedBy' })
-  async getpositionRequestSubmittedBy() {
-    return this.positionRequestService.getPositionRequestSubmittedBy();
+  async getpositionRequestSubmittedBy(
+    @CurrentUser() user: Express.User,
+    @Args('requestingFeature', { type: () => RequestingFeature, nullable: true }) requestingFeature?: RequestingFeature,
+  ) {
+    return this.positionRequestService.getPositionRequestSubmittedBy(user.roles, requestingFeature);
   }
 
   @Mutation(() => Boolean)
+  //deprecated - if we want to use this in the future, update to check Peoplesoft status as well
   async updatePositionRequestStatus(
     @Args('id', { type: () => Int }) id: number,
     @Args('status', { type: () => Int }) status: number,

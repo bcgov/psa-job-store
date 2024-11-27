@@ -1,13 +1,15 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { gql } from 'graphql-request';
 import { graphqlApi } from '.';
+import { IdVersion } from './job-profile-types';
+import { PositionProfileModel } from './position.api';
 
 export interface UserConnect {
   id: string;
 }
 
 export interface JobProfileConnect {
-  id: number;
+  id_version: IdVersion | null;
 }
 
 interface JobProfileConnectItem {
@@ -17,38 +19,54 @@ interface JobProfileConnectItem {
 export interface CreatePositionRequestInput {
   step: number;
   reports_to_position_id: number;
-  profile_json_updated?: any;
+  profile_json?: any;
   orgchart_json?: any;
   parent_job_profile?: JobProfileConnectItem;
   title?: string;
-  classification_id?: string;
-  classification_code?: string;
+  classification?: {
+    connect: {
+      classification_id: string;
+      classification_employee_group_id: string;
+      classification_peoplesoft_id: string;
+    };
+  };
   department?: {
     connect: {
       id: string;
     };
   };
+  orgchart_png?: string;
 }
-
 export interface GetPositionRequestResponseContent {
   id: number;
   step?: number;
-  reports_to_position_id?: number;
+  max_step_completed?: number;
+  reports_to_position_id: number;
+  reports_to_position: PositionProfileModel;
+  excluded_manager_position: PositionProfileModel;
   orgchart_json?: any;
-  profile_json_updated?: any;
-  user_id?: string;
-  user_name?: string;
+  profile_json?: any;
+  user?: {
+    id?: string;
+    name?: string;
+    email?: string;
+  };
+  classification?: {
+    employee_group_id?: string;
+    code?: string;
+    id?: string;
+  };
   parent_job_profile_id?: number;
+  parent_job_profile_version?: number;
   title?: string;
   position_number?: number;
-  classification?: string;
-  classification_code?: string;
   submission_id?: string;
   status?: string;
   department_id?: string;
   approved_at?: string;
   updated_at?: string;
-  email?: string;
+  submitted_at?: string;
+  resubmitted_at?: string;
   shareUUID?: string;
   parent_job_profile?: {
     number: number;
@@ -62,6 +80,7 @@ export interface GetPositionRequestResponseContent {
 
 export interface AdditionalInfo {
   work_location_id?: string;
+  work_location_name?: string;
   department_id?: string;
   excluded_mgr_position_number?: string;
   comments?: string;
@@ -72,6 +91,10 @@ export interface AdditionalInfo {
 export interface GetPositionRequestResponse {
   positionRequest?: GetPositionRequestResponseContent;
   sharedPositionRequest?: GetPositionRequestResponseContent; // this is for GetSharedPositionRequestResponse
+}
+
+export interface UpdatePositionRequestResponse {
+  updatePositionRequest: GetPositionRequestResponseContent;
 }
 
 export interface SubmitPositionRequestResponse {
@@ -90,7 +113,7 @@ export interface PositionNeedsReviewResponseContent {
 export interface PositionRequestStatusCounts {
   draft: number;
   completed: number;
-  inReview: number;
+  verification: number;
   total: number;
 }
 
@@ -115,31 +138,39 @@ export interface CreatePositionRequestResponse {
 export interface UpdatePositionRequestInput {
   id: number;
   step?: number;
+  max_step_completed?: number;
   reports_to_position_id?: number;
   orgchart_json?: any;
-  profile_json_updated?: any;
+  profile_json?: any;
   user_id?: string;
   title?: string | null;
   position_number?: number;
-  classification_id?: string;
+  classification?: {
+    connect: {
+      id_employee_group_id_peoplesoft_id: {
+        id: string;
+        employee_group_id: string;
+        peoplesoft_id: string;
+      };
+    };
+  };
   submission_id?: string;
   status?: string;
   additional_info?: AdditionalInfo | null;
-  parent_job_profile?: {
-    connect: {
-      id: number | null;
-    };
-  };
+  parent_job_profile?: JobProfileConnectItem;
   department?: {
     connect: {
       id: string;
     };
   };
+  returnFullObject?: boolean;
+  orgchart_png?: string;
 }
 
 export interface SubmitPositionRequestInput {
   id: number;
   comment?: string;
+  orgchart_png?: string;
 }
 
 export interface DeletePositionRequestInput {
@@ -152,7 +183,7 @@ export interface GetPositionRequestsArgs {
   orderBy?: Record<string, any>;
   take?: number;
   skip?: number;
-  onlyCompletedForAll?: boolean;
+  requestingFeature?: string;
 }
 
 export interface GetPositionRequestUserClassificationsResponse {
@@ -197,8 +228,8 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
               $where: PositionRequestWhereInput
               $take: Int
               $skip: Int
-              $orderBy: [PositionRequestOrderByWithRelationAndSearchRelevanceInput!]
-              $onlyCompletedForAll: Boolean
+              $orderBy: [PositionRequestOrderByWithRelationInput!]
+              $requestingFeature: RequestingFeature
             ) {
               positionRequests(
                 search: $search
@@ -206,23 +237,33 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
                 take: $take
                 skip: $skip
                 orderBy: $orderBy
-                onlyCompletedForAll: $onlyCompletedForAll
+                requestingFeature: $requestingFeature
               ) {
                 id
                 step
+                max_step_completed
                 reports_to_position_id
                 parent_job_profile_id
-                user_id
-                user_name
-                email
+                parent_job_profile_version
+                user {
+                  id
+                  name
+                  email
+                }
+                classification {
+                  code
+                  id
+                }
                 title
                 approved_at
                 position_number
-                classification_code
                 submission_id
                 status
                 updated_at
+                resubmitted_at
                 submitted_at
+                time_to_approve
+                approval_type
                 shareUUID
                 parent_job_profile {
                   number
@@ -230,10 +271,10 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
                 crm_id
                 crm_lookup_name
               }
-              positionRequestsCount(search: $search, where: $where, onlyCompletedForAll: $onlyCompletedForAll) {
+              positionRequestsCount(search: $search, where: $where, requestingFeature: $requestingFeature) {
                 draft
                 completed
-                inReview
+                verification
                 total
               }
             }
@@ -244,13 +285,13 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
             skip: args.skip,
             take: args.take,
             orderBy: args.orderBy,
-            onlyCompletedForAll: args.onlyCompletedForAll,
+            requestingFeature: args.requestingFeature,
           },
         };
       },
     }),
     getPositionRequest: build.query<GetPositionRequestResponse, GetPositionRequestArgs>({
-      providesTags: ['positionRequest'],
+      // providesTags: ['positionRequest'],
       // result
       //   ? [{ type: 'PositionRequest' as const, id: result.positionRequest.id }]
       //   : [{ type: 'PositionRequest' as const, id: 'id' }],
@@ -261,19 +302,30 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
               positionRequest(id: ${args.id}) {
                   id
                   step
+                  max_step_completed
                   reports_to_position_id
+                  reports_to_position
+                  excluded_manager_position
                   parent_job_profile_id
-                  profile_json_updated
+                  parent_job_profile_version
+                  profile_json
                   orgchart_json
-                  user_id
-                  user_name
-                  email
+                  user {
+                    id
+                    name
+                    email
+                  }
+                  classification {
+                    employee_group_id
+                    code
+                    id
+                  }
                   title
                   position_number
-                  classification_code
                   submission_id
                   status
                   updated_at
+                  resubmitted_at
                   submitted_at
                   department_id
                   approved_at
@@ -291,7 +343,7 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
       },
     }),
     getSharedPositionRequest: build.query<GetPositionRequestResponse, GetPositionRequestArgs>({
-      providesTags: ['positionRequest'],
+      // providesTags: ['positionRequest'],
       // result
       //   ? [{ type: 'PositionRequest' as const, id: result.positionRequest.id }]
       //   : [{ type: 'PositionRequest' as const, id: 'id' }],
@@ -302,19 +354,28 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
               sharedPositionRequest(uuid: "${args.uuid}") {
                   id
                   step
+                  max_step_completed
                   reports_to_position_id
+                  reports_to_position
+                  excluded_manager_position
                   parent_job_profile_id
-                  profile_json_updated
+                  parent_job_profile_version
+                  profile_json
                   orgchart_json
-                  user_id
-                  user_name
-                  email
+                  user {
+                    id
+                    name
+                    email
+                  }
+                  classification {
+                    code
+                  }
                   title
                   position_number
-                  classification_code
                   submission_id
                   status
                   updated_at
+                  resubmitted_at
                   submitted_at
                   department_id
                   approved_at
@@ -335,7 +396,7 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
       query: (input: CreatePositionRequestInput) => {
         return {
           document: gql`
-            mutation CreatePositionRequest($data: PositionRequestCreateInput!) {
+            mutation CreatePositionRequest($data: PositionRequestCreateInputWithoutUser!) {
               createPositionRequest(data: $data)
             }
           `,
@@ -345,14 +406,50 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
         };
       },
     }),
-    updatePositionRequest: build.mutation<GetPositionRequestResponse, UpdatePositionRequestInput>({
-      invalidatesTags: ['positionRequest'],
+    updatePositionRequest: build.mutation<UpdatePositionRequestResponse, UpdatePositionRequestInput>({
+      // invalidatesTags: ['positionRequest'],
       query: (input: UpdatePositionRequestInput) => {
         return {
           document: gql`
-            mutation UpdatePositionRequest($id: Int!, $updateInput: PositionRequestUpdateInput!) {
-              updatePositionRequest(id: $id, updateInput: $updateInput) {
+            mutation UpdatePositionRequest(
+              $id: Int!
+              $updateInput: PositionRequestUpdateInput!
+              $returnFullObject: Boolean
+            ) {
+              updatePositionRequest(id: $id, updateInput: $updateInput, returnFullObject: $returnFullObject) {
                 id
+                step
+                max_step_completed
+                reports_to_position_id
+                parent_job_profile_id
+                parent_job_profile_version
+                profile_json
+                orgchart_json
+                user {
+                  id
+                  name
+                  email
+                }
+                classification {
+                  code
+                  id
+                }
+                title
+                position_number
+                submission_id
+                status
+                updated_at
+                resubmitted_at
+                submitted_at
+                department_id
+                approved_at
+                parent_job_profile {
+                  number
+                }
+                additional_info
+                crm_id
+                crm_lookup_name
+                shareUUID
               }
             }
           `,
@@ -361,7 +458,9 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
             updateInput: {
               ...input,
               id: undefined,
+              returnFullObject: undefined,
             },
+            returnFullObject: input.returnFullObject || false,
           },
         };
       },
@@ -371,31 +470,49 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
       query: (input: SubmitPositionRequestInput) => {
         return {
           document: gql`
-            mutation SubmitPositionRequest($id: Int!, $comment: String) {
-              submitPositionRequest(id: $id, comment: $comment) {
+            mutation SubmitPositionRequest($id: Int!, $comment: String, $orgchart_png: String) {
+              submitPositionRequest(id: $id, comment: $comment, orgchart_png: $orgchart_png) {
                 id
                 step
+                max_step_completed
                 reports_to_position_id
-                department_id
+                reports_to_position
+                excluded_manager_position
                 parent_job_profile_id
-                profile_json_updated
-                user_id
+                parent_job_profile_version
+                profile_json
+                orgchart_json
+                user {
+                  id
+                  name
+                  email
+                }
+                classification {
+                  code
+                  id
+                }
                 title
                 position_number
-                classification_id
-                classification_code
-                user_name
-                email
-                submission_id
-                approved_at
                 status
                 updated_at
+                resubmitted_at
+                submitted_at
+                department_id
+                approved_at
+                parent_job_profile {
+                  number
+                }
+                additional_info
+                crm_id
+                crm_lookup_name
+                shareUUID
               }
             }
           `,
           variables: {
             id: input.id,
             comment: input.comment,
+            orgchart_png: input.orgchart_png,
           },
         };
       },
@@ -467,17 +584,23 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
         };
       },
     }),
-    getPositionRequestSubmittedBy: build.query<GetPositionRequestSubmittedByResponse, void>({
-      query: () => {
+    getPositionRequestSubmittedBy: build.query<
+      GetPositionRequestSubmittedByResponse,
+      GetPositionRequestsArgs | undefined
+    >({
+      query: (args: GetPositionRequestsArgs = {}) => {
         return {
           document: gql`
-            query PositionRequestSubmittedBy {
-              positionRequestSubmittedBy {
+            query PositionRequestSubmittedBy($requestingFeature: RequestingFeature) {
+              positionRequestSubmittedBy(requestingFeature: $requestingFeature) {
                 id
                 name
               }
             }
           `,
+          variables: {
+            requestingFeature: args.requestingFeature,
+          },
         };
       },
     }),
@@ -490,7 +613,7 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
               positionRequestsCount(search: $search, where: $where) {
                 draft
                 completed
-                inReview
+                verification
                 total
               }
             }
@@ -533,6 +656,7 @@ export const {
   useSubmitPositionRequestMutation,
   useDeletePositionRequestMutation,
   useGetPositionRequestsCountQuery,
+  useLazyGetPositionRequestsCountQuery,
   useGetPositionRequestClassificationsQuery,
   useGetPositionRequestJobStoreNumbersQuery,
   useGetPositionRequestStatusesQuery,
@@ -540,4 +664,5 @@ export const {
   usePositionNeedsRivewQuery,
   useLazyPositionNeedsRivewQuery,
   useGetSharedPositionRequestQuery,
+  useLazyGetSharedPositionRequestQuery,
 } = positionRequestApi;

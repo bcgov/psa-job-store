@@ -1,23 +1,56 @@
 apiVersion: postgres-operator.crunchydata.com/v1beta1
 kind: PostgresCluster
 metadata:
-  name: api-postgres-alpha
+  name: api-postgres-beta
 spec:
+  instances:
+    - replicas: 2
+      resources:
+        requests:
+          cpu: '500m'
+          memory: '512Mi'
+        limits:
+          cpu: '1000m'
+          memory: '1024Mi'
+      dataVolumeClaimSpec:
+        accessModes:
+          - 'ReadWriteOnce'
+        resources:
+          requests:
+            storage: 1.5Gi # Adjust the storage size as per your requirement
   backups:
     pgbackrest:
       global:
-          repo1-retention-full: "1" # Retain backups for 1 day. All full and incremental after this will be removed.
-          repo1-retention-full-type: time
+        repo1-retention-full: '1' # Retain backups for 1 day. All full and incremental after this will be removed.
+        repo1-retention-full-type: time
       repos:
         - name: repo1
           schedules:
-            full: "0 2 * * *"
-            incremental: "*/60 * * * *"
+            full: '0 2 * * *'
+            incremental: '*/60 * * * *'
           volume:
             volumeClaimSpec:
               storageClassName: netapp-file-backup
               accessModes:
-              - "ReadWriteOnce"
+                - 'ReadWriteOnce'
               resources:
                 requests:
-                  storage: 3.5Gi  # Adjust as needed
+                  storage: 3.5Gi # Adjust as needed
+      repoHost:
+        resources:
+          requests:
+            cpu: 100m
+            memory: 128Mi
+          limits:
+            cpu: 200m
+            memory: 256Mi
+      sidecars:
+        pgbackrest:
+          resources:
+            requests:
+              cpu: '100m'
+              memory: '150Mi'
+            limits:
+              cpu: '200m'
+              memory: '256Mi'
+ 

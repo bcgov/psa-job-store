@@ -1,17 +1,33 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Popover } from 'antd';
+import { TooltipPlacement } from 'antd/es/tooltip';
 import React, { ReactNode, forwardRef, useEffect, useRef, useState } from 'react';
+import './accessible-popover-menu.css';
 
-interface AcessiblePopoverMenuProps {
+interface AccessiblePopoverMenuProps {
   triggerButton: ReactNode;
   content: ReactNode;
   ariaLabel?: string;
+  padding?: string;
+  buttonId?: string;
+  compact?: boolean;
+  placement?: TooltipPlacement;
+  arrow?: boolean;
+  focusable?: boolean;
+  borderFocus?: boolean;
 }
 
-const AcessiblePopoverMenu: React.FC<AcessiblePopoverMenuProps> = ({
+const AccessiblePopoverMenu: React.FC<AccessiblePopoverMenuProps> = ({
   triggerButton,
   content,
   ariaLabel = 'Open menu',
+  padding,
+  buttonId,
+  compact,
+  placement,
+  arrow,
+  focusable = true,
+  borderFocus = false,
 }) => {
   const [visible, setVisible] = useState(false);
 
@@ -23,15 +39,19 @@ const AcessiblePopoverMenu: React.FC<AcessiblePopoverMenuProps> = ({
     // Update the visibility based on user interaction
     setVisible(isVisible);
 
-    if (!isVisible && ellipsisRef.current) {
-      ellipsisRef.current.focus();
-    }
+    // only focus back on the button in response to escape key
+    // on click it should focus on whatever the user is clicking (for example input box)
+    // if (!isVisible && ellipsisRef.current) {
+    //   ellipsisRef.current.focus();
+    // }
   };
 
   const handlePopoverOpen = (visible: any) => {
+    // console.log('handlePopoverOpen: ', visible);
     if (visible) {
       setTimeout(() => {
         const popover = contentRef.current?.querySelector(`.ant-menu-item:not(.ant-menu-item-disabled)`);
+        // console.log('focusing on: ', popover);
         if (popover) {
           const popoverElement = popover as HTMLElement;
           popoverElement.focus();
@@ -58,27 +78,40 @@ const AcessiblePopoverMenu: React.FC<AcessiblePopoverMenuProps> = ({
     return () => document.removeEventListener('keydown', handleKeyDown);
   }, [visible]);
 
-  const TriggerButtonWrapper = forwardRef<HTMLDivElement, { children: ReactNode }>(({ children, ...props }, ref) => (
-    <div
-      {...props}
-      ref={ref}
-      style={{ cursor: 'pointer', display: 'inline-flex' }}
-      tabIndex={0}
-      role="button"
-      aria-label={ariaLabel}
-      data-testid="popover-trigger"
-    >
-      {children}
-    </div>
-  ));
+  const TriggerButtonWrapper = forwardRef<HTMLDivElement, { children: ReactNode; buttonId?: string }>(
+    ({ children, buttonId, ...props }, ref) => (
+      <div
+        {...props}
+        id={buttonId}
+        ref={ref}
+        style={{ cursor: 'pointer', display: 'inline-flex' }}
+        tabIndex={focusable ? 0 : -1}
+        role="button"
+        aria-label={ariaLabel}
+        data-testid="popover-trigger"
+        className={`popover-trigger ${borderFocus ? 'border-focus' : ''}`}
+        onKeyDown={(e) => {
+          if (e.key === 'Enter' || e.key === ' ') {
+            e.preventDefault();
+            handleVisibleChange(!visible);
+            handlePopoverOpen(!visible);
+          }
+        }}
+      >
+        {children}
+      </div>
+    ),
+  );
 
   const ContentWrapper = forwardRef<HTMLDivElement, { children: ReactNode }>(({ children, ...props }, ref) => (
-    <div {...props} ref={ref}>
+    // onClick prevents menu from staying open when clicking on the menu items
+    <div {...props} ref={ref} onClick={() => setVisible(false)}>
       {children}
     </div>
   ));
 
-  // console.log('open: ', visible);
+  // console.log('placement: ', placement);
+
   return (
     <Popover
       open={visible}
@@ -89,12 +122,17 @@ const AcessiblePopoverMenu: React.FC<AcessiblePopoverMenuProps> = ({
       }}
       content={<ContentWrapper ref={contentRef}>{content}</ContentWrapper>}
       trigger="click"
-      placement="bottom"
+      placement={placement ?? 'bottom'}
+      overlayInnerStyle={{ padding: padding }}
+      overlayClassName={compact ? 'compact-popover accessible-popover' : 'accessible-popover'}
+      arrow={arrow ?? true}
     >
       {/* add ref to triggerButton, e.g. ref={(el) => (ellipsisRef.current = el)} */}
-      <TriggerButtonWrapper ref={ellipsisRef}>{triggerButton}</TriggerButtonWrapper>
+      <TriggerButtonWrapper ref={ellipsisRef} buttonId={buttonId}>
+        {triggerButton}
+      </TriggerButtonWrapper>
     </Popover>
   );
 };
 
-export default AcessiblePopoverMenu;
+export default AccessiblePopoverMenu;

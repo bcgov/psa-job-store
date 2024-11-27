@@ -1,12 +1,13 @@
 import { Outlet } from 'react-router-dom';
 import { PositionProvider } from '../../components/app/common/contexts/position.context';
+import { JobProfilesProvider } from '../job-profiles/components/job-profiles.context';
 
 export const WizardRoute = () => {
   return (
-    <div style={{ height: '100%' }}>
-      <PositionProvider>
+    <PositionProvider>
+      <JobProfilesProvider>
         <Outlet />
-      </PositionProvider>
-    </div>
+      </JobProfilesProvider>
+    </PositionProvider>
   );
 };

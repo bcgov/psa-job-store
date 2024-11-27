@@ -1,6 +1,12 @@
 import { Injectable } from '@nestjs/common';
-import { FindManyClassificationArgs, FindUniqueClassificationArgs } from '../../@generated/prisma-nestjs-graphql';
+import { Prisma } from '@prisma/client';
+import {
+  Classification,
+  FindManyClassificationArgs,
+  FindUniqueClassificationArgs,
+} from '../../@generated/prisma-nestjs-graphql';
 import { PrismaService } from '../prisma/prisma.service';
+import { PeoplesoftPosition } from './models/peoplesoft-position.model';
 
 @Injectable()
 export class ClassificationService {
@@ -11,6 +17,9 @@ export class ClassificationService {
       where: {
         ...where,
       },
+      orderBy: {
+        name: 'asc',
+      },
       ...args,
       include: {},
     });
@@ -20,13 +29,75 @@ export class ClassificationService {
     return this.prisma.classification.findUnique({ ...args });
   }
 
+  async getClassificationSetIds(): Promise<string[]> {
+    const data = await this.prisma.classification.findMany({
+      select: {
+        peoplesoft_id: true,
+      },
+      distinct: ['peoplesoft_id'],
+      orderBy: {
+        peoplesoft_id: 'asc',
+      },
+    });
+
+    return data.map(({ peoplesoft_id }) => peoplesoft_id);
+  }
+
+  async getClassificationForPeoplesoftPosition(position: PeoplesoftPosition) {
+    if (position['A.BUSINESS_UNIT'] == null || position['A.BUSINESS_UNIT'].length === 0) return null;
+
+    const ministry = await this.prisma.organization.findUnique({
+      where: { id: position['A.BUSINESS_UNIT'] },
+    });
+
+    if (
+      position['A.JOBCODE'] == null ||
+      position['A.JOBCODE'].length === 0 ||
+      position['A.SAL_ADMIN_PLAN'] == null ||
+      position['A.SAL_ADMIN_PLAN'].length === 0
+    )
+      return null;
+
+    const query = [
+      `WITH cte aS (
+      SELECT
+          ROW_NUMBER() OVER(
+              PARTITION BY id
+              ORDER BY (
+                  CASE
+                      WHEN peoplesoft_id = '${ministry.peoplesoft_id}' THEN 1
+                      WHEN peoplesoft_id = 'BCSET' THEN 2
+                  END
+              )
+          ),
+          *
+      FROM
+          classification
+  )
+  SELECT
+    *
+  FROM
+    cte
+  WHERE
+    row_number = 1
+    AND id = '${position['A.JOBCODE']}'
+    AND employee_group_id = '${position['A.SAL_ADMIN_PLAN']}'
+  LIMIT 1;`,
+    ];
+
+    const queryResults = await this.prisma.$queryRaw<(Classification & { row_number: any })[]>(Prisma.sql(query));
+    const result = queryResults.length > 0 ? queryResults[0] : null;
+    if (result === null) return null;
+
+    return result as Classification;
+  }
+
   // classifications tree data algorithm
 
   async getGroupedClassifications(args: FindManyClassificationArgs): Promise<any> {
     const classifications = await this.prisma.classification.findMany({
       where: {
         effective_status: 'Active',
-        peoplesoft_id: 'BCSET',
         ...args.where,
       },
       ...args,
@@ -48,8 +119,9 @@ export class ClassificationService {
         if (i === nameParts.length - 1) {
           currentLevel[part]._items.push({
             id: classification.id,
-            name: classification.name,
+            peoplesoft_id: classification.peoplesoft_id,
             employee_group_id: classification.employee_group_id,
+            name: classification.name,
           });
         } else {
           currentLevel = currentLevel[part];
@@ -63,7 +135,44 @@ export class ClassificationService {
     // console.log('tree before sort: ', JSON.stringify(tree));
     tree = this.sortItemsByName(tree);
     // console.log('tree after sort: ', JSON.stringify(tree));
+
+    // add (Grade - X) to entries that have same names but different grades so they are not confused
+    tree = await this.includeDuplicateGrades(tree);
+
     return tree;
+  }
+
+  private async includeDuplicateGrades(nodes: any[]): Promise<any[]> {
+    const duplicateGrades: { id: string; name: string; grade: string }[] = await this.prisma.$queryRaw`
+      SELECT c1.id, c1.name, c1.grade
+      FROM classification c1
+      WHERE c1.effective_status = 'Active'
+        AND EXISTS (
+          SELECT 1
+          FROM classification c2
+          WHERE c2.name = c1.name
+            AND c2.grade <> c1.grade
+            AND c2.effective_status = 'Active'
+        )
+      ORDER BY c1.name, c1.grade;
+    `;
+
+    const duplicateGradesMap = new Map(duplicateGrades.map((entry) => [entry.id, entry]));
+
+    const processNode = (node: any) => {
+      if (node.items) {
+        node.items = node.items.map((item: any) => {
+          if (duplicateGradesMap.has(item.id)) {
+            const { name, grade } = duplicateGradesMap.get(item.id);
+            item.name = `${name} (Grade - ${grade})`;
+          }
+          return processNode(item);
+        });
+      }
+      return node;
+    };
+
+    return nodes.map(processNode);
   }
 
   private sortItemsByName(nodes) {

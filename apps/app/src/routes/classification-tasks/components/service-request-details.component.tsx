@@ -1,32 +1,33 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Card, Col, Descriptions, Row } from 'antd';
-import LoadingComponent from '../../../components/app/common/components/loading.component';
+import { ExportOutlined } from '@ant-design/icons';
+import { Card, Col, Descriptions, Row, Typography } from 'antd';
+import { Link } from 'react-router-dom';
 import PositionProfile from '../../../components/app/common/components/positionProfile';
-import { useGetLocationQuery } from '../../../redux/services/graphql-api/location.api';
+import { useGetJobProfileMetaQuery } from '../../../redux/services/graphql-api/job-profile.api';
 import { GetPositionRequestResponse } from '../../../redux/services/graphql-api/position-request.api';
 import { formatDateTime } from '../../../utils/Utils';
+import CommentsList from '../../wizard/components/comments-list.component';
 
 type ServiceRequestDetailsProps = {
   positionRequestData: GetPositionRequestResponse;
 };
 
 export const ServiceRequestDetails: React.FC<ServiceRequestDetailsProps> = ({ positionRequestData }) => {
-  // console.log('ServiceRequestDetails positionRequestData: ', positionRequestData);
+  const { data: jobProfileMeta } = useGetJobProfileMetaQuery(
+    positionRequestData?.positionRequest?.parent_job_profile_id ?? -1,
 
-  const { data: locationInfo, isLoading: locationLoading } = useGetLocationQuery(
-    {
-      id: positionRequestData?.positionRequest?.additional_info?.work_location_id,
-    },
     { skip: !positionRequestData?.positionRequest?.additional_info?.work_location_id },
   );
-
+  const currentVersion =
+    positionRequestData?.positionRequest?.parent_job_profile_version ==
+    jobProfileMeta?.jobProfileMeta.versions.map((v) => v.version).sort((a, b: number) => b - a)[0];
   // console.log('locationInfo: ', locationInfo);
 
   const submissionDetailsItems = [
     {
       key: 'submittedBy',
       label: 'Submitted by',
-      children: <div>{positionRequestData?.positionRequest?.user_name}</div>,
+      children: <div>{positionRequestData?.positionRequest?.user?.name}</div>,
       span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
     },
     {
@@ -34,8 +35,8 @@ export const ServiceRequestDetails: React.FC<ServiceRequestDetailsProps> = ({ po
       label: 'Submitted at',
       children: (
         <div>
-          {positionRequestData?.positionRequest?.approved_at &&
-            formatDateTime(positionRequestData?.positionRequest?.approved_at)}
+          {positionRequestData?.positionRequest?.submitted_at &&
+            formatDateTime(positionRequestData?.positionRequest?.submitted_at)}
         </div>
       ),
       span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
@@ -77,19 +78,32 @@ export const ServiceRequestDetails: React.FC<ServiceRequestDetailsProps> = ({ po
     {
       key: 'jobTitle',
       label: 'Job title',
-      children: <div>{positionRequestData?.positionRequest?.profile_json_updated?.title?.text}</div>,
+      children: <div>{positionRequestData?.positionRequest?.profile_json?.title?.text}</div>,
       span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24 },
     },
     {
       key: 'expectedClassificationLevel',
       label: 'Expected classification level',
-      children: <div>{positionRequestData?.positionRequest?.classification_code}</div>,
+      children: <div>{positionRequestData?.positionRequest?.classification?.code}</div>,
       span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24 },
     },
     {
       key: 'jobStoreProfileNumber',
       label: 'Job Store profile number',
-      children: <div>{positionRequestData?.positionRequest?.parent_job_profile?.number}</div>,
+      children: (
+        <div>
+          <div>{positionRequestData?.positionRequest?.parent_job_profile?.number}</div>
+
+          <Link
+            to={`/job-profiles/${positionRequestData?.positionRequest?.parent_job_profile?.number}?id=${positionRequestData?.positionRequest?.parent_job_profile_id}&version=${positionRequestData?.positionRequest?.parent_job_profile_version}`}
+          >
+            <Typography.Text type="secondary">
+              Version {positionRequestData?.positionRequest?.parent_job_profile_version} {currentVersion && '(Latest) '}
+            </Typography.Text>
+            <ExportOutlined />
+          </Link>
+        </div>
+      ),
       span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24 },
     },
     {
@@ -97,9 +111,11 @@ export const ServiceRequestDetails: React.FC<ServiceRequestDetailsProps> = ({ po
       label: 'Reports to',
       children: (
         <PositionProfile
-          positionNumber={positionRequestData?.positionRequest?.additional_info?.excluded_mgr_position_number}
+          positionNumber={null}
+          positionProfile={positionRequestData?.positionRequest?.reports_to_position}
           orgChartData={positionRequestData?.positionRequest?.orgchart_json}
         ></PositionProfile>
+
         // <div>
         //   {reportsToLoading && <LoadingComponent mode="small" />}
         //   {firstActivePosition2 && reportsToInfo?.positionProfile && reportsToInfo?.positionProfile?.length > 0 && (
@@ -130,7 +146,8 @@ export const ServiceRequestDetails: React.FC<ServiceRequestDetailsProps> = ({ po
       label: 'First level excluded manager for this position',
       children: (
         <PositionProfile
-          positionNumber={positionRequestData?.positionRequest?.reports_to_position_id}
+          positionNumber={null}
+          positionProfile={positionRequestData?.positionRequest?.excluded_manager_position}
           orgChartData={positionRequestData?.positionRequest?.orgchart_json}
         ></PositionProfile>
         // <div>
@@ -153,25 +170,39 @@ export const ServiceRequestDetails: React.FC<ServiceRequestDetailsProps> = ({ po
     {
       key: 'payListDepartmentIdNumber',
       label: 'Department ID',
-      children: <div>{positionRequestData?.positionRequest?.additional_info?.department_id}</div>,
+      children: (
+        <div>
+          <div>{positionRequestData?.positionRequest?.additional_info?.department_id}</div>
+          {positionRequestData?.positionRequest?.additional_info?.branch && (
+            <div>
+              <Typography.Text type="secondary">
+                Branch: {positionRequestData?.positionRequest?.additional_info?.branch}
+              </Typography.Text>
+            </div>
+          )}
+          {positionRequestData?.positionRequest?.additional_info?.division && (
+            <div>
+              <Typography.Text type="secondary">
+                Division: {positionRequestData?.positionRequest?.additional_info?.division}
+              </Typography.Text>
+            </div>
+          )}
+        </div>
+      ),
       span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24 },
     },
-    {
-      key: 'branch',
-      label: 'Branch',
-      children: <div>{positionRequestData?.positionRequest?.additional_info?.branch}</div>,
-      span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24 },
-    },
-    {
-      key: 'division',
-      label: 'Division',
-      children: <div>{positionRequestData?.positionRequest?.additional_info?.division}</div>,
-      span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24 },
-    },
+
     {
       key: 'includedOrExcluded',
       label: 'Included or excluded?',
-      children: <div>Included</div>,
+      children: (
+        <div>
+          {positionRequestData?.positionRequest?.classification?.employee_group_id === 'MGT' ||
+          positionRequestData?.positionRequest?.classification?.employee_group_id === 'OEX'
+            ? 'Excluded'
+            : 'Included'}
+        </div>
+      ),
       span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24 },
     },
     {
@@ -189,12 +220,7 @@ export const ServiceRequestDetails: React.FC<ServiceRequestDetailsProps> = ({ po
     {
       key: 'positionLocation',
       label: 'Position location',
-      children: (
-        <div>
-          {locationLoading && <LoadingComponent mode="small" />}
-          {locationInfo?.location?.name}
-        </div>
-      ),
+      children: <div>{positionRequestData.positionRequest?.additional_info?.work_location_name}</div>,
       span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24 },
     },
 
@@ -202,6 +228,14 @@ export const ServiceRequestDetails: React.FC<ServiceRequestDetailsProps> = ({ po
       key: 'receivedExecutiveApproval',
       label: 'Received executive approval (Deputy Minister or delegate)',
       children: <div>Yes</div>,
+      span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24 },
+    },
+    {
+      key: 'comments',
+      label: 'Comments',
+      children: (
+        <CommentsList positionRequestId={positionRequestData?.positionRequest?.id ?? -1} showCollapse={false} />
+      ),
       span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24 },
     },
   ];

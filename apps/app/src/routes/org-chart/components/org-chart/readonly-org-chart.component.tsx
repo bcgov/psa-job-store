@@ -6,6 +6,7 @@ import { OrgChartType } from '../../enums/org-chart-type.enum';
 import { Elements } from '../../interfaces/elements.interface';
 import { Controls } from '../controls';
 import { OrgChartNode } from '../org-chart-node.component';
+import DownloadButton from './download-button.component';
 
 const { Text } = Typography;
 
@@ -13,6 +14,7 @@ export interface ReadonlyOrgChartProps {
   type: OrgChartType.READONLY;
   departmentId: string;
   elements: Elements;
+  wrapProvider?: boolean;
 }
 
 export const ReadonlyOrgChart = ({ elements, departmentId, type }: ReadonlyOrgChartProps) => {
@@ -50,9 +52,12 @@ export const ReadonlyOrgChart = ({ elements, departmentId, type }: ReadonlyOrgCh
   }, [edges, nodes, type]);
 
   return (
-    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', width: '100%' }}>
+    <div style={{ display: 'flex', flexDirection: 'column', height: '100%', width: '100%' }} data-testid="org-chart">
       <Row gutter={[8, 8]} justify="space-between" style={{ margin: '0.5rem 1rem' }}>
-        <Col xs={24} md={{ offset: 12, span: 12 }}>
+        <Col xs={24} md={12}>
+          <DownloadButton />
+        </Col>
+        <Col xs={24} md={12}>
           <Space direction="vertical" style={{ textAlign: 'right', width: '100%' }}>
             {departmentDataIsFetching ? (
               <Spin spinning />
@@ -70,6 +75,7 @@ export const ReadonlyOrgChart = ({ elements, departmentId, type }: ReadonlyOrgCh
           </Space>
         </Col>
       </Row>
+
       <ReactFlow
         edges={edges}
         fitView
@@ -84,7 +90,7 @@ export const ReadonlyOrgChart = ({ elements, departmentId, type }: ReadonlyOrgCh
         onNodeClick={() => {}}
       >
         <Background />
-        <Controls position="top-right" />
+        <Controls position="top-right" showInteractive={false} />
         <MiniMap
           nodeStrokeWidth={3}
           pannable

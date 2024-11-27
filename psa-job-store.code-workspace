@@ -24,6 +24,10 @@
       "path": "apps/app"
     },
     {
+      "name": "apps/jobstore-cypress",
+      "path": "apps/jobstore-cypress"
+    },
+    {
       "name": "packages/common-kit",
       "path": "packages/common-kit"
     },

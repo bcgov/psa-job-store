@@ -8,13 +8,19 @@ import { AuthProvider, AuthProviderProps } from 'react-oidc-context';
 import { Provider as ReduxProvider } from 'react-redux';
 import { RouterProvider } from 'react-router-dom';
 import 'reflect-metadata';
-import { VITE_KEYCLOAK_CLIENT_ID, VITE_KEYCLOAK_REALM_URL, VITE_KEYCLOAK_REDIRECT_URL } from '../envConfig';
+import { VITE_KEYCLOAK_CLIENT_ID, VITE_KEYCLOAK_REALM_URL } from '../envConfig';
 import './global.css';
 import { store } from './redux/redux.store';
-import { sendLogToServer } from './redux/services/loggerService';
 import { router } from './router/index';
-import ErrorBoundary from './routes/error-boundary/ErrorBoundary';
 import { WizardProvider } from './routes/wizard/components/wizard.provider';
+import { sendLogToServer } from './utils/logger-service.util';
+
+const origin = window.location.origin;
+// console.log('debuging app log');
+// console.log('window.location: ', window.location.toString());
+
+//  on login is http://localhost:5173/?state=123...
+// VITE_KEYCLOAK_REDIRECT_URL is http://localhost:5173/login/auth/login
 
 export const oidcConfig: AuthProviderProps = {
   userStore: new WebStorageStateStore({
@@ -22,13 +28,18 @@ export const oidcConfig: AuthProviderProps = {
   }),
   authority: VITE_KEYCLOAK_REALM_URL,
   client_id: VITE_KEYCLOAK_CLIENT_ID,
-  redirect_uri: VITE_KEYCLOAK_REDIRECT_URL,
+  redirect_uri: origin + '/auth/login', //,VITE_KEYCLOAK_REDIRECT_URL
 };
 
-window.addEventListener('error', function (event) {
-  console.error('Caught by global error listener:', event.error);
-  sendLogToServer(event.error);
-});
+// window.addEventListener('error', function (event) {
+//   console.error('Caught by global error listener:', event.error);
+//   sendLogToServer(event.error);
+// });
+
+window.onerror = function (_message, _source, _lineno, _colno, error) {
+  console.error('Caught by window.onerror:', error);
+  if (error) sendLogToServer(error);
+};
 
 window.addEventListener('unhandledrejection', function (event) {
   console.error('Unhandled promise rejection:', event.reason);
@@ -37,6 +48,7 @@ window.addEventListener('unhandledrejection', function (event) {
 
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
+    {/* <ErrorBoundary > */}
     <AuthProvider {...oidcConfig} automaticSilentRenew>
       <ReduxProvider store={store}>
         <ConfigProvider
@@ -60,6 +72,8 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
               fontSizeHeading4: 14,
               fontSizeHeading5: 14,
 
+              controlItemBgActive: '#F1F8FE',
+
               lineHeightHeading1: 1.4,
               lineHeightHeading2: 1.33333,
               lineHeightHeading3: 1.375,
@@ -74,14 +88,13 @@ ReactDOM.createRoot(document.getElementById('root')!).render(
             <App>
               <Helmet defaultTitle="Job Store" titleTemplate="%s | Job Store" />
               <WizardProvider>
-                <ErrorBoundary>
-                  <RouterProvider router={router} />
-                </ErrorBoundary>
+                <RouterProvider router={router} />
               </WizardProvider>
             </App>
           </HelmetProvider>
         </ConfigProvider>
       </ReduxProvider>
     </AuthProvider>
+    {/* </ErrorBoundary> */}
   </React.StrictMode>,
 );

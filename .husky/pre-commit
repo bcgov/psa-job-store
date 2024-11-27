@@ -1,12 +1,17 @@
-#!/usr/bin/env sh
-. "$(dirname -- "$0")/_/husky.sh"
-
 BRANCH=$(git branch | grep '*' | sed 's/* //')
-PROTECTED_BRANCHES="^(main|stage|develop)"
+PROTECTED_BRANCHES="^(main$|stage$|develop$)"
 
 if [[ "$BRANCH" =~ $PROTECTED_BRANCHES ]]
 then
     echo "\n🚫 Committing directly to '$BRANCH' is not allowed.  Create a feature branch and commit your work there instead.\n"
+    exit 1
+fi
+
+# check for secret and env var usage
+sh  "$(dirname -- "$0")/check_secrets.sh"
+
+if [ $? -ne 0 ]; then
+    echo "\n🚫 Secrets detected in the code. Please remove or secure them before committing.\n"
     exit 1
 fi
 

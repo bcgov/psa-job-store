@@ -17,7 +17,7 @@ spec:
         spec:
             containers:
                 - name: kibana
-                  image: docker.elastic.co/kibana/kibana:8.11.1
+                  image: docker.elastic.co/kibana/kibana:8.16.0
                   resources:
                       limits:
                           cpu: 100m
@@ -35,3 +35,9 @@ spec:
                                 key: XPACK_ENCRYPTEDSAVEDOBJECTS_ENCRYPTIONKEY
                   ports:
                       - containerPort: 5601
+                  securityContext:
+                      allowPrivilegeEscalation: false
+                      runAsNonRoot: true
+                      capabilities:
+                        drop:
+                          - ALL

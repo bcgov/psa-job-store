@@ -1,13 +1,6 @@
 # Use OpenResty's Alpine image as a parent image
 FROM openresty/openresty:alpine
 
-# Declare environment variables (optionally set default values)
-ENV DISCOVERY=$KEYCLOAK_REALM_URL
-ENV CLIENT_ID=$KEYCLOAK_CLIENT_ID_PRIVATE
-ENV CLIENT_SECRET=$KEYCLOAK_CLIENT_SECRET
-ENV REFRESH_SESSION_INTERVAL=$REFRESH_SESSION_INTERVAL
-ENV ACCESS_TOKEN_EXPIRES_IN=$ACCESS_TOKEN_EXPIRES_IN
-
 # Set working directory inside the container
 WORKDIR /usr/local/openresty/nginx/conf
 
@@ -46,7 +39,7 @@ RUN apk add --no-cache gettext
 RUN rm -f /etc/nginx/conf.d/*
 
 COPY nginx.conf /usr/local/openresty/nginx/conf
-COPY nginx.serv.conf /etc/nginx/conf.d/nginx.serv.conf
+COPY nginx.serv.conf /etc/nginx/conf.d/nginx.conf
 
 
 RUN mkdir -p /var/run/openresty \
@@ -66,7 +59,7 @@ RUN mkdir -p /usr/local/openresty/nginx/logs \
     && chmod -R g=u /usr/local/openresty/nginx/logs
 
 
-RUN chmod -R g=u /etc/nginx/conf.d/nginx.serv.conf
+RUN chmod -R g=u /etc/nginx/conf.d/nginx.conf
 RUN touch /etc/nginx/conf.d/nginx.conf
 RUN chmod -R g=u /etc/nginx/conf.d/nginx.conf
 

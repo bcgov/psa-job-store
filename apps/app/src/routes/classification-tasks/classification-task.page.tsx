@@ -1,13 +1,20 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
+import { CopyOutlined, EllipsisOutlined, LinkOutlined } from '@ant-design/icons';
 import {
-  CheckCircleFilled,
-  CopyOutlined,
-  EllipsisOutlined,
-  ExclamationCircleFilled,
-  FundFilled,
-  LinkOutlined,
-} from '@ant-design/icons';
-import { Alert, Button, Card, Col, Divider, Dropdown, Result, Row, Space, Tabs, Typography, message } from 'antd';
+  Alert,
+  Button,
+  Card,
+  Col,
+  Descriptions,
+  Divider,
+  Dropdown,
+  Result,
+  Row,
+  Space,
+  Tabs,
+  Typography,
+  message,
+} from 'antd';
 import { MenuProps } from 'antd/es/menu';
 import copy from 'copy-to-clipboard';
 import { cloneElement, useState } from 'react';
@@ -16,14 +23,19 @@ import LoadingSpinnerWithMessage from '../../components/app/common/components/lo
 import PositionProfile from '../../components/app/common/components/positionProfile';
 import '../../components/app/common/css/filtered-table.component.css';
 import { PageHeader } from '../../components/app/page-header.component';
+import { statusIconColorMap } from '../../components/app/utils/statusIconColorMap.utils';
 import { DownloadJobProfileComponent } from '../../components/shared/download-job-profile/download-job-profile.component';
 import { useGetPositionRequestQuery } from '../../redux/services/graphql-api/position-request.api';
-import ContentWrapper from '../home/components/content-wrapper.component';
+import { useTestUser } from '../../utils/useTestUser';
+import NotFoundComponent from '../not-found/404';
 import { OrgChart } from '../org-chart/components/org-chart';
 import { OrgChartType } from '../org-chart/enums/org-chart-type.enum';
+import StatusIndicator from '../wizard/components/wizard-position-request-status-indicator';
 import './classification-tasks.page.css';
 import { JobProfileWithDiff } from './components/job-profile-with-diff.component';
+import { NextSteps } from './components/next-steps';
 import { ServiceRequestDetails } from './components/service-request-details.component';
+
 // import '../wizard/wizard-review.page.css';
 // import './total-comp-approved-request.page.css';
 const { Text } = Typography;
@@ -31,12 +43,13 @@ const { Text } = Typography;
 // Import your API service to fetch position request
 
 export const ClassificationTaskPage = () => {
+  const isTestUser = useTestUser();
   const { positionRequestId } = useParams();
   const [activeTabKey, setActiveTabKey] = useState('1');
 
   if (!positionRequestId) throw 'No position request provided';
 
-  const { data } = useGetPositionRequestQuery({
+  const { data, isLoading } = useGetPositionRequestQuery({
     id: parseInt(positionRequestId),
   });
 
@@ -47,30 +60,22 @@ export const ClassificationTaskPage = () => {
 
   const handleCopyURL = () => {
     // Implement URL copy functionality here
-    const linkToCopy = `${window.location.origin}/my-positions/share/${data?.positionRequest?.shareUUID}`;
+    const linkToCopy = `${window.location.origin}/requests/positions/share/${data?.positionRequest?.shareUUID}`;
 
     // Use the Clipboard API to copy the link to the clipboard
-    if (import.meta.env.VITE_TEST_ENV !== 'true') copy(linkToCopy);
+    if (!isTestUser) copy(linkToCopy);
     message.success('Link copied to clipboard!');
   };
 
-  const statusIconColorMap: any = {
-    ESCALATED: { icon: <FundFilled />, color: '#FF4D4F', text: 'Escalated' },
-    ACTION_REQUIRED: { icon: <ExclamationCircleFilled />, color: '#FA8C16', text: 'Review required' },
-    COMPLETED: { icon: <CheckCircleFilled />, color: '#237804', text: 'Completed' },
-    IN_REVIEW: { icon: <CheckCircleFilled />, color: '#722ED1', text: 'Verification' },
-  };
-
   const StatusIcon = ({ status }: any) => {
-    const statusInfo = statusIconColorMap[status];
-    return statusInfo?.icon ? (
-      <span style={{ color: statusInfo.color }}>
-        <Space>
-          {statusInfo.icon}
-          {statusInfo.text}
-        </Space>
-      </span>
-    ) : null;
+    // const statusInfo = statusIconColorMap[status];
+    // return statusInfo?.icon ? (
+    //   <Space>
+    //     <span style={{ color: statusInfo.color }}>{statusInfo.icon}</span>
+    //     <span style={{ color: statusInfo.textColor }}>{statusInfo.text}</span>
+    //   </Space>
+    // ) : null;
+    return <StatusIndicator status={status} />;
   };
 
   const currentStatus = data?.positionRequest?.status;
@@ -81,7 +86,7 @@ export const ClassificationTaskPage = () => {
   }
 
   // console.log('positionRequest data: ', data);
-
+  if (!data.positionRequest && !isLoading) return <NotFoundComponent entity="position request" />;
   // END ACTIONS TAB DATA
   const snapshotCopy = JSON.parse(JSON.stringify(data?.positionRequest?.orgchart_json));
   const tabItems = [
@@ -94,17 +99,23 @@ export const ClassificationTaskPage = () => {
       key: '2',
       label: 'Organization Chart',
       children: (
-        <OrgChart
-          type={OrgChartType.READONLY}
-          departmentId={data.positionRequest?.department_id ?? ''}
-          elements={snapshotCopy}
-        />
+        <div style={{ height: '100%' }}>
+          <OrgChart
+            type={OrgChartType.READONLY}
+            departmentId={data.positionRequest?.department_id ?? ''}
+            elements={snapshotCopy}
+          />
+        </div>
       ),
     },
     {
       key: '3',
       label: 'Job Profile',
-      children: <JobProfileWithDiff positionRequestData={data} />,
+      children: (
+        <div style={{ padding: '0 1rem 1rem 1rem' }}>
+          <JobProfileWithDiff positionRequestData={data} />
+        </div>
+      ),
     },
     {
       key: '4',
@@ -119,7 +130,8 @@ export const ClassificationTaskPage = () => {
               <div className="result-extra-content">
                 <Row justify="center">
                   <Col xs={24} sm={24} md={24} lg={20} xl={16}>
-                    {currentStatus == 'ESCALATED' && (
+                    {!['COMPLETED', 'CANCELLED'].includes(currentStatus ?? '') && <NextSteps />}
+                    {currentStatus == 'REVIEW' && (
                       <Alert
                         style={{ marginBottom: '1rem' }}
                         message={
@@ -152,19 +164,57 @@ export const ClassificationTaskPage = () => {
                         showIcon
                       />
                     )}
-                    <Card title="Actions" style={{ marginBottom: '1rem' }}>
-                      <Space direction="vertical" size="small" style={{ width: '100%' }}>
-                        <div>
-                          <strong>Download job profile</strong>
-                          <p>Attached copy of the job profile that needs review.</p>
-                          {/* <Button onClick={handleDownload}>Download job profile</Button> */}
-                          <DownloadJobProfileComponent jobProfile={data?.positionRequest?.profile_json_updated} />
-                          <Button type="link" onClick={() => setActiveTabKey('3')}>
-                            View job profile
-                          </Button>
-                        </div>
-                        <Divider />
-                        {/* <div>
+                    <Card style={{ marginBottom: '1rem' }} title="Contact" bordered={false}>
+                      <p>Reach out to the hiring manager or reporting managers for feedback.</p>
+                      <Descriptions bordered column={2}>
+                        <Descriptions.Item label="Hiring Manager" span={3}>
+                          {data?.positionRequest?.user?.name} -{' '}
+                          <a href={`mailto:${data?.positionRequest?.user?.email}`}>
+                            {data?.positionRequest?.user?.email}
+                          </a>
+                          <CopyOutlined
+                            onClick={() => {
+                              navigator.clipboard.writeText(data?.positionRequest?.user?.email || '');
+                              message.success('Email copied to clipboard');
+                            }}
+                            style={{ cursor: 'pointer' }}
+                          />
+                        </Descriptions.Item>
+                        <Descriptions.Item label="Reporting Manager" span={3}>
+                          <PositionProfile
+                            positionNumber={data?.positionRequest?.reports_to_position.positionNumber}
+                            // positionProfile={data?.positionRequest?.reports_to_position}
+                            orgChartData={data?.positionRequest?.orgchart_json}
+                            mode="contact"
+                          ></PositionProfile>
+                        </Descriptions.Item>
+                        <Descriptions.Item label="First Band Manager" span={3}>
+                          <PositionProfile
+                            positionNumber={data?.positionRequest?.excluded_manager_position.positionNumber}
+                            // positionProfile={data?.positionRequest?.excluded_manager_position}
+                            orgChartData={data?.positionRequest?.orgchart_json}
+                            mode="contact"
+                          ></PositionProfile>
+                        </Descriptions.Item>
+                      </Descriptions>
+                    </Card>
+                    {currentStatus == 'COMPLETED' && (
+                      <Card title="Actions" style={{ marginBottom: '1rem' }}>
+                        <Space direction="vertical" size="small" style={{ width: '100%' }}>
+                          <div>
+                            <strong>Download job profile</strong>
+                            <p>Attached copy of the job profile that needs review.</p>
+                            {/* <Button onClick={handleDownload}>Download job profile</Button> */}
+                            <DownloadJobProfileComponent
+                              positionRequest={data?.positionRequest}
+                              jobProfile={data?.positionRequest?.profile_json}
+                            />
+                            <Button type="link" onClick={() => setActiveTabKey('3')}>
+                              View job profile
+                            </Button>
+                          </div>
+                          <Divider />
+                          {/* <div>
                           <strong>Download organization chart</strong>
                           <p>
                             Attached copy of the org chart that shows the topic position and the job titles, position
@@ -174,26 +224,27 @@ export const ClassificationTaskPage = () => {
                           <Button type="link">View org chart</Button>
                         </div>
                         <Divider /> */}
-                        <div>
-                          <strong>Invite others to review</strong>
-                          <p>Share the URL with people who you would like to collaborate with (IDIR restricted).</p>
-                          <Space>
-                            <Text>{`${window.location.origin}/my-positions/share/${data?.positionRequest?.shareUUID}`}</Text>
-                            <Button icon={<CopyOutlined />} onClick={handleCopyURL}>
-                              Copy URL
-                            </Button>
-                          </Space>
-                        </div>
-                        <Divider />
-                        <div>
-                          <Text strong>View all tasks</Text>
-                          <p>View all tasks that you have been assigned to.</p>
-                          <Link to="/">
-                            <Button>Go to My tasks</Button>
-                          </Link>
-                        </div>
-                      </Space>
-                    </Card>
+                          <div>
+                            <strong>Invite others to review</strong>
+                            <p>Share the URL with people who you would like to collaborate with (IDIR restricted).</p>
+                            <Space>
+                              <Text>{`${window.location.origin}/requests/positions/share/${data?.positionRequest?.shareUUID}`}</Text>
+                              <Button icon={<CopyOutlined />} onClick={handleCopyURL}>
+                                Copy URL
+                              </Button>
+                            </Space>
+                          </div>
+                          <Divider />
+                          <div>
+                            <Text strong>View all tasks</Text>
+                            <p>View all tasks that you have been assigned to.</p>
+                            <Link to="/">
+                              <Button>Go to My tasks</Button>
+                            </Link>
+                          </div>
+                        </Space>
+                      </Card>
+                    )}
                   </Col>
                 </Row>
               </div>,
@@ -220,7 +271,10 @@ export const ClassificationTaskPage = () => {
     {
       label: (
         <div>
-          <DownloadJobProfileComponent jobProfile={data.positionRequest?.profile_json_updated}>
+          <DownloadJobProfileComponent
+            positionRequest={data?.positionRequest}
+            jobProfile={data.positionRequest?.profile_json}
+          >
             <>
               Download job profile
               <Text type="secondary" style={{ display: 'block' }}>
@@ -247,46 +301,39 @@ export const ClassificationTaskPage = () => {
 
   return (
     <>
-      <Row align="middle" justify="space-between">
-        <Col xs={24} lg={21}>
-          <PageHeader
-            title={data?.positionRequest?.title}
-            subTitle={
-              <div>
-                <PositionProfile
-                  prefix="Reporting to"
-                  mode="compact"
-                  positionNumber={data?.positionRequest?.reports_to_position_id}
-                  orgChartData={data?.positionRequest?.orgchart_json}
-                ></PositionProfile>
-              </div>
-            }
-            additionalBreadcrumb={{ title: data?.positionRequest?.title }}
-          />
-        </Col>
-        <Col xs={24} lg={3}>
-          <Row justify="start">
-            <Col>
-              {data?.positionRequest?.status && <StatusIcon status={data.positionRequest.status} />}
+      <PageHeader
+        extra={
+          <>
+            {data?.positionRequest?.status && <StatusIcon status={data.positionRequest.status} />}
 
-              <Divider type="vertical" />
-              <Dropdown menu={{ items }} placement="bottom" trigger={['click']}>
-                <Button icon={<EllipsisOutlined />}></Button>
-              </Dropdown>
-            </Col>
-          </Row>
-        </Col>
-      </Row>
-
-      <ContentWrapper>
-        <Tabs
-          activeKey={activeTabKey}
-          onChange={(key) => setActiveTabKey(key)}
-          defaultActiveKey="1"
-          items={tabItems}
-          tabBarStyle={{ backgroundColor: '#fff', margin: '0 -1rem', padding: '0 1rem 0px 1rem' }}
-        />
-      </ContentWrapper>
+            <Divider type="vertical" />
+            <Dropdown menu={{ items }} placement="bottom" trigger={['click']}>
+              <Button icon={<EllipsisOutlined />}></Button>
+            </Dropdown>
+          </>
+        }
+        title={data?.positionRequest?.title}
+        subTitle={
+          <div>
+            <PositionProfile
+              prefix="Reporting to"
+              mode="compact"
+              positionNumber={data?.positionRequest?.reports_to_position_id}
+              positionProfile={data.positionRequest?.reports_to_position}
+              orgChartData={data?.positionRequest?.orgchart_json}
+            />
+          </div>
+        }
+        additionalBreadcrumb={{ title: data?.positionRequest?.title }}
+      />
+      <Tabs
+        activeKey={activeTabKey}
+        onChange={(key) => setActiveTabKey(key)}
+        defaultActiveKey="1"
+        items={tabItems}
+        tabBarStyle={{ backgroundColor: '#fff', padding: '0 1rem 0px 1rem' }}
+        style={{ backgroundColor: '#f5f5f5' }}
+      />
     </>
   );
 };

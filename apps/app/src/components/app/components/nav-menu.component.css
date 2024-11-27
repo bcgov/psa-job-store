@@ -1,0 +1,69 @@
+.jobstore-side-menu.expanded .create-button{
+    margin: 0.8rem auto 0.8rem auto;
+    width: 90%;
+    padding: 0;
+}
+
+.jobstore-side-menu .create-menu-button .ant-menu-submenu-title:active{
+    background-color: #0057ad;
+}
+
+/* .jobstore-side-menu .create-button{
+    margin-top: 0.8rem;
+    padding:0 !important;
+} */
+
+.jobstore-side-menu.expanded .create-button .popover-trigger{
+    position: absolute;
+    top: 0;
+    left: 0;
+    height:100%;
+}
+
+.jobstore-side-menu .create-button .popover-trigger{
+    width:100%;
+}
+
+.jobstore-side-menu .ant-menu-item:focus-visible a,
+.jobstore-side-menu .ant-menu-item a:focus-visible,
+.jobstore-side-menu-popup .ant-menu-item:focus-visible a,
+.jobstore-side-menu-popup .ant-menu-item a:focus-visible{
+  outline: 4px solid #66a8d4;
+  outline-offset: -4px;
+  border-radius: 8px;
+}
+
+
+.jobstore-side-menu-popup a,
+.jobstore-side-menu a{
+    display:block;
+}
+
+/* .ant-layout-sider-collapsed a{
+    display: block;
+    width: 100%;
+    position: absolute;
+    left: 0;
+    top: 0;
+    text-align: center;
+} */
+
+.ant-layout-sider-collapsed .link-label{
+    display:none !important;
+}
+
+/* Remove collapsed styles from create menu, it's in the AccessiblePopover component,
+but because parent side menu can be collapsed, it incorrectly affects this menu as well */
+
+/* .create-menu.ant-menu-inline-collapsed{
+    width: auto !important;
+}
+
+.create-menu.ant-menu-inline-collapsed .ant-menu-title-content{
+    opacity: 1 !important;
+}
+
+.create-menu.ant-menu-inline-collapsed >.ant-menu-item .anticon{
+    margin:auto !important;
+    line-height: 0 !important;
+} */

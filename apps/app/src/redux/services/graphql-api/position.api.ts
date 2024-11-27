@@ -1,12 +1,13 @@
 import { gql } from 'graphql-request';
 import { graphqlApi } from '.';
-import { DepartmentModel } from './department.api';
 import { ClassificationModel } from './job-profile-types';
-import { OrganizationModel } from './organization';
+import { DepartmentModel, OrganizationModel } from './organization';
 
 export interface PositionModel {
   id: string;
   classification_id: string;
+  classification_employee_group_id: string;
+  classification_peoplesoft_id: string;
   department_id: string;
   organization_id: string;
   supervisor_id: string;
@@ -24,9 +25,15 @@ export interface PositionProfileModel {
   positionDescription: string;
   departmentName: string;
   employeeName: string;
+  employeeEmail: string;
   classification: string;
   ministry: string;
   status: string;
+  // former PositionModel data that is optionally included here
+  classificationId?: string;
+  classificationPeoplesoftId?: string;
+  classificationEmployeeGroupId?: string;
+  effectiveDate?: string;
 }
 
 export interface PositionProfileModelResponse {
@@ -43,6 +50,7 @@ export interface GetPositionArgs {
 
 export interface GetPositionResponseArgs {
   positionNumber: string;
+  extraInfo?: boolean;
   uniqueKey?: string;
   suppressGlobalError?: boolean;
 }
@@ -57,6 +65,9 @@ export const positionApi = graphqlApi.injectEndpoints({
             query Position($where: PositionWhereUniqueInput!) {
               position(where: $where) {
                 classification_id
+                effective_date
+                classification_employee_group_id
+                classification_peoplesoft_id
               }
             }
           `,
@@ -71,20 +82,26 @@ export const positionApi = graphqlApi.injectEndpoints({
       query: (args: GetPositionResponseArgs) => {
         return {
           document: gql`
-            query PositionProfile($positionNumber: String!) {
-              positionProfile(positionNumber: $positionNumber) {
+            query PositionProfile($positionNumber: String!, $extraInfo: Boolean) {
+              positionProfile(positionNumber: $positionNumber, extraInfo: $extraInfo) {
                 positionNumber
                 positionDescription
                 departmentName
                 employeeName
+                employeeEmail
                 classification
                 ministry
                 status
+                classificationId
+                classificationPeoplesoftId
+                classificationEmployeeGroupId
+                effectiveDate
               }
             }
           `,
           variables: {
             positionNumber: args.positionNumber,
+            extraInfo: args.extraInfo,
             uniqueKey: args.uniqueKey,
             suppressGlobalError: args.suppressGlobalError,
           },

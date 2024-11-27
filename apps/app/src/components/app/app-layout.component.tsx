@@ -1,357 +1,64 @@
-import {
-  CheckCircleOutlined,
-  FileAddFilled,
-  FileAddOutlined,
-  FileOutlined,
-  FileProtectOutlined,
-  FileSearchOutlined,
-  HistoryOutlined,
-  HomeOutlined,
-  MenuFoldOutlined,
-  MenuUnfoldOutlined,
-  PartitionOutlined,
-  PlusCircleFilled,
-  UserAddOutlined,
-} from '@ant-design/icons';
-import { Button, Layout, Menu, MenuProps } from 'antd';
-import React, { useEffect, useState } from 'react';
+import { MenuFoldOutlined, MenuUnfoldOutlined } from '@ant-design/icons';
+import { Button, Layout } from 'antd';
 import { useAuth } from 'react-oidc-context';
-import { Link, Outlet } from 'react-router-dom';
+import { useLocation } from 'react-router-dom';
 import { useLocalStorage } from 'usehooks-ts';
-import { AppHeader } from './header.component';
-import { SiderNavItem } from './sider-nav/sider-nav-item.component';
-import { SiderNav } from './sider-nav/sider-nav.component';
+import { ErrorBoundaryLayout } from '../../routes/not-found/error';
+import { AppHeader } from '../app/header.component';
+import { NavMenu } from './components/nav-menu.component';
 
 const { Content, Sider } = Layout;
 
-type MenuItem = Required<MenuProps>['items'][number];
+const RenderOutlet = () => {
+  const auth = useAuth();
+  const location = useLocation();
 
-function getItem(
-  label: React.ReactNode,
-  key: React.Key,
-  icon?: React.ReactNode,
-  children?: MenuItem[],
-  type?: 'group',
-  onTitleClick?: () => void,
-): MenuItem {
-  return {
-    key,
-    icon,
-    children,
-    label,
-    type,
-    onTitleClick,
-  } as MenuItem;
-}
+  // Render the <Outlet /> if user is on the login/logout page, or is logged in.
+  return ['/auth/login', '/auth/logout'].some((path) => path.includes(location.pathname)) || auth.isAuthenticated ? (
+    <ErrorBoundaryLayout />
+  ) : (
+    <></>
+  );
+};
 
 export const AppLayout = () => {
   const auth = useAuth();
-  const [collapsed, setCollapsed] = useLocalStorage('sider-collapsed', true);
-  const [role, setRole] = useState<string | null>(null);
+  const [collapsed, setCollapsed] = useLocalStorage('sider-collapsed', false);
 
-  const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
-  // useEffect(() => {
-  //   // Initialize or update the selectedKeys based on the current URL
-  //   const path = location.pathname;
-  //   setSelectedKeys([path]);
-  //   // console.log(path);
-  // }, [location.pathname]);
-  // Function to handle menu item click
-  const handleMenuClick: MenuProps['onClick'] = (e) => {
-    // Update the selectedKeys when a menu item is clicked
-    console.log(e.keyPath);
-    setSelectedKeys([e.key]);
-  };
-
-  useEffect(() => {
-    // console.log('auth.user: ', auth.user);
-    const roles = auth.user?.profile['client_roles'];
-    if (roles && (roles as string[]).includes('total-compensation')) {
-      setRole('total-compensation');
-    } else if (roles && (roles as string[]).includes('classification')) {
-      setRole('classification');
-    } else if (roles && (roles as string[]).includes('hiring-manager')) {
-      setRole('hiring-manager');
-    } else {
-      setRole('user');
-    }
-  }, [auth]);
-
-  // collapsible menu
-
-  const totalCompensationMenuItems: MenuProps['items'] = [
-    getItem('Job Profiles', 'sub1', <FileSearchOutlined style={{ fontSize: '1.25rem' }} />, [
-      getItem(<Link to="/draft-job-profiles">Drafts</Link>, '1', <FileOutlined style={{ fontSize: '1.25rem' }} />),
-      getItem(
-        <Link to="/published-job-profiles">Published</Link>,
-        '2',
-        <FileProtectOutlined style={{ fontSize: '1.25rem' }} />,
-      ),
-      getItem(
-        <Link to="/archived-job-profiles">Archived</Link>,
-        '3',
-        <HistoryOutlined style={{ fontSize: '1.25rem' }} />,
-      ),
-    ]),
-  ];
-  const hiringManagerMenuItems: MenuProps['items'] = [
-    getItem('Hiring Manager', 'sub1', <UserAddOutlined style={{ fontSize: '1.25rem' }} />, [
-      getItem(
-        <Link to="/my-positions/create">Create new position</Link>,
-        '3',
-        <PlusCircleFilled style={{ fontSize: '1.25rem' }} />,
-      ),
-      getItem(
-        <Link to="/org-chart">My organizations</Link>,
-        '5',
-        <PartitionOutlined style={{ fontSize: '1.25rem' }} />,
-      ),
-      getItem(
-        <Link to="/job-profiles">Explore job profiles</Link>,
-        '6',
-        <FileSearchOutlined style={{ fontSize: '1.25rem' }} />,
-      ),
-      getItem(<Link to="/my-positions">My positions</Link>, '7', <UserAddOutlined style={{ fontSize: '1.25rem' }} />),
-    ]),
-  ];
-
-  if (role === 'user') {
-    return (
-      <Layout style={{ height: '100vh' }}>
-        <AppHeader></AppHeader>
-        <Layout style={{ height: '100%' }}>
-          <Layout>
-            <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', overflowY: 'auto' }}>
-              <Content style={{ display: 'flex', flexDirection: 'column', backgroundColor: '#FFF', flex: '1 0 auto' }}>
-                <Outlet />
-              </Content>
-            </div>
-          </Layout>
-        </Layout>
-      </Layout>
-    );
-  }
-
-  // console.log('role: ', role);
   return (
-    <Layout style={{ height: '100vh' }}>
-      <AppHeader></AppHeader>
-      <Layout hasSider style={{ height: '100%' }}>
+    <Layout style={{ minHeight: '100vh' }} id="layout">
+      <AppHeader />
+      <Layout hasSider style={{ flex: '1' }} id="layout2">
         {auth.isAuthenticated && (
           <Sider
-            role="navigation"
-            collapsible
-            collapsed={collapsed}
-            collapsedWidth="3.5rem"
             onCollapse={setCollapsed}
-            trigger={null}
-            style={{
-              boxShadow: '2px 0 5px 0 #CCC',
-              zIndex: 1000,
-            }}
+            collapsed={collapsed}
+            collapsible
+            role="navigation"
+            style={{ boxShadow: '2px 0 5px 0 #CCC', zIndex: 1000 }}
+            theme="light"
+            trigger={
+              <Button
+                data-testid="menu-toggle-btn"
+                aria-label={collapsed ? 'Expand side navigation' : 'Collapse side navigation'}
+                icon={collapsed ? <MenuUnfoldOutlined aria-hidden /> : <MenuFoldOutlined aria-hidden />}
+                onClick={() => setCollapsed(!collapsed)}
+                type="link"
+                style={{
+                  color: '#000',
+                  fontSize: '16px',
+                  margin: '0.5rem 0 0.5rem 0.75rem',
+                }}
+              />
+            }
           >
-            <div style={{ display: 'flex', flexDirection: 'column', height: '100%' }}>
-              <div
-                style={{ display: 'flex', flexDirection: 'column', height: '100%', overflowY: 'auto', flex: 'auto' }}
-              >
-                {role === 'hiring-manager' && (
-                  <>
-                    {collapsed ? (
-                      <SiderNavItem
-                        collapsed={collapsed}
-                        icon={
-                          <PlusCircleFilled
-                            data-testid="create-new-position-btn-collapsed"
-                            role="button"
-                            aria-label="Create new position"
-                            style={{ fontSize: '1.25rem', color: '#0057ad' }}
-                          />
-                        }
-                        key={'Create new position'}
-                        title={'Create new position'}
-                        to={'/my-positions/create'}
-                        hideTitle={true}
-                      />
-                    ) : (
-                      <div style={{ textAlign: 'center', padding: '10px 0' }}>
-                        <Link to="/my-positions/create">
-                          <Button type="primary" tabIndex={-1} data-testid="create-new-position-btn-expanded">
-                            Create new position
-                          </Button>
-                        </Link>
-                      </div>
-                    )}
-                    <SiderNav
-                      data-testid="menu-options"
-                      collapsed={collapsed}
-                      items={[
-                        {
-                          icon: <HomeOutlined aria-hidden style={{ fontSize: '1.25rem' }} />,
-                          title: 'Home',
-                          to: '/',
-                        },
-                        {
-                          icon: <PartitionOutlined aria-hidden style={{ fontSize: '1.25rem' }} />,
-                          title: 'My organizations',
-                          to: '/org-chart',
-                        },
-                        {
-                          icon: <FileSearchOutlined aria-hidden style={{ fontSize: '1.25rem' }} />,
-                          title: 'Explore job profiles',
-                          to: '/job-profiles',
-                        },
-                        {
-                          icon: <UserAddOutlined aria-hidden style={{ fontSize: '1.25rem' }} />,
-                          title: 'My positions',
-                          to: '/my-positions',
-                        },
-                      ]}
-                    />
-                  </>
-                )}
-                {role === 'total-compensation' && (
-                  <>
-                    {collapsed ? (
-                      <SiderNav
-                        collapsed={collapsed}
-                        items={[
-                          {
-                            icon: <FileAddFilled aria-hidden style={{ fontSize: '1.25rem', color: '#0057ad' }} />,
-                            title: 'Create new profile',
-                            to: '/draft-job-profiles/create',
-                            hideTitle: true,
-                          },
-                          {
-                            icon: <FileOutlined aria-hidden style={{ fontSize: '1.25rem' }} />,
-                            title: 'Draft job profiles',
-                            to: '/draft-job-profiles',
-                            hideTitle: true,
-                          },
-                          {
-                            icon: <FileProtectOutlined aria-hidden style={{ fontSize: '1.25rem' }} />,
-                            title: 'Published job profiles',
-                            to: '/published-job-profiles',
-                            hideTitle: true,
-                          },
-                          {
-                            icon: <CheckCircleOutlined aria-hidden style={{ fontSize: '1.25rem' }} />,
-                            title: 'Approved requests',
-                            to: '/approved-requests',
-                            hideTitle: true,
-                          },
-                          {
-                            icon: <PlusCircleFilled aria-hidden style={{ fontSize: '1.25rem' }} />,
-                            title: 'Create new position',
-                            to: '/my-positions/create',
-                            hideTitle: true,
-                          },
-                          {
-                            icon: <PartitionOutlined aria-hidden style={{ fontSize: '1.25rem' }} />,
-                            title: 'My organizations',
-                            to: '/org-chart',
-                            hideTitle: true,
-                          },
-                          {
-                            icon: <FileSearchOutlined aria-hidden style={{ fontSize: '1.25rem' }} />,
-                            title: 'Explore job profiles',
-                            to: '/job-profiles',
-                            hideTitle: true,
-                          },
-                          {
-                            icon: <UserAddOutlined aria-hidden style={{ fontSize: '1.25rem' }} />,
-                            title: 'My positions',
-                            to: '/my-positions',
-                            hideTitle: true,
-                          },
-                        ]}
-                      />
-                    ) : (
-                      <>
-                        <div style={{ padding: '10px 10px 2px 10px' }}>
-                          <Link to="/draft-job-profiles/create">
-                            <Button
-                              type="primary"
-                              icon={<FileAddOutlined aria-hidden style={{ fontSize: '1.25rem' }} />}
-                              style={{ display: 'flex', alignItems: 'center', justifyContent: 'center' }}
-                            >
-                              Create new profile
-                            </Button>
-                          </Link>
-                        </div>
-
-                        <Menu
-                          style={{ transition: 'width 0.2s ease-out', width: '200px' }}
-                          mode="inline"
-                          selectedKeys={selectedKeys}
-                          onClick={handleMenuClick}
-                          items={totalCompensationMenuItems}
-                        />
-
-                        <Link to="/approved-requests">
-                          <Menu
-                            style={{ transition: 'width 0.2s ease-out', width: '200px' }}
-                            mode="inline"
-                            selectedKeys={selectedKeys}
-                            onClick={handleMenuClick}
-                          >
-                            <Menu.Item
-                              icon={<CheckCircleOutlined aria-hidden style={{ fontSize: '1.25rem' }} />}
-                              key="/approved-requests"
-                            >
-                              Approved Reqs
-                            </Menu.Item>
-                          </Menu>
-                        </Link>
-
-                        <Menu
-                          style={{ transition: 'width 0.2s ease-out', width: '200px', marginTop: '10px' }}
-                          mode="inline"
-                          selectedKeys={selectedKeys}
-                          onClick={handleMenuClick}
-                          items={hiringManagerMenuItems}
-                        />
-                      </>
-                    )}
-                  </>
-                )}
-                {role === 'classification' && (
-                  <>
-                    <SiderNav
-                      collapsed={collapsed}
-                      items={[
-                        {
-                          icon: <CheckCircleOutlined aria-hidden style={{ fontSize: '1.25rem' }} />,
-                          title: 'My tasks',
-                          to: '/',
-                        },
-                      ]}
-                    />
-                  </>
-                )}
-              </div>
-              <div style={{ borderTop: '1px solid #CCC', flexShrink: 0 }}>
-                <Button
-                  data-testid="menu-toggle-btn"
-                  aria-label={collapsed ? 'Expand side navigation' : 'Collapse side navigation'}
-                  icon={collapsed ? <MenuUnfoldOutlined aria-hidden /> : <MenuFoldOutlined aria-hidden />}
-                  onClick={() => setCollapsed(!collapsed)}
-                  type="link"
-                  style={{
-                    color: '#000',
-                    fontSize: '16px',
-                    margin: '0.5rem 0 0.5rem 0.75rem',
-                  }}
-                />
-              </div>
-            </div>
+            <NavMenu collapsed={collapsed} />
           </Sider>
         )}
         <Layout>
-          <div style={{ display: 'flex', flexDirection: 'column', height: '100vh', overflowY: 'auto' }}>
-            <Content style={{ display: 'flex', flexDirection: 'column', backgroundColor: '#FFF', flex: '1 0 auto' }}>
-              <Outlet />
-            </Content>
-          </div>
+          <Content style={{ display: 'flex', flexDirection: 'column' }} id="content">
+            <RenderOutlet />
+          </Content>
         </Layout>
       </Layout>
     </Layout>

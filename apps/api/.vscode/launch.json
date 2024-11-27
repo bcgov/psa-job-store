@@ -1,0 +1,34 @@
+{
+  "version": "0.2.0",
+  "configurations": [
+    {
+      "name": "NestJS API (Launch)",
+      "type": "node",
+      "request": "launch",
+      "runtimeExecutable": "npm",
+      "runtimeArgs": ["-w", "api", "run", "start:debug"],
+      "outputCapture": "std",
+      "internalConsoleOptions": "openOnSessionStart",
+      "console": "integratedTerminal", // Changed to integrated terminal for better interactivity
+      "cwd": "${workspaceFolder}", // Sets the working directory to the API app folder
+      "envFile": "${workspaceFolder}/.env", // Loads environment variables from a .env file
+      "skipFiles": ["<node_internals>/**", "node_modules/**"], // Skips unnecessary files during debugging
+      "sourceMaps": true,
+      "smartStep": true // Automatically steps through code that has source maps
+    },
+    {
+      "name": "NestJS API (Attach)",
+      "type": "node",
+      "request": "attach",
+      "port": 9229, // Adjust if necessary based on the debug port
+      "restart": true,
+      "timeout": 60000,
+      "address": "localhost",
+      "localRoot": "${workspaceFolder}",
+      "remoteRoot": "/usr/src/app",
+      "sourceMaps": true,
+      "skipFiles": ["<node_internals>/**", "node_modules/**"]
+    }
+  ],
+  "compounds": []
+}

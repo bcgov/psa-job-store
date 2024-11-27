@@ -8,23 +8,31 @@ import { ScheduleModule } from '@nestjs/schedule';
 import { LoggerModule } from 'nestjs-pino';
 import { AppResolver } from './app.resolver';
 import { RequestIdMiddleware } from './middleware/request-id.middleware';
+import { AppLogModule } from './modules/app-log/app-log.module';
 import { AuthModule } from './modules/auth/auth.module';
+import { E2EAuthModule } from './modules/auth/e2e-auth.module';
 import { AuthGuard } from './modules/auth/guards/auth.guard';
-import { RolesGlobalGuard } from './modules/auth/guards/role-global.guard';
 import { RoleGuard } from './modules/auth/guards/role.guard';
 import { BehaviouralComptencyModule } from './modules/behavioral-comptency/behavioural-comptency.module';
 import { ClassificationModule } from './modules/classification/classification.module';
+import { CommentModule } from './modules/comment/comment.module';
 import { EmployeeGroupModule } from './modules/employee-group/employee-group.module';
 import { ExternalModule } from './modules/external/external.module';
+import { HealthCheckModule } from './modules/health-check/health-check.module';
 import { JobFamilyModule } from './modules/job-family/job-family.module';
 import { JobProfileMinimumRequirementsModule } from './modules/job-profile-minimum-requirements/job-profile-minimum-requirements.module';
 import { JobProfileScopeModule } from './modules/job-profile-scope/job-profile-scope.module';
 import { JobProfileStreamModule } from './modules/job-profile-stream/job-profile-stream.module';
 import { JobProfileModule } from './modules/job-profile/job-profile.module';
 import { JobRoleModule } from './modules/job-role/job-role.module';
+import { KeycloakModule } from './modules/keycloak/keycloak.module';
+import { OrganizationModule } from './modules/organization/organization.module';
 import { PositionRequestModule } from './modules/position-request/position-request.module';
+import { SavedJobProfileModule } from './modules/saved-job-profile/saved-job-profile.module';
 import { ScheduledTaskModule } from './modules/scheduled-task/scheduled-task.module';
 import { SearchModule } from './modules/search/search.module';
+import { SettingsModule } from './modules/settings/settings.module';
+import { UserModule } from './modules/user/user.module';
 import { apolloPinoLoggingPlugin } from './utils/logging/apolloPinoLoggingPlugin';
 import { formatGraphQLError } from './utils/logging/graphql-error.formatter';
 import { loggerOptions } from './utils/logging/logger.factory';
@@ -47,12 +55,13 @@ import { validateAppConfig } from './utils/validate-app-config.util';
         pinoHttp: loggerOptions,
       }),
     }),
-
+    HealthCheckModule,
     ScheduleModule.forRoot(),
     AuthModule,
     PositionRequestModule,
     JobProfileModule,
     ClassificationModule,
+    CommentModule,
     JobFamilyModule,
     JobRoleModule,
     BehaviouralComptencyModule,
@@ -62,19 +71,17 @@ import { validateAppConfig } from './utils/validate-app-config.util';
     JobProfileStreamModule,
     JobProfileScopeModule,
     JobProfileMinimumRequirementsModule,
-    // AppLogModule,
+    AppLogModule,
     ScheduledTaskModule,
+    SavedJobProfileModule,
+    UserModule,
+    KeycloakModule,
+    SettingsModule,
+    OrganizationModule,
+    E2EAuthModule,
   ],
   controllers: [],
-  providers: [
-    { provide: APP_GUARD, useClass: AuthGuard },
-    {
-      provide: APP_GUARD,
-      useClass: RolesGlobalGuard,
-    },
-    { provide: APP_GUARD, useClass: RoleGuard },
-    AppResolver,
-  ],
+  providers: [{ provide: APP_GUARD, useClass: AuthGuard }, { provide: APP_GUARD, useClass: RoleGuard }, AppResolver],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

@@ -1,4 +1,4 @@
-import { ArgsType, Field, IntersectionType } from '@nestjs/graphql';
+import { ArgsType, IntersectionType } from '@nestjs/graphql';
 import { FindManyPositionRequestArgs } from '../../../@generated/prisma-nestjs-graphql';
 import { SearchArgs } from '../../../args/search.args';
 
@@ -6,7 +6,4 @@ import { SearchArgs } from '../../../args/search.args';
 export class FindManyPositionRequestWithSearch extends IntersectionType(FindManyPositionRequestArgs, SearchArgs) {}
 
 @ArgsType()
-export class ExtendedFindManyPositionRequestWithSearch extends FindManyPositionRequestWithSearch {
-  @Field(() => Boolean, { nullable: true })
-  onlyCompletedForAll?: boolean;
-}
+export class ExtendedFindManyPositionRequestWithSearch extends FindManyPositionRequestWithSearch {}

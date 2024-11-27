@@ -11,6 +11,7 @@ export const apolloPinoLoggingPlugin: ApolloServerPlugin = {
           {
             query: rc.request.query,
             variables: rc.request.variables,
+            errors: rc.errors,
           },
           'GraphQL Query with Error',
         );

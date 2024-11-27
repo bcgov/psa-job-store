@@ -2,7 +2,7 @@
 
 ![JobStore Beta Screenshot](/screenshot.PNG?raw=true)
 
-Welcome to the BC Public Service Agency's Job Store βeta, the all-in-one solution for navigating and managing your organizational chart with ease and efficiency. This tool is designed to streamline the way you view, edit, and create positions within your organization, all while integrating seamlessly with PeopleSoft and CRM systems.
+Welcome to the BC Public Service Agency's Job Store βeta, the all-in-one solution for navigating and managing your organization chart with ease and efficiency. This tool is designed to streamline the way you view, edit, and create positions within your organization, all while integrating seamlessly with PeopleSoft and CRM systems.
 
 ## Features
 
@@ -84,15 +84,15 @@ Visit [http://localhost:5173/](http://localhost:5173/) to see the application!
 First, ensure that `TEST_ENV=true` is set in your `apps/api/.env` file. This disables verification
 step for the JWT token and enables passing of a mock token for authentication and does other API modifications.
 
-Also set `VITE_TEST_ENV=true` in `apps/app/.env` file. This applies minor UI changes to facilitate cypress automation
-
 Ensure that database has been reset to defaults with the special seed for e2e tests:
 
 `npx -w api npm run migrate:reset:e2e-test`
 
-Run `npm -w app run test-e2e`
+Run `npx -w jobstore-cypress cypress open`
 
-## Running component tests
+To run in same environment as GitHub actions: `npx cypress run --browser edge --headless`
+
+## Running React component tests
 
 Run `npx -w app jest`
 
@@ -128,6 +128,8 @@ If there's a conflict because develop is ahead of main:
 - Make a pull request from this branch into develop
 
 ## @generated files and slow commits
+
+NOTE: this is no longer necessary - generated files were added to .gitignore and are no longer source controlled
 
 To avoid slow commits when auto-generation takes place, run `git add .` and then `npm run lint-generated` (in the api project)
 
@@ -182,11 +184,23 @@ Upload backup file to dev/test sql pod:
 
 Login to sql, and clear all data:
 
-`psql -d DB_NAME -c "DROP SCHEMA public CASCADE; CREATE SCHEMA public;"`
+`psql -d api -c "DROP SCHEMA public CASCADE; CREATE SCHEMA public;"`
+
+If importing to local:
+
+`psql -d api -c "DROP SCHEMA public CASCADE; CREATE SCHEMA public;" -h localhost -p 5432 -U admin`
+
+`docker cp backup.sql api-postgres-1:/home/backup.sql`
 
 Import production data:
 
 `psql -U postgres -d api -f backup.sql`
+
+If on local:
+
+`psql -U postgres -d api -f /home/backup.sql -h localhost -p 5432 -U admin`
+
+`npx -w api prisma migrate deploy`
 
 Clear position requests:
 
@@ -329,3 +343,48 @@ To expire from the archive pod (there needs to be space on the volume to perform
 `psql`
 `\l` - get a list of dbs
 `SELECT pg_size_pretty( pg_database_size('api') );`
+
+## Husky pre-commit hook issues on windows with GitHub desktop
+
+If getting this type of error when commiting changes:
+
+```
+.husky/pre-commit: line 13: npx: command not found
+husky - pre-commit hook exited with code 127 (error)
+husky - command not found in PATH=/mingw64/libexec/git-core:/mingw64/bin:/usr/bin...:undefined
+``
+
+- Reinstall GitHub desktop
+- Check that system PATH variable contains `C:\Program Files\Git\bin` (path containing sh.exe) AND that it's first in the list
+```
+
+## Upgrade psql on CrunchyDB
+
+Modify pgupgrade to include your desired upgrade then run:
+
+`oc apply -f base\crunchy\pgupgrade.yml`
+
+annotate cluster to enable the upgrade to proceed:
+
+`oc annotate postgrescluster api-postgres-clone postgres-operator.crunchydata.com/allow-upgrade="api-postgres-clone-upgrade"`
+
+Shutdown the cluster with the flag in `postgrescluster.yml`:
+
+```
+spec:
+  shutdown: true
+```
+
+`oc apply -k overlays/crunchy/test`
+
+Monitor for upgrade:
+
+`oc describe pgupgrade.postgres-operator.crunchydata.com/api-postgres-clone-upgrade`
+
+Cleanup. Remove the pgupgrade object:
+
+`oc delete -f base\crunchy\pgupgrade.yml`
+
+Remove annotation:
+
+`oc annotate postgrescluster api-postgres-clone postgres-operator.crunchydata.com/allow-upgrade-`

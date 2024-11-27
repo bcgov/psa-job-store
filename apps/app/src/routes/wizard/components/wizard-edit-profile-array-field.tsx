@@ -13,8 +13,8 @@ import './wizard-edit-profile.css';
 
 interface WizardEditProfileArrayFieldProps {
   useFormReturn: UseFormReturn<JobProfileValidationModel, any, undefined>;
-  originalFields: any[];
-  validateVerification: () => void;
+  originalFields?: any[];
+  validateVerification?: () => void;
   label: string;
   description?: string;
   tooltip?: string;
@@ -23,7 +23,6 @@ interface WizardEditProfileArrayFieldProps {
   addButtonText: string;
   editedFields?: { [key: number]: boolean };
   setEditedFields?: React.Dispatch<React.SetStateAction<{ [key: number]: boolean }>>;
-  forceSignificant?: boolean;
   formErrors?: any;
 }
 
@@ -39,14 +38,12 @@ const WizardEditProfileArrayField: React.FC<WizardEditProfileArrayFieldProps> = 
   addButtonText,
   editedFields,
   setEditedFields,
-  forceSignificant = false,
   formErrors,
 }) => {
-  const { fields, handleRemove, handleAddBack, handleAddNew, handleReset } = useFormFields({
+  const { fields, handleRemove, handleAddBack, handleAddNew, handleReset, update } = useFormFields({
     useFormReturn,
     fieldName,
     originalFields,
-    forceSignificant,
     setEditedFields,
   });
 
@@ -62,10 +59,10 @@ const WizardEditProfileArrayField: React.FC<WizardEditProfileArrayFieldProps> = 
       originalFields,
       editedFields,
       setEditedFields,
-      forceSignificant,
+      update,
     };
 
-    return <WizardEditProfileListItem {...commonProps} fieldName={fieldName} testId={testId} />;
+    return <WizardEditProfileListItem {...commonProps} label={label} fieldName={fieldName} testId={testId} />;
   };
 
   return (
@@ -73,7 +70,7 @@ const WizardEditProfileArrayField: React.FC<WizardEditProfileArrayFieldProps> = 
       <Form.Item
         label={
           !tooltip ? (
-            label
+            <h4>{label}</h4>
           ) : (
             <span>
               {label}{' '}

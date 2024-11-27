@@ -1,13 +1,15 @@
 import { Injectable } from '@nestjs/common';
 import { Classification, Department } from '@prisma/client';
 import { AlexandriaError } from '../../utils/alexandria-error';
+import { DepartmentService } from '../organization/department/department.service';
+import { OrganizationService } from '../organization/organization/organization.service';
 import { ClassificationService } from './classification.service';
-import { DepartmentService } from './department.service';
 import { Employee } from './models/employee.model';
 import { FindUniquePositionArgs } from './models/find-unique-position.args';
+import { PeoplesoftPosition } from './models/peoplesoft-position.model';
 import { PositionProfile } from './models/position-profile.model';
 import { Position } from './models/position.model';
-import { OrganizationService } from './organization.service';
+import { PeoplesoftV2Service } from './peoplesoft-v2.service';
 import { PeoplesoftService } from './peoplesoft.service';
 
 @Injectable()
@@ -19,12 +21,19 @@ export class PositionService {
     private readonly classificationService: ClassificationService,
     private readonly departmentService: DepartmentService,
     private readonly peoplesoftService: PeoplesoftService,
+    private readonly peoplesoftV2Service: PeoplesoftV2Service,
     private readonly organizationService: OrganizationService,
   ) {
-    (async () => {
-      this.classifications = await this.classificationService.getClassifications({});
-      this.departments = await this.departmentService.getDepartments();
-    })();
+    // (async () => {
+    //   console.log('Loading classifications and departments');
+    //   this.classifications = await this.classificationService.getClassifications({});
+    //   this.departments = await this.departmentService.getDepartments();
+    // })();
+  }
+
+  async onModuleInit() {
+    this.classifications = await this.classificationService.getClassifications({});
+    this.departments = await this.departmentService.getDepartments();
   }
 
   async getPosition(args?: FindUniquePositionArgs) {
@@ -34,12 +43,9 @@ export class PositionService {
     let position: Position | null = null;
 
     if (rows?.length > 0) {
-      const raw = rows[0];
+      const raw = rows[0] as PeoplesoftPosition;
 
-      const classification =
-        raw['A.JOBCODE'] != null
-          ? await this.classificationService.getClassification({ where: { id: raw['A.JOBCODE'] } })
-          : null;
+      const classification = await this.classificationService.getClassificationForPeoplesoftPosition(raw);
 
       const department =
         raw['A.DEPTID'] != null ? await this.departmentService.getDepartment({ where: { id: raw['A.DEPTID'] } }) : null;
@@ -52,6 +58,8 @@ export class PositionService {
       position = {
         id: raw['A.POSITION_NBR'],
         classification_id: raw['A.JOBCODE'],
+        classification_employee_group_id: classification.employee_group_id,
+        classification_peoplesoft_id: classification.peoplesoft_id,
         classification: classification,
         department_id: raw['A.DEPTID'],
         department: department,
@@ -68,6 +76,9 @@ export class PositionService {
     return position;
   }
 
+  /* This end point is used to get the position profile for a given position number. 
+     It returns the position details along with the employee details if the position has an employee. 
+  */
   async getPositionProfile(positionNumber: string, extraInfo = false): Promise<PositionProfile[]> {
     if (!positionNumber) throw AlexandriaError('Position number is required');
     const positionDetails = await this.getPosition({ where: { id: positionNumber } });
@@ -78,26 +89,49 @@ export class PositionService {
     employeesForPositions = await this.peoplesoftService.getEmployeesForPositions([positionNumber]);
 
     const employeesInPosition = employeesForPositions.get(positionNumber) ?? [];
-
+    if (employeesInPosition.length === 0) {
+      return [
+        {
+          positionNumber: positionNumber,
+          positionDescription: positionDetails.title,
+          departmentName: positionDetails.department.name,
+          classification: positionDetails.classification.name,
+          ministry: positionDetails.organization.name,
+          employeeName: '', // No employee
+          employeeEmail: '',
+          status: '', // No employee status
+          employeeId: '',
+          departmentId: extraInfo ? positionDetails.department_id : '',
+          organizationId: extraInfo ? positionDetails.organization_id : '',
+          classificationId: extraInfo ? positionDetails.classification_id : '',
+          classificationPeoplesoftId: extraInfo ? positionDetails.classification_peoplesoft_id : '',
+          classificationEmployeeGroupId: extraInfo ? positionDetails.classification_employee_group_id : '',
+          effectiveDate: positionDetails.effective_date,
+        },
+      ];
+    }
     const positionProfiles = await Promise.all(
       employeesInPosition.map(async (employee) => {
         const employeeResponse = await this.peoplesoftService.getEmployee(employee.id);
         const employeeDetail = employeeResponse?.data?.query?.rows?.[0];
-
+        const profile = await this.peoplesoftV2Service.getProfile(null, employeeDetail?.EMPLID ?? '');
         return {
           positionNumber: positionNumber,
           positionDescription: positionDetails.title,
           departmentName: positionDetails.department.name,
           employeeName: employeeDetail?.NAME_DISPLAY,
+          employeeEmail: profile?.EMAILID,
           classification: positionDetails.classification.name,
           ministry: positionDetails.organization.name,
           status: employee.status,
 
-          employeeId: extraInfo ? employeeDetail?.EMPLID ?? '' : '',
+          employeeId: extraInfo ? (employeeDetail?.EMPLID ?? '') : '',
           departmentId: extraInfo ? positionDetails.department_id : '',
           organizationId: extraInfo ? positionDetails.organization_id : '',
           classificationId: extraInfo ? positionDetails.classification_id : '',
-          classificationCode: extraInfo ? positionDetails.classification.code : '',
+          classificationPeoplesoftId: extraInfo ? positionDetails.classification_peoplesoft_id : '',
+          classificationEmployeeGroupId: extraInfo ? positionDetails.classification_employee_group_id : '',
+          effectiveDate: positionDetails.effective_date,
         };
       }),
     );

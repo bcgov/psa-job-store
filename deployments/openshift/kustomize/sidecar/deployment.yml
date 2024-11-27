@@ -1,0 +1,38 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: sidecar
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: sidecar
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        name: sidecar
+    spec:
+      automountServiceAccountToken: false
+      containers:
+      - name: sidecar
+        image: node:alpine
+        command: ["sh"]
+        args: ["-c", "while :; do sleep 3600; done"]
+        ports:
+        - containerPort: 3000
+          protocol: TCP
+        env:
+        - name: npm_config_cache
+          value: "/tmp/.npm"
+        envFrom:
+        - secretRef:
+            name: secrets
+        resources:
+          requests:
+            cpu: 100m
+            memory: 200Mi
+          limits:
+            cpu: 200m
+            memory: 400Mi

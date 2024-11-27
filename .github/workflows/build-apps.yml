@@ -1,12 +1,14 @@
 name: Build Docker Images
 
 on:
-  repository_dispatch:
-    types: [build-apps-trigger]
+  push:
+    branches: [main, stage, develop]
+  workflow_dispatch:
 jobs:
   metadata:
     name: Get Metadata
     runs-on: ubuntu-20.04
+
     outputs:
       changed-apps: ${{ steps.get-changed-apps.outputs.changes }}
       short-sha: ${{ steps.get-short-sha.outputs.sha }}
@@ -14,13 +16,13 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
         with:
-          ref: ${{ github.event.client_payload.ref }}
+          ref: ${{ github.ref }}
       - name: Get Changed Apps
         id: get-changed-apps
         uses: dorny/paths-filter@v2
         with:
-          base: ${{ github.event.client_payload.ref }}
-          ref: ${{ github.event.client_payload.ref }}
+          base: ${{ github.ref }}
+          ref: ${{ github.ref }}
           filters: |
             api:
               - 'apps/api/**'
@@ -35,7 +37,7 @@ jobs:
     if: ${{needs.metadata.outputs.changed-apps != '[]' && needs.metadata.outputs.changed-apps != ''}}
     runs-on: ubuntu-20.04
     environment:
-      name: ${{ github.event.client_payload.ref_name == 'main' && 'prod' || github.event.client_payload.ref_name == 'stage' && 'test' || 'dev' }}
+      name: ${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'stage' && 'test' || 'dev' }}
     strategy:
       fail-fast: false # Continue with other matrix jobs even if one fails
       matrix:
@@ -48,7 +50,7 @@ jobs:
       - name: Checkout
         uses: actions/checkout@v3
         with:
-          ref: ${{ github.event.client_payload.ref }}
+          ref: ${{ github.ref }}
       - name: Login to Artifactory
         uses: docker/login-action@v2
         with:
@@ -68,9 +70,9 @@ jobs:
           images: |
             ${{ env.ARTIFACTORY_URL }}/af3c-gen-docker-local/${{ matrix.app }}
           tags: |
-            type=raw,value=latest,enable={{is_default_branch}}
-            type=raw,value=${{ steps.app-version.outputs.prop }},enable={{is_default_branch}}
-            type=raw,value=${{ github.event.client_payload.ref_name }}-latest,enable=${{ github.event.client_payload.ref != github.event.repository.default_branch }}
+            type=raw,value=latest,enable=${{ github.ref_name == github.event.repository.default_branch }}
+            type=raw,value=${{ steps.app-version.outputs.prop }},enable=${{ github.ref_name == github.event.repository.default_branch }}
+            type=raw,value=${{ github.ref_name }}-latest
       - name: Build and Push
         uses: docker/build-push-action@v4
         with:
@@ -80,17 +82,64 @@ jobs:
           tags: ${{ steps.docker-metadata.outputs.tags }}
           labels: ${{ steps.docker-metadata.outputs.labels }}
           build-args: |
+            GITHUB_SHA=${{ github.sha }}
             VITE_KEYCLOAK_REDIRECT_URL=${{ secrets.KEYCLOAK_REDIRECT_URL }}
-            KEYCLOAK_CLIENT_ID_PRIVATE=${{ secrets.KEYCLOAK_CLIENT_ID_PRIVATE }}
-            KEYCLOAK_CLIENT_ID_PUBLIC=${{ secrets.KEYCLOAK_CLIENT_ID_PUBLIC }}
             VITE_KEYCLOAK_CLIENT_ID=${{ secrets.KEYCLOAK_CLIENT_ID_PUBLIC }}
-            KEYCLOAK_CLIENT_SECRET=${{ secrets.KEYCLOAK_CLIENT_SECRET }}
-            KEYCLOAK_ISSUER=${{ secrets.KEYCLOAK_ISSUER }}
             VITE_KEYCLOAK_REALM_URL=${{ secrets.KEYCLOAK_ISSUER }}
             VITE_BACKEND_URL=${{ secrets.VITE_BACKEND_URL }}
+            VITE_SUPPORT_EMAIL=${{ secrets.VITE_SUPPORT_EMAIL }}
+            VITE_ENV=${{ secrets.VITE_ENV }}
+            SSO_ENVIRONMENT=${{ secrets.SSO_ENVIRONMENT }}
+            SSO_INTEGRATION_ID=${{ secrets.SSO_INTEGRATION_ID }}
+            CSS_API_CLIENT_ID=${{ secrets.CSS_API_CLIENT_ID }}
+            CSS_API_CLIENT_SECRET=${{ secrets.CSS_API_CLIENT_SECRET }}
             KEYCLOAK_REALM_URL=${{ secrets.KEYCLOAK_ISSUER }}
-      - name: Trigger Deployments
-        uses: ./.github/actions/trigger-deploy
+            KEYCLOAK_CLIENT_ID_PRIVATE=${{ secrets.KEYCLOAK_CLIENT_ID_PRIVATE }}
+            KEYCLOAK_CLIENT_ID_PUBLIC=${{ secrets.KEYCLOAK_CLIENT_ID_PUBLIC }}
+            KEYCLOAK_CLIENT_SECRET=${{ secrets.KEYCLOAK_CLIENT_SECRET }}
+            KEYCLOAK_ISSUER=${{ secrets.KEYCLOAK_ISSUER }}
+
+  trigger_migration:
+    needs: [metadata, build-apps] # Add metadata to needs
+    runs-on: ubuntu-latest
+    steps:
+      - name: Trigger Migration Workflow
+        uses: actions/github-script@v6
         with:
-          openshift-server: ${{ secrets.OPENSHIFT_SERVER }}
-          api-token: ${{ secrets.OPENSHIFT_TOOLS_API_TOKEN }}
+          github-token: ${{ secrets.GITHUB_TOKEN }}
+          script: |
+            await github.rest.actions.createWorkflowDispatch({
+              owner: context.repo.owner,
+              repo: context.repo.repo,
+              workflow_id: 'migrate-db.yml',
+              ref: '${{ github.ref }}',
+              inputs: {
+                sha: '${{ github.sha }}',
+                changed_apps: '${{ needs.metadata.outputs.changed-apps }}'
+              }
+            });
+
+  # trigger-unit-tests:
+  #   name: Trigger Unit Tests
+  #   runs-on: ubuntu-20.04
+  #   if: |
+  #     always() &&
+  #     (github.ref_name == 'develop')
+  #   steps:
+  #     - name: Trigger Unit Tests
+  #       uses: actions/github-script@v6
+  #       with:
+  #         script: |
+  #           try {
+  #             console.log('Attempting to trigger unit tests');
+  #             await github.rest.actions.createWorkflowDispatch({
+  #               owner: context.repo.owner,
+  #               repo: context.repo.repo,
+  #               workflow_id: 'react-unit-tests.yml',
+  #               ref: 'develop',
+  #             });
+  #             console.log('Unit tests triggered successfully');
+  #           } catch (error) {
+  #             console.log('Error triggering unit tests:', error);
+  #             throw error;
+  #           }

@@ -1,0 +1,4 @@
+{
+  "version": "%REACT_APP_GIT_SHA%",
+  "timestamp": "%BUILD_TIME%"
+}

@@ -1,12 +1,16 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ExclamationCircleFilled, InfoCircleOutlined, QuestionCircleOutlined } from '@ant-design/icons';
-import { classValidatorResolver } from '@hookform/resolvers/class-validator';
-import { Alert, Col, Descriptions, Form, Input, List, Row, Tooltip } from 'antd';
-import TextArea from 'antd/es/input/TextArea';
+import {
+  ExclamationCircleFilled,
+  InfoCircleFilled,
+  InfoCircleOutlined,
+  QuestionCircleOutlined,
+} from '@ant-design/icons';
+import { Alert, Button, Col, Descriptions, Form, Input, List, Row, Tooltip } from 'antd';
 import { MutableRefObject, forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { useFieldArray, useForm } from 'react-hook-form';
 
+import TextArea from 'antd/es/input/TextArea';
 import DOMPurify from 'dompurify';
 import LoadingSpinnerWithMessage from '../../../components/app/common/components/loading.component';
 import PositionProfile from '../../../components/app/common/components/positionProfile';
@@ -18,7 +22,6 @@ import {
   TrackedFieldArrayItem,
 } from '../../../redux/services/graphql-api/job-profile-types';
 import { useGetJobProfileQuery, useLazyGetJobProfileQuery } from '../../../redux/services/graphql-api/job-profile.api';
-import { useGetPositionRequestQuery } from '../../../redux/services/graphql-api/position-request.api';
 import { FormItem } from '../../../utils/FormItem';
 import { JobProfileValidationModel } from '../../job-profiles/components/job-profile.component';
 import AccountabilitiesSection from './wizard-edit-profile-accountabilities-section';
@@ -36,18 +39,21 @@ interface ConfigProps {
 
 interface WizardEditProfileProps {
   id?: string;
+  version?: string;
   profileData?: JobProfileModel | null;
   config?: ConfigProps;
   submitText?: string;
   showBackButton?: boolean;
   onVerificationRequiredChange?: (verificationRequired: boolean) => void;
+  handleFormChange: (state: boolean) => void;
 }
 
 enum reasons {
   ACCOUNTABILITIES = 'Changes in Accountabilities',
-  EDUCATION = 'Changes in Education', // Added for demonstration
-  JOB_EXPERIENCE = 'Changes in Job Experience', // Added for demonstration
-  SECURITY_SCREENINGS = 'Changes in Security Screenings', // Added for demonstration
+  EDUCATION = 'Changes in Education',
+  JOB_EXPERIENCE = 'Changes in Job Experience',
+  SECURITY_SCREENINGS = 'Changes in Security Screenings',
+  PROFESSIONAL_REGISTRATIONS = 'Changes in Professional Registration and Certification Requirements',
 }
 
 type sectionMap = {
@@ -55,7 +61,10 @@ type sectionMap = {
 };
 
 const WizardEditProfile = forwardRef(
-  ({ id, profileData, config, onVerificationRequiredChange }: WizardEditProfileProps, ref) => {
+  (
+    { id, version, profileData, config, onVerificationRequiredChange, handleFormChange }: WizardEditProfileProps,
+    ref,
+  ) => {
     const {
       originalValuesSet,
       setOriginalValuesSet,
@@ -90,22 +99,26 @@ const WizardEditProfile = forwardRef(
       setOriginalProvisosFields,
       originalBehaviouralCompetenciesFields,
       setOriginalBehaviouralCompetenciesFields,
-      positionRequestId,
       positionRequestProfileId,
+      positionRequestProfileVersion,
       // errors,
       currentSection,
       setCurrentSection,
     } = useWizardContext();
 
+    // console.log('originalRelWorkFields: ', originalRelWorkFields);
+
     const acctSection = useRef<null | HTMLDivElement>(null);
     const educationSection = useRef<null | HTMLDivElement>(null);
     const workExperienceSection = useRef<null | HTMLDivElement>(null);
+    const professionalRegSection = useRef<null | HTMLDivElement>(null);
     const securitySection = useRef<null | HTMLDivElement>(null);
     const sections: sectionMap = {
       [reasons.ACCOUNTABILITIES]: acctSection,
       [reasons.EDUCATION]: educationSection,
       [reasons.JOB_EXPERIENCE]: workExperienceSection,
       [reasons.SECURITY_SCREENINGS]: securitySection,
+      [reasons.PROFESSIONAL_REGISTRATIONS]: professionalRegSection,
     };
     const [verificationNeededReasons, setVerificationNeededReasons] = useState<string[]>([]);
 
@@ -135,19 +148,25 @@ const WizardEditProfile = forwardRef(
       }
     };
     useEffect(() => {
-      if (effectiveData && sections && currentSection) {
+      // only checking securitySection is set, to ensure those sections have loaded
+      if (effectiveData && currentSection && securitySection.current) {
         handleSectionScroll(currentSection);
         setCurrentSection(null);
       }
       // eslint-disable-next-line react-hooks/exhaustive-deps
-    }, []);
+    }, [acctSection.current]);
     // get original profile data for comparison to the edited state
-    const { data: originalProfileData } = useGetJobProfileQuery({ id: positionRequestProfileId ?? -1 });
+    const { data: originalProfileData } = useGetJobProfileQuery({
+      id: positionRequestProfileId ?? -1,
+      version: positionRequestProfileVersion ?? -1,
+    });
     const initialData = profileData ?? null;
     const [effectiveData, setEffectiveData] = useState<JobProfileModel | null>(initialData);
     const [requiresVerification, setRequiresVerification] = useState(false);
     const [resetComplete, setResetComplete] = useState(false);
     const [triggerGetJobProfile, { data, isLoading }] = useLazyGetJobProfileQuery();
+
+    const [pickerData, setPickerData] = useState<any>({});
 
     const [editedAccReqFields, setEditedAccReqFields] = useState<{ [key: number]: boolean }>({});
     const [editedMinReqFields, setEditedMinReqFields] = useState<{ [key: number]: boolean }>({});
@@ -163,19 +182,24 @@ const WizardEditProfile = forwardRef(
       // If profileData exists, use it to set the form state
       if (profileData) {
         setEffectiveData(profileData);
-      } else if (!profileData && id) {
+      } else if (!profileData && id && version) {
         // If no profileData is provided and an id exists, fetch the data
-        triggerGetJobProfile({ id: +id });
+        triggerGetJobProfile({ id: +id, version: +version });
       }
-    }, [id, profileData, triggerGetJobProfile]);
+    }, [id, profileData, triggerGetJobProfile, version]);
 
     // eslint-disable-next-line @typescript-eslint/no-unused-vars
     const useFormReturn = useForm<JobProfileValidationModel>({
-      resolver: classValidatorResolver(JobProfileValidationModel),
+      // resolver: classValidatorResolver(JobProfileValidationModel), // todo: re-enable once profiles have proper fields
       mode: 'onChange',
     });
 
     const { control, reset, handleSubmit, getValues, formState, trigger } = useFormReturn;
+    const { isDirty } = formState;
+
+    useEffect(() => {
+      handleFormChange(isDirty);
+    }, [isDirty, handleFormChange]);
 
     useEffect(() => {
       if (!profileData && data && !isLoading) {
@@ -187,7 +211,106 @@ const WizardEditProfile = forwardRef(
 
     const [form] = Form.useForm();
 
+    useEffect(() => {
+      if (!effectiveData) return;
+
+      // construct picklist data by looking at fields that are marked as editable + non-significant
+
+      const pickListData = {
+        requirementsWithoutReadOnly: {
+          professionalRegistrationRequirements: [] as { text: string }[],
+          accountabilities: [] as { text: string }[],
+          securityScreenings: [] as { text: string }[],
+        },
+      };
+
+      // professional registrations
+      const profRegs = effectiveData.professional_registration_requirements;
+
+      profRegs?.forEach((profReg) => {
+        const isSignificant = profReg.is_significant;
+        const isReadonly = profReg.is_readonly;
+
+        if (!isSignificant && !isReadonly) {
+          pickListData.requirementsWithoutReadOnly.professionalRegistrationRequirements.push({
+            text: profReg.text,
+          });
+        }
+      });
+
+      // accountabilities
+      const accs = effectiveData.accountabilities;
+
+      accs.forEach((acc) => {
+        const isSignificant = acc.is_significant;
+        const isReadonly = acc.is_readonly;
+
+        if (!isSignificant && !isReadonly) {
+          pickListData.requirementsWithoutReadOnly.accountabilities.push({
+            text: acc.text.toString(),
+          });
+        }
+      });
+
+      // security screenings
+      const secs = effectiveData.security_screenings;
+
+      secs.forEach((acc) => {
+        const isSignificant = acc.is_significant;
+        const isReadonly = acc.is_readonly;
+
+        if (!isSignificant && !isReadonly) {
+          pickListData.requirementsWithoutReadOnly.securityScreenings.push({
+            text: acc.text.toString(),
+          });
+        }
+      });
+
+      setPickerData(pickListData);
+    }, [effectiveData]);
+
+    // // // parameters for picklist query
+    // const useProfile = effectiveData?.original_profile_json ?? effectiveData;
+    // const allOrganizations = useProfile?.organizations?.length === 0;
+    // const selectedMinistry = useProfile?.organizations?.map((org) => org.organization.id);
+    // const jobFamilyIds = useProfile?.jobFamilies?.map((fam) => fam.jobFamily.id) ?? [];
+    // const selectedClassificationId = useProfile?.classifications?.[0]?.classification?.id;
+    // const employeeGroup = useProfile?.classifications?.[0]?.classification?.employee_group_id;
+    // const jobFamilyStreamIds = useProfile?.streams?.map((stream) => stream.stream.id) ?? [];
+    // const streamFamilies = useProfile?.streams?.map((stream) => stream.stream.job_family_id);
+    // const jobFamilyWithNoStream = useProfile?.jobFamilies
+    //   ?.filter((fam) => streamFamilies?.indexOf(fam.jobFamily.id) === -1)
+    //   .map((fam) => fam.jobFamily.id);
+
+    // // todo - check profile with a specific ministries
+    // const { data: pickerDataa } = useGetRequirementsWithoutReadOnlyQuery(
+    //   {
+    //     jobFamilyIds: jobFamilyIds,
+    //     jobFamilyStreamIds: jobFamilyStreamIds,
+    //     classificationId: selectedClassificationId && selectedClassificationId.split('.')[0],
+    //     classificationEmployeeGroupId: employeeGroup,
+    //     ministryIds: !allOrganizations ? selectedMinistry : undefined,
+    //     jobFamilyWithNoStream: jobFamilyWithNoStream,
+    //     excludeProfileId: useProfile?.id,
+    //   },
+    //   {
+    //     skip: !selectedClassificationId || !employeeGroup,
+    //   },
+    // );
+
     const validateVerification = useCallback(() => {
+      if (!resetComplete) return;
+
+      // console.log(
+      //   'checking: ',
+      //   editedAccReqFields,
+      //   editedMinReqFields,
+      //   editedRelWorkFields,
+      //   editedSecurityScreeningsFields,
+      //   originalMinReqFields,
+      //   originalRelWorkFields,
+      // );
+      // console.log('resetComplete:', resetComplete);
       // check if the form in its current state would require verification
 
       // check if any flags are true in editedAccReqFieldsArray
@@ -197,22 +320,47 @@ const WizardEditProfile = forwardRef(
 
       const anyEducationTrue = Object.entries(editedMinReqFields).some(([index, item]) => {
         const originalItem = originalMinReqFields[Number(index)];
+        if (!originalItem) return item === true && !isAdmin;
+
         return item === true && originalItem && originalItem.is_significant && !isAdmin;
       });
 
       const anyRelWorkTrue = Object.entries(editedRelWorkFields).some(([index, item]) => {
         const originalItem = originalRelWorkFields[Number(index)];
-        return item === true && originalItem && originalItem.is_significant && !isAdmin;
+        if (!originalItem) return item === true;
+        return item === true && originalItem && originalItem.is_significant;
       });
 
-      const anySsecurityScreeningsTrue = Object.values(editedSecurityScreeningsFields).some((item) => item === true);
+      const anyProfRegTrue = Object.entries(editedProfessionalRegistrationFields).some(([index, item]) => {
+        const originalItem = originalProfessionalRegistrationFields?.[Number(index)];
+        if (!originalItem) return item === true;
+        return item === true && originalItem && originalItem.is_significant;
+      });
+
+      const anySsecurityScreeningsTrue = Object.entries(editedSecurityScreeningsFields).some(([index, item]) => {
+        const originalItem = originalSecurityScreeningsFields?.[Number(index)];
+        // check for undefined and treat it as significant, since significant flag was added later
+        // initially all security screenings were treated as significant
+
+        if (!originalItem) return item === true;
+        return item === true && originalItem && originalItem.is_significant;
+      });
+
       const verificationReasons = [];
       anyReqAccsTrue && verificationReasons.push(reasons.ACCOUNTABILITIES);
       anyEducationTrue && verificationReasons.push(reasons.EDUCATION);
       anyRelWorkTrue && verificationReasons.push(reasons.JOB_EXPERIENCE);
       anySsecurityScreeningsTrue && verificationReasons.push(reasons.SECURITY_SCREENINGS);
+      anyProfRegTrue && verificationReasons.push(reasons.PROFESSIONAL_REGISTRATIONS);
       const verificationRequired = verificationReasons.length > 0;
-      setVerificationNeededReasons(verificationReasons);
+
+      // console.log('validating verification, verificationReasons: ', verificationReasons);
+      // console.log('editedSecurityScreeningsFields: ', editedSecurityScreeningsFields)
+
+      // check if same to preven re-render unnecessarily (causes an issue where clicking directly from input to menu doesn't open menu on first click)
+      if (JSON.stringify(verificationReasons) !== JSON.stringify(verificationNeededReasons))
+        setVerificationNeededReasons(verificationReasons);
+
       setRequiresVerification(verificationRequired);
       onVerificationRequiredChange?.(verificationRequired); // call parent
     }, [
@@ -224,6 +372,11 @@ const WizardEditProfile = forwardRef(
       isAdmin,
       originalMinReqFields,
       originalRelWorkFields,
+      resetComplete,
+      editedProfessionalRegistrationFields,
+      originalProfessionalRegistrationFields,
+      originalSecurityScreeningsFields,
+      verificationNeededReasons,
     ]);
 
     useEffect(() => {
@@ -246,7 +399,7 @@ const WizardEditProfile = forwardRef(
         // console.log('effectiveData?.classifications: ', effectiveData?.classifications);
 
         const classificationIds =
-          effectiveData?.classifications?.map((c) => ({ classification: c.classification?.id })) ?? [];
+          originalProfileData.jobProfile?.classifications?.map((c) => ({ classification: c.classification?.id })) ?? [];
 
         const fieldMappings = [
           {
@@ -280,12 +433,14 @@ const WizardEditProfile = forwardRef(
             originalField: 'security_screenings',
             setOriginal: setOriginalSecurityScreeningsFields,
             setEdited: setEditedSecurityScreeningsFields,
+            isSignificant: true,
           },
           {
             field: 'professional_registration_requirements',
             originalField: 'professional_registration_requirements',
             setOriginal: setOriginalProfessionalRegistrationFields,
             setEdited: setEditedProfessionalRegistrationFields,
+            isSignificant: true,
           },
           {
             field: 'optional_requirements',
@@ -317,7 +472,11 @@ const WizardEditProfile = forwardRef(
         // console.log('effectiveData: ', effectiveData);
 
         fieldMappings.forEach(({ field, originalField, setOriginal, setEdited, isSignificant }) => {
-          // console.log('KEY: ', field, originalField);
+          // console.log('KEY: ', field, originalField, isSignificant);
+          // console.log(
+          //   'originalProfileData.jobProfile[originalField as keyof JobProfileModel] as Array<any>: ',
+          //   originalProfileData.jobProfile[originalField as keyof JobProfileModel] as Array<any>,
+          // );
 
           // for accountabilities, make sure we only look at those with significant == true,
           // since false means it's an optional accountability
@@ -338,8 +497,16 @@ const WizardEditProfile = forwardRef(
               }
             })
             .filter((item) => {
-              if (field != 'accountabilities') return true;
-              else return item.is_significant === isSignificant;
+              // console.log('filter item: ', item);
+              // this should be a list with picklists
+              if (
+                field == 'accountabilities' ||
+                field == 'professional_registration_requirements' ||
+                field == 'security_screenings'
+              )
+                return item.is_significant === isSignificant;
+              else return true;
+              // return item.is_significant === isSignificant;
             });
 
           // console.log('originalFieldValue: ', originalFieldValue);
@@ -359,24 +526,31 @@ const WizardEditProfile = forwardRef(
               }
             })
             .filter((item) => {
-              if (field != 'accountabilities') return true;
-              else return item.is_significant === isSignificant;
+              // this should be a list with picklists
+              if (
+                field == 'accountabilities' ||
+                field == 'professional_registration_requirements' ||
+                field == 'security_screenings'
+              )
+                return item.is_significant === isSignificant;
+              else return true;
+
+              // return item.is_significant === isSignificant;
             });
 
           if (!originalValuesSet) setOriginal(originalFieldValue);
 
           // console.log('initialFieldValue: ', field, initialFieldValue);
-
           // console.log('isSignificant: ', isSignificant);
 
           const initialEditStatus: { [key: number]: boolean } = {};
           initialFieldValue?.forEach((item, index) => {
-            // console.log('initial item/original: ', item, originalFieldValue[index]);
+            // console.log('initial item/original: ', item, originalFieldValue, originalFieldValue?.[index]);
             const isEdited =
               isSignificant !== undefined
-                ? (item.text !== originalFieldValue[index]?.text && item.is_significant === isSignificant) ||
+                ? (item.text !== originalFieldValue?.[index]?.text && item.is_significant === isSignificant) ||
                   (item.disabled === true && item.is_significant === isSignificant)
-                : item.text !== originalFieldValue[index]?.text || item.disabled === true;
+                : item.text !== originalFieldValue?.[index]?.text || item.disabled === true;
             initialEditStatus[index] = isEdited;
           });
 
@@ -411,12 +585,14 @@ const WizardEditProfile = forwardRef(
 
         validateVerification();
 
+        const security_screenings = getInitialFieldValue(effectiveData.security_screenings, true);
+        const preferences = getInitialFieldValue(effectiveData.preferences);
+
         reset({
           id: effectiveData?.id,
           number: effectiveData?.number,
           title: getInitialValue(effectiveData.title),
-          context:
-            typeof effectiveData?.context === 'string' ? effectiveData?.context : effectiveData?.context.description,
+          context: typeof effectiveData?.context === 'string' ? effectiveData?.context : effectiveData?.context,
           overview: getInitialValue(effectiveData.overview),
           program_overview: getInitialValue(effectiveData.program_overview),
           classifications: classificationIds,
@@ -424,18 +600,26 @@ const WizardEditProfile = forwardRef(
           optional_accountabilities: getInitialFieldValue(effectiveData.accountabilities, false),
           education: getInitialFieldValue(effectiveData.education),
           job_experience: getInitialFieldValue(effectiveData.job_experience),
-          security_screenings: getInitialFieldValue(effectiveData.security_screenings),
+          security_screenings: security_screenings,
+          optional_security_screenings: getInitialFieldValue(effectiveData.security_screenings, false),
           behavioural_competencies: effectiveData?.behavioural_competencies || [],
           professional_registration_requirements: getInitialFieldValue(
             effectiveData.professional_registration_requirements,
+            true,
           ),
-          preferences: getInitialFieldValue(effectiveData.preferences),
+          optional_professional_registration_requirements: getInitialFieldValue(
+            effectiveData.professional_registration_requirements,
+            false,
+          ),
+          // professional_registration_requirements: getInitialFieldValue(
+          //   effectiveData.professional_registration_requirements,
+          // ).map((item) => ({professional_registration_requirement:item})),
+          preferences: preferences,
           knowledge_skills_abilities: getInitialFieldValue(effectiveData.knowledge_skills_abilities),
           willingness_statements: getInitialFieldValue(effectiveData.willingness_statements),
           optional_requirements: getInitialFieldValue(effectiveData.optional_requirements),
         });
         setResetComplete(true);
-        console.log('reset complete');
 
         trigger();
       }
@@ -487,7 +671,13 @@ const WizardEditProfile = forwardRef(
     const getInitialFieldValue = (
       field: AccountabilitiesModel[] | TrackedFieldArrayItem[],
       isSignificant?: boolean | undefined,
-    ) => {
+    ): Array<{
+      text: string | TrackedFieldArrayItem;
+      isCustom: boolean | undefined;
+      disabled: boolean;
+      is_readonly?: boolean;
+      is_significant?: boolean;
+    }> => {
       // console.log('getInitialFieldValue: ', field, isSignificant);
       const ret = field
         ?.map((item) => {
@@ -498,21 +688,24 @@ const WizardEditProfile = forwardRef(
               (isSignificant === true && item.is_significant === false) ||
               (isSignificant === false && item.is_significant === true)
             )
-              return;
+              return null;
 
             return {
               text: item.text,
               isCustom: item.isCustom,
-              // for optional accountabilities, disable by default (isSignificant is false)
+              // for optional items, disable by default (isSignificant is false)
               disabled: item.disabled === undefined ? (isSignificant === false ? true : false) : item.disabled,
+              // disabled: item.disabled === undefined ? false : item.disabled,
               is_readonly: item.is_readonly,
+              tc_is_readonly: item.tc_is_readonly,
               is_significant: item.is_significant,
             };
           }
         })
-        .filter((item) => item !== undefined);
+        .filter((item): item is NonNullable<typeof item> => item !== null);
+
       // console.log('getInitialFieldValue: ', field, ret);
-      return ret;
+      return ret ?? [];
     };
 
     const { fields: classifications_fields } = useFieldArray({
@@ -542,9 +735,7 @@ const WizardEditProfile = forwardRef(
       setFormErrors(formState.errors);
     }, [formState.errors]);
 
-    const { data: positionRequestData } = useGetPositionRequestQuery({
-      id: positionRequestId ? positionRequestId : -1,
-    });
+    const { positionRequestData } = useWizardContext();
 
     if (isLoading || !resetComplete) {
       return <LoadingSpinnerWithMessage />;
@@ -563,6 +754,7 @@ const WizardEditProfile = forwardRef(
           <Col xs={24} sm={24} lg={8} aria-label="Context and job details" role="region">
             {requiresVerification && (
               <Alert
+                role="info"
                 data-testid="verification-warning-message"
                 message=""
                 description={
@@ -589,6 +781,7 @@ const WizardEditProfile = forwardRef(
               role="note"
               type="info"
               showIcon
+              icon={<InfoCircleFilled aria-hidden />}
               message={
                 <span>
                   Job context{' '}
@@ -600,11 +793,7 @@ const WizardEditProfile = forwardRef(
               description={
                 <p
                   dangerouslySetInnerHTML={{
-                    __html: DOMPurify.sanitize(
-                      typeof effectiveData?.context === 'string'
-                        ? effectiveData?.context
-                        : effectiveData?.context?.description ?? '',
-                    ),
+                    __html: DOMPurify.sanitize(effectiveData?.context ?? ''),
                   }}
                 ></p>
               }
@@ -617,11 +806,20 @@ const WizardEditProfile = forwardRef(
                 <div>
                   Job Details
                   <div style={{ float: 'right', fontSize: '90%' }}>
-                    <Tooltip title="Information shown here is dependent on the values that you selected in the previous steps.">
-                      <a href="#" style={{ marginLeft: 8 }}>
+                    <Tooltip
+                      trigger={['hover', 'focus']}
+                      title="Information shown here is dependent on the values that you selected in the previous steps."
+                      id="tooltip-info"
+                    >
+                      <Button
+                        type="link"
+                        role="button"
+                        aria-describedby="tooltip-info"
+                        aria-label="Why can't I make changes?"
+                      >
                         Why can't I make changes?
-                        <QuestionCircleOutlined style={{ marginLeft: 4 }} />
-                      </a>
+                        <QuestionCircleOutlined aria-hidden style={{ marginLeft: 4 }} />
+                      </Button>
                     </Tooltip>
                   </div>
                 </div>
@@ -630,12 +828,13 @@ const WizardEditProfile = forwardRef(
               column={1}
             >
               <Descriptions.Item label="Expected classification">
-                {effectiveData?.classifications?.[0]?.classification?.name}
+                {originalProfileData?.jobProfile?.classifications?.[0]?.classification?.name}
               </Descriptions.Item>
               <Descriptions.Item label="Reporting manager">
                 <PositionProfile
-                  positionNumber={positionRequestData?.positionRequest?.reports_to_position_id?.toString()}
-                  orgChartData={positionRequestData?.positionRequest?.orgchart_json}
+                  positionNumber={positionRequestData?.reports_to_position_id?.toString()}
+                  positionProfile={positionRequestData?.reports_to_position}
+                  orgChartData={positionRequestData?.orgchart_json}
                 ></PositionProfile>
               </Descriptions.Item>
               <Descriptions.Item label="Job Store #">{effectiveData?.number}</Descriptions.Item>
@@ -692,7 +891,12 @@ const WizardEditProfile = forwardRef(
 
               <WizardTitle trigger={trigger} formErrors={formErrors} useFormReturn={useFormReturn} />
 
-              <WizardProgramOverview trigger={trigger} formErrors={formErrors} useFormReturn={useFormReturn} />
+              <WizardProgramOverview
+                trigger={trigger}
+                formErrors={formErrors}
+                useFormReturn={useFormReturn}
+                readOnly={false}
+              />
 
               {config?.contextEditable ? (
                 <FormItem
@@ -720,6 +924,7 @@ const WizardEditProfile = forwardRef(
                 setEditedAccReqFields={setEditedAccReqFields}
                 formErrors={formErrors}
                 trigger={trigger}
+                pickerData={pickerData}
               />
 
               <MinimumRequirementsSection
@@ -731,6 +936,7 @@ const WizardEditProfile = forwardRef(
                 editedEducationFields={editedMinReqFields}
                 setEditedEducationFields={setEditedMinReqFields}
                 originalRelatedExperienceFields={originalRelWorkFields}
+                professionalRegSectionRef={professionalRegSection}
                 relatedExperienceSectionRef={workExperienceSection}
                 editedRelatedExperienceFields={editedRelWorkFields}
                 setEditedRelatedExperienceFields={setEditedRelWorkFields}
@@ -755,6 +961,7 @@ const WizardEditProfile = forwardRef(
                 isAdmin={isAdmin}
                 formErrors={formErrors}
                 trigger={trigger}
+                pickerData={pickerData}
               />
 
               <WizardBehaviouralCompetencies

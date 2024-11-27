@@ -3,7 +3,6 @@ import {
   ArrowDownOutlined,
   CopyOutlined,
   DeleteOutlined,
-  DownloadOutlined,
   EditOutlined,
   EllipsisOutlined,
   EyeOutlined,
@@ -14,12 +13,14 @@ import {
   UploadOutlined,
 } from '@ant-design/icons';
 import { SerializedError } from '@reduxjs/toolkit';
-import { Button, Card, Col, Menu, Modal, Popover, Result, Row, Table, Tooltip } from 'antd';
+import { Button, Card, Col, Menu, Modal, Result, Row, Table, Tooltip, message } from 'antd';
 import { SortOrder } from 'antd/es/table/interface';
+import copy from 'copy-to-clipboard';
 import { CSSProperties, ReactNode, useCallback, useEffect, useState } from 'react';
 import { ErrorResponse, Link, useNavigate, useSearchParams } from 'react-router-dom';
 import ErrorGraphic from '../../../assets/empty_error.svg';
 import EmptyJobPositionGraphic from '../../../assets/empty_jobPosition.svg';
+import AccessiblePopoverMenu from '../../../components/app/common/components/accessible-popover-menu';
 import LoadingSpinnerWithMessage from '../../../components/app/common/components/loading.component';
 import '../../../components/app/common/css/filtered-table.component.css';
 import {
@@ -34,8 +35,10 @@ import {
   useLazyGetJobProfilesDraftsQuery,
   useLazyGetJobProfilesQuery,
   useUnarchiveJobProfileMutation,
+  useUpdateJobProfileStateMutation,
 } from '../../../redux/services/graphql-api/job-profile.api';
 import { formatDateTime } from '../../../utils/Utils';
+import { useTestUser } from '../../../utils/useTestUser';
 
 // Define the new PositionsTable component
 interface MyPositionsTableProps {
@@ -60,6 +63,7 @@ type ColumnTypes = {
   defaultSortOrder?: SortOrder;
   render?: (text: any, record: any) => React.ReactNode;
   align?: 'left' | 'center' | 'right'; // AlignType is typically one of these string literals
+  fixed?: boolean | 'right' | 'left';
 };
 
 // Declare the MyPositionsTable component with TypeScript
@@ -71,7 +75,7 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
   style,
   itemsPerPage = 10,
   topRightComponent,
-  tableTitle = 'My Positions',
+  tableTitle = 'My Position Requests',
   state = 'DRAFT',
   onDataAvailable,
 }) => {
@@ -92,7 +96,7 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
 
   const [totalResults, setTotalResults] = useState(0); // Total results count from API
   const [error, setError] = useState<string | null>(null);
-
+  const [selectedKeys, setSelectedKeys] = useState([]);
   // Callback function to be called when table properties change
   const handleTableChangeCallback = (pagination: any, _filters: any, sorter: any) => {
     const newPage = pagination.current;
@@ -128,16 +132,17 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
     if (is_archived === false) {
       // eslint-disable-next-line react-hooks/rules-of-hooks
       [trigger, { data, isLoading, error: fetchError }] = useLazyGetJobProfilesDraftsQuery();
-      link = '/draft-job-profiles/';
+      link = '/job-profiles/manage/draft/';
     } else {
       // eslint-disable-next-line react-hooks/rules-of-hooks
       [trigger, { data, isLoading, error: fetchError }] = useLazyGetJobProfilesArchivedQuery();
-      link = '/archived-job-profiles/';
+      link = '/job-profiles/manage/archived/';
     }
   } else {
+    // TC user is viewing published job profiles
     // eslint-disable-next-line react-hooks/rules-of-hooks
     [trigger, { data, isLoading, error: fetchError }] = useLazyGetJobProfilesQuery();
-    link = '/published-job-profiles/';
+    link = '/job-profiles/manage/published/';
   }
 
   // Check if data is available and call the callback function to notify the parent component
@@ -197,7 +202,7 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
       title: 'Class',
       dataIndex: 'classifications',
       key: 'classifications',
-      render: (classifications: any[]) => classifications?.map((c) => c.classification.name).join(', '),
+      render: (classifications: any[]) => classifications?.map((c) => c.classification.name)[0],
     },
     {
       sorter: allowSorting,
@@ -206,14 +211,7 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
       dataIndex: 'number',
       key: 'number',
     },
-    {
-      sorter: allowSorting,
-      defaultSortOrder: getSortOrder('owner'),
-      title: 'Owner',
-      dataIndex: 'owner',
-      key: 'owner',
-      render: (owner: any) => owner?.name,
-    },
+
     // {
     //   sorter: allowSorting,
     //   defaultSortOrder: getSortOrder('career_group'),
@@ -280,6 +278,14 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
     },
     {
       sorter: allowSorting,
+      defaultSortOrder: getSortOrder('updated_by'),
+      title: 'Modified By',
+      dataIndex: 'updated_by',
+      key: 'updated_by',
+      render: (updated_by: any) => updated_by?.name,
+    },
+    {
+      sorter: allowSorting,
       defaultSortOrder: getSortOrder('updated_at'),
       title: 'Modified at',
       dataIndex: 'updated_at',
@@ -289,11 +295,16 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
     {
       title: <SettingOutlined />,
       align: 'center',
+      fixed: 'right',
       key: 'action',
       render: (_text: any, record: any) => (
-        <Popover content={getMenuContent(record)} trigger="click" placement="bottomRight">
-          <EllipsisOutlined />
-        </Popover>
+        // <Popover content={getMenuContent(record)} trigger="click" placement="bottomRight">
+        //   <EllipsisOutlined />
+        // </Popover>
+        <AccessiblePopoverMenu
+          triggerButton={<EllipsisOutlined className={`ellipsis-${record.id}`} />}
+          content={getMenuContent(record)}
+        ></AccessiblePopoverMenu>
       ),
     },
   ];
@@ -303,7 +314,7 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
 
     const organizationFilter = searchParams.get('ministry_id__in');
     // const careerGroupFilter = searchParams.get('career_group_id__in');
-    const jobRoleFilter = searchParams.get('job_role_id__in');
+    const jobRoleFilter = searchParams.get('job_role_type_id__in');
     const classificationFilter = searchParams.get('classification_id__in');
     const jobFamilyFilter = searchParams.get('job_family_id__in');
     const jobStreamFilter = searchParams.get('job_stream_id__in');
@@ -339,7 +350,7 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
                     ? useSortOrder === 'ascend'
                       ? 'asc'
                       : 'desc'
-                    : sortField === 'owner'
+                    : sortField === 'updated_by' || sortField === 'published_by'
                       ? {
                           name: {
                             sort: useSortOrder === 'ascend' ? 'asc' : 'desc',
@@ -387,9 +398,14 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
                 {
                   classifications: {
                     some: {
-                      classification_id: {
-                        in: classificationFilter.split(',').map((v) => v.trim()),
-                      },
+                      OR: classificationFilter?.split(',').flatMap((c) => {
+                        const [id, employee_group_id, peoplesoft_id] = c.split('.');
+                        return {
+                          classification_id: { equals: id },
+                          classification_employee_group_id: { equals: employee_group_id },
+                          classification_peoplesoft_id: { equals: peoplesoft_id },
+                        };
+                      }),
                     },
                   },
                 },
@@ -405,7 +421,7 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
           ...(jobRoleFilter !== null
             ? [
                 {
-                  role_id: {
+                  role_type_id: {
                     in: JSON.parse(`[${jobRoleFilter}]`),
                   },
                 },
@@ -449,8 +465,12 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
   const renderTableFooter = () => {
     return (
       <div>
-        Showing {(currentPage - 1) * pageSize + 1}-{Math.min(currentPage * pageSize, totalResults)} of {totalResults}{' '}
-        results
+        {totalResults === 0
+          ? '0 results'
+          : `Showing ${(currentPage - 1) * pageSize + 1}-${Math.min(
+              currentPage * pageSize,
+              totalResults,
+            )} of ${totalResults} results`}
       </div>
     );
   };
@@ -478,13 +498,22 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
   const [duplicateJobProfile] = useDuplicateJobProfileMutation();
   const [deleteJobProfile] = useDeleteJobProfileMutation();
   const [unarchiveJobProfile] = useUnarchiveJobProfileMutation();
+  const [updateJobProfileState] = useUpdateJobProfileStateMutation();
 
   const navigate = useNavigate();
   const duplicate = async (record: any) => {
     // console.log('duplicate', record);
-    const res = await duplicateJobProfile({ jobProfileId: record.id }).unwrap();
+    const res = await duplicateJobProfile({ jobProfileId: record.id, jobProfileVersion: record.version }).unwrap();
     // console.log('res: ', res);
     navigate(`${link}${res.duplicateJobProfile}`);
+  };
+
+  const update = async (record: any, state: string) => {
+    // console.log('duplicate', record);
+    await updateJobProfileState({ jobProfileId: record.id, jobProfileVersion: record.version, state: state }).unwrap();
+    message.success(state === 'PUBLISHED' ? 'Job Profile published!' : 'Job Profile unpublished!');
+    setSelectedKeys([]);
+    updateData();
   };
 
   const deleteDraft = async (record: any) => {
@@ -516,23 +545,48 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
     });
   };
 
-  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  const isTestUser = useTestUser();
+
+  const handleCopyLink = (record: any) => {
+    // Dynamically construct the link to include the current base URL
+    const linkToCopy = `${window.location.origin}${link}${record.id}`;
+
+    // Use the Clipboard API to copy the link to the clipboard
+    if (!isTestUser) copy(linkToCopy);
+    message.success('Link copied to clipboard!');
+    setSelectedKeys([]);
+  };
   const getMenuContent = (_record: any) => {
     return (
-      <Menu>
+      <Menu selectedKeys={selectedKeys} className={`popover-selector-${_record.id}`}>
         <>
           {state === 'PUBLISHED' && (
             <>
-              <Menu.Item key="view" icon={<EyeOutlined />}>
+              <Menu.Item
+                data-testid="menu-option-view"
+                key="view"
+                icon={<EyeOutlined aria-hidden />}
+                onClick={() => navigate(`${link}${_record.id}`)}
+              >
                 View
               </Menu.Item>
-              <Menu.Item key="unpublish" icon={<ArrowDownOutlined />}>
+              <Menu.Item
+                key="unpublish"
+                icon={<ArrowDownOutlined />}
+                onClick={() => update(_record, 'DRAFT')}
+                data-testid="menu-option-unpublish link"
+              >
                 Unpublish
               </Menu.Item>
               <Menu.Item key="duplicate" icon={<CopyOutlined />} onClick={() => duplicate(_record)}>
                 Duplicate
               </Menu.Item>
-              <Menu.Item key="copy" icon={<LinkOutlined />}>
+              <Menu.Item
+                key="copy"
+                icon={<LinkOutlined aria-hidden />}
+                onClick={() => handleCopyLink(_record)}
+                data-testid="menu-option-copy link"
+              >
                 Copy link
               </Menu.Item>
             </>
@@ -540,19 +594,47 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
 
           {state === 'DRAFT' && !is_archived && (
             <>
-              <Menu.Item key="edit" icon={<EditOutlined />}>
+              <Menu.Item
+                data-testid="menu-option-edit"
+                key="edit"
+                icon={<EditOutlined aria-hidden />}
+                onClick={() => navigate(`${link}${_record.id}`)}
+              >
+                {' '}
                 Edit
               </Menu.Item>
-              <Menu.Item key="publish" icon={<DownloadOutlined />}>
+              {/* Publishing from here is problematic as it void validation */}
+              {/* Users should open the detailed view to publish and pass validation */}
+              {/* <Menu.Item
+                key="publish"
+                icon={<DownloadOutlined />}
+                onClick={() => update(_record, 'PUBLISHED')}
+                data-testid="menu-option-publish link"
+              >
                 Publish
-              </Menu.Item>
-              <Menu.Item key="duplicate" icon={<CopyOutlined />} onClick={() => duplicate(_record)}>
+              </Menu.Item> */}
+              <Menu.Item
+                key="duplicate"
+                icon={<CopyOutlined />}
+                onClick={() => duplicate(_record)}
+                data-testid="menu-option-duplicate link"
+              >
                 Duplicate
               </Menu.Item>
-              <Menu.Item key="copy" icon={<LinkOutlined />}>
+              <Menu.Item
+                key="copy"
+                icon={<LinkOutlined aria-hidden />}
+                onClick={() => handleCopyLink(_record)}
+                data-testid="menu-option-copy link"
+              >
                 Copy link
               </Menu.Item>
-              <Menu.Item key="delete" icon={<DeleteOutlined />} onClick={() => deleteDraft(_record)}>
+              <Menu.Item
+                key="delete"
+                icon={<DeleteOutlined />}
+                onClick={() => deleteDraft(_record)}
+                data-testid="menu-option-delete link"
+              >
                 Delete
               </Menu.Item>
             </>
@@ -560,8 +642,21 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
 
           {state === 'DRAFT' && is_archived && (
             <>
-              <Menu.Item key="publish" icon={<UploadOutlined />} onClick={() => unarchive(_record)}>
+              <Menu.Item
+                key="restore"
+                icon={<UploadOutlined />}
+                onClick={() => unarchive(_record)}
+                data-testid="menu-option-unarchive link"
+              >
                 Unarchive
+              </Menu.Item>
+              <Menu.Item
+                key="duplicate"
+                icon={<CopyOutlined />}
+                onClick={() => duplicate(_record)}
+                data-testid="menu-option-duplicate link"
+              >
+                Duplicate
               </Menu.Item>
             </>
           )}
@@ -605,12 +700,7 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
 
       {!isLoading && hasPositionRequests && !error && (
         <Table
-          // onRow={(record) => {
-          //   return {
-          //     onMouseEnter: () => handleMouseEnter(record.id),
-          //     onMouseLeave: handleMouseLeave,
-          //   };
-          // }}
+          scroll={{ x: 'max-content' }}
           className="tableWithHeader"
           columns={columns}
           dataSource={
@@ -685,7 +775,7 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
               <>
                 <div>Looks like you’re not working on anything right now.</div>
                 {/* Link button to the orgchart page */}
-                <Link to="/draft-job-profiles/create">
+                <Link to="/job-profiles/manage/create">
                   <Button type="primary" style={{ marginTop: '1rem' }}>
                     Create new profile
                   </Button>

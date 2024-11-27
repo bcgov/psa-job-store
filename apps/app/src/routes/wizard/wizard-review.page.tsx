@@ -1,25 +1,28 @@
 import { ArrowLeftOutlined, EllipsisOutlined } from '@ant-design/icons';
-import { Button, Card, Col, Menu, Modal, Popover, Row, Typography } from 'antd';
-import { useState } from 'react';
+import { Button, Col, Menu, Modal, Row, Typography } from 'antd';
+import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
+import AccessiblePopoverMenu from '../../components/app/common/components/accessible-popover-menu';
+import { useLazyGetJobProfileQuery } from '../../redux/services/graphql-api/job-profile.api';
 import {
   GetPositionRequestResponseContent,
   useDeletePositionRequestMutation,
   useUpdatePositionRequestMutation,
 } from '../../redux/services/graphql-api/position-request.api';
-import { JobProfile } from '../job-profiles/components/job-profile.component';
+import { JobProfileWithDiff } from '../classification-tasks/components/job-profile-with-diff.component';
 import { WizardSteps } from '../wizard/components/wizard-steps.component';
-import WizardEditControlBar from './components/wizard-edit-control-bar';
+import OtherDetails from './components/other-details.component';
+import WizardContentWrapper from './components/wizard-content-wrapper';
 import { WizardPageWrapper } from './components/wizard-page-wrapper.component';
 import StatusIndicator from './components/wizard-position-request-status-indicator';
 import { useWizardContext } from './components/wizard.provider';
-import './wizard-review.page.css';
 
 interface WizardReviewPageProps {
   onNext?: () => void;
   onBack?: () => void;
   disableBlockingAndNavigateHome: () => void;
   positionRequest: GetPositionRequestResponseContent | null;
+  setCurrentStep: React.Dispatch<React.SetStateAction<number | null>>;
 }
 
 export const WizardReviewPage: React.FC<WizardReviewPageProps> = ({
@@ -27,16 +30,34 @@ export const WizardReviewPage: React.FC<WizardReviewPageProps> = ({
   onBack,
   disableBlockingAndNavigateHome,
   positionRequest,
+  setCurrentStep,
 }) => {
   const [updatePositionRequest] = useUpdatePositionRequestMutation();
-  const { wizardData, positionRequestId } = useWizardContext();
+  // todo: move this to a context
+  const [triggerGetJobProfile, { data: originalProfileData }] = useLazyGetJobProfileQuery();
+  const { positionRequestId, wizardData, positionRequestData, setPositionRequestData } = useWizardContext();
   const [isLoading, setIsLoading] = useState(false);
+
+  useEffect(() => {
+    triggerGetJobProfile({
+      id: positionRequestData?.parent_job_profile_id,
+      version: positionRequestData?.parent_job_profile_version,
+    });
+  }, [triggerGetJobProfile, positionRequestData]);
 
   const onNextCallback = async () => {
     setIsLoading(true);
     try {
       if (positionRequestId) {
-        await updatePositionRequest({ id: positionRequestId, step: 4 }).unwrap();
+        const resp = await updatePositionRequest({
+          id: positionRequestId,
+          step: 5,
+
+          // increment max step only if it's not incremented
+          ...(positionRequest?.max_step_completed != 5 ? { max_step_completed: 5 } : {}),
+          returnFullObject: true,
+        }).unwrap();
+        setPositionRequestData(resp.updatePositionRequest ?? null);
         if (onNext) onNext();
         // navigate('/wizard/confirm');
       }
@@ -47,16 +68,10 @@ export const WizardReviewPage: React.FC<WizardReviewPageProps> = ({
 
   const onBackCallback = async () => {
     if (positionRequestId) {
-      await updatePositionRequest({ id: positionRequestId, step: 2 }).unwrap();
+      await updatePositionRequest({ id: positionRequestId, step: 3 }).unwrap();
       if (onBack) onBack();
     }
     // navigate(-1);
-  };
-
-  const [showDiff, setShowDiff] = useState(true);
-
-  const handleToggleShowDiff = (checked: boolean) => {
-    setShowDiff(checked);
   };
 
   // const [hasScrolledPast, setHasScrolledPast] = useState(false);
@@ -103,12 +118,12 @@ export const WizardReviewPage: React.FC<WizardReviewPageProps> = ({
   };
   const getMenuContent = () => {
     return (
-      <Menu>
+      <Menu className="wizard-menu">
         <Menu.Item key="save" onClick={disableBlockingAndNavigateHome}>
           <div style={{ padding: '5px 0' }}>
             Save and quit
             <Typography.Text type="secondary" style={{ marginTop: '5px', display: 'block' }}>
-              Saves your progress. You can access this position request from the 'My Positions' page.
+              Saves your progress. You can access this position request from the 'My Position Requests' page.
             </Typography.Text>
           </div>
         </Menu.Item>
@@ -118,13 +133,22 @@ export const WizardReviewPage: React.FC<WizardReviewPageProps> = ({
             <div style={{ padding: '5px 0' }}>
               Delete
               <Typography.Text type="secondary" style={{ marginTop: '5px', display: 'block' }}>
-                Removes this position request from 'My Positions'. This action is irreversible.
+                Removes this position request from 'My Position Requests'. This action is irreversible.
               </Typography.Text>
             </div>
           </Menu.Item>
         </Menu.ItemGroup>
       </Menu>
     );
+  };
+
+  const switchStep = async (step: number) => {
+    setCurrentStep(step);
+    if (positionRequestId)
+      await updatePositionRequest({
+        id: positionRequestId,
+        step: step,
+      });
   };
 
   return (
@@ -152,12 +176,15 @@ export const WizardReviewPage: React.FC<WizardReviewPageProps> = ({
         hpad={false}
         grayBg={false}
         pageHeaderExtra={[
-          <div style={{ marginRight: '1rem' }}>
+          <div style={{ marginRight: '1rem' }} key="statusIndicator">
             <StatusIndicator status={positionRequest?.status ?? ''} />
           </div>,
-          <Popover content={getMenuContent()} trigger="click" placement="bottomRight">
-            <Button icon={<EllipsisOutlined />}></Button>
-          </Popover>,
+          <AccessiblePopoverMenu
+            key={'menu'}
+            triggerButton={<Button data-testid="ellipsis-menu" tabIndex={-1} icon={<EllipsisOutlined />}></Button>}
+            content={getMenuContent()}
+            ariaLabel="Open position request menu"
+          ></AccessiblePopoverMenu>,
           <Button onClick={onBackCallback} key="back" data-testid="back-button">
             Back
           </Button>,
@@ -166,54 +193,32 @@ export const WizardReviewPage: React.FC<WizardReviewPageProps> = ({
           </Button>,
         ]}
       >
-        <WizardSteps current={3}></WizardSteps>
+        <WizardSteps
+          onStepClick={switchStep}
+          current={4}
+          maxStepCompleted={positionRequest?.max_step_completed}
+        ></WizardSteps>
 
-        <div
-          style={{
-            overflow: 'hidden',
-            position: 'relative',
-            height: '100%',
-            background: 'rgb(240, 242, 245)',
-            marginLeft: '-1rem',
-            marginRight: '-1rem',
-            marginTop: '-1px',
-            padding: '2rem 1rem',
-          }}
-        >
-          <Row justify="center" gutter={16}>
-            <Col sm={24} md={24} lg={24} xxl={18}>
-              <Card bodyStyle={{ padding: '0' }}>
-                <WizardEditControlBar
-                  style={{ background: 'white' }}
-                  onToggleShowDiff={handleToggleShowDiff}
-                  showDiffToggle={true}
-                  showDiff={showDiff}
-                  showNext={false}
-                />
-              </Card>
-
-              {/* <Collapse
-        ref={collapseRef}
-        bordered={false}
-        ghost
-        activeKey={showDiff ? ['1'] : []} // Control the active key based on showDiff
-        className={hasScrolledPast ? 'no-animation' : ''}
-      >
-        <Collapse.Panel key="1" showArrow={false} header="">
-          {diffLegendContent}
-        </Collapse.Panel>
-      </Collapse> */}
-              <JobProfile
-                style={{ marginTop: '1rem' }}
-                profileData={wizardData}
-                showBackToResults={false}
-                showDiff={showDiff}
-                id={wizardData?.id.toString()}
-                showBasicInfo={false}
-              />
+        <WizardContentWrapper>
+          <div style={{ paddingTop: '24px' }}>
+            <JobProfileWithDiff
+              positionRequestData={{ positionRequest: positionRequestData }}
+              showBasicInfo={false}
+              controlBarStyle={{ background: 'white' }}
+              rowProps={{ justify: 'center' }}
+              colProps={{ sm: 24, md: 24, lg: 24, xxl: 18 }}
+            />
+          </div>
+          <Row {...{ justify: 'center' }}>
+            <Col {...{ sm: 24, md: 24, lg: 24, xxl: 18 }}>
+              <OtherDetails
+                wizardData={wizardData}
+                positionRequestData={positionRequestData}
+                originalProfileData={originalProfileData}
+              ></OtherDetails>
             </Col>
           </Row>
-        </div>
+        </WizardContentWrapper>
       </WizardPageWrapper>
     </div>
   );

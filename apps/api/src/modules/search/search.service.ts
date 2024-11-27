@@ -1,37 +1,88 @@
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { Injectable } from '@nestjs/common';
+import { Inject, Injectable, forwardRef } from '@nestjs/common';
 import { ElasticsearchService } from '@nestjs/elasticsearch';
-import { Prisma } from '@prisma/client';
+import { JobProfileState, Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
 
 export enum SearchIndex {
   JobProfile = 'job-profile',
+  SettingsDocument = '93eb5277-f780-43c7-94e3-d857bc75a27a',
 }
 
 @Injectable()
 export class SearchService {
   constructor(
     private readonly elasticService: ElasticsearchService,
+    @Inject(forwardRef(() => PrismaService))
     private readonly prisma: PrismaService,
   ) {}
 
-  private query(index: SearchIndex, value: string): QueryDslQueryContainer {
-    switch (index) {
-      case SearchIndex.JobProfile: {
-        return {
-          multi_match: {
-            query: value,
-            fields: ['title', 'context', 'overview'],
-            fuzziness: 1,
-          },
-        };
+  async onApplicationBootstrap() {
+    // onApplicationBootstrap fires later in the lifecycle than onModuleInit
+    // this way prisma client is fully initialized before we start using it.
+    await this.resetIndex();
+  }
+
+  async indexDocument(index: SearchIndex, id: string, document: Record<string, any>) {
+    await this.elasticService.index({ index, id, document });
+  }
+
+  async search(index: SearchIndex, query?: QueryDslQueryContainer) {
+    const results = await this.elasticService.search({ index, query });
+
+    return results;
+  }
+
+  async deleteDocument(index: SearchIndex, id: string) {
+    try {
+      await this.elasticService.delete({ index, id });
+    } catch (error) {}
+  }
+
+  async resetIndex() {
+    try {
+      // console.log('resetting index..');
+
+      const indexExists = await this.elasticService.indices.exists({ index: SearchIndex.JobProfile });
+      if (indexExists === true) {
+        await this.elasticService.indices.delete({ index: SearchIndex.JobProfile });
       }
-      default:
-        return {};
+      await this.elasticService.indices.create({
+        index: SearchIndex.JobProfile,
+      });
+
+      const jobProfiles = await this.prisma.currentJobProfile.findMany({
+        select: { id: true },
+        where: { state: { equals: JobProfileState.PUBLISHED } },
+      });
+
+      for await (const profile of jobProfiles) {
+        await this.updateJobProfileSearchIndex(profile.id);
+      }
+    } catch (error) {
+      console.error('ERROR during reset and reindex: ', error);
     }
   }
 
+  // private query(index: SearchIndex, value: string): QueryDslQueryContainer {
+  //   switch (index) {
+  //     case SearchIndex.JobProfile: {
+  //       return {
+  //         multi_match: {
+  //           query: value,
+  //           fields: ['title', 'context', 'overview'],
+  //           fuzziness: 1,
+  //         },
+  //       };
+  //     }
+  //     default:
+  //       return {};
+  //   }
+  // }
+
   async searchJobProfiles(value: string) {
+    // console.log('searchProfiles: ', value);
+
     const results = await this.elasticService.search({
       index: SearchIndex.JobProfile,
       query: {
@@ -270,9 +321,8 @@ export class SearchService {
   }
 
   async updateJobProfileSearchIndex(job_profile_id: number) {
-    const profile = await this.prisma.jobProfile.findUnique({
+    const profile = await this.prisma.currentJobProfile.findUnique({
       where: { id: job_profile_id },
-      include: { context: true },
     });
 
     // If profile doesn't exist, or it is in DRAFT or UNPUBLISHED state, delete it from the search index
@@ -282,6 +332,7 @@ export class SearchService {
         id: `${job_profile_id}`,
       });
       if (documentExists) await this.elasticService.delete({ index: SearchIndex.JobProfile, id: `${job_profile_id}` });
+
       return;
     }
 
@@ -292,7 +343,7 @@ export class SearchService {
       document: {
         title: profile.title,
         number: profile.number,
-        context: profile.context?.description,
+        context: profile.context,
         overview: profile.overview,
         // requirements: profile.requirements,
         education: (profile.education as Prisma.JsonObject[]).map((education) => education.text),
@@ -316,12 +367,14 @@ export class SearchService {
             },
           })
         ).map(({ behavioural_competency: { name, description } }) => `${name} ${description}`),
-        professional_registration_requirements: profile.professional_registration_requirements,
-        preferences: profile.preferences,
-        knowledge_skills_abilities: profile.knowledge_skills_abilities,
-        willingness_statements: profile.willingness_statements,
+        professional_registration_requirements: (
+          profile.professional_registration_requirements as Prisma.JsonObject[]
+        )?.map((pr) => pr.text),
+        preferences: (profile.preferences as Prisma.JsonObject[])?.map((pr) => pr.text),
+        knowledge_skills_abilities: (profile.knowledge_skills_abilities as Prisma.JsonObject[])?.map((pr) => pr.text),
+        willingness_statements: (profile.willingness_statements as Prisma.JsonObject[])?.map((pr) => pr.text),
         optional_requirements: profile.optional_requirements,
-        security_screenings: profile.security_screenings,
+        security_screenings: (profile.security_screenings as Prisma.JsonObject[])?.map((pr) => pr.text),
         classifications: (
           await this.prisma.jobProfileClassification.findMany({
             where: {

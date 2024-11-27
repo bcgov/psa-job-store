@@ -4,7 +4,7 @@ import { UseFormReturn, UseFormTrigger } from 'react-hook-form';
 import AccessibleList from '../../../components/app/common/components/accessible-list';
 import { JobProfileValidationModel } from '../../job-profiles/components/job-profile.component';
 import useFormFields from '../hooks/wizardUseFieldArray';
-import { WizardModal } from './modal.component';
+import { WizardModalComponent, useModalActions } from './modal.component';
 import WizardEditAddButton from './wizard-edit-profile-add-button';
 import WizardEditProfileListItem from './wizard-edit-profile-list-item';
 import WizardValidationError from './wizard-edit-profile-validation-error';
@@ -34,7 +34,7 @@ const Education: React.FC<EducationProps> = ({
 }) => {
   const { minReqAlertShown, setMinReqAlertShown } = useWizardContext();
 
-  const { fields, handleRemove, handleAddBack, handleAddNew, handleReset } = useFormFields({
+  const { fields, handleRemove, handleAddBack, handleAddNew, handleReset, update } = useFormFields({
     useFormReturn,
     fieldName: 'education',
     setEditedFields: setEditedFields,
@@ -42,34 +42,14 @@ const Education: React.FC<EducationProps> = ({
     significant: true,
   });
 
-  const handleEducationRemoveModal = (index: number) => {
-    if (!isAdmin) {
-      WizardModal(
-        'Do you want to make changes to education and work experiences?',
-        minReqAlertShown,
-        setMinReqAlertShown,
-        () => handleRemove(index),
-        true,
-        undefined,
-        'education-warning',
-        trigger,
-      );
-    } else {
-      handleRemove(index);
-    }
-  };
-
-  const handleEducationFocusModal = (field: any) => {
-    WizardModal(
-      'Do you want to make changes to education and work experiences?',
-      minReqAlertShown,
-      setMinReqAlertShown,
-      () => {},
-      true,
-      field.is_significant,
-      'education-warning',
-    );
-  };
+  const { modalProps, closeModal, handleRemoveModal, handleFocusModal, handleAddModal } = useModalActions({
+    title: 'Do you want to make changes to education and work experiences?',
+    alertShown: minReqAlertShown,
+    setAlertShown: setMinReqAlertShown,
+    dataTestId: 'education-warning',
+    trigger,
+    isSignificant: !isAdmin,
+  });
 
   const renderFields = (field: any, index: number) => {
     const commonProps = {
@@ -83,6 +63,7 @@ const Education: React.FC<EducationProps> = ({
       handleAddBack,
       handleRemove,
       originalFields,
+      update,
     };
 
     return (
@@ -91,8 +72,10 @@ const Education: React.FC<EducationProps> = ({
         label="education and work experience"
         fieldName="education"
         testId="education"
-        confirmRemoveModal={() => handleEducationRemoveModal(index)}
-        onFocus={() => handleEducationFocusModal(field)}
+        confirmRemoveModal={() => handleRemoveModal({ index, handleRemove, field })}
+        onFocus={(inputRef) => {
+          handleFocusModal({ inputRef, field });
+        }}
         isAdmin={isAdmin}
       />
     );
@@ -100,27 +83,13 @@ const Education: React.FC<EducationProps> = ({
 
   return (
     <>
+      {modalProps && <WizardModalComponent {...modalProps} onClose={closeModal} />}
       {fields.length > 0 && (
         <AccessibleList dataSource={fields} renderItem={renderFields} ariaLabel="Education and work experience" />
       )}
       <WizardValidationError formErrors={formErrors} fieldName="education" />
 
-      <WizardEditAddButton
-        testId="add-education-button"
-        onClick={() => {
-          WizardModal(
-            'Do you want to make changes to education and work experiences?',
-            minReqAlertShown,
-            setMinReqAlertShown,
-            () => {
-              handleAddNew();
-            },
-            true,
-            undefined,
-            'education-warning',
-          );
-        }}
-      >
+      <WizardEditAddButton testId="add-education-button" onClick={() => handleAddModal(handleAddNew)}>
         Add an education or work requirement
       </WizardEditAddButton>
     </>

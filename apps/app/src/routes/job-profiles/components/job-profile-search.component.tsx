@@ -1,19 +1,22 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { CloseCircleFilled } from '@ant-design/icons';
-import { Button, Card, Col, Input, Row, Tag, Tooltip, TreeSelect } from 'antd';
+import { CloseCircleFilled, CloseOutlined } from '@ant-design/icons';
+import { Button, Card, Col, Form, Input, Row, Tag, Tooltip } from 'antd';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import Select, { components } from 'react-select';
+import AccessibleTreeSelect from '../../../components/app/common/components/accessible-tree-select';
 import { useGetJobFamiliesQuery } from '../../../redux/services/graphql-api/job-family.api';
 import {
   JobProfileStreamModel,
   useGetJobProfileStreamsQuery,
 } from '../../../redux/services/graphql-api/job-profile-stream';
+import { ClassificationModel } from '../../../redux/services/graphql-api/job-profile-types';
 import {
   useGetJobProfilesClassificationsQuery,
   useGetJobProfilesMinistriesQuery,
 } from '../../../redux/services/graphql-api/job-profile.api';
 import './job-profile-search.component.css';
+import { useJobProfilesProvider } from './job-profiles.context';
 
 const { Search } = Input;
 
@@ -38,7 +41,7 @@ interface JobProfileSearchProps {
   additionalFilters?: boolean;
   fullWidth?: boolean;
   ministriesData?: any;
-  classificationData?: any;
+  classificationData?: ClassificationModel[] | undefined;
   positionRequestId?: number;
 }
 
@@ -64,12 +67,13 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
   // additionalFilters = false,
   fullWidth = false,
   ministriesData = null,
-  classificationData = null,
+  classificationData = undefined,
 }) => {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const location = useLocation();
-  const isPositionRequestRoute = location.pathname.includes('/my-positions/');
+  const { clearingFilters, setClearingFilters, clearingSearch, setClearingSearch } = useJobProfilesProvider();
+  const isPositionRequestRoute = location.pathname.includes('/requests/positions/');
 
   // const organizationData = useGetOrganizationsQuery().data?.organizations;
   // const jobRoleData = useGetJobRolesQuery().data?.jobRoles;
@@ -94,13 +98,17 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
 
   const [searchText, setSearchText] = useState(searchParams.get('search') || '');
 
+  useEffect(() => {
+    setSearchText(searchParams.get('search') || '');
+  }, [searchParams]);
+
   // JOB FAMILIES AND STREAMS TREE VIEW
   const { data: jobFamiliesData } = useGetJobFamiliesQuery();
   const { data: jobProfileStreamsData } = useGetJobProfileStreamsQuery();
 
-  const [searchValue, setSearchValue] = useState('');
+  // const [searchValue, setSearchValue] = useState('');
   const [treeData, setTreeData] = useState<any>([]);
-  const { SHOW_CHILD } = TreeSelect;
+  // const { SHOW_CHILD } = TreeSelect;
 
   useEffect(() => {
     if (jobFamiliesData && jobProfileStreamsData) {
@@ -148,7 +156,7 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
   // Get the base path for the current route
   const getBasePath = useCallback(
     (path: string) => {
-      if (isPositionRequestRoute) return location.pathname.split('/').slice(0, 3).join('/');
+      if (isPositionRequestRoute) return location.pathname.split('/').slice(0, 4).join('/');
 
       const pathParts = path.split('/');
       // Check if the last part is a number (ID), if so, remove it
@@ -163,10 +171,14 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
   // Update the classification Select components when data changes
   useEffect(() => {
     if (classificationData) {
-      const newOptions = classificationData.map((classification: { name: any; id: any }) => ({
-        label: classification.name,
-        value: classification.id,
-      }));
+      const newOptions = classificationData.map((classification) => {
+        const { id, employee_group_id, peoplesoft_id, name } = classification;
+
+        return {
+          label: name,
+          value: `${id}.${employee_group_id}.${peoplesoft_id}`,
+        };
+      });
       setClassificationOptions(newOptions);
     }
   }, [classificationData]);
@@ -248,7 +260,7 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
     const jobStreamParams = decodeURIComponent(searchParams.get('job_stream_id__in') || '')
       .split(',')
       .filter(Boolean);
-    const jobRoleTypeParams = decodeURIComponent(searchParams.get('job_role_id__in') || '')
+    const jobRoleTypeParams = decodeURIComponent(searchParams.get('job_role_type_id__in') || '')
       .split(',')
       .filter(Boolean);
     const classificationParams = decodeURIComponent(searchParams.get('classification_id__in') || '')
@@ -313,6 +325,8 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
     const pageFromURL = parseInt(searchParams.get('page') || '1', 10);
     const searchFromURL = searchParams.get('search');
     const selectedProfileFromUrl = searchParams.get('selectedProfile');
+    const idFromUrl = searchParams.get('id');
+    const versionFromUrl = searchParams.get('version');
     const pageSizeFromURL = searchParams.get('pageSize');
     const sortFieldFromURL = searchParams.get('sortField');
     const sortOrderFromURL = searchParams.get('sortOrder');
@@ -320,6 +334,7 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
     // construct new url params
     // Update URL parameters if needed
     if (selectedProfileFromUrl) newSearchParams.set('selectedProfile', selectedProfileFromUrl);
+
     if (pageFromURL != 1) newSearchParams.set('page', pageFromURL.toString());
     if (searchFromURL) newSearchParams.set('search', searchFromURL.toString());
     if (pageSizeFromURL) newSearchParams.set('pageSize', pageSizeFromURL.toString());
@@ -327,15 +342,17 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
     if (sortOrderFromURL) newSearchParams.set('sortOrder', sortOrderFromURL.toString());
 
     if (jobFamilyValues) newSearchParams.set('job_family_id__in', jobFamilyValues);
-    if (jobRoleTypeValues) newSearchParams.set('job_role_id__in', jobRoleTypeValues);
+    if (jobRoleTypeValues) newSearchParams.set('job_role_type_id__in', jobRoleTypeValues);
     if (jobStreamValues) newSearchParams.set('job_stream_id__in', jobStreamValues);
     if (classificationValues) newSearchParams.set('classification_id__in', classificationValues);
     // if (careerGroupValues) newSearchParams.set('career_group_id__in', careerGroupValues);
     if (ministryValues) newSearchParams.set('ministry_id__in', ministryValues);
+    if (idFromUrl) newSearchParams.set('id', idFromUrl);
+    if (versionFromUrl) newSearchParams.set('version', versionFromUrl);
 
     const jobFamilyChanged = newSearchParams.get('job_family_id__in') != searchParams.get('job_family_id__in');
     const jobStreamChanged = newSearchParams.get('job_stream_id__in') != searchParams.get('job_stream_id__in');
-    const jobRoleTypeChanged = newSearchParams.get('job_role_id__in') != searchParams.get('job_role_id__in');
+    const jobRoleTypeChanged = newSearchParams.get('job_role_type_id__in') != searchParams.get('job_role_type_id__in');
     const classificationChanged =
       newSearchParams.get('classification_id__in') != searchParams.get('classification_id__in');
 
@@ -344,9 +361,14 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
 
     // If the job family or classification filters have changed, de-select the selected profile
     if (jobFamilyChanged || classificationChanged || ministryChanged || jobRoleTypeChanged || jobStreamChanged) {
+      // do not run this if we're clearing filters - in that case we want to have the profile still selected
+      if (clearingFilters) {
+        return;
+      }
       newSearchParams.set('page', '1');
       newSearchParams.delete('selectedProfile');
-      // console.log('navigating.. B', getBasePath(location.pathname));
+      // console.log('navigating.. B', getBasePath(location.pathname), 'searchParams: ', searchParams.toString());
+
       navigate(
         {
           pathname: getBasePath(location.pathname),
@@ -355,9 +377,13 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
         { replace: true },
       );
     } else {
+      // filters did not change, but some other parameters did
       // Only update search params if there's a change
       if (searchParams.toString() !== newSearchParams.toString()) {
         // console.log('navigating.. A', getBasePath(location.pathname));
+        // console.log('search params were: ', searchParams.toString());
+        // console.log('search params now: ', newSearchParams.toString());
+
         navigate(
           {
             pathname: getBasePath(location.pathname),
@@ -415,12 +441,20 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
 
   useEffect(() => {
     // if searchparams has clear filters flag, do that
-    if (searchParams.get('clearFilters')) {
+    if (clearingFilters) {
       setAllSelections([]);
-      searchParams.delete('clearFilters');
+      setClearingFilters(false);
       setSearchParams(searchParams);
     }
-  }, [searchParams, setAllSelections, setSearchParams]);
+  }, [searchParams, setAllSelections, setSearchParams, clearingFilters, setClearingFilters]);
+
+  useEffect(() => {
+    if (clearingSearch) {
+      setSearchText('');
+      handleSearch('');
+      setClearingSearch(false);
+    }
+  }, [clearingSearch, setClearingSearch, setSearchText, handleSearch]);
 
   const clearFilters = () => {
     // setAllSelections([]);
@@ -428,20 +462,68 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
     // Update the URL parameters
     const newSearchParams = new URLSearchParams();
 
-    const pageFromUrl = searchParams.get('page');
-    if (pageFromUrl) newSearchParams.set('page', pageFromUrl);
+    // do not preserve the page when resetting filters - go to page 1
+    // const pageFromUrl = searchParams.get('page');
+    // if (pageFromUrl) newSearchParams.set('page', pageFromUrl);
 
     const searchFromUrl = searchParams.get('search');
     if (searchFromUrl) newSearchParams.set('search', searchFromUrl);
 
-    newSearchParams.set('clearFilters', 'true');
+    setClearingFilters(true);
+    // newSearchParams.set('clearFilters', 'true');
     // setSearchParams(newSearchParams);
 
+    // console.log('location.pathname: ', location.pathname);
+    // const basePath = getBasePath(location.pathname);
+
+    // search is used on saved profiles, explore profiles, wizard profiles, draft profiles and published profiles
+    // saved:
+    // - /job-profiles/saved?selectedProfile=304
+    // - /job-profiles/saved/101
+    // wizard:
+    // - /requests/positions/360?selectedProfile=304
+    // explore:
+    // /job-profiles/saved/304
+
+    const selectedProfileFromUrl = searchParams.get('selectedProfile');
+
+    const selectedProfileFromPath =
+      !isPositionRequestRoute && !isNaN(Number(location.pathname.split('/').pop()))
+        ? location.pathname.split('/').pop()
+        : null;
+
     const basePath = getBasePath(location.pathname);
+    // console.log('basePath: ', basePath);
+
+    // if profile is currently selected, leave it selected (depending if either selectedProfileFromUrl or selectedProfileFromPath is set)
+    // if it's selectedProfileFromUrl, then navigate to ?selectedProfile=selectedProfileFromUrl
+    // if it's selectedProfileFromPath, then navigate to basePath/selectedProfileFromPath
+
+    // console.log('selectedProfileFromUrl: ', selectedProfileFromUrl, selectedProfileFromPath);
+
+    // console.log('selectedProfileFromPath: ', selectedProfileFromPath);
+    let navigateToPath = selectedProfileFromPath ? `${basePath}/${selectedProfileFromPath}` : basePath;
+
+    if (selectedProfileFromUrl) {
+      // console.log('selectedProfileFromUrl')
+      if (isPositionRequestRoute) {
+        // console.log('isPositionRequestRoute')
+        navigateToPath = `${basePath}`;
+        newSearchParams.set('selectedProfile', selectedProfileFromUrl);
+      } else {
+        // console.log('not isPositionRequestRoute')
+        navigateToPath = `${basePath}/${selectedProfileFromUrl}`;
+      }
+    } else {
+      // console.log('not selectedProfileFromUrl')
+    }
+
+    // console.log('navigateToPath: ', navigateToPath);
+    // console.log('newSearchParams: ', newSearchParams.toString());
 
     navigate(
       {
-        pathname: basePath,
+        pathname: navigateToPath,
         search: newSearchParams.toString(),
       },
       { replace: true },
@@ -495,7 +577,10 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
                 }}
                 value={searchText}
                 onBlur={() => {
-                  handleSearch(searchText);
+                  // doing on this blur causes unexpected behaviour when using keyboard navigation
+                  // for example there may be previously selected profile, then when user tabs through the fields
+                  // it gets deselected
+                  // handleSearch(searchText);
                 }}
                 suffix={
                   <Tooltip placement="top" title={'Clear search'}>
@@ -514,52 +599,113 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
             <Col xl={18} lg={16} md={12} sm={24}>
               <Row gutter={8} justify="end">
                 <Col data-testid="Ministry-filter" data-cy="Ministry-filter">
-                  <Select
-                    closeMenuOnSelect={false}
-                    isClearable={false}
-                    backspaceRemovesValue={false}
-                    hideSelectedOptions={false}
-                    value={ministriesFilterData.filter((jf) =>
-                      allSelections
-                        .filter((selection) => selection.type === 'ministry')
-                        .map((selection) => selection.value)
-                        .includes(jf.value),
-                    )}
-                    styles={{
-                      container: (css) => ({ ...css, width: '200px' }),
-                      menu: (styles) => ({ ...styles, width: 'max-content', minWidth: '100%' }),
-                    }}
-                    components={{
-                      ValueContainer: CustomValueContainer,
-                    }}
-                    classNamePrefix="react-select"
-                    isMulti
-                    aria-label="Ministries"
-                    placeholder="Ministries"
-                    options={ministriesFilterData}
-                    onChange={(selectedItems) => {
-                      const newValues = selectedItems.map((item) => item.value);
-                      if (newValues == null) return;
+                  {/* dragon naturally speaking doesn't pick up on aria-label alone */}
+                  <Form.Item label="Ministries" name="ministries" className="sr-only-label">
+                    <Select
+                      closeMenuOnSelect={false}
+                      isClearable={false}
+                      backspaceRemovesValue={false}
+                      hideSelectedOptions={false}
+                      value={ministriesFilterData.filter((jf) =>
+                        allSelections
+                          .filter((selection) => selection.type === 'ministry')
+                          .map((selection) => selection.value)
+                          .includes(jf.value),
+                      )}
+                      styles={{
+                        container: (css) => ({ ...css, width: '200px' }),
+                        menu: (styles) => ({ ...styles, width: 'max-content', minWidth: '100%' }),
+                      }}
+                      components={{
+                        ValueContainer: CustomValueContainer,
+                      }}
+                      classNamePrefix="react-select"
+                      isMulti
+                      aria-label="Ministries"
+                      placeholder="Ministries"
+                      options={ministriesFilterData}
+                      onChange={(selectedItems) => {
+                        const newValues = selectedItems.map((item) => item.value);
+                        if (newValues == null) return;
 
-                      newValues.forEach((val: any) => {
-                        if (!selectedMinistry.includes(val)) addSelection(val, 'ministry');
-                      });
-                      selectedMinistry.forEach((val) => {
-                        if (!newValues.includes(val)) removeSelection(val, 'ministry');
-                      });
-                    }}
-                  ></Select>
+                        newValues.forEach((val: any) => {
+                          if (!selectedMinistry.includes(val)) addSelection(val, 'ministry');
+                        });
+                        selectedMinistry.forEach((val) => {
+                          if (!newValues.includes(val)) removeSelection(val, 'ministry');
+                        });
+                      }}
+                    ></Select>
+                  </Form.Item>
                 </Col>
                 <Col data-testid="Job Family-filter" data-cy="Job Family-filter">
-                  <TreeSelect
+                  <AccessibleTreeSelect
+                    width={'300px'}
+                    placeholderText={'Profession and Discipline'}
+                    treeData={JSON.parse(JSON.stringify(treeData))}
+                    value={treeSelectValues}
+                    onChange={(selectedItems) => {
+                      console.log('ONCHANGE');
+                      console.log('selectedItems: ', selectedItems);
+
+                      // separate selectedItems into jobFamily and jobStream
+                      const selectedJobFamilies: any[] = [];
+                      const selectedJobStreams: any[] = [];
+
+                      selectedItems.forEach((item: any) => {
+                        if (item.startsWith('job_family-')) {
+                          // Extract the job family ID and store it
+                          selectedJobFamilies.push(item.replace('job_family-', ''));
+                        } else if (item.startsWith('stream-')) {
+                          // Extract the job stream ID and store it
+                          selectedJobStreams.push(item.replace('stream-', ''));
+                        }
+                      });
+
+                      // console.log('tree on change: ', selectedJobFamilies, selectedJobStreams);
+
+                      const selections: { value: any; type: string }[] = [];
+                      const newValues = selectedJobFamilies;
+                      if (newValues != null) {
+                        newValues.forEach((val: any) => {
+                          selections.push({ value: val, type: 'jobFamily' });
+                        });
+                      }
+
+                      // console.log('selectedJobStream: ', selectedJobStream);
+                      const newValues2 = selectedJobStreams;
+                      if (newValues2 != null) {
+                        newValues2.forEach((val: any) => {
+                          selections.push({ value: val, type: 'jobStream' });
+                        });
+                      }
+
+                      // console.log('selections: ', selections);
+
+                      // remove previous settings and set new ones
+                      // get all the unique types from the selections, removing duplicates
+                      const types = ['jobStream', 'jobFamily'];
+
+                      // remove these types from the current selections
+                      const cleanedSelections = allSelections.filter((selection) => !types.includes(selection.type));
+
+                      // selections has value and type
+                      const newSelections = selections.map((item: any) => ({ value: item.value, type: item.type }));
+
+                      // console.log('cleaned, new: ', cleanedSelections, newSelections);
+                      setAllSelections([...cleanedSelections, ...newSelections]);
+                    }}
+                  />
+
+                  {/* <TreeSelect
                     className={`jobFamilyStreamFilter ${searchValue ? 'search-active' : 'no-search'}`}
                     value={treeSelectValues}
                     onSearch={(value) => {
                       setSearchValue(value);
                     }}
                     onChange={(selectedItems) => {
-                      // console.log('ONCHANGE');
-                      // console.log('selectedItems: ', selectedItems);
+                      console.log('ONCHANGE');
+                      console.log('selectedItems: ', selectedItems);
 
                       // separate selectedItems into jobFamily and jobStream
                       const selectedJobFamilies: any[] = [];
@@ -610,6 +756,8 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
                     }}
                     style={{ width: '200px' }}
                     treeData={treeData}
+                    treeNodeLabelProp="title"
+                    treeNodeFilterProp="title"
                     treeCheckable={true}
                     showCheckedStrategy={SHOW_CHILD}
                     placeholder="Profession and Discipline"
@@ -619,82 +767,88 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
                     tagRender={() => {
                       return <></>;
                     }}
-                  />
+                  /> */}
                 </Col>
                 <Col data-testid="Classification-filter" data-cy="Classification-filter">
-                  <Select
-                    closeMenuOnSelect={false}
-                    isClearable={false}
-                    backspaceRemovesValue={false}
-                    hideSelectedOptions={false}
-                    value={classificationFilterData.filter((jf) =>
-                      allSelections
-                        .filter((selection) => selection.type === 'classification')
-                        .map((selection) => selection.value)
-                        .includes(jf.value),
-                    )}
-                    styles={{
-                      container: (css) => ({ ...css, width: '200px' }),
-                      menu: (styles) => ({ ...styles, width: 'max-content', minWidth: '100%' }),
-                    }}
-                    components={{
-                      ValueContainer: CustomValueContainer,
-                    }}
-                    classNamePrefix="react-select"
-                    isMulti
-                    placeholder="Classification"
-                    aria-label="Classification"
-                    options={classificationFilterData}
-                    onChange={(selectedItems) => {
-                      const newValues = selectedItems.map((item) => item.value);
-                      if (newValues == null) return;
+                  {/* dragon naturally speaking doesn't pick up on aria-label alone */}
+                  <Form.Item label="Classification" name="classification" className="sr-only-label">
+                    <Select
+                      closeMenuOnSelect={false}
+                      isClearable={false}
+                      backspaceRemovesValue={false}
+                      hideSelectedOptions={false}
+                      value={classificationFilterData.filter((jf) =>
+                        allSelections
+                          .filter((selection) => selection.type === 'classification')
+                          .map((selection) => selection.value)
+                          .includes(jf.value),
+                      )}
+                      styles={{
+                        container: (css) => ({ ...css, width: '200px' }),
+                        menu: (styles) => ({ ...styles, width: 'max-content', minWidth: '100%' }),
+                      }}
+                      components={{
+                        ValueContainer: CustomValueContainer,
+                      }}
+                      classNamePrefix="react-select"
+                      isMulti
+                      placeholder="Classification"
+                      aria-label="Classification"
+                      options={classificationFilterData}
+                      onChange={(selectedItems) => {
+                        const newValues = selectedItems.map((item) => item.value);
+                        if (newValues == null) return;
 
-                      newValues.forEach((val: any) => {
-                        if (!selectedClassification.includes(val)) addSelection(val, 'classification');
-                      });
-                      selectedClassification.forEach((val) => {
-                        if (!newValues.includes(val)) removeSelection(val, 'classification');
-                      });
-                    }}
-                  ></Select>
+                        newValues.forEach((val: any) => {
+                          if (!selectedClassification.includes(val)) addSelection(val, 'classification');
+                        });
+                        selectedClassification.forEach((val) => {
+                          if (!newValues.includes(val)) removeSelection(val, 'classification');
+                        });
+                      }}
+                    ></Select>
+                  </Form.Item>
                 </Col>
 
                 <Col data-testid="Job role type-filter" data-cy="Job role type-filter">
-                  <Select
-                    closeMenuOnSelect={false}
-                    isClearable={false}
-                    backspaceRemovesValue={false}
-                    hideSelectedOptions={false}
-                    value={jobRoleTypeFilterData.filter((jf) =>
-                      allSelections
-                        .filter((selection) => selection.type === 'jobRoleType')
-                        .map((selection) => selection.value)
-                        .includes(jf.value),
-                    )}
-                    styles={{
-                      container: (css) => ({ ...css, width: '200px' }),
-                      menu: (styles) => ({ ...styles, width: 'max-content', minWidth: '100%' }),
-                    }}
-                    components={{
-                      ValueContainer: CustomValueContainer,
-                    }}
-                    classNamePrefix="react-select"
-                    isMulti
-                    placeholder="Role"
-                    aria-label="Role"
-                    options={jobRoleTypeFilterData}
-                    onChange={(selectedItems) => {
-                      const newValues = selectedItems.map((item) => item.value);
-                      if (newValues == null) return;
+                  {/* dragon naturally speaking doesn't pick up on aria-label alone */}
+                  <Form.Item label="Role" name="role" className="sr-only-label">
+                    <Select
+                      closeMenuOnSelect={false}
+                      isClearable={false}
+                      backspaceRemovesValue={false}
+                      hideSelectedOptions={false}
+                      value={jobRoleTypeFilterData.filter((jf) =>
+                        allSelections
+                          .filter((selection) => selection.type === 'jobRoleType')
+                          .map((selection) => selection.value)
+                          .includes(jf.value),
+                      )}
+                      styles={{
+                        container: (css) => ({ ...css, width: '200px' }),
+                        menu: (styles) => ({ ...styles, width: 'max-content', minWidth: '100%' }),
+                      }}
+                      components={{
+                        ValueContainer: CustomValueContainer,
+                      }}
+                      classNamePrefix="react-select"
+                      isMulti
+                      placeholder="Role"
+                      aria-label="Role"
+                      options={jobRoleTypeFilterData}
+                      onChange={(selectedItems) => {
+                        const newValues = selectedItems.map((item) => item.value);
+                        if (newValues == null) return;
 
-                      newValues.forEach((val: any) => {
-                        if (!selectedJobRoleType.includes(val)) addSelection(val, 'jobRoleType');
-                      });
-                      selectedJobRoleType.forEach((val) => {
-                        if (!newValues.includes(val)) removeSelection(val, 'jobRoleType');
-                      });
-                    }}
-                  ></Select>
+                        newValues.forEach((val: any) => {
+                          if (!selectedJobRoleType.includes(val)) addSelection(val, 'jobRoleType');
+                        });
+                        selectedJobRoleType.forEach((val) => {
+                          if (!newValues.includes(val)) removeSelection(val, 'jobRoleType');
+                        });
+                      }}
+                    ></Select>
+                  </Form.Item>
                 </Col>
 
                 {/* if filters contains careerGroup, then render it */}
@@ -769,6 +923,21 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
             <Col lg={15} xs={24}>
               {allSelections.map((selection) => (
                 <Tag
+                  closeIcon={
+                    <Button
+                      type="link"
+                      size="small"
+                      style={{ padding: '0', width: 'auto', height: 'auto' }}
+                      icon={<CloseOutlined aria-hidden style={{ fontSize: '0.7rem', color: 'rgba(0, 0, 0, 0.88)' }} />}
+                      aria-label={`Remove ${findLabel(selection.value, selection.type)} filter`}
+                      onKeyDown={(e) => {
+                        if (e.key === 'Enter' || e.key === ' ') {
+                          e.preventDefault();
+                          removeSelection(selection.value, selection.type);
+                        }
+                      }}
+                    />
+                  }
                   style={{ marginTop: '10px' }}
                   key={`${selection.type}-${selection.value}`}
                   closable

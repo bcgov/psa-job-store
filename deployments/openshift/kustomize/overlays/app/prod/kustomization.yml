@@ -3,5 +3,6 @@ kind: Kustomization
 # Points to the overlay that creates the images.
 resources:
 - ../../../base/app
+- route.yml
 patchesStrategicMerge:
 - patch.yml

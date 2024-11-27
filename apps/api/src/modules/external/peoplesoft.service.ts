@@ -5,8 +5,10 @@ import { AxiosHeaders } from 'axios';
 import { catchError, firstValueFrom, map, retry } from 'rxjs';
 import { AppConfigDto } from '../../dtos/app-config.dto';
 import { PrismaService } from '../prisma/prisma.service';
+import { SearchIndex, SearchService } from '../search/search.service';
 import { Employee } from './models/employee.model';
 import { PositionCreateInput } from './models/position-create.input';
+import { UpdateMockPositionInput } from './peoplesoft.mock.resolver';
 
 enum Endpoint {
   Classifications = 'PJS_TGB_REST_JOB_CODE',
@@ -58,6 +60,7 @@ export class PeoplesoftService {
     private readonly configService: ConfigService<AppConfigDto, true>,
     private readonly httpService: HttpService,
     private readonly prisma: PrismaService,
+    private readonly searchService: SearchService,
   ) {
     this.headers = new AxiosHeaders();
     this.headers.set(
@@ -83,23 +86,37 @@ export class PeoplesoftService {
 
     // Filter by applicable employee groups
     // Sort rows by effective date ASC
-    const sortedRows = (response?.data?.query?.rows ?? [])
-      .filter(
-        (row) => ['BCSET'].includes(row.SETID) && ['GEU', 'MGT', 'OEX', 'PEA', 'NUR'].includes(row.SAL_ADMIN_PLAN),
-      )
-      .sort((a, b) => {
-        if (a.EFFDT > b.EFFDT) {
-          return -1;
-        } else if (b.EFFDT > a.EFFDT) {
-          return 1;
-        } else {
-          return 0;
-        }
+    const sortedRows = (response?.data?.query?.rows ?? []).sort((a, b) => {
+      if (a.EFFDT > b.EFFDT) {
+        return -1;
+      } else if (b.EFFDT > a.EFFDT) {
+        return 1;
+      } else {
+        return 0;
+      }
+    });
+
+    const employeeGroups: string[] = sortedRows.flatMap((row) => row.SAL_ADMIN_PLAN as string);
+    for await (const id of new Set(employeeGroups)) {
+      await this.prisma.employeeGroup.upsert({
+        where: { id },
+        create: {
+          id,
+          name: id,
+        },
+        update: {},
       });
+    }
 
     for await (const row of sortedRows) {
       await this.prisma.classification.upsert({
-        where: { id: row.JOBCODE },
+        where: {
+          id_employee_group_id_peoplesoft_id: {
+            id: row.JOBCODE,
+            employee_group_id: row.SAL_ADMIN_PLAN,
+            peoplesoft_id: row.SETID,
+          },
+        },
         create: {
           id: row.JOBCODE,
           peoplesoft_id: row.SETID,
@@ -223,6 +240,8 @@ export class PeoplesoftService {
       ),
     );
 
+    await this.searchService.resetIndex();
+
     for await (const row of response?.data?.query?.rows ?? []) {
       try {
         await this.prisma.department.upsert({
@@ -277,6 +296,20 @@ export class PeoplesoftService {
                 id: organizations.find((org) => org.peoplesoft_id === row.SETID).id,
               },
             },
+          },
+        });
+
+        await this.searchService.indexDocument(SearchIndex.SettingsDocument, row.DEPTID, {
+          id: row.DEPTID,
+          name: row.DESCR,
+        });
+      } catch (error) {}
+
+      // Try to create a metadata entry if it doesn't already exist.  Ignore the FK error
+      try {
+        await this.prisma.departmentMetadata.create({
+          data: {
+            department_id: row.DEPTID,
           },
         });
       } catch (error) {}
@@ -411,6 +444,10 @@ export class PeoplesoftService {
 
     return response;
   }
+
+  // eslint-disable-next-line @typescript-eslint/no-unused-vars
+  async updateMockPosition(positionNbr: string, data: UpdateMockPositionInput) {}
+  async resetMockData() {}
 
   async createPosition(data: PositionCreateInput) {
     const response = await firstValueFrom(

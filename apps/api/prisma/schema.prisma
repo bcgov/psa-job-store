@@ -3,7 +3,7 @@
 
 generator client {
   provider        = "prisma-client-js"
-  previewFeatures = ["fullTextSearch"]
+  previewFeatures = ["fullTextSearch", "views", "driverAdapters"]
 }
 
 generator nestgraphql {
@@ -38,54 +38,58 @@ model ScheduledTaskMetadata {
 
 enum PositionRequestStatus {
   DRAFT
-  IN_REVIEW
+  VERIFICATION
   COMPLETED
-  ESCALATED
+  REVIEW
   ACTION_REQUIRED
+  CANCELLED
+}
+
+enum ApprovalType {
+  AUTOMATIC
+  VERIFIED
+  REVIEWED
 }
 
 model PositionRequest {
-  id                         Int                    @id @default(autoincrement())
-  crm_id                     Int?                   @unique
-  crm_assigned_to_account_id Int? // CRM account id of the classifications user who is assigned to the incident
-  crm_lookup_name            String?
-  step                       Int
-  reports_to_position_id     String
-  department_id              String // this is department id that user selected in org chart
-  parent_job_profile_id      Int?
-  crm_json                   Json?                  @db.JsonB
-  profile_json               Json?                  @db.JsonB
-  profile_json_updated       Json?                  @db.JsonB
-  orgchart_json              Json?                  @db.JsonB
-  user_id                    String?                @db.Uuid
-  title                      String?
-  position_number            Int?
-  classification_id          String?
-  classification_code        String? // this is just to satisfy type definition, no data is stored here AL-146
-  user_name                  String? // this is just to satisfy type definition, no data is stored here AL-146
-  email                      String? // this is just to satisfy type definition, no data is stored here AL-146
-  submission_id              String?
-  submitted_at               DateTime               @default(now())
-  approved_at                DateTime               @default(now())
-  status                     PositionRequestStatus?
-  updated_at                 DateTime               @default(now()) @updatedAt
-  shareUUID                  String?                @default(uuid()) @db.Uuid
-
-  // additional information form data
-  additional_info_work_location_id             String?
-  additional_info_department_id                String? // this is department id collected from the additional information form
-  additional_info_excluded_mgr_position_number String?
-  additional_info_comments                     String?
+  id                               Int                    @id @default(autoincrement())
+  crm_id                           Int?                   @unique
+  crm_assigned_to_account_id       Int? // CRM account id of the classifications user who is assigned to the incident
+  crm_lookup_name                  String? // Keeps track of the current step in the wizard
+  step                             Int // Keeps track of the current step in the wizard
+  max_step_completed               Int? // Keeps track of the highest step completed in the wizard
+  reports_to_position_id           String
+  reports_to_position              Json?                  @db.JsonB // position data as it was submitted
+  excluded_manager_position        Json?                  @db.JsonB // position data as it was submitted
+  department_id                    String // this is department id that user selected in org chart
+  parent_job_profile_id            Int?
+  parent_job_profile_version       Int?
+  crm_json                         Json?                  @db.JsonB
+  profile_json                     Json?                  @db.JsonB
+  orgchart_json                    Json?                  @db.JsonB
+  user_id                          String                 @db.Uuid
+  title                            String?
+  position_number                  Int?
+  classification_id                String?
+  classification_employee_group_id String?
+  classification_peoplesoft_id     String?
+  submission_id                    String?
+  resubmitted_at                   DateTime? // keeps track of when the position was resubmitted for verification
+  submitted_at                     DateTime               @default(now())
+  approved_at                      DateTime?
+  time_to_approve                  Int?
+  approval_type                    ApprovalType?
+  status                           PositionRequestStatus?
+  updated_at                       DateTime               @default(now()) @updatedAt
+  shareUUID                        String?                @default(uuid()) @db.Uuid
 
   additional_info Json? @db.JsonB
 
-  // TODO: AL-146
-  // user        User       @relation(fields: [user_id], references: [id])
-  // classification     Classification @relation(fields: [classification_id], references: [id])
-  parent_job_profile JobProfile? @relation(fields: [parent_job_profile_id], references: [id])
-  department         Department  @relation(fields: [department_id], references: [id])
-  workLocation       Location?   @relation(fields: [additional_info_work_location_id], references: [id])
-  paylist_department Department? @relation(name: "PositionRequestPaylistDepartment", fields: [additional_info_department_id], references: [id])
+  user               User               @relation(fields: [user_id], references: [id])
+  classification     Classification?    @relation(fields: [classification_id, classification_employee_group_id, classification_peoplesoft_id], references: [id, employee_group_id, peoplesoft_id])
+  parent_job_profile JobProfile?        @relation(fields: [parent_job_profile_id, parent_job_profile_version], references: [id, version])
+  department         Department         @relation(fields: [department_id], references: [id])
+  CurrentJobProfile  CurrentJobProfile? @relation("currentJobProfilePositionRequests", fields: [parent_job_profile_id, parent_job_profile_version], references: [id, version], map: "current_job_profile_position_requests_fk")
 
   @@map("position_request")
 }
@@ -103,9 +107,14 @@ model User {
 
   comments Comment[]
 
-  // TODO: AL-146
-  // PositionRequest PositionRequest[]
-  JobProfile JobProfile[]
+  JobProfile                  JobProfile[]
+  SavedJobProfile             SavedJobProfile[]
+  draftedJobProfiles          JobProfile[]        @relation(name: "updatedByRelation")
+  publishedJobProfiles        JobProfile[]        @relation(name: "PublishedByRelation")
+  CurrentSavedJobProfiles     CurrentJobProfile[]
+  CurrentDraftedJobProfiles   CurrentJobProfile[] @relation(name: "currentDraftedByRelation")
+  CurrentPublishedJobProfiles CurrentJobProfile[] @relation(name: "currentPublishedByRelation")
+  PositionRequest             PositionRequest[]
 
   @@map("user")
 }
@@ -156,88 +165,189 @@ enum JobProfileType {
 }
 
 model JobProfile {
-  id                       Int                               @id @default(autoincrement())
+  id                       Int
+  version                  Int                               @default(1)
   behavioural_competencies JobProfileBehaviouralCompetency[]
   classifications          JobProfileClassification[]
   organizations            JobProfileOrganization[]
   all_organizations        Boolean                           @default(true)
   all_reports_to           Boolean                           @default(false)
 
-  context          JobProfileContext?
-  role             JobProfileRole?           @relation(fields: [role_id], references: [id])
-  role_id          Int?
-  role_type        JobProfileRoleType?       @relation(fields: [role_type_id], references: [id])
-  role_type_id     Int?
-  scope            JobProfileScope?          @relation(fields: [scope_id], references: [id])
-  scope_id         Int?
-  state            JobProfileState           @default(DRAFT)
-  type             JobProfileType
-  updated_at       DateTime?                 @default(now()) @updatedAt
-  owner_id         String?                   @db.Uuid
-  owner            User?                     @relation(fields: [owner_id], references: [id])
+  context         String?
+  role            JobProfileRole?       @relation(fields: [role_id], references: [id])
+  role_id         Int?
+  role_type       JobProfileRoleType?   @relation(fields: [role_type_id], references: [id])
+  role_type_id    Int?
+  scopes          JobProfileScopeLink[]
+  state           JobProfileState       @default(DRAFT)
+  type            JobProfileType
+  created_at      DateTime?             @default(now())
+  updated_at      DateTime?             @default(now()) @updatedAt
+  published_at    DateTime?
+  owner_id        String                @db.Uuid
+  owner           User                  @relation(fields: [owner_id], references: [id]) //  @relation(name: "OwnerRelation", fields: [owner_id], references: [id])
+  updated_by_id   String?               @db.Uuid
+  updated_by      User?                 @relation(name: "updatedByRelation", fields: [updated_by_id], references: [id])
+  published_by_id String?               @db.Uuid
+  published_by    User?                 @relation(name: "PublishedByRelation", fields: [published_by_id], references: [id])
+
   jobFamilies      JobProfileJobFamilyLink[]
   streams          JobProfileStreamLink[]
   program_overview String?
   review_required  Boolean?                  @default(false)
 
   title                                  String
-  number                                 Int                   @unique
+  number                                 Int
   overview                               String
   accountabilities                       Json?                 @db.JsonB
   education                              Json?                 @db.JsonB
   job_experience                         Json?                 @db.JsonB
-  professional_registration_requirements String[]
-  preferences                            String[]
-  knowledge_skills_abilities             String[]
-  willingness_statements                 String[]
+  professional_registration_requirements Json?                 @db.JsonB
+  preferences                            Json?                 @db.JsonB
+  knowledge_skills_abilities             Json?                 @db.JsonB
+  willingness_statements                 Json?                 @db.JsonB
   optional_requirements                  String[]
   security_screenings                    Json?                 @db.JsonB
   reports_to                             JobProfileReportsTo[]
   position_request                       PositionRequest[]
   total_comp_create_form_misc            Json? // stores e.x. state of checkbox for markAllNonEditable for accountabilities
 
-  is_archived Boolean @default(false) // When total comp puts profile to draft, then deletes it AND it's linked to PositionRequests
+  is_archived Boolean   @default(false) // When total comp puts profile to draft, then deletes it AND it's linked to PositionRequests
+  valid_from  DateTime? @default(now())
+  valid_to    DateTime?
 
+  views Int? @default(0)
+
+  @@id(name: "id_version", [id, version])
+  // @@id([id, version])
   @@map("job_profile")
 }
 
-model JobProfileJobFamilyLink {
-  jobProfileId Int
-  jobFamilyId  Int
-  jobProfile   JobProfile          @relation(fields: [jobProfileId], references: [id])
-  jobFamily    JobProfileJobFamily @relation(fields: [jobFamilyId], references: [id])
+view CurrentJobProfile {
+  id                                     Int                               @unique
+  version                                Int
+  behavioural_competencies               JobProfileBehaviouralCompetency[] @relation("currentJobProfileBehaviouralCompetencies")
+  classifications                        JobProfileClassification[]        @relation("currentJobProfileClassifications")
+  organizations                          JobProfileOrganization[]          @relation("currentJobProfileOrganizations")
+  all_organizations                      Boolean
+  all_reports_to                         Boolean
+  context                                String?
+  role                                   JobProfileRole?                   @relation(fields: [role_id], references: [id])
+  role_id                                Int?
+  role_type                              JobProfileRoleType?               @relation(fields: [role_type_id], references: [id])
+  role_type_id                           Int?
+  scopes                                 JobProfileScopeLink[]             @relation("currentJobProfileScopes")
+  state                                  JobProfileState
+  type                                   JobProfileType
+  created_at                             DateTime?
+  updated_at                             DateTime?
+  published_at                           DateTime?
+  owner_id                               String?                           @db.Uuid
+  owner                                  User?                             @relation(fields: [owner_id], references: [id])
+  updated_by_id                          String?                           @db.Uuid
+  updated_by                             User?                             @relation(name: "currentDraftedByRelation", fields: [updated_by_id], references: [id])
+  published_by_id                        String?                           @db.Uuid
+  published_by                           User?                             @relation(name: "currentPublishedByRelation", fields: [published_by_id], references: [id])
+  jobFamilies                            JobProfileJobFamilyLink[]         @relation("currentJobProfileFamilyLinks")
+  streams                                JobProfileStreamLink[]            @relation("currentJobProfileStreamLinks")
+  program_overview                       String?
+  review_required                        Boolean?
+  title                                  String
+  number                                 Int                               @unique
+  overview                               String
+  accountabilities                       Json?                             @db.JsonB
+  education                              Json?                             @db.JsonB
+  job_experience                         Json?                             @db.JsonB
+  professional_registration_requirements Json?                             @db.JsonB
+  preferences                            Json?                             @db.JsonB
+  knowledge_skills_abilities             Json?                             @db.JsonB
+  willingness_statements                 Json?                             @db.JsonB
+  optional_requirements                  String[]
+  security_screenings                    Json?                             @db.JsonB
+  reports_to                             JobProfileReportsTo[]             @relation("currentJobProfileReportsTo")
+  position_request                       PositionRequest[]                 @relation("currentJobProfilePositionRequests")
+  total_comp_create_form_misc            Json?                             @db.JsonB
+  is_archived                            Boolean
+  SavedJobProfile                        SavedJobProfile[]
+  valid_from                             DateTime?
+  valid_to                               DateTime?
+  views                                  Int?
 
-  @@id([jobProfileId, jobFamilyId])
+  @@id(name: "id_version", [id, version])
+  @@map("current_job_profiles")
+}
+
+model SavedJobProfile {
+  user              User               @relation(fields: [userId], references: [id])
+  userId            String             @db.Uuid
+  jobProfileId      Int
+  createdAt         DateTime           @default(now())
+  CurrentJobProfile CurrentJobProfile? @relation(fields: [jobProfileId], references: [id])
+
+  @@id([userId, jobProfileId])
+  @@map("saved_job_profile")
+}
+
+model JobProfileScopeLink {
+  id                  Int                @id @default(autoincrement())
+  job_profile         JobProfile         @relation(fields: [job_profile_id, job_profile_version], references: [id, version])
+  job_profile_id      Int
+  job_profile_version Int
+  scope               JobProfileScope    @relation(fields: [scope_id], references: [id])
+  scope_id            Int
+  CurrentJobProfile   CurrentJobProfile? @relation("currentJobProfileScopes", fields: [job_profile_id, job_profile_version], references: [id, version], map: "current_job_profile_scopes_fk")
+
+  @@map("job_profile_scope_link")
+}
+
+model JobProfileJobFamilyLink {
+  jobProfileId      Int
+  jobProfileVersion Int
+  jobFamilyId       Int
+  jobProfile        JobProfile          @relation(fields: [jobProfileId, jobProfileVersion], references: [id, version])
+  jobFamily         JobProfileJobFamily @relation(fields: [jobFamilyId], references: [id])
+  CurrentJobProfile CurrentJobProfile?  @relation("currentJobProfileFamilyLinks", fields: [jobProfileId, jobProfileVersion], references: [id, version], map: "current_job_profile_family_links_fk")
+
+  @@id([jobProfileId, jobProfileVersion, jobFamilyId])
   @@map("job_profile_job_family_link")
 }
 
 model JobProfileStreamLink {
-  jobProfileId Int
-  streamId     Int
-  jobProfile   JobProfile       @relation(fields: [jobProfileId], references: [id])
-  stream       JobProfileStream @relation(fields: [streamId], references: [id])
+  jobProfileId      Int
+  jobProfileVersion Int
+  streamId          Int
+  jobProfile        JobProfile         @relation(fields: [jobProfileId, jobProfileVersion], references: [id, version])
+  stream            JobProfileStream   @relation(fields: [streamId], references: [id])
+  CurrentJobProfile CurrentJobProfile? @relation("currentJobProfileStreamLinks", fields: [jobProfileId, jobProfileVersion], references: [id, version], map: "current_job_profile_stream_links_fk")
 
-  @@id([jobProfileId, streamId])
+  @@id([jobProfileId, jobProfileVersion, streamId])
   @@map("job_profile_stream_link")
 }
 
 model JobProfileBehaviouralCompetency {
   behavioural_competency    BehaviouralCompetency @relation(fields: [behavioural_competency_id], references: [id])
   behavioural_competency_id Int
-  job_profile               JobProfile            @relation(fields: [job_profile_id], references: [id])
+  job_profile               JobProfile            @relation(fields: [job_profile_id, job_profile_version], references: [id, version])
   job_profile_id            Int
+  job_profile_version       Int
+  CurrentJobProfile         CurrentJobProfile?    @relation("currentJobProfileBehaviouralCompetencies", fields: [job_profile_id, job_profile_version], references: [id, version], map: "current_job_profile_behavioural_competencies_fk")
 
-  @@id([behavioural_competency_id, job_profile_id])
+  @@id([behavioural_competency_id, job_profile_id, job_profile_version])
   @@map("job_profile_behavioural_competency")
 }
 
 model JobProfileClassification {
-  classification    Classification @relation(fields: [classification_id], references: [id])
-  classification_id String
-  job_profile       JobProfile     @relation(fields: [job_profile_id], references: [id])
-  job_profile_id    Int
+  job_profile                      JobProfile     @relation(fields: [job_profile_id, job_profile_version], references: [id, version])
+  job_profile_id                   Int
+  job_profile_version              Int
+  classification                   Classification @relation(fields: [classification_id, classification_employee_group_id, classification_peoplesoft_id], references: [id, employee_group_id, peoplesoft_id])
+  classification_id                String
+  classification_employee_group_id String         @default("-1")
+  classification_peoplesoft_id     String         @default("-1")
 
-  @@id([classification_id, job_profile_id])
+  CurrentJobProfile CurrentJobProfile? @relation("currentJobProfileClassifications", fields: [job_profile_id, job_profile_version], references: [id, version], map: "current_job_profile_classifications_fk")
+
+  @@id([job_profile_id, job_profile_version, classification_id, classification_employee_group_id, classification_peoplesoft_id])
   @@map("job_profile_classification")
 }
 
@@ -249,43 +359,87 @@ model JobProfileMinimumRequirements {
   @@map("job_profile_minimum_requirements")
 }
 
-model JobProfileOrganization {
-  organization    Organization @relation(fields: [organization_id], references: [id])
-  organization_id String
-  job_profile     JobProfile   @relation(fields: [job_profile_id], references: [id])
-  job_profile_id  Int
+model ProfessionalRegistrationRequirementBase {
+  id            Int                                   @id @default(autoincrement())
+  text          String                                @unique
+  registrations ProfessionalRegistrationRequirement[]
 
-  @@id([organization_id, job_profile_id])
+  @@map("professional_registration_requirement_base")
+}
+
+model ProfessionalRegistrationRequirement {
+  id                               Int                                     @id @default(autoincrement())
+  requirement                      ProfessionalRegistrationRequirementBase @relation(fields: [requirement_id], references: [id])
+  requirement_id                   Int
+  classification_id                String?
+  classification_employee_group_id String?
+  job_family                       JobProfileJobFamily?                    @relation(fields: [job_family_id], references: [id])
+  job_family_id                    Int?
+
+  organization    Organization? @relation(fields: [organization_id], references: [id])
+  organization_id String?
+
+  @@unique([requirement_id, classification_id, classification_employee_group_id, job_family_id, organization_id])
+  @@map("professional_registration_requirement")
+}
+
+model SecurityScreeningBase {
+  id         Int                 @id @default(autoincrement())
+  text       String              @unique
+  screenings SecurityScreening[]
+
+  @@map("security_screenings_base")
+}
+
+model SecurityScreening {
+  id            Int                   @id @default(autoincrement())
+  screening     SecurityScreeningBase @relation(fields: [screening_id], references: [id])
+  screening_id  Int
+  job_family    JobProfileJobFamily?  @relation(fields: [job_family_id], references: [id])
+  job_family_id Int?
+
+  organization    Organization? @relation(fields: [organization_id], references: [id])
+  organization_id String?
+
+  @@unique([screening_id, job_family_id, organization_id])
+  @@map("security_screening")
+}
+
+model JobProfileOrganization {
+  organization        Organization       @relation(fields: [organization_id], references: [id])
+  organization_id     String
+  job_profile         JobProfile         @relation(fields: [job_profile_id, job_profile_version], references: [id, version])
+  job_profile_id      Int
+  job_profile_version Int
+  CurrentJobProfile   CurrentJobProfile? @relation("currentJobProfileOrganizations", fields: [job_profile_id, job_profile_version], references: [id, version], map: "current_job_profile_organizations_fk")
+
+  @@id([organization_id, job_profile_id, job_profile_version])
   @@map("job_profile_organization")
 }
 
-model JobProfileContext {
-  id             Int        @id @default(autoincrement())
-  job_profile    JobProfile @relation(fields: [job_profile_id], references: [id])
-  job_profile_id Int        @unique
-
-  description String
-
-  @@map("job_profile_context")
-}
-
 model JobProfileJobFamily {
-  id               Int                       @id @default(autoincrement())
-  name             String
+  id                                  Int                                   @id @default(autoincrement())
+  name                                String
   // job_profiles     JobProfile[]
-  jobProfiles      JobProfileJobFamilyLink[]
-  JobProfileStream JobProfileStream[]
+  jobProfiles                         JobProfileJobFamilyLink[]
+  JobProfileStream                    JobProfileStream[]
+  ProfessionalRegistrationRequirement ProfessionalRegistrationRequirement[]
+  SecurityScreening                   SecurityScreening[]
 
   @@map("job_profile_job_family")
 }
 
 model JobProfileReportsTo {
-  classification    Classification @relation(fields: [classification_id], references: [id])
-  classification_id String
-  job_profile       JobProfile     @relation(fields: [job_profile_id], references: [id])
-  job_profile_id    Int
+  job_profile                      JobProfile         @relation(fields: [job_profile_id, job_profile_version], references: [id, version])
+  job_profile_id                   Int
+  job_profile_version              Int
+  classification                   Classification     @relation(fields: [classification_id, classification_employee_group_id, classification_peoplesoft_id], references: [id, employee_group_id, peoplesoft_id])
+  classification_id                String
+  classification_employee_group_id String             @default("-1")
+  classification_peoplesoft_id     String             @default("-1")
+  CurrentJobProfile                CurrentJobProfile? @relation("currentJobProfileReportsTo", fields: [job_profile_id, job_profile_version], references: [id, version], map: "current_job_profile_reports_to_fk")
 
-  @@id([classification_id, job_profile_id])
+  @@id([job_profile_id, job_profile_version, classification_id, classification_employee_group_id, classification_peoplesoft_id])
   @@map("job_profile_reports_to")
 }
 
@@ -294,7 +448,7 @@ model JobProfileScope {
   name        String
   description String
 
-  job_profiles JobProfile[]
+  JobProfileScopeLink JobProfileScopeLink[]
 
   @@map("job_profile_scope")
 }
@@ -303,7 +457,8 @@ model JobProfileRole {
   id   Int    @id @default(autoincrement())
   name String
 
-  job_profiles JobProfile[]
+  job_profiles      JobProfile[]
+  CurrentJobProfile CurrentJobProfile[]
 
   @@map("job_profile_role")
 }
@@ -312,7 +467,8 @@ model JobProfileRoleType {
   id   Int    @id @default(autoincrement())
   name String
 
-  job_profiles JobProfile[]
+  job_profiles      JobProfile[]
+  CurrentJobProfile CurrentJobProfile[]
 
   @@map("job_profile_role_type")
 }
@@ -326,20 +482,6 @@ model JobProfileStream {
   // job_profiles  JobProfile[]
 
   @@map("job_profile_stream")
-}
-
-model JobProfileHistory {
-  id             Int       @id @default(autoincrement())
-  job_profile_id Int
-  json           Json      @db.JsonB
-  created_at     DateTime  @default(now())
-  created_by     Int
-  updated_at     DateTime  @default(now())
-  updated_by     Int
-  deleted_at     DateTime?
-  deleted_by     Int
-
-  @@map("job_profile_history")
 }
 
 model Comment {
@@ -369,19 +511,21 @@ model EmployeeGroup {
 
 // PeopleSoft Tables
 model Classification {
-  id                String   @id // JOBCODE
+  id                String // JOBCODE
+  employee_group_id String // SAL_ADMIN_PLAN
   peoplesoft_id     String // SETID
   code              String // DESCRSHORT
   name              String // DESCR
-  employee_group_id String // SAL_ADMIN_PLAN
   grade             String // GRADE
   effective_status  String // EFF_STATUS
   effective_date    DateTime @db.Date // EFFDT
 
-  employee_group EmployeeGroup              @relation(fields: [employee_group_id], references: [id])
-  job_profiles   JobProfileClassification[]
-  reportees      JobProfileReportsTo[]
+  employee_group  EmployeeGroup              @relation(fields: [employee_group_id], references: [id])
+  job_profiles    JobProfileClassification[]
+  reportees       JobProfileReportsTo[]
+  PositionRequest PositionRequest[]
 
+  @@id([id, employee_group_id, peoplesoft_id])
   @@map("classification")
 }
 
@@ -397,10 +541,19 @@ model Department {
   effective_status String // EFF_STATUS
   effective_date   DateTime     @db.Date // EFFDT
 
-  PositionRequest                     PositionRequest[]
-  PositionRequestsByPaylistDepartment PositionRequest[] @relation(name: "PositionRequestPaylistDepartment")
+  PositionRequest PositionRequest[]
+  metadata        DepartmentMetadata?
 
   @@map("department")
+}
+
+model DepartmentMetadata {
+  department_id           String  @id
+  is_statutorily_excluded Boolean @default(false)
+
+  department Department @relation(fields: [department_id], references: [id])
+
+  @@map("department_metadata")
 }
 
 model Location {
@@ -411,8 +564,7 @@ model Location {
   effective_status String // EFF_STATUS
   effective_date   DateTime @db.Date // EFFDT
 
-  departments      Department[]
-  positionRequests PositionRequest[]
+  departments Department[]
 
   @@map("location")
 }
@@ -425,8 +577,10 @@ model Organization {
   effective_status String // EFF_STATUS
   effective_date   DateTime @db.Date // EFFDT
 
-  departments            Department[]
-  JobProfileOrganization JobProfileOrganization[]
+  departments                         Department[]
+  JobProfileOrganization              JobProfileOrganization[]
+  ProfessionalRegistrationRequirement ProfessionalRegistrationRequirement[]
+  SecurityScreening                   SecurityScreening[]
 
   @@map("organization")
 }

@@ -1,24 +1,26 @@
 import { Injectable, Logger } from '@nestjs/common';
 import { Field, Int, ObjectType } from '@nestjs/graphql';
-import { Prisma } from '@prisma/client';
-import { JsonObject } from '@prisma/client/runtime/library';
-import { btoa } from 'buffer';
-import { Elements, autolayout, generateJobProfile } from 'common-kit';
+import { PositionRequest, Prisma } from '@prisma/client';
+import {
+  Elements,
+  autolayout,
+  generateJobProfile,
+  getALStatus,
+  updateSupervisorAndAddNewPositionNode,
+} from 'common-kit';
 import dayjs from 'dayjs';
 import { diff_match_patch } from 'diff-match-patch';
 import { Packer } from 'docx';
 import GraphQLJSON from 'graphql-type-json';
 import {
-  PositionRequestCreateInput,
   PositionRequestStatus,
   PositionRequestUpdateInput,
   PositionRequestWhereInput,
   UuidFilter,
 } from '../../@generated/prisma-nestjs-graphql';
-import { AlexandriaError } from '../../utils/alexandria-error';
+import { AlexandriaError, AlexandriaErrorClass } from '../../utils/alexandria-error';
 import { ClassificationService } from '../external/classification.service';
 import { CrmService } from '../external/crm.service';
-import { DepartmentService } from '../external/department.service';
 import {
   IncidentCreateUpdateInput,
   IncidentStatus,
@@ -34,9 +36,11 @@ import {
 } from '../external/models/position-create.input';
 import { PeoplesoftService } from '../external/peoplesoft.service';
 import { PositionService } from '../external/position.service';
+import { JobProfileService } from '../job-profile/job-profile.service';
+import { DepartmentService } from '../organization/department/department.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { ExtendedFindManyPositionRequestWithSearch } from './args/find-many-position-request-with-search.args';
-import { convertIncidentStatusToPositionRequestStatus } from './utils/convert-incident-status-to-position-request-status.util';
+import { PositionRequestCreateInputWithoutUser, RequestingFeature } from './position-request.resolver';
 
 @ObjectType()
 export class PositionRequestResponse {
@@ -53,7 +57,7 @@ export class PositionRequestResponse {
   parent_job_profile_id: number;
 
   @Field(() => GraphQLJSON)
-  profile_json_updated: any;
+  profile_json: any;
 
   @Field(() => GraphQLJSON)
   orgchart_json: any;
@@ -68,23 +72,26 @@ export class PositionRequestStatusCounts {
   completed: number;
 
   @Field(() => Int)
-  inReview: number;
+  verification: number;
 
   @Field(() => Int)
   total: number;
 
   @Field(() => Int)
-  escalatedCount: number;
+  reviewCount: number;
 
   @Field(() => Int)
   actionRequiredCount: number;
+
+  @Field(() => Int)
+  cancelledCount: number;
 }
 
 interface AdditionalInfo {
   work_location_id?: string;
+  work_location_name?: string;
   department_id?: string;
   excluded_mgr_position_number?: string;
-  comments?: string;
   branch?: string;
   division?: string;
 }
@@ -110,6 +117,7 @@ export class PositionRequestApiService {
     private readonly peoplesoftService: PeoplesoftService,
     private readonly prisma: PrismaService,
     private readonly positionService: PositionService,
+    private readonly jobProfileService: JobProfileService,
   ) {}
 
   async generateUniqueShortId(length: number, retries: number = 5): Promise<string> {
@@ -126,7 +134,7 @@ export class PositionRequestApiService {
     throw AlexandriaError('Failed to generate a unique ID');
   }
 
-  async createPositionRequest(data: PositionRequestCreateInput, userId: string) {
+  async createPositionRequest(data: PositionRequestCreateInputWithoutUser) {
     const uniqueSubmissionId = await this.generateUniqueShortId(10);
 
     return this.prisma.positionRequest.create({
@@ -134,153 +142,314 @@ export class PositionRequestApiService {
         department: data.department,
         additional_info: data.additional_info === null ? Prisma.DbNull : data.additional_info,
         step: data.step,
+        max_step_completed: data.max_step_completed,
         reports_to_position_id: data.reports_to_position_id,
-        profile_json_updated: data.profile_json_updated === null ? Prisma.DbNull : data.profile_json_updated,
+        profile_json: data.profile_json === null ? Prisma.DbNull : data.profile_json,
         orgchart_json: data.orgchart_json === null ? Prisma.DbNull : data.orgchart_json,
-        // TODO: AL-146
-        // user: data.user,
-        user_id: userId,
+        user: data.user,
         parent_job_profile: data.parent_job_profile,
         submission_id: uniqueSubmissionId,
         status: 'DRAFT',
         title: data.title,
-        // TODO: AL-146
-        // classification: data.classification,
-        classification_id: data.classification_id,
+        classification: data.classification,
       } as any as Prisma.PositionRequestCreateInput, // To prevent Excessive Stack Depth error,
-      // include: {
-      //   user: true,
-      //   parent_job_profile: true,
-      // },
     });
   }
 
-  async submitPositionRequest(id: number, comment: string) {
+  async submitPositionRequest(id: number, comment: string, userId: string, orgchart_png: string) {
     let positionRequest = await this.prisma.positionRequest.findUnique({ where: { id } });
 
+    if (!positionRequest) throw AlexandriaError('Position request not found');
+
     // ensure comments are saved
-    if (comment != null && comment.length > 0) {
-      positionRequest = await this.prisma.positionRequest.update({
-        where: { id },
-        data: {
-          additional_info: {
-            ...(positionRequest.additional_info as JsonObject),
-            comments: comment,
-          },
-        },
-      });
-    }
-
     try {
-      if (positionRequest.position_number == null) {
-        // in testmode, we can skip the peoplesoft call to create position
-        const position =
-          process.env.TEST_ENV === 'true'
-            ? { positionNbr: '00028153' }
-            : await this.createPositionForPositionRequest(id);
-
-        if (position.positionNbr.length > 0) {
-          const result = await this.peoplesoftService.getPosition(position.positionNbr);
-          const rows = result?.data?.query?.rows;
-          const positionObj: Record<string, any> | null = (rows ?? []).length > 0 ? rows[0] : null;
-
-          const classification = await this.classificationService.getClassification({
-            where: { id: positionObj['A.JOBCODE'] },
-          });
-
-          const department = await this.departmentService.getDepartment({ where: { id: positionObj['A.DEPTID'] } });
-          const { edges, nodes } = positionRequest.orgchart_json as Record<string, any> as Elements;
-
-          // Update supervisor, excluded manager nodes
-          const excludedManagerId = (positionRequest.additional_info as AdditionalInfo | null)
-            ?.excluded_mgr_position_number;
-          const supervisorId = positionObj['A.REPORTS_TO'];
-          nodes.forEach((node) => {
-            node.data = {
-              ...node.data,
-              isAdjacent: [excludedManagerId, supervisorId].includes(node.id),
-              isExcludedManager: node.id === excludedManagerId,
-              isNewPosition: false, // Clear previous positions marked as new
-              isSelected: false,
-              isSupervisor: node.id === supervisorId,
-            };
-          });
-
-          // Add edge & node for new position
-          const edgeId = `${supervisorId}-${positionObj['A.POSITION_NBR']}`;
-          if (edges.find((edge) => edge.id === edgeId) == null) {
-            edges.push({
-              id: edgeId,
-              source: supervisorId,
-              target: positionObj['A.POSITION_NBR'],
-              style: { stroke: 'blue' },
-              type: 'smoothstep',
-              animated: true,
-              selected: true,
-            });
-          }
-
-          const nodeId = positionObj['A.POSITION_NBR'];
-          if (nodes.find((node) => node.id === nodeId) == null) {
-            nodes.push({
-              id: nodeId,
-              type: 'org-chart-card',
-              data: {
-                id: nodeId,
-                isAdjacent: true,
-                isNewPosition: true,
-                title: positionObj['A.DESCR'],
-                classification: {
-                  id: classification.id,
-                  code: classification.code,
-                  name: classification.name,
-                },
-                department: {
-                  id: department.id,
-                  organization_id: department.organization_id,
-                  name: department.name,
-                },
-                employees: [],
-              },
-              position: { x: 0, y: 0 },
-            });
-          }
-
-          positionRequest = await this.prisma.positionRequest.update({
-            where: { id },
-            data: {
-              position_number: +position.positionNbr,
-              orgchart_json: autolayout({ edges, nodes }) as any,
-            },
-          });
-        }
+      if (comment != null && comment.length > 0) {
+        //  const c =
+        await this.prisma.comment.create({
+          data: {
+            author_id: userId,
+            record_id: positionRequest.id,
+            record_type: 'PositionRequest',
+            text: comment,
+          },
+        });
+        // console.log('comment ', c);
       }
     } catch (error) {
       this.logger.error(error);
+      throw AlexandriaError('Failed to save comments');
     }
 
     try {
-      // CRM Incident Managements
-      const incident = await this.createOrUpdateCrmIncidentForPositionRequest(id);
-      positionRequest = await this.prisma.positionRequest.update({
+      // there is no position number associated with this position request - create position in peoplesoft
+      if (positionRequest.position_number == null) {
+        // in testmode, we can skip the peoplesoft call to create position
+        let position, positionRequestNeedsReview;
+        try {
+          if (process.env.TEST_ENV === 'true') {
+            positionRequestNeedsReview = (await this.positionRequestNeedsReview(id)).result;
+
+            if (positionRequestNeedsReview === true)
+              position = { positionNbr: '00142558' }; // 00142558 is proposed (for verification required test)
+            else position = { positionNbr: '00132136' }; // this position needs to be in approved status in order to have valid final state
+          } else {
+            // note this returns data with this format (string with leading zeros): { positionNbr: '00132136', errMessage: '' }
+            [position, positionRequestNeedsReview] = await this.createPositionForPositionRequest(id);
+          }
+        } catch (error) {
+          this.logger.error(error);
+          throw AlexandriaError('Failed to create position in Peoplesoft');
+        }
+
+        // write position number back to position request immidietely to prevent data loss and duplicate position creation
+        // also set submitted_at date
+        try {
+          positionRequest = await this.prisma.positionRequest.update({
+            where: { id },
+            data: {
+              approval_type: positionRequestNeedsReview ? 'VERIFIED' : 'AUTOMATIC',
+              position_number: +position.positionNbr,
+              submitted_at: dayjs().toDate(),
+            },
+          });
+        } catch (error) {
+          this.logger.error('Failed to save position number: ' + position.positionNbr);
+          this.logger.error(error);
+          throw AlexandriaError('Failed to save position number');
+        }
+
+        if (position.positionNbr.length > 0) {
+          positionRequest = await this.submitPositionRequest_afterCreatePosition(
+            position.positionNbr,
+            id,
+            positionRequest,
+            orgchart_png,
+            comment,
+          );
+        } else {
+          throw AlexandriaError('Peoplesoft returned a blank position number');
+        }
+      } else {
+        // we already have a position number assigned to this position request
+        // this happens if something went wrong previously and we did not get to changing the status of this position request
+        // or if user is re-submitting after CS requested HM to make changes
+
+        // check crm status etc
+
+        // update submitted_at
+        // try {
+        //   positionRequest = await this.prisma.positionRequest.update({
+        //     where: { id },
+        //     data: {
+        //       submitted_at: dayjs().toDate(),
+        //     },
+        //   });
+        // } catch (error) {
+        //   this.logger.error('Failed to update submitted_at: ' + positionRequest.position_number.toString());
+        //   this.logger.error(error);
+        // }
+
+        positionRequest = await this.submitPositionRequest_afterCreatePosition(
+          `${positionRequest.position_number.toString()}`.padStart(8, '0'),
+          id,
+          positionRequest,
+          orgchart_png,
+          comment,
+        );
+      }
+    } catch (error) {
+      if (!(error instanceof AlexandriaErrorClass)) {
+        this.logger.error(error);
+        throw AlexandriaError('An unexpected error occurred');
+      }
+      throw error;
+    }
+    return positionRequest;
+  }
+
+  private async submitPositionRequest_afterCreatePosition(
+    positionNumber: string,
+    id,
+    positionRequest: PositionRequest,
+    orgchart_png,
+    comment,
+  ) {
+    // this function runs after a position has been created in peoplesoft
+    // we're going to update org chart (update supervisor and add new position nodes),
+    // create or update CRM incident, and update position request status
+
+    // retrieve position we just created from peoplesoft
+    let positionObj: Record<string, any> | null;
+    try {
+      // console.log('getting position from peoplesoft: ', positionNumber);
+
+      const result = await this.peoplesoftService.getPosition(positionNumber);
+      const rows = result?.data?.query?.rows;
+      positionObj = (rows ?? []).length > 0 ? rows[0] : null;
+    } catch (error) {
+      this.logger.error(error);
+      throw AlexandriaError('Failed to retrieve position from Peoplesoft');
+    }
+
+    if (!positionObj) throw AlexandriaError('Failed to retrieve position from Peoplesoft');
+
+    // update org chart snapshot
+    try {
+      await this.submitPositionRequest_updateOrgChart(positionObj, positionRequest, id);
+    } catch (error) {
+      this.logger.error(error);
+      throw AlexandriaError('Failed to update org chart');
+    }
+
+    try {
+      const reportsTo = (
+        await this.positionService.getPositionProfile(positionRequest.reports_to_position_id, true)
+      )[0];
+      const excludedMgr = (
+        await this.positionService.getPositionProfile(
+          (positionRequest.additional_info as Record<string, any>).excluded_mgr_position_number,
+          true,
+        )
+      )[0];
+
+      await this.prisma.positionRequest.update({
         where: { id },
         data: {
-          crm_id: incident.id,
-          status: convertIncidentStatusToPositionRequestStatus(+incident.statusWithType.status.id),
+          reports_to_position: reportsTo,
+          excluded_manager_position: excludedMgr,
+          resubmitted_at: new Date(),
         },
       });
     } catch (error) {
       this.logger.error(error);
+      throw AlexandriaError('Failed to update manager information.');
     }
 
-    return positionRequest;
+    // CRM Incident Managements
+    let crm_id;
+    let crm_lookup_name;
+    let crm_status;
+    let crm_category;
+    try {
+      const incident = await this.createOrUpdateCrmIncidentForPositionRequest(id, orgchart_png, comment);
+      ({ crm_id, crm_lookup_name, crm_status, crm_category } = incident);
+      await this.prisma.positionRequest.update({
+        where: { id },
+        data: {
+          crm_id: +incident.crm_id,
+        },
+      });
+    } catch (error) {
+      if (error instanceof AlexandriaErrorClass) {
+        throw error; // Rethrow the AlexandriaError
+      } else {
+        this.logger.error(error);
+        throw AlexandriaError('Failed to create or update CRM service request');
+      }
+    }
+
+    try {
+      // determine the status for the position request based on CRM status + peoplesoft status
+      // console.log('getALStatus args: ', {
+      //   category: crm_category,
+      //   crm_status: crm_status,
+      //   ps_status: positionObj['A.POSN_STATUS'],
+      //   ps_effective_status: positionObj['EFF_STATUS'],
+      // });
+
+      const incomingPositionRequestStatus = getALStatus({
+        category: crm_category,
+        crm_status: crm_status,
+        ps_status: positionObj['A.POSN_STATUS'],
+        ps_effective_status: positionObj['EFF_STATUS'],
+      });
+
+      if (incomingPositionRequestStatus === 'UNKNOWN') {
+        this.logger.warn(
+          `Failed to map to an internal status for position request id ${id}: crm_id: ${crm_id}, crm_lookup_name: ${crm_lookup_name}, crm status:  ${crm_status}, crm category: ${crm_category}, ps status: ${positionObj['A.POSN_STATUS']}, positionNumber: ${positionNumber}`,
+        );
+        // incomingPositionRequestStatus = 'DRAFT';
+        throw AlexandriaError('Unexpected error occured while creating position request.');
+      }
+
+      // we will potentially create PRs with UNKNOWN status if there is an issue with CRM or PS creation
+      // if status is completed, update approved_at date
+      const status = incomingPositionRequestStatus as PositionRequestStatus;
+      const approved_at = status === 'COMPLETED' ? dayjs().toDate() : null;
+      return await this.prisma.positionRequest.update({
+        where: { id },
+        data: {
+          status: status,
+          ...(approved_at === null ? {} : { approved_at }),
+        },
+      });
+    } catch (error) {
+      if (error instanceof AlexandriaErrorClass) {
+        throw error; // Rethrow the AlexandriaError
+      } else {
+        this.logger.error(error);
+        throw AlexandriaError('Failed to update position request status');
+      }
+    }
+  }
+
+  private async submitPositionRequest_updateOrgChart(positionObj, positionRequest: PositionRequest, id) {
+    // get classification for this new position
+    const classification = await this.classificationService.getClassificationForPeoplesoftPosition(positionObj);
+
+    // console.log('positionObj: ', positionObj);
+
+    // get department in which this position was created
+    const department = await this.departmentService.getDepartment({ where: { id: positionObj['A.DEPTID'] } });
+    const { edges, nodes } = positionRequest.orgchart_json as Record<string, any> as Elements;
+
+    const excludedManagerId = (positionRequest.additional_info as AdditionalInfo | null)?.excluded_mgr_position_number;
+    const supervisorId = positionObj['A.REPORTS_TO'];
+    const positionNumber = positionObj['A.POSITION_NBR'];
+    const positionTitle = positionObj['A.DESCR'];
+
+    // remove node with isNewPosition = true (exists on new position requests, doesn't on older ones)
+    // updateSupervisorAndAddNewPositionNode will re-add it with updated data
+    const nodesWithNoNewPosition = nodes.filter((node) => !node.data.isNewPosition);
+
+    // remove edge related to the new position, if exists
+    const newEdgeId = `${positionRequest.reports_to_position_id}-000000`;
+    const edgesWithNoNewPosition = edges.filter((edge) => edge.id !== newEdgeId);
+
+    const { edges: newEdges, nodes: newNodes } = updateSupervisorAndAddNewPositionNode(
+      edgesWithNoNewPosition,
+      nodesWithNoNewPosition,
+      excludedManagerId,
+      supervisorId,
+      positionNumber,
+      positionTitle,
+      classification,
+      department,
+    );
+
+    const elementsData: Elements = {
+      edges: newEdges,
+      nodes: newNodes,
+    };
+
+    const orgchart_json = autolayout(elementsData) as any;
+
+    //write org chart changes
+    const positionRequestNew = await this.prisma.positionRequest.update({
+      where: { id },
+      data: {
+        orgchart_json: orgchart_json,
+      },
+    });
+    return positionRequestNew;
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async getPositionRequests(
-    { search, where, onlyCompletedForAll, ...args }: ExtendedFindManyPositionRequestWithSearch,
+    { search, where, ...args }: ExtendedFindManyPositionRequestWithSearch,
     userId: string,
     userRoles: string[] = [],
+    requestingFeature?: RequestingFeature | null,
   ) {
     let searchConditions = {};
     if (search) {
@@ -307,20 +476,22 @@ export class PositionRequestApiService {
       ...where,
     };
 
+    // 'classificationTasks'|'myPositions'|'totalCompApprovedRequests'
+
+    // console.log('whereConditions: ', JSON.stringify(whereConditions));
     // If the user has the "total-compensation" role and wants only completed requests for all users
-    if (userRoles.includes('total-compensation') && onlyCompletedForAll) {
+    if (userRoles.includes('total-compensation') && requestingFeature === 'totalCompApprovedRequests') {
       whereConditions = {
         ...whereConditions,
         status: { equals: 'COMPLETED' },
       };
       // If the user is in "classification" role, then return only requests assigned to this user using classificationAssignedTo property
-    } else if (userRoles.includes('classification')) {
+    } else if (userRoles.includes('classification') && requestingFeature === 'classificationTasks') {
       whereConditions = {
         ...whereConditions,
-        // classificationAssignedTo: { equals: userId }, // todo: enable this after testing session
         status: { not: { equals: 'DRAFT' } },
       };
-    } else {
+    } else if (requestingFeature === 'myPositions' || !requestingFeature) {
       // Default behavior for other users - get position requests for the current user only
       whereConditions = {
         ...whereConditions,
@@ -328,15 +499,19 @@ export class PositionRequestApiService {
       };
     }
 
+    // Prepare orderBy
+    const orderBy = (args.orderBy as any[]) || [];
+
+    // Add default sorting by id
+    orderBy.push({ id: 'desc' });
+
+    // console.log('final whereConditions: ', JSON.stringify(whereConditions));
+
     const positionRequests = await this.prisma.positionRequest.findMany({
       where: whereConditions,
-      // where: {
-      //   ...searchConditions,
-      //   ...where,
-      //   user_id: userId,
-      // },
-      ...args,
-      orderBy: [...(args.orderBy || []), { id: 'desc' }],
+      orderBy,
+      take: args.take,
+      skip: args.skip,
       select: {
         id: true,
         parent_job_profile_id: true,
@@ -346,86 +521,36 @@ export class PositionRequestApiService {
         title: true,
         position_number: true,
         classification_id: true,
+        classification_employee_group_id: true,
+        classification_peoplesoft_id: true,
         submission_id: true,
         status: true,
         updated_at: true,
+        resubmitted_at: true,
         parent_job_profile: true,
         approved_at: true,
         submitted_at: true,
+        approval_type: true,
+        time_to_approve: true,
         crm_id: true,
         crm_lookup_name: true,
         shareUUID: true,
         additional_info: true,
+        classification: true,
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
       },
     });
 
-    // todo: AL-146 this should not be needed if the foreign key relationship is working properly in schema.prisma
-
-    // Collect all unique classification IDs from the position requests
-    const classificationIds = [
-      ...new Set(positionRequests.map((pr) => pr.classification_id).filter((id) => id != null)), // Filters out null values
-    ];
-
-    // Fetch classifications based on the collected IDs
-    const classifications = await this.prisma.classification.findMany({
-      where: {
-        id: { in: classificationIds },
-      },
-      select: {
-        id: true,
-        code: true,
-      },
-    });
-
-    // Create a map for easy lookup
-    const classificationMap = new Map(classifications.map((c) => [c.id, c.code]));
-
-    // Collect all unique user IDs from the position requests
-    const userIds = [...new Set(positionRequests.map((pr) => pr.user_id).filter((id) => id != null))];
-
-    // Fetch users based on the collected IDs
-    const users = await this.prisma.user.findMany({
-      where: {
-        id: { in: userIds },
-      },
-      select: {
-        id: true,
-        name: true, // Assuming 'name' is the field in your User model
-      },
-    });
-
-    // Create a map for easy user lookup
-    const userMap = new Map(users.map((u) => [u.id, u.name]));
-
-    // Merge position requests with classification codes
-    const mergedResults = positionRequests.map((pr) => ({
-      ...pr,
-      classification_code: classificationMap.get(pr.classification_id),
-      user_name: userMap.get(pr.user_id),
-    }));
-
-    // Check if we need to sort by classification_code
-    const orderByClassificationCode = args.orderBy?.find((o) => o.classification_code);
-    if (orderByClassificationCode) {
-      // Determine the sort direction
-      const sortDirection = orderByClassificationCode.classification_code.sort === 'asc' ? 1 : -1;
-
-      // Sort mergedResults by classification_code
-      mergedResults.sort((a, b) => {
-        if (a.classification_code < b.classification_code) {
-          return -1 * sortDirection;
-        }
-        if (a.classification_code > b.classification_code) {
-          return 1 * sortDirection;
-        }
-        return 0;
-      });
-    }
-    return mergedResults; //.reverse();
+    return positionRequests;
   }
 
   async getSharedPositionRequest(shareUUID: string) {
-    // console.log('getPositionRequest!', userRoles);
     if (!shareUUID || shareUUID === '') {
       throw AlexandriaError('Invalid share URL');
     }
@@ -438,60 +563,36 @@ export class PositionRequestApiService {
         where: whereCondition,
         include: {
           parent_job_profile: true,
+          classification: {
+            select: {
+              code: true,
+            },
+          },
+          user: {
+            select: {
+              id: true,
+              name: true,
+              email: true,
+            },
+          },
         },
       });
-      // catch findFirstOrThrow error
     } catch (error) {
       throw AlexandriaError('Invalid share URL');
     }
-
-    // console.log('positionRequest: ', positionRequest, JSON.stringify(whereCondition));
 
     if (!positionRequest) {
       return null;
     }
 
-    // TODO: AL-146 - this should not be needed if the foreign key relationship is working properly in schema.prisma
-    // Fetch classification
-
-    const classification =
-      positionRequest.classification_id == null
-        ? null
-        : await this.prisma.classification.findUnique({
-            where: { id: positionRequest.classification_id },
-            select: {
-              code: true, // Assuming 'code' is the field you want from the classification
-            },
-          });
-
-    // Fetch user
-    const user = await this.prisma.user.findUnique({
-      where: { id: positionRequest.user_id },
-      select: {
-        name: true, // Assuming 'name' is the field you want from the user
-        email: true,
-      },
-    });
-
-    return {
-      ...positionRequest,
-      classification_code: classification?.code,
-      user_name: user?.name,
-      email: user?.email,
-    };
+    return positionRequest;
   }
 
   async getPositionRequest(id: number, userId: string, userRoles: string[] = []) {
-    // console.log('getPositionRequest!', userRoles);
     let whereCondition: { id: number; user_id?: UuidFilter; NOT?: Array<PositionRequestWhereInput> } = { id };
 
-    // If the user does not have the "total-compesation" or "classification" role, the filter will include the requesting user id
-    // otherwise, allow user to access any position by id, except those in "DRAFT" status
     if (['classification', 'total-compensation'].some((value) => userRoles.includes(value))) {
-      whereCondition = {
-        ...whereCondition,
-        // NOT: [{ status: { equals: 'DRAFT' } }],
-      };
+      whereCondition = { ...whereCondition };
     } else {
       whereCondition = {
         ...whereCondition,
@@ -503,102 +604,77 @@ export class PositionRequestApiService {
       where: whereCondition,
       include: {
         parent_job_profile: true,
+        classification: {
+          select: {
+            id: true,
+            code: true,
+            employee_group_id: true,
+            peoplesoft_id: true,
+          },
+        },
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
       },
     });
-
-    // console.log('positionRequest: ', positionRequest, JSON.stringify(whereCondition));
 
     if (!positionRequest) {
       return null;
     }
 
-    // TODO: AL-146 - this should not be needed if the foreign key relationship is working properly in schema.prisma
-    // Fetch classification
-
-    const classification =
-      positionRequest.classification_id == null
-        ? null
-        : await this.prisma.classification.findUnique({
-            where: { id: positionRequest.classification_id },
-            select: {
-              code: true, // Assuming 'code' is the field you want from the classification
-            },
-          });
-
-    // Fetch user
-    const user = await this.prisma.user.findUnique({
-      where: { id: positionRequest.user_id },
-      select: {
-        name: true, // Assuming 'name' is the field you want from the user
-        email: true,
-      },
-    });
-
     return {
       ...positionRequest,
-      classification_code: classification?.code,
-      user_name: user?.name,
-      email: user?.email,
+      classification_employee_group_id: positionRequest.classification?.employee_group_id,
+      classification_peoplesoft_id: positionRequest.classification?.peoplesoft_id,
     };
   }
 
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async getPositionRequestCount(
-    { search, where, onlyCompletedForAll }: ExtendedFindManyPositionRequestWithSearch,
+    { search, where }: ExtendedFindManyPositionRequestWithSearch,
     userId: string,
     userRoles: string[] = [],
+    requestingFeature?: RequestingFeature | null,
   ): Promise<PositionRequestStatusCounts> {
     let searchConditions = {};
     if (search) {
       searchConditions = {
         OR: [
-          {
-            title: {
-              contains: search,
-              mode: 'insensitive',
-            },
-          },
-          {
-            submission_id: {
-              contains: search,
-              mode: 'insensitive',
-            },
-          },
+          { title: { contains: search, mode: 'insensitive' } },
+          { submission_id: { contains: search, mode: 'insensitive' } },
         ],
       };
     }
 
-    let whereConditions = {
+    const whereConditions = {
       ...searchConditions,
       ...where,
     };
 
-    // Update where conditions based on the "total-compensation" role and onlyCompletedForAll flag
-    if (userRoles.includes('total-compensation') && onlyCompletedForAll) {
-      whereConditions = {
-        ...whereConditions,
-        status: { equals: 'COMPLETED' },
-      };
-    } else if (userRoles.includes('classification')) {
-      // for classification, return the count of all entries that are not in draft state, across the board
-      whereConditions = {
-        ...whereConditions,
-        // classificationAssignedTo: { equals: userId }, // todo: enable this after testing session
-        status: { not: { equals: 'DRAFT' } },
-      };
-    } else {
-      whereConditions = {
-        ...whereConditions,
-        user_id: { equals: userId },
-      };
+    // Initial phase: Set up status filtering
+    if (userRoles.includes('total-compensation') && requestingFeature === 'totalCompApprovedRequests') {
+      whereConditions.status = { equals: 'COMPLETED' };
+    } else if (userRoles.includes('classification') && requestingFeature === 'classificationTasks') {
+      whereConditions.status = { not: { equals: 'DRAFT' } };
+    } else if (requestingFeature === 'myPositions' || !requestingFeature) {
+      whereConditions.user_id = { equals: userId };
     }
 
-    // Function to get count for a specific status
+    // Store the initial status condition
+    const initialStatusCondition = whereConditions.status;
+
+    // Function to get count for a specific status, respecting initial filter
     const getCountForStatus = async (status: PositionRequestStatus) => {
+      const statusFilter = initialStatusCondition ? { ...initialStatusCondition, equals: status } : { equals: status };
+
       return await this.prisma.positionRequest.count({
         where: {
           ...whereConditions,
-          status: status,
+          status: statusFilter,
         },
       });
     };
@@ -606,58 +682,39 @@ export class PositionRequestApiService {
     // Get counts for each status
     const draftCount = await getCountForStatus(PositionRequestStatus.DRAFT);
     const completedCount = await getCountForStatus(PositionRequestStatus.COMPLETED);
-    const inReviewCount = await getCountForStatus(PositionRequestStatus.IN_REVIEW);
-    const escalatedCount = await getCountForStatus(PositionRequestStatus.ESCALATED);
+    const verificationCount = await getCountForStatus(PositionRequestStatus.VERIFICATION);
+    const reviewCount = await getCountForStatus(PositionRequestStatus.REVIEW);
     const actionRequiredCount = await getCountForStatus(PositionRequestStatus.ACTION_REQUIRED);
+    const cancelledCount = await getCountForStatus(PositionRequestStatus.CANCELLED);
 
     // Return the counts
     return {
       draft: draftCount,
       completed: completedCount,
-      inReview: inReviewCount,
-      escalatedCount: escalatedCount,
+      verification: verificationCount,
+      reviewCount: reviewCount,
       actionRequiredCount: actionRequiredCount,
-      total: draftCount + completedCount + inReviewCount + escalatedCount + actionRequiredCount,
+      cancelledCount: cancelledCount,
+      total: draftCount + completedCount + verificationCount + reviewCount + actionRequiredCount + cancelledCount,
     };
   }
 
   async getPositionRequestUserClassifications(userId: string) {
-    const positionRequests = await this.prisma.positionRequest.findMany({
-      where: {
-        user_id: userId,
-      },
-      select: {
-        id: true,
-        parent_job_profile_id: true,
-        step: true,
-        reports_to_position_id: true,
-        user_id: true,
-        title: true,
-        position_number: true,
-        classification_id: true,
-        submission_id: true,
-        status: true,
-      },
-    });
-
-    // todo: this should not be needed if the foreign key relationship is working properly in schema.prisma
-
-    // Collect all unique classification IDs from the position requests
-    const classificationIds = [
-      ...new Set(positionRequests.map((pr) => pr.classification_id).filter((id) => id != null)),
-    ];
-
-    if (!classificationIds) return [];
-
-    // Fetch classifications based on the collected IDs
     const classifications = await this.prisma.classification.findMany({
       where: {
-        id: { in: classificationIds },
+        PositionRequest: {
+          some: {
+            user_id: userId,
+          },
+        },
       },
       select: {
         id: true,
+        employee_group_id: true,
+        peoplesoft_id: true,
         code: true,
       },
+      distinct: ['id', 'employee_group_id', 'peoplesoft_id'],
     });
 
     return classifications;
@@ -671,57 +728,47 @@ export class PositionRequestApiService {
     return states;
   }
 
-  async getPositionRequestSubmittedBy() {
-    const positionRequests = await this.prisma.positionRequest.findMany({
-      select: {
-        user_id: true,
+  async getPositionRequestSubmittedBy(userRoles: string[] = [], requestingFeature: RequestingFeature) {
+    const whereConditions: any = {
+      PositionRequest: {
+        some: {}, // This ensures we only get users who have submitted position requests
       },
-    });
+    };
 
-    // todo: AL-146 this should not be needed if the foreign key relationship is working properly in schema.prisma
-    // Collect all unique user IDs from the position requests
-    const userIds = [...new Set(positionRequests.map((pr) => pr.user_id).filter((id) => id != null))];
+    if (userRoles.includes('total-compensation') && requestingFeature === 'totalCompApprovedRequests') {
+      whereConditions.PositionRequest.some.status = { equals: 'COMPLETED' };
+    } else if (userRoles.includes('classification') && requestingFeature === 'classificationTasks') {
+      whereConditions.PositionRequest.some.status = { not: { equals: 'DRAFT' } };
+    }
 
-    // Fetch users based on the collected IDs
     const users = await this.prisma.user.findMany({
-      where: {
-        id: { in: userIds },
-      },
+      where: whereConditions,
       select: {
         id: true,
-        name: true, // Assuming 'name' is the field in your User model
+        name: true,
       },
+      distinct: ['id'], // This ensures we get unique users
     });
 
-    return Array.from(new Map(users.map((user) => [user.id, user])).values());
+    return users;
   }
 
   async getPositionRequestClassifications() {
-    const positionRequests = await this.prisma.positionRequest.findMany({
-      where: {
-        status: 'COMPLETED',
-      },
-      select: {
-        classification_id: true,
-      },
-    });
-
-    // todo: this should not be needed if the foreign key relationship is working properly in schema.prisma
-
-    // Collect all unique classification IDs from the position requests
-    const classificationIds = [
-      ...new Set(positionRequests.map((pr) => pr.classification_id).filter((id) => id !== null)),
-    ];
-
-    // Fetch classifications based on the collected IDs
     const classifications = await this.prisma.classification.findMany({
       where: {
-        id: { in: classificationIds },
+        PositionRequest: {
+          some: {
+            status: 'COMPLETED',
+          },
+        },
       },
       select: {
         id: true,
+        employee_group_id: true,
+        peoplesoft_id: true,
         code: true,
       },
+      distinct: ['id', 'employee_group_id', 'peoplesoft_id'],
     });
 
     return classifications;
@@ -763,9 +810,10 @@ export class PositionRequestApiService {
     return isDifferent;
   }
 
-  async updatePositionRequest(id: number, updateData: PositionRequestUpdateInput) {
-    // todo: AL-146 - tried to do this with a spread operator, but getting an error
+  async updatePositionRequest(id: number, updateData: PositionRequestUpdateInput, user_id: string) {
+    // todo: AL-146 - tried to do this with a spread operator, but getting an error (todo: this can now be fixed)
     let updatingAdditionalInfo = false;
+    const currentData = await this.getPositionRequest(id, user_id);
     const updatePayload: Prisma.PositionRequestUpdateInput = {
       additional_info: {} as Prisma.JsonValue,
     };
@@ -774,13 +822,26 @@ export class PositionRequestApiService {
       updatePayload.step = updateData.step;
     }
 
+    if (updateData.max_step_completed !== undefined) {
+      updatePayload.max_step_completed = updateData.max_step_completed;
+    }
+
     if (updateData.reports_to_position_id !== undefined) {
       updatePayload.reports_to_position_id = updateData.reports_to_position_id;
     }
 
-    if (updateData.profile_json_updated !== undefined) {
-      updatePayload.profile_json_updated =
-        updateData.profile_json_updated === null ? Prisma.DbNull : updateData.profile_json_updated;
+    if (updateData.profile_json !== undefined) {
+      updatePayload.profile_json = updateData.profile_json === null ? Prisma.DbNull : updateData.profile_json;
+      // attach original profile json
+      // no longer need to do this, as profile versioning can now be used to retreive original profile
+      // if (updateData.profile_json !== null) {
+      //   const originalProfile = await this.jobProfileService.getJobProfile(
+      //     updateData.profile_json.id,
+      //     updateData.profile_json.version,
+      //     userRoles,
+      //   );
+      //   updateData.profile_json.original_profile_json = originalProfile;
+      // }
     }
 
     if (updateData.orgchart_json !== undefined) {
@@ -789,19 +850,82 @@ export class PositionRequestApiService {
 
     if (updateData.title !== undefined) {
       updatePayload.title = updateData.title;
-    }
 
-    if (updateData.classification_id !== undefined) {
-      updatePayload.classification_id = updateData.classification_id;
-    }
+      // update the title of the isNewPosition node in the org chart
+      // this allows display of correct title on the node on the org chart when viewed via share link
 
-    if (updateData.status !== undefined) {
-      updatePayload.status = updateData.status;
+      const positionRequest = await this.prisma.positionRequest.findUnique({
+        where: { id: id },
+        select: { orgchart_json: true },
+      });
+
+      const orgChart = positionRequest.orgchart_json;
+
+      if (orgChart && typeof orgChart === 'object' && 'nodes' in orgChart) {
+        const nodes = orgChart.nodes as any[];
+        const isNewPositionNode = nodes.find((node) => node.data?.isNewPosition === true);
+        if (isNewPositionNode) {
+          isNewPositionNode.data.title = updateData.title;
+        }
+        updatePayload.orgchart_json = orgChart;
+      }
     }
 
     if (updateData.parent_job_profile !== undefined) {
-      if (updateData.parent_job_profile.connect.id == null) updatePayload.parent_job_profile = { disconnect: true };
-      else updatePayload.parent_job_profile = { connect: { id: updateData.parent_job_profile.connect.id } };
+      if (updateData.parent_job_profile.connect.id_version == null) {
+        updatePayload.parent_job_profile = { disconnect: true };
+      } else {
+        updatePayload.parent_job_profile = {
+          connect: {
+            id_version: {
+              id: updateData.parent_job_profile.connect.id_version.id,
+              version: updateData.parent_job_profile.connect.id_version.version,
+            },
+          },
+        };
+
+        const parentJobProfile = await this.jobProfileService.getJobProfile(
+          updateData.parent_job_profile.connect.id_version.id,
+          updateData.parent_job_profile.connect.id_version.version,
+        );
+        // if we have a department, try to filter for multiple classifications
+        if (parentJobProfile?.classifications.length > 1) {
+          const getClassification = async (parentJobProfile: any, department_id: string) => {
+            const isExcluded = (await this.departmentService.getDepartment({ where: { id: department_id } })).metadata
+              .is_statutorily_excluded;
+
+            const classifications = parentJobProfile.classifications;
+            return isExcluded
+              ? classifications.filter((cl) => cl.classification_employee_group_id == 'OEX')
+              : classifications.filter((cl) => cl.classification_employee_group_id != 'OEX');
+          };
+          const classifications = await getClassification(parentJobProfile, currentData.department_id);
+          // Set Classification IDs on positionRequest
+          updatePayload.classification = {
+            connect: {
+              id_employee_group_id_peoplesoft_id: {
+                id: classifications[0].classification.id,
+                employee_group_id: classifications[0].classification.employee_group_id,
+                peoplesoft_id: classifications[0].classification.peoplesoft_id,
+              },
+            },
+          };
+        } else if (parentJobProfile?.classifications && parentJobProfile?.classifications.length > 0) {
+          const classification = parentJobProfile.classifications[0].classification;
+          updatePayload.classification = {
+            connect: {
+              id_employee_group_id_peoplesoft_id: {
+                id: classification.id,
+                employee_group_id: classification.employee_group_id,
+                peoplesoft_id: classification.peoplesoft_id,
+              },
+            },
+          };
+        } else {
+          // If there's no classification, disconnect the existing one
+          updatePayload.classification = { disconnect: true };
+        }
+      }
     }
 
     if (updateData.department !== undefined) {
@@ -837,6 +961,11 @@ export class PositionRequestApiService {
           additionalInfo.work_location_id;
       }
 
+      if (additionalInfo.work_location_name !== undefined) {
+        (updatePayload.additional_info as Record<string, Prisma.JsonValue>).work_location_name =
+          additionalInfo.work_location_name;
+      }
+
       if (
         additionalInfo.excluded_mgr_position_number !== undefined &&
         additionalInfo.excluded_mgr_position_number !== null // it might be null if we're unsetting, e.g. when user changes supervisor on org chart
@@ -865,13 +994,24 @@ export class PositionRequestApiService {
         const orgChart = positionRequest.orgchart_json;
 
         if (orgChart && typeof orgChart === 'object' && 'nodes' in orgChart) {
+          // const excludedNodes = (orgChart.nodes as any[]).filter((node) => node.data?.externalDepartment === true);
+          // console.log('Excluded nodes:', excludedNodes);
+
           // Remove existing node with isExcludedManager = true
-          const updatedNodes = (orgChart.nodes as any[]).filter((node) => node.data?.isExcludedManager !== true);
+          // isExcludedManager indicates it's a custom added node
+          let updatedNodes = (orgChart.nodes as any[]).filter((node) => node.data?.externalDepartment !== true);
+
+          // const excludedEdges = (orgChart.edges as any[]).filter((edge) => {
+          //   const sourceNode = (orgChart.nodes as any[]).find((node) => node.id === edge.source);
+          //   const targetNode = (orgChart.nodes as any[]).find((node) => node.id === edge.target);
+          //   return sourceNode?.data?.externalDepartment === true || targetNode?.data?.externalDepartment === true;
+          // });
+          // console.log('Excluded edges:', excludedEdges);
 
           const updatedEdges = (orgChart.edges as any[]).filter((edge) => {
             const sourceNode = (orgChart.nodes as any[]).find((node) => node.id === edge.source);
             const targetNode = (orgChart.nodes as any[]).find((node) => node.id === edge.target);
-            return sourceNode?.data?.isExcludedManager !== true && targetNode?.data?.isExcludedManager !== true;
+            return sourceNode?.data?.externalDepartment !== true && targetNode?.data?.externalDepartment !== true;
           });
 
           const isExcludedManagerInOrgChart = (orgChart.nodes as any[]).some(
@@ -880,6 +1020,11 @@ export class PositionRequestApiService {
 
           // console.log('isExcludedManagerInOrgChart: ', isExcludedManagerInOrgChart);
 
+          // excluded manager is not in the org chart, add it
+          let updatedOrgChart: {
+            edges: any[];
+            nodes: any[];
+          } = { edges: [], nodes: [] };
           if (!isExcludedManagerInOrgChart) {
             // console.log('isExcludedManagerInOrgChart false');
 
@@ -894,7 +1039,7 @@ export class PositionRequestApiService {
 
             // console.log('topLevelPositionId: ', topLevelPositionId);
 
-            const updatedOrgChart = {
+            updatedOrgChart = {
               ...orgChart,
               nodes: [
                 ...updatedNodes,
@@ -903,7 +1048,8 @@ export class PositionRequestApiService {
                   data: {
                     id: additionalInfo.excluded_mgr_position_number,
                     title: employeeInfo[0].positionDescription,
-                    isExcludedManager: true,
+                    isExcludedManager: true, // mark node as excluded manager
+                    externalDepartment: true, // indicate this excluded manager is not part of the department
                     employees: employeeInfo.map((employee) => ({
                       id: employee.employeeId,
                       name: employee.employeeName,
@@ -937,15 +1083,75 @@ export class PositionRequestApiService {
                 },
               ],
             };
+          } else {
+            // excluded manager is in the org chart
+            // we may still need to update the org chart in case user changed excluded manager from
+            // excluded manager that was outside of the department to one being inside the department
+            // so we need to remove that from org chart
 
-            // console.log('new org chart: ', JSON.stringify(updatedOrgChart));
-            updatePayload.orgchart_json = updatedOrgChart;
+            updatedOrgChart = {
+              ...orgChart,
+              nodes: [...updatedNodes],
+              edges: [...updatedEdges],
+            };
           }
-        }
-      }
 
-      if (additionalInfo.comments !== undefined) {
-        (updatePayload.additional_info as Record<string, Prisma.JsonValue>).comments = additionalInfo.comments;
+          // find the excluded manager node and mark it as excluded manager
+          // unmark any other node that was previously marked as excluded manager
+          updatedNodes = updatedOrgChart.nodes.map((node) => {
+            if (node.id === additionalInfo.excluded_mgr_position_number) {
+              // console.log('found excluded manager, marking..');
+              return {
+                ...node,
+                data: {
+                  ...node.data,
+                  isExcludedManager: true,
+                },
+              };
+            } else {
+              return {
+                ...node,
+                data: {
+                  ...node.data,
+                  isExcludedManager: false,
+                },
+              };
+            }
+          });
+
+          // if updatePayload.additional_info.department_id is provided, update department_id on the node with isNewPosition == true
+          // this way new position node will have correct department id when viewed in shared mode
+          if (additionalInfo.department_id !== undefined) {
+            updatedNodes = updatedNodes.map((node) => {
+              if (node.data?.isNewPosition === true) {
+                return {
+                  ...node,
+                  data: {
+                    ...node.data,
+                    department: {
+                      id: additionalInfo.department_id,
+                      organization_id: additionalInfo.work_location_id,
+                      name: additionalInfo.work_location_name,
+                    },
+                  },
+                };
+              } else {
+                return node;
+              }
+            });
+          }
+
+          updatedOrgChart = {
+            ...orgChart,
+            nodes: [...updatedNodes],
+            edges: [...updatedOrgChart.edges],
+          };
+
+          updatePayload.orgchart_json = autolayout(updatedOrgChart) as {
+            edges: any[];
+            nodes: any[];
+          };
+        }
       }
     } else if (additionalInfo === null) {
       updatingAdditionalInfo = true;
@@ -958,6 +1164,16 @@ export class PositionRequestApiService {
     const positionRequest = await this.prisma.positionRequest.update({
       where: { id: id },
       data: updatePayload,
+      include: {
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+        classification: true,
+      },
     });
 
     return positionRequest;
@@ -1011,8 +1227,13 @@ export class PositionRequestApiService {
   async positionRequestNeedsReview(id: number) {
     const reasons = [];
     const positionRequest = await this.prisma.positionRequest.findUnique({ where: { id: id } });
+    if (positionRequest.parent_job_profile_id == null) {
+      return { result: false, reasons: reasons };
+    }
     const jobProfile = await this.prisma.jobProfile.findUnique({
-      where: { id: positionRequest.parent_job_profile_id },
+      where: {
+        id_version: { id: positionRequest.parent_job_profile_id, version: positionRequest.parent_job_profile_version },
+      },
       include: {
         jobFamilies: {
           include: {
@@ -1023,13 +1244,20 @@ export class PositionRequestApiService {
     });
 
     // If the Job Profile is denoted as requiring review, it _must_ be reviewed every time
+    let profilesRequiresReview = false;
     if (jobProfile.review_required === true) {
+      profilesRequiresReview = true;
       reasons.push('Job Profile is denoted as requiring review');
-      return { result: true, reasons: reasons };
+      // return { result: true, reasons: reasons };
+    }
+
+    if (positionRequest.profile_json === null) {
+      return { result: profilesRequiresReview, reasons: reasons };
     }
 
     // If the job profile is _not_ denoted as requiring review, it must be reviewed _only_ if significant sections have been changed
-    const prJobProfile = positionRequest.profile_json_updated as Record<string, any>;
+
+    const prJobProfile = positionRequest.profile_json as Record<string, any>;
 
     // Find position request job profile signficant sections
     const prJobProfileSignificantSections = {
@@ -1053,8 +1281,20 @@ export class PositionRequestApiService {
             obj.is_significant === true && (Object.keys(obj).indexOf('disabled') === -1 || obj.disabled === false),
         )
         .map((obj) => obj.text),
-      security_screenings: prJobProfile.security_screenings // all security screenings are significant - there is no is_significant flag
-        .filter((obj) => Object.keys(obj).indexOf('disabled') === -1 || obj.disabled === false)
+      professional_registration_requirements: prJobProfile.professional_registration_requirements
+        .filter(
+          (obj) =>
+            obj.is_significant === true && (Object.keys(obj).indexOf('disabled') === -1 || obj.disabled === false),
+        )
+        .map((obj) => obj.text),
+      security_screenings: prJobProfile.security_screenings
+        // check for undefined and treat it as significant, since significant flag was added later
+        // initially all security screenings were treated as significant
+        .filter(
+          (obj) =>
+            (obj.is_significant === true || obj.is_significant === undefined) &&
+            (Object.keys(obj).indexOf('disabled') === -1 || obj.disabled === false),
+        )
         .map((obj) => obj.text),
     };
 
@@ -1078,8 +1318,21 @@ export class PositionRequestApiService {
             obj.is_significant === true && (Object.keys(obj).indexOf('disabled') === -1 || obj.disabled === false),
         )
         .map((obj) => obj.text),
-      security_screenings: (jobProfile.security_screenings as Record<string, any>) // all security screenings are significant - there is no is_significant flag
-        .filter((obj) => Object.keys(obj).indexOf('disabled') === -1 || obj.disabled === false)
+      professional_registration_requirements:
+        (jobProfile.professional_registration_requirements as Record<string, any>)
+          ?.filter(
+            (obj) =>
+              obj.is_significant === true && (Object.keys(obj).indexOf('disabled') === -1 || obj.disabled === false),
+          )
+          ?.map((obj) => obj.text) ?? [],
+      security_screenings: (jobProfile.security_screenings as Record<string, any>)
+        // check for undefined and treat it as significant, since significant flag was added later
+        // initially all security screenings were treated as significant
+        .filter(
+          (obj) =>
+            (obj.is_significant === true || obj.is_significant === undefined) &&
+            (Object.keys(obj).indexOf('disabled') === -1 || obj.disabled === false),
+        )
         .map((obj) => obj.text),
     };
 
@@ -1102,6 +1355,11 @@ export class PositionRequestApiService {
         JSON.stringify(jobProfileSignficantSections.job_experience),
         JSON.stringify(prJobProfileSignificantSections.job_experience),
       ),
+      // Professional Registration Requirements
+      this.dataHasChanges(
+        JSON.stringify(jobProfileSignficantSections.professional_registration_requirements),
+        JSON.stringify(prJobProfileSignificantSections.professional_registration_requirements),
+      ),
       // Security Screenings
       this.dataHasChanges(
         JSON.stringify(jobProfileSignficantSections.security_screenings),
@@ -1121,129 +1379,192 @@ export class PositionRequestApiService {
         reasons.push('Changes in Job Experience');
       }
       if (significantSectionChanges[3]) {
+        reasons.push('Changes in Professional Registration and Certification Requirements');
+      }
+      if (significantSectionChanges[4]) {
         reasons.push('Changes in Security Screenings');
       }
     }
 
-    return { result: significantSectionChanges.some((value) => value === true), reasons: reasons };
+    return {
+      result: significantSectionChanges.some((value) => value === true) || profilesRequiresReview,
+      reasons: reasons,
+    };
   }
 
-  async createOrUpdateCrmIncidentForPositionRequest(id: number) {
-    const needsReview = (await this.positionRequestNeedsReview(id)).result;
-
-    const positionRequest = await this.prisma.positionRequest.findUnique({ where: { id } });
-    const classification = await this.classificationService.getClassification({
-      where: { id: positionRequest.classification_id },
-    });
-    const { metadata } = await this.prisma.user.findUnique({ where: { id: positionRequest.user_id } });
-    const contactId =
-      ((metadata ?? {}) as Record<string, any>).crm?.contact_id ?? (process.env.TEST_ENV === 'true' ? 231166 : null);
-
-    // without contactId we cannot create an incident
-    // this can happen if this is new staff member and they have not been assigned a CRM contact yet
-    if (contactId === null) {
-      throw AlexandriaError('CRM Contact ID not found');
-    }
-
-    const additionalInfo = positionRequest.additional_info as AdditionalInfo | null;
-
-    const paylist_department = await this.prisma.department.findUnique({
-      where: { id: additionalInfo.department_id },
-    });
-    const location = await this.prisma.location.findUnique({ where: { id: paylist_department.location_id } });
-    const parentJobProfile = await this.prisma.jobProfile.findUnique({
-      where: { id: positionRequest.parent_job_profile_id },
-    });
-
-    const jobProfileDocument =
-      positionRequest.profile_json_updated != null
-        ? generateJobProfile({
-            jobProfile: positionRequest.profile_json_updated as Record<string, any>,
-            parentJobProfile: parentJobProfile,
-          })
-        : null;
-    const jobProfileBase64 = await Packer.toBase64String(jobProfileDocument);
-
-    const orgChartBase64 =
-      positionRequest.orgchart_json != null ? btoa(JSON.stringify(positionRequest.orgchart_json)) : null;
-
-    const zeroFilledPositionNumber =
-      positionRequest.position_number != null ? String(positionRequest.position_number).padStart(8, '0') : null;
-
-    const data: IncidentCreateUpdateInput = {
-      subject: `Job Store Beta - Position Number Request - ${classification.code}`,
-      primaryContact: { id: contactId },
-      assignedTo: {
-        staffGroup: {
-          lookupName: 'HRSC - Classification',
+  async createOrUpdateCrmIncidentForPositionRequest(id: number, orgchartPng: string, comment: string) {
+    try {
+      const needsReview = (await this.positionRequestNeedsReview(id)).result;
+      const formattedDate = dayjs().format('YYYYMMDD');
+      const positionRequest = await this.prisma.positionRequest.findUnique({ where: { id } });
+      const classification = await this.classificationService.getClassification({
+        where: {
+          id_employee_group_id_peoplesoft_id: {
+            id: positionRequest.classification_id,
+            employee_group_id: positionRequest.classification_employee_group_id,
+            peoplesoft_id: positionRequest.classification_peoplesoft_id,
+          },
         },
-      },
-      statusWithType: {
-        status: {
-          id: needsReview ? IncidentStatus.Unresolved : IncidentStatus.Solved,
+      });
+      const { metadata } = await this.prisma.user.findUnique({ where: { id: positionRequest.user_id } });
+      const contactId =
+        ((metadata ?? {}) as Record<string, any>).crm?.contact_id ?? (process.env.TEST_ENV === 'true' ? 231166 : null);
+
+      // without contactId we cannot create an incident
+      // this can happen if this is new staff member and they have not been assigned a CRM contact yet
+      if (contactId === null) {
+        throw AlexandriaError('CRM Contact ID not found');
+      }
+
+      const additionalInfo = positionRequest.additional_info as AdditionalInfo | null;
+
+      // Fetch the parent job profile with its classification info
+      const parentJobProfile = await this.prisma.jobProfile.findUnique({
+        where: {
+          id_version: {
+            id: positionRequest.parent_job_profile_id,
+            version: positionRequest.parent_job_profile_version,
+          },
         },
-      },
-      // Need to determine usage of this block
-      category: {
-        id: 1930,
-      },
-      severity: {
-        lookupName: '4 - Routine',
-      },
-      threads: [
-        {
-          channel: {
-            id: IncidentThreadChannel.CSSWeb,
+        include: {
+          classifications: {
+            include: {
+              classification: true,
+            },
           },
-          contentType: {
-            id: IncidentThreadContentType.TextHtml,
+        },
+      });
+
+      // Augment the profile data with classification info
+      const jobProfile = {
+        ...(positionRequest.profile_json as Record<string, any>),
+        classifications: parentJobProfile.classifications,
+      } as Record<string, any>;
+
+      // const jobProfile = positionRequest.profile_json as Record<string, any>;
+      const paylist_department = await this.prisma.department.findUnique({
+        where: { id: additionalInfo.department_id },
+      });
+      const location = await this.prisma.location.findUnique({ where: { id: paylist_department.location_id } });
+      const supervisorProfile = await this.positionService.getPositionProfile(
+        additionalInfo.excluded_mgr_position_number.toString(),
+      );
+
+      const jobProfileDocument =
+        positionRequest.profile_json != null
+          ? generateJobProfile({
+              jobProfile,
+              positionRequest,
+              supervisorProfile: supervisorProfile.length > 0 ? supervisorProfile[0] : null,
+            })
+          : null;
+      const jobProfileBase64 = await Packer.toBase64String(jobProfileDocument);
+
+      const zeroFilledPositionNumber =
+        positionRequest.position_number != null ? String(positionRequest.position_number).padStart(8, '0') : null;
+
+      const pngFileName = `Organization Chart ${zeroFilledPositionNumber} ${positionRequest.title} ${formattedDate}.png`;
+
+      const data: IncidentCreateUpdateInput = {
+        subject: `Job Store Beta - Position Number Request - ${classification.code}`,
+        primaryContact: { id: contactId },
+        assignedTo: {
+          staffGroup: {
+            lookupName: 'HRSC - Classification',
           },
-          entryType: {
-            id: IncidentThreadEntryType.PrivateNote,
+        },
+        statusWithType: {
+          status: {
+            // if user is re-submitting, set crm status to updated, always
+            id:
+              positionRequest.status === PositionRequestStatus.ACTION_REQUIRED
+                ? IncidentStatus.Updated
+                : // if user is not resubmitting (submitting for the first time), set status based on needsReview
+                  needsReview
+                  ? IncidentStatus.Unresolved
+                  : IncidentStatus.Solved,
           },
-          text: `   
+        },
+        // Need to determine usage of this block
+        category: {
+          id: 1930,
+        },
+        severity: {
+          lookupName: '4 - Routine',
+        },
+        threads: [
+          {
+            channel: {
+              id: IncidentThreadChannel.CSSWeb,
+            },
+            contentType: {
+              id: IncidentThreadContentType.TextHtml,
+            },
+            entryType: {
+              id: IncidentThreadEntryType.PrivateNote,
+            },
+            text: `   
           <div>         
-            <a href="https://jobstore.apps.silver.devops.gov.bc.ca/classification-tasks/${
+            <a href="https://jobstore.gov.bc.ca/requests/positions/manage/${
               positionRequest.id
             }">View this position in the Job Store</a>
             <br />
             <strong>
             ${
               positionRequest.position_number != null
-                ? `The ${needsReview === true ? 'proposed' : 'approved'} position # is: ${zeroFilledPositionNumber}`
+                ? `The ${
+                    // if user is re-submitting, it means position was originally created in proposed state
+                    // if not re-submitting, it depends on needsReview flag
+                    positionRequest.status === PositionRequestStatus.ACTION_REQUIRED || needsReview === true
+                      ? 'proposed'
+                      : 'approved'
+                  } position # is: ${zeroFilledPositionNumber}`
                 : `No position was created for this request`
             }
             </strong> 
           </div>`,
-        },
-        {
-          channel: {
-            id: IncidentThreadChannel.CSSWeb,
           },
-          contentType: {
-            id: IncidentThreadContentType.TextHtml,
-          },
-          entryType: {
-            id: IncidentThreadEntryType.Customer,
-          },
-          text: `
+          {
+            channel: {
+              id: IncidentThreadChannel.CSSWeb,
+            },
+            contentType: {
+              id: IncidentThreadContentType.TextHtml,
+            },
+            entryType: {
+              id: IncidentThreadEntryType.Customer,
+            },
+            text: `
           <div>
-            ${
-              (additionalInfo.comments ?? '').length > 0
-                ? `
-            <br />
-            <strong>The following note was added to this position request:</strong>
-            <br />
-            <em>${additionalInfo.comments}</em>`
-                : ''
-            }
-            <br />
+          ${
+            (comment ?? '').length > 0
+              ? `
+          <br />
+          <strong>The following note was added to this position request:</strong>
+          <br />
+          <em>${comment}</em> <br />`
+              : ''
+          }
+          ${
+            // user is re-submitting (so initially was requiring verification) but now selected a profile that does not reuqire review
+            positionRequest.status === PositionRequestStatus.ACTION_REQUIRED && !needsReview
+              ? `
+          <strong>Note:</strong> User modified the profile such that it no longer requires a review. You still need to set the status of this request to 'Solved' and approve the position in PeopleSoft as usual.
+          <br />
+          `
+              : ``
+          }
+          
             <ul>
               <li>Have you received executive approval (Depuity Minister or delegate) for this new position?    Yes</li>
               <li>What is the effective date?    ${dayjs().format('MMM D, YYYY')}</li>
               <li>What is the pay list/department ID number?    ${paylist_department.id}</li>
               <li>What is the expected classification level?    ${classification.code} (${classification.name})</li>
-              <li>Is this position included or excluded?    Included</li>
+              <li>Is this position included or excluded?    ${
+                classification.employee_group_id === 'MGT' || classification.employee_group_id === 'OEX'
+                  ? 'Excluded'
+                  : 'Included'
+              }</li>
               <li>Is the position full-time or part-time?    Full-time</li>
               <li>What is the job title?    ${positionRequest.title}</li>
               <li>Is this a regular or temporary position?    Regular</li>
@@ -1253,7 +1574,7 @@ export class PositionRequestApiService {
               <li>Where is the position location?    ${location.name}</li>
               <li>Which position number will the position report to?    ${positionRequest.reports_to_position_id}</li>
               <li>Is a Job Store profile being used? If so, what is the Job Store profile number?    ${
-                parentJobProfile.number
+                jobProfile.number
               }</li>
               <li>Has the classification been approved by Classification Services? If so, what is the E-Class case number? (Not required if using Job Store profile)    n/a</li>
               <li>Please attach a copy of the job profile you will be using.    Attached</li>
@@ -1262,45 +1583,62 @@ export class PositionRequestApiService {
           </div>
 
           `,
-        },
-      ],
-      fileAttachments: [
-        {
-          name: `${zeroFilledPositionNumber} - ${positionRequest.title} ${classification.code}.docx`.substring(0, 40),
-          fileName: `${zeroFilledPositionNumber} - ${positionRequest.title} ${classification.code}.docx`,
-          contentType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-          data: jobProfileBase64,
-        },
-        {
-          name: `${zeroFilledPositionNumber} - Organization Chart.json`.substring(0, 40),
-          fileName: `${zeroFilledPositionNumber} - Organization Chart.json`,
-          contentType: 'application/json',
-          data: orgChartBase64,
-        },
-      ],
-    };
+          },
+        ],
+        fileAttachments: [
+          {
+            name: `${zeroFilledPositionNumber} - ${positionRequest.title} ${classification.code}.docx`.substring(0, 40),
+            fileName: `${zeroFilledPositionNumber} - ${positionRequest.title} ${classification.code}.docx`,
+            contentType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+            data: jobProfileBase64,
+          },
+          ...(orgchartPng && orgchartPng.trim() !== ''
+            ? [
+                {
+                  name: 'Org chart',
+                  fileName: pngFileName,
+                  contentType: 'image/png',
+                  data: orgchartPng,
+                },
+              ]
+            : []),
+        ],
+      };
 
-    let incident: Record<string, any> = {};
-    if (positionRequest.crm_id === null) {
-      // console.log(JSON.stringify(data));
+      let incident: Record<string, any> = {};
+      if (positionRequest.crm_id === null) {
+        // console.log(JSON.stringify(data));
 
-      this.logger.debug('incident creation ' + JSON.stringify(data));
-      incident = await this.crmService.createIncident(data);
-    } else {
-      await this.crmService.updateIncident(positionRequest.crm_id, data);
-      incident = await this.crmService.getIncident(positionRequest.crm_id);
+        // this.logger.debug('incident creation ' + JSON.stringify(data));
+        incident = await this.crmService.createIncident(data);
+      } else {
+        await this.crmService.updateIncident(positionRequest.crm_id, data);
+      }
+      // re-fetch the data in the structure we need
+      incident = await this.crmService.getIncident(
+        positionRequest.crm_id != null ? positionRequest.crm_id : incident.id,
+      );
+
+      if (incident.crm_lookup_name != null) {
+        await this.prisma.positionRequest.update({
+          where: { id: positionRequest.id },
+          data: {
+            crm_lookup_name: incident.crm_lookup_name,
+          },
+        });
+      }
+
+      // console.log('incident is ', incident);
+
+      return incident;
+    } catch (error) {
+      if (error instanceof AlexandriaErrorClass) {
+        throw error; // Rethrow the AlexandriaError
+      } else {
+        this.logger.error(error);
+        throw AlexandriaError('Failed to create or update CRM service request');
+      }
     }
-
-    if (incident.lookupName != null) {
-      await this.prisma.positionRequest.update({
-        where: { id: positionRequest.id },
-        data: {
-          crm_lookup_name: incident.lookupName,
-        },
-      });
-    }
-
-    return incident;
   }
 
   async createPositionForPositionRequest(id: number) {
@@ -1309,59 +1647,45 @@ export class PositionRequestApiService {
     const positionRequest = await this.prisma.positionRequest.findUnique({ where: { id } });
     const additionalInfo = positionRequest.additional_info as AdditionalInfo | null;
 
-    const classification = await this.prisma.classification.findUnique({
-      where: { id: positionRequest.classification_id },
-    });
     const paylist_department = await this.prisma.department.findUnique({
       select: { id: true, organization: { select: { id: true } } },
       where: { id: additionalInfo.department_id },
     });
 
-    let data: PositionCreateInput;
+    const employees = (
+      await this.peoplesoftService.getEmployeesForPositions([additionalInfo.excluded_mgr_position_number])
+    ).get(additionalInfo.excluded_mgr_position_number);
+    const employeeId = employees.length > 0 ? employees[0].id : null;
 
-    switch (classification.employee_group_id) {
-      case 'MGT':
-        data = {
-          BUSINESS_UNIT: paylist_department.organization.id,
-          DEPTID: paylist_department.id,
-          JOBCODE: positionRequest.classification_id,
-          REPORTS_TO: positionRequest.reports_to_position_id,
-          POSN_STATUS: positionRequestNeedsReview.result === true ? PositionStatus.Proposed : PositionStatus.Active,
-          DESCR: positionRequest.title,
-          REG_TEMP: PositionDuration.Regular,
-          FULL_PART_TIME: PositionType.FullTime,
-        };
-        break;
-      case 'GEU':
-      case 'OEX':
-      case 'PEA': {
-        const employees = (
-          await this.peoplesoftService.getEmployeesForPositions([additionalInfo.excluded_mgr_position_number])
-        ).get(additionalInfo.excluded_mgr_position_number);
-        const employeeId = employees.length > 0 ? employees[0].id : null;
+    const data = {
+      BUSINESS_UNIT: paylist_department.organization.id,
+      DEPTID: paylist_department.id,
+      JOBCODE: positionRequest.classification_id,
+      REPORTS_TO: positionRequest.reports_to_position_id,
+      POSN_STATUS: positionRequestNeedsReview.result === true ? PositionStatus.Proposed : PositionStatus.Active,
+      DESCR: positionRequest.title,
+      REG_TEMP: PositionDuration.Regular,
+      FULL_PART_TIME: PositionType.FullTime,
+      TGB_E_CLASS: `P${(positionRequest.profile_json as Record<string, any>).number}`,
+      TGB_APPRV_MGR: employeeId,
+    };
 
-        data = {
-          BUSINESS_UNIT: paylist_department.organization.id,
-          DEPTID: paylist_department.id,
-          JOBCODE: positionRequest.classification_id,
-          REPORTS_TO: positionRequest.reports_to_position_id,
-          POSN_STATUS: positionRequestNeedsReview.result === true ? PositionStatus.Proposed : PositionStatus.Active,
-          DESCR: positionRequest.title,
-          REG_TEMP: PositionDuration.Regular,
-          FULL_PART_TIME: PositionType.FullTime,
-          TGB_E_CLASS: `P${(positionRequest.profile_json_updated as Record<string, any>).number}`,
-          TGB_APPRV_MGR: employeeId,
-        };
-
-        break;
+    let position;
+    try {
+      position = await this.peoplesoftService.createPosition(data as PositionCreateInput);
+      if (position.positionNbr == null || position.positionNbr === '') {
+        this.logger.error('Failed to create position in PeopleSoft: ' + position.errMessage);
+        throw AlexandriaError('Failed to create position in PeopleSoft');
       }
+    } catch (error) {
+      this.logger.error(error);
+      throw AlexandriaError('Failed to create position in PeopleSoft');
     }
 
-    const position = await this.peoplesoftService.createPosition(data);
-
-    return position;
+    return [position, positionRequestNeedsReview.result];
   }
 
+  //deprecated
   async updatePositionRequestStatus(id: number, status: number) {
     return await this.crmService.updateIncidentStatus(id, status);
   }

@@ -1,16 +1,18 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { ArrowLeftOutlined, EllipsisOutlined } from '@ant-design/icons';
-import { Button, Col, FormInstance, List, Menu, Modal, Popover, Row, Typography } from 'antd';
+import { Button, Col, FormInstance, List, Menu, Modal, Row, Typography } from 'antd';
 import { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
+import AccessiblePopoverMenu from '../../components/app/common/components/accessible-popover-menu';
 import LoadingComponent from '../../components/app/common/components/loading.component';
-import { ClassificationModel, JobProfileModel } from '../../redux/services/graphql-api/job-profile-types';
+import { JobProfileModel } from '../../redux/services/graphql-api/job-profile-types';
 import {
   GetPositionRequestResponseContent,
   useDeletePositionRequestMutation,
   useUpdatePositionRequestMutation,
 } from '../../redux/services/graphql-api/position-request.api';
 import { WizardSteps } from '../wizard/components/wizard-steps.component';
+import WizardContentWrapper from './components/wizard-content-wrapper';
 import WizardEditProfile from './components/wizard-edit-profile';
 import { WizardPageWrapper } from './components/wizard-page-wrapper.component';
 import StatusIndicator from './components/wizard-position-request-status-indicator';
@@ -26,6 +28,7 @@ interface WizardEditPageProps {
   onNext?: () => void;
   disableBlockingAndNavigateHome: () => void;
   positionRequest: GetPositionRequestResponseContent | null;
+  setCurrentStep: React.Dispatch<React.SetStateAction<number | null>>;
 }
 
 export const WizardEditPage: React.FC<WizardEditPageProps> = ({
@@ -33,38 +36,36 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
   onNext,
   disableBlockingAndNavigateHome,
   positionRequest,
+  setCurrentStep,
 }) => {
   // "wizardData" may be the data that was already saved in context. This is used to support "back" button
   // functionality from the review screen (so that form contains data the user has previously entered)
   const {
     wizardData,
     setWizardData,
-    classificationsData,
+    // getClassificationById,
     positionRequestProfileId,
+    positionRequestProfileVersion,
     positionRequestId,
     setRequiresVerification,
+    setPositionRequestData,
   } = useWizardContext();
+
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingBack, setIsLoadingBack] = useState(false);
   const [saveAndQuitLoading, setSaveAndQuitLoading] = useState(false);
+  const [isFormModified, setIsFormModified] = useState(false);
+
+  const handleFormChange = (state: boolean) => {
+    setIsFormModified(state);
+  };
 
   const [updatePositionRequest] = useUpdatePositionRequestMutation();
-
-  const profileId = positionRequestProfileId;
-
-  function getClassificationById(id: string): ClassificationModel | undefined {
-    // If data is loaded, find the classification by ID
-    if (classificationsData) {
-      return classificationsData.classifications.find(
-        (classification: ClassificationModel) => classification.id === id,
-      );
-    }
-    return;
-  }
 
   function transformFormData(originalData: any): JobProfileModel {
     return {
       id: originalData.id,
+      version: originalData.version,
       type: 'USER',
       title: originalData.title,
       number: originalData.number,
@@ -82,29 +83,44 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
           isCustom: acc.isCustom,
           disabled: acc.disabled,
         }))
-        .filter((acc) => acc.text.trim() !== ''),
-      education: originalData.education.filter((edu: { text: string }) => edu.text.trim() !== ''),
-      job_experience: originalData.job_experience.filter((exp: { text: string }) => exp.text.trim() !== ''),
+        .filter((acc) => !acc.isCustom || acc.text.trim() !== ''), // remove items only if they are custom and empty
+      education: originalData.education.filter(
+        (edu: { text: string; isCustom?: boolean }) => !edu.isCustom || edu.text.trim() !== '',
+      ),
+      job_experience: originalData.job_experience.filter(
+        (exp: { text: string; isCustom?: boolean }) => !exp.isCustom || exp.text.trim() !== '',
+      ),
       behavioural_competencies: originalData.behavioural_competencies,
-      classifications: originalData.classifications.map((classification: any) => ({
-        classification: getClassificationById(classification.classification),
-      })),
+      // classifications: originalData.classifications.map((classification: any) => ({
+      //   classification: getClassificationById(classification.classification),
+      // })),
       role: { id: originalData.roleId || null },
       role_type: { id: originalData.roleTypeId || null },
-      scope: { id: originalData.scopeId || null },
+      scopes: [], //{ id: originalData.scopeId || null },
       reports_to: [],
       organizations: [],
       review_required: false,
       professions: [],
-      professional_registration_requirements: originalData.professional_registration_requirements.filter(
-        (reg: { text: string }) => reg.text.trim() !== '',
-      ),
+      professional_registration_requirements: [
+        ...originalData.professional_registration_requirements,
+        ...originalData.optional_professional_registration_requirements,
+      ]
+        .map((acc) => ({
+          text: acc.text,
+          is_significant: acc.is_significant,
+          is_readonly: acc.is_readonly,
+          isCustom: acc.isCustom,
+          disabled: acc.disabled,
+        }))
+        .filter((acc) => !acc.isCustom || acc.text.trim() !== ''), // remove items only if they are custom and empty
       optional_requirements: originalData.optional_requirements.filter(
-        (req: { text: string }) => req.text.trim() !== '',
+        (req: { text: string; isCustom?: boolean }) => !req.isCustom || req.text.trim() !== '',
       ),
-      preferences: originalData.preferences.filter((pref: { text: string }) => pref.text.trim() !== ''),
+      preferences: originalData.preferences.filter(
+        (pref: { text: string; isCustom?: boolean }) => !pref.isCustom || pref.text.trim() !== '',
+      ),
       knowledge_skills_abilities: originalData.knowledge_skills_abilities.filter(
-        (ksa: { text: string }) => ksa.text.trim() !== '',
+        (ksa: { text: string; isCustom?: boolean }) => !ksa.isCustom || ksa.text.trim() !== '',
       ),
       willingness_statements: originalData.willingness_statements
         .map((proviso: any) => ({
@@ -112,12 +128,24 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
           isCustom: proviso.isCustom,
           disabled: proviso.disabled,
         }))
-        .filter((stmt: { text: string }) => stmt.text.trim() !== ''),
-      security_screenings: originalData.security_screenings.filter(
-        (screening: { text: string }) => screening.text.trim() !== '',
-      ),
+        .filter((stmt: { text: string; isCustom?: boolean }) => !stmt.isCustom || stmt.text.trim() !== ''),
+      security_screenings: [...originalData.security_screenings, ...originalData.optional_security_screenings]
+        .map((acc) => ({
+          text: acc.text,
+          is_significant: acc.is_significant,
+          is_readonly: acc.is_readonly,
+          isCustom: acc.isCustom,
+          disabled: acc.disabled,
+        }))
+        .filter((acc) => !acc.isCustom || acc.text.trim() !== ''), // remove items only if they are custom and empty
+
+      // originalData.security_screenings.filter(
+      //   (screening: { text: string; isCustom?: boolean }) => !screening.isCustom || screening.text.trim() !== '',
+      // ),
       all_organizations: false,
       all_reports_to: false,
+      owner: originalData.owner,
+      created_at: originalData.created_at,
     };
   }
 
@@ -130,7 +158,7 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
 
   // const navigate = useNavigate();
 
-  const saveData = async (action: string) => {
+  const saveData = async (action: string, step?: number) => {
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const errors = Object.values(wizardEditProfileRef.current?.getFormErrors()).map((error: any) => {
       const message =
@@ -165,7 +193,7 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
     else setSaveAndQuitLoading(true);
 
     try {
-      // Create an entry in My Positions
+      // Create an entry in My Position Requests
 
       const formData = wizardEditProfileRef.current?.getFormData();
       // console.log('formData: ', formData);
@@ -173,18 +201,41 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
       const transformedData = transformFormData(formData);
       // console.log('transformedData: ', transformedData);
 
-      // return;
+      // Check if any classification is undefined or if the array is empty
+      // const hasUndefinedClassification = transformedData?.classifications?.some(
+      //   (item) => item.classification === undefined,
+      // );
+      // const isClassificationsEmpty = transformedData?.classifications?.length === 0;
+
+      // if (
+      //   (hasUndefinedClassification || isClassificationsEmpty || !transformedData?.classifications) &&
+      action === 'next';
+      // ) {
+      //   Modal.error({
+      //     title: 'Error',
+      //     content: 'Could not find classification, please try again later or contact an administrator.',
+      //   });
+      //   return;
+      // }
+
+      // if (transformedData.classifications == [{}]) console.log('whhoops');
 
       setWizardData(transformedData);
       try {
-        if (positionRequestId)
-          await updatePositionRequest({
+        if (positionRequestId) {
+          const resp = await updatePositionRequest({
             id: positionRequestId,
-            step: action === 'next' ? 3 : action === 'back' ? 1 : 2,
-            profile_json_updated: transformedData,
+            step: !step && step != 0 ? (action === 'next' ? 4 : action === 'back' ? 2 : 3) : step,
+            // increment max step only if it's not incremented
+            ...(action === 'next' && (positionRequest?.max_step_completed ?? 0) < 4 && !step && step != 0
+              ? { max_step_completed: 4 }
+              : {}),
+            profile_json: transformedData,
             title: formData.title.text,
-            // classification_code: classification ? classification.code : '',
+            returnFullObject: true,
           }).unwrap();
+          setPositionRequestData(resp.updatePositionRequest ?? null);
+        }
       } catch (error) {
         // Handle the error, possibly showing another modal
         Modal.error({
@@ -195,7 +246,8 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
       }
 
       if (action === 'next') {
-        if (onNext) onNext();
+        if (step || step == 0) setCurrentStep(step);
+        else if (onNext) onNext();
       } else if (action === 'back') {
         if (onBack) {
           // console.log('onback');
@@ -205,6 +257,7 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
       return true;
     } catch (e) {
       // throw e;
+      console.log('error: ', e);
       return false;
     } finally {
       if (action === 'next') setIsLoading(false);
@@ -213,8 +266,8 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
     }
   };
 
-  const onNextCallback = async () => {
-    await saveData('next');
+  const onNextCallback = async ({ step }: { step?: number } = {}) => {
+    await saveData('next', step);
   };
 
   const onBackCallback = async () => {
@@ -248,7 +301,7 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
 
   const getMenuContent = () => {
     return (
-      <Menu>
+      <Menu className="wizard-menu">
         <Menu.Item key="save" onClick={saveAndQuit} disabled={saveAndQuitLoading}>
           <div style={{ position: 'relative' }}>
             {saveAndQuitLoading && (
@@ -262,7 +315,7 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
             <div style={{ padding: '5px 0' }}>
               Save and quit
               <Typography.Text type="secondary" style={{ marginTop: '5px', display: 'block' }}>
-                Saves your progress. You can access this position request from the 'My Positions' page.
+                Saves your progress. You can access this position request from the 'My Position Requests' page.
               </Typography.Text>
             </div>
           </div>
@@ -273,13 +326,52 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
             <div style={{ padding: '5px 0' }}>
               Delete
               <Typography.Text type="secondary" style={{ marginTop: '5px', display: 'block' }}>
-                Removes this position request from 'My Positions'. This action is irreversible.
+                Removes this position request from 'My Position Requests'. This action is irreversible.
               </Typography.Text>
             </div>
           </Menu.Item>
         </Menu.ItemGroup>
       </Menu>
     );
+  };
+
+  // const [isSwitchStepLoading, setIsSwitchStepLoading] = useState(false);
+
+  const switchStep = async (step: number) => {
+    if (isFormModified) {
+      Modal.confirm({
+        title: 'Unsaved Changes',
+        content: (
+          <div>
+            <p>You have unsaved changes. Do you want to save them before switching steps?</p>
+          </div>
+        ),
+        // okButtonProps: {
+        //   loading: isSwitchStepLoading,
+        // },
+        // cancelButtonProps: {
+        //   loading: isSwitchStepLoading,
+        // },
+        okText: 'Save',
+        cancelText: 'Cancel',
+        onOk: async () => {
+          // setIsSwitchStepLoading(true);
+          onNextCallback({ step: step });
+          setIsFormModified(false);
+          // setIsSwitchStepLoading(false);
+        },
+        onCancel: () => {
+          // Do nothing if the user cancels
+        },
+      });
+    } else {
+      setCurrentStep(step);
+      if (positionRequestId)
+        await updatePositionRequest({
+          id: positionRequestId,
+          step: step,
+        });
+    }
   };
 
   return (
@@ -299,21 +391,38 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
       hpad={false}
       grayBg={false}
       pageHeaderExtra={[
-        <div style={{ marginRight: '1rem' }}>
+        <div style={{ marginRight: '1rem' }} key="statusIndicator">
           <StatusIndicator status={positionRequest?.status ?? ''} />
         </div>,
-        <Popover content={getMenuContent()} trigger="click" placement="bottomRight">
-          <Button icon={<EllipsisOutlined />}></Button>
-        </Popover>,
+
+        <AccessiblePopoverMenu
+          key="menu"
+          triggerButton={<Button data-testid="ellipsis-menu" tabIndex={-1} icon={<EllipsisOutlined />}></Button>}
+          content={getMenuContent()}
+          ariaLabel="Open position request menu"
+        ></AccessiblePopoverMenu>,
+
         <Button onClick={onBackCallback} key="back" data-testid="back-button" loading={isLoadingBack}>
           Back
         </Button>,
-        <Button key="next" type="primary" onClick={onNextCallback} data-testid="next-button" loading={isLoading}>
+        <Button
+          key="next"
+          type="primary"
+          onClick={() => {
+            onNextCallback();
+          }}
+          data-testid="next-button"
+          loading={isLoading}
+        >
           Save and next
         </Button>,
       ]}
     >
-      <WizardSteps current={2}></WizardSteps>
+      <WizardSteps
+        current={3}
+        onStepClick={switchStep}
+        maxStepCompleted={positionRequest?.max_step_completed}
+      ></WizardSteps>
       {/* <WizardEditControlBar
         style={{ marginBottom: '1rem' }}
         onNext={onNextCallback}
@@ -322,31 +431,22 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
         nextText="Save and Next"
       /> */}
 
-      <div
-        style={{
-          overflow: 'hidden',
-          position: 'relative',
-          height: '100%',
-          background: 'rgb(240, 242, 245)',
-          marginLeft: '-1rem',
-          marginRight: '-1rem',
-          marginTop: '-1px',
-          padding: '2rem 1rem',
-        }}
-      >
+      <WizardContentWrapper>
         <Row justify="center" gutter={16}>
-          <Col>
+          <Col style={{ paddingTop: '24px' }}>
             <WizardEditProfile
               onVerificationRequiredChange={setRequiresVerification}
               ref={wizardEditProfileRef}
               profileData={wizardData}
-              id={profileId?.toString()}
+              id={positionRequestProfileId?.toString()}
+              version={positionRequestProfileVersion?.toString()}
               submitText="Review Profile"
               showBackButton={true}
+              handleFormChange={handleFormChange}
             ></WizardEditProfile>
           </Col>
         </Row>
-      </div>
+      </WizardContentWrapper>
     </WizardPageWrapper>
   );
 };

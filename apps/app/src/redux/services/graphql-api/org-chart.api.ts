@@ -2,6 +2,17 @@ import { gql } from 'graphql-request';
 import { Edge, Node } from 'reactflow';
 import { graphqlApi } from '.';
 
+export interface OrgChartDepartmentFilterModel {
+  label: string;
+  value: string;
+  selectable: boolean;
+  children: { label: string; value: string; filterString: string }[];
+}
+
+export interface GetOrgChartDepartmentFilterResponse {
+  getOrgChartDepartmentFilter: OrgChartDepartmentFilterModel;
+}
+
 export interface OrgChartModel {
   edges: Edge[];
   nodes: Node[];
@@ -59,7 +70,34 @@ export const orgChartApi = graphqlApi.injectEndpoints({
         };
       },
     }),
+    getOrgChartDepartmentFilter: build.query<GetOrgChartDepartmentFilterResponse, void>({
+      query: () => {
+        return {
+          document: gql`
+            query GetOrgChartDepartmentFilter {
+              getOrgChartDepartmentFilter {
+                label
+                value
+                selectable
+                children {
+                  label
+                  value
+                  filterString
+                  location_id
+                  location_name
+                }
+              }
+            }
+          `,
+        };
+      },
+    }),
   }),
 });
 
-export const { useGetOrgChartQuery, useLazyGetOrgChartQuery } = orgChartApi;
+export const {
+  useGetOrgChartQuery,
+  useGetOrgChartDepartmentFilterQuery,
+  useLazyGetOrgChartQuery,
+  useLazyGetOrgChartDepartmentFilterQuery,
+} = orgChartApi;

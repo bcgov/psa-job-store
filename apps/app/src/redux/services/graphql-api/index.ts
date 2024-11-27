@@ -89,13 +89,13 @@ const baseQuery = async (args: any, api: any, extraOptions: any) => {
       // if it's unauthorized, do not show the error toast -  the system will handle the redirect to login page
       if (errorCode == 'UNAUTHENTICATED') return result;
 
-      isToastShown = true;
-
       if (errorMessage.startsWith('ALEXANDRIA_ERROR:') && !suppressErrorToast) {
+        isToastShown = true;
         errorToastShown = true;
         const messageParts = errorMessage.split(':');
         const errorDescription = messageParts[1];
         notification.error({
+          placement: 'bottomRight',
           duration: 0,
           message: 'Error',
           description: errorDescription,
@@ -116,6 +116,7 @@ const baseQuery = async (args: any, api: any, extraOptions: any) => {
     if (!errorToastShown && !isToastShown && !suppressErrorToast) {
       isToastShown = true;
       notification.error({
+        placement: 'bottomRight',
         duration: 0,
         message: 'Unknown Error',
         description: 'Unknown error has occurred. We are investigating the issue. Please try again later.',
@@ -130,6 +131,16 @@ const baseQuery = async (args: any, api: any, extraOptions: any) => {
 
 export const graphqlApi = createApi({
   baseQuery,
-  tagTypes: ['positionRequest', 'positionRequestsCount', 'jobProfiles', 'getOrgChart'],
+  tagTypes: [
+    'positionRequest',
+    'positionRequestsCount',
+    'getOrgChart',
+    'jobProfiles',
+    'importUserSearch',
+    'settingsDepartment',
+    'settingsDepartmentMetadata',
+    'settingsUser',
+    'settingsUserRoles',
+  ],
   endpoints: () => ({}),
 });

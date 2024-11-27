@@ -1,24 +1,26 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ArrowLeftOutlined, ClockCircleFilled, ExclamationCircleFilled, FundFilled } from '@ant-design/icons';
+import { ArrowLeftOutlined, BulbOutlined, ExclamationCircleFilled } from '@ant-design/icons';
 import { Alert, Button, Card, Col, Descriptions, Modal, Result, Row, Tabs, Typography, message } from 'antd';
 import Title from 'antd/es/typography/Title';
 import copy from 'copy-to-clipboard';
 import dayjs from 'dayjs';
-import { useEffect, useRef, useState } from 'react';
+import { cloneElement, useEffect, useRef, useState } from 'react';
 import { Link, useBlocker, useLocation, useNavigate, useParams } from 'react-router-dom';
 import LoadingSpinnerWithMessage from '../../components/app/common/components/loading.component';
 import PositionProfile from '../../components/app/common/components/positionProfile';
+import { statusIconColorMap } from '../../components/app/utils/statusIconColorMap.utils';
 import { DownloadJobProfileComponent } from '../../components/shared/download-job-profile/download-job-profile.component';
 import { useLazyGetClassificationsQuery } from '../../redux/services/graphql-api/classification.api';
 import {
   GetPositionRequestResponse,
-  GetPositionRequestResponseContent,
-  useGetPositionRequestQuery,
-  useGetSharedPositionRequestQuery,
+  useLazyGetPositionRequestQuery,
+  useLazyGetSharedPositionRequestQuery,
   useLazyPositionNeedsRivewQuery,
 } from '../../redux/services/graphql-api/position-request.api';
+import { useTestUser } from '../../utils/useTestUser';
 import { JobProfileWithDiff } from '../classification-tasks/components/job-profile-with-diff.component';
 import { ServiceRequestDetails } from '../classification-tasks/components/service-request-details.component';
+import { NotFoundComponent } from '../not-found/404';
 import { OrgChart } from '../org-chart/components/org-chart';
 import { OrgChartType } from '../org-chart/enums/org-chart-type.enum';
 import { WizardPageWrapper } from './components/wizard-page-wrapper.component';
@@ -48,18 +50,18 @@ export const PositionRequestPage = () => {
   const [mode, setMode] = useState('editable');
   const [readonlyMode, setReadonlyMode] = useState('');
   const [readOnlySelectedTab, setReadOnlySelectedTab] = useState('1');
-  const [unwrappedPositionRequestData, setUnwrappedPositionRequestData] =
-    useState<GetPositionRequestResponseContent | null>(null);
 
   const {
     positionRequestId: wizardPositionRequestId,
     setWizardData,
     setPositionRequestId,
     setPositionRequestProfileId,
+    setPositionRequestProfileVersion,
     setPositionRequestDepartmentId,
     setPositionRequestData,
     resetWizardContext,
     setRequiresVerification,
+    positionRequestData: wizardContextPositionRequestData,
     setClassificationsData,
   } = useWizardContext();
 
@@ -70,6 +72,7 @@ export const PositionRequestPage = () => {
   const [triggerGetClassificationData, { data: classificationsData, isLoading: classificationsDataLoading }] =
     useLazyGetClassificationsQuery();
 
+  // Fetch all classifications - thiw will be used throughout the wizard via the wizardContext
   const [classificationsFetched, setClassificationsFetched] = useState(false);
 
   useEffect(() => {
@@ -86,31 +89,71 @@ export const PositionRequestPage = () => {
   }, [classificationsFetched, triggerGetClassificationData]);
 
   useEffect(() => {
-    setRequiresVerification(positionNeedsReviewData?.positionNeedsRivew?.result ?? false);
+    if (
+      positionNeedsReviewData?.positionNeedsRivew?.result == true ||
+      positionNeedsReviewData?.positionNeedsRivew?.result == false
+    ) {
+      // if the only reason for review is that the profile was set as requiring review, ignore it
+      // otherwise the step indicator will show wrongfully that user made edits to profile requiring review
+      // e.g. if response is like this : {"positionNeedsRivew":{"result":true,"reasons":["Job Profile is denoted as requiring review"]}}
+
+      // Check if the only reason for review is that the profile was set as requiring review
+      const reasons = positionNeedsReviewData?.positionNeedsRivew?.reasons || [];
+      const onlyReasonIsProfileRequiresReview =
+        reasons.length === 1 && reasons[0] === 'Job Profile is denoted as requiring review';
+
+      if (onlyReasonIsProfileRequiresReview) {
+        // If the only reason is that the profile requires review, set requiresVerification to false
+        setRequiresVerification(false);
+      } else {
+        // Otherwise, set requiresVerification based on the positionNeedsRivew result
+        setRequiresVerification(positionNeedsReviewData?.positionNeedsRivew?.result);
+      }
+    }
   }, [positionNeedsReviewData, setRequiresVerification]);
 
   const { positionRequestId } = useParams();
 
+  const location = useLocation();
+  // Determine if the current path is a shared URL
+  const isSharedRoute = location.pathname.includes('/requests/positions/share/');
+
   // position request id changed from what's being stored in the context,
   // clear context
   useEffect(() => {
-    if (positionRequestId && wizardPositionRequestId && positionRequestId !== wizardPositionRequestId?.toString()) {
+    if (
+      positionRequestId &&
+      wizardPositionRequestId &&
+      positionRequestId !== wizardPositionRequestId?.toString() &&
+      !isSharedRoute
+    ) {
       resetWizardContext();
     }
-  }, [positionRequestId, wizardPositionRequestId, resetWizardContext]);
+  }, [positionRequestId, wizardPositionRequestId, resetWizardContext, isSharedRoute]);
 
-  const location = useLocation();
+  const [currentStep, setCurrentStep] = useState<number | null>(null);
 
-  // Determine if the current path is a shared URL
-  const isSharedRoute = location.pathname.includes('/my-positions/share/');
   // Use state or other logic to determine which query hook to use
   // This could be a piece of state that determines which query to run, for example
-  const queryHook = isSharedRoute ? useGetSharedPositionRequestQuery : useGetPositionRequestQuery;
+  // const queryHook = isSharedRoute ? useLazyGetSharedPositionRequestQuery : useLazyGetPositionRequestQuery;
+
+  const [getPositionRequest, { data: positionRequestData }] = isSharedRoute
+    ? // eslint-disable-next-line react-hooks/rules-of-hooks
+      useLazyGetSharedPositionRequestQuery()
+    : // eslint-disable-next-line react-hooks/rules-of-hooks
+      useLazyGetPositionRequestQuery();
 
   // Use the determined query hook with the positionRequestId
-  const { data: positionRequestData } = isSharedRoute
-    ? queryHook({ uuid: positionRequestId ?? '' })
-    : queryHook({ id: parseInt(positionRequestId ?? '') });
+  // const { data: positionRequestData, refetch } = isSharedRoute
+  //   ? queryHook({ uuid: positionRequestId ?? '' })
+  //   : queryHook({ id: parseInt(positionRequestId ?? '') });
+
+  useEffect(() => {
+    getPositionRequest({
+      ...(isSharedRoute ? { uuid: positionRequestId ?? '' } : { id: parseInt(positionRequestId ?? '') }),
+    });
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, []);
 
   useEffect(() => {
     if (!positionRequestId) throw new Error('No position request provided');
@@ -120,9 +163,11 @@ export const PositionRequestPage = () => {
       // If it's a shared route, set modes or perform actions accordingly
       setMode('readonly');
     }
-
-    setUnwrappedPositionRequestData(
-      isSharedRoute ? positionRequestData?.sharedPositionRequest ?? null : positionRequestData?.positionRequest ?? null,
+    console.log(positionRequestData);
+    setPositionRequestData(
+      isSharedRoute
+        ? (positionRequestData?.sharedPositionRequest ?? null)
+        : (positionRequestData?.positionRequest ?? null),
     );
   }, [
     positionRequestId,
@@ -131,43 +176,62 @@ export const PositionRequestPage = () => {
     setWizardData,
     setPositionRequestId,
     setPositionRequestProfileId,
+    setPositionRequestProfileVersion,
     setPositionRequestDepartmentId,
     setPositionRequestData,
+
     isSharedRoute,
   ]);
 
-  const [currentStep, setCurrentStep] = useState<number | null>(null);
-
   useEffect(() => {
-    const step = unwrappedPositionRequestData?.step;
+    if (
+      wizardContextPositionRequestData &&
+      // AL-980 Navigating between position requests may display an error
+      // check that the id from useParams is the same as the one in the context
+      // fixes a bug where the context still contains stale data when switching between requests
+      // - user navigates to request A
+      // - goes back to dashboard, navigates to request B
+      // - context still contains data from request A
+      // - resetWizardContext fires, but this useEffect fires while data is still stale
+      // fix does not apply for shared routes (no position request id in the URL)
+      (wizardContextPositionRequestData?.id == parseInt(positionRequestId ?? '-1') || isSharedRoute)
+    ) {
+      const step = wizardContextPositionRequestData?.step;
 
-    if (step != null) setCurrentStep(step);
+      if (step != null) {
+        setCurrentStep(step);
+      }
 
-    if (step ?? 0 > 2) triggerPositionNeedsReviewQuery({ id: unwrappedPositionRequestData?.id });
+      //TODO
+      // if (step ?? 0 > 2)
+      triggerPositionNeedsReviewQuery({ id: wizardContextPositionRequestData?.id });
 
-    if (unwrappedPositionRequestData) setPositionRequestData(unwrappedPositionRequestData);
+      if (wizardContextPositionRequestData?.id) {
+        setPositionRequestId(wizardContextPositionRequestData?.id);
+      }
 
-    if (unwrappedPositionRequestData?.id) {
-      setPositionRequestId(unwrappedPositionRequestData?.id);
-    }
+      if (wizardContextPositionRequestData?.profile_json) setWizardData(wizardContextPositionRequestData?.profile_json);
 
-    if (unwrappedPositionRequestData?.profile_json_updated)
-      setWizardData(unwrappedPositionRequestData?.profile_json_updated);
+      if (wizardContextPositionRequestData?.parent_job_profile_id)
+        setPositionRequestProfileId(wizardContextPositionRequestData?.parent_job_profile_id);
 
-    if (unwrappedPositionRequestData?.parent_job_profile_id)
-      setPositionRequestProfileId(unwrappedPositionRequestData?.parent_job_profile_id);
+      if (wizardContextPositionRequestData?.parent_job_profile_version)
+        setPositionRequestProfileVersion(wizardContextPositionRequestData?.parent_job_profile_version);
 
-    if (unwrappedPositionRequestData?.department_id) {
-      setPositionRequestDepartmentId(unwrappedPositionRequestData?.department_id);
+      if (wizardContextPositionRequestData?.department_id) {
+        setPositionRequestDepartmentId(wizardContextPositionRequestData?.department_id);
+      }
     }
   }, [
-    unwrappedPositionRequestData,
+    wizardContextPositionRequestData,
+    positionRequestId,
     setPositionRequestId,
     setWizardData,
     setPositionRequestProfileId,
+    setPositionRequestProfileVersion,
     setPositionRequestDepartmentId,
-    setPositionRequestData,
     triggerPositionNeedsReviewQuery,
+    isSharedRoute,
   ]);
 
   const onNext = async () => {
@@ -196,7 +260,19 @@ export const PositionRequestPage = () => {
   // nav block
   const isBlocking = useRef(true);
   const blocker = useBlocker(({ currentLocation, nextLocation }) => {
-    return currentLocation.pathname !== nextLocation.pathname && currentStep != 5 && isBlocking.current;
+    // console.log(
+    //   'blocker: currentLocation, nextLocation, currentStep, isBlocking.current: ',
+    //   currentLocation,
+    //   nextLocation,
+    //   currentStep,
+    //   isBlocking.current,
+    // );
+    return (
+      currentLocation.pathname !== nextLocation.pathname &&
+      currentStep != 5 &&
+      isBlocking.current &&
+      !positionRequestData
+    );
   });
 
   const disableBlockingAndNavigateHome = () => {
@@ -204,63 +280,80 @@ export const PositionRequestPage = () => {
     navigate('/'); // Replace with the path where the user should be redirected
   };
 
+  const isTestUser = useTestUser();
+
   const handleCopy = (copyData: any) => {
     // Use the Clipboard API to copy the link to the clipboard
-    if (import.meta.env.VITE_TEST_ENV !== 'true') copy(copyData);
+    if (!isTestUser) copy(copyData);
     message.success('Link copied to clipboard!');
   };
 
   const renderStepComponent = () => {
+    if (!wizardContextPositionRequestData) return <LoadingSpinnerWithMessage />;
+
     switch (currentStep) {
       case 0:
-        return <WizardOrgChartPage onCreateNewPosition={onNext} positionRequest={unwrappedPositionRequestData} />;
+        return (
+          <WizardOrgChartPage
+            setCurrentStep={setCurrentStep}
+            onCreateNewPosition={onNext}
+            positionRequest={wizardContextPositionRequestData}
+          />
+        );
       case 1:
         return (
-          <WizardPage
+          <WizardConfirmDetailsPage
+            setCurrentStep={setCurrentStep}
             onNext={onNext}
             onBack={onBack}
             disableBlockingAndNavigateHome={disableBlockingAndNavigateHome}
-            positionRequest={unwrappedPositionRequestData}
+            positionRequest={wizardContextPositionRequestData}
           />
         );
       case 2:
         return (
-          <WizardEditPage
-            onBack={onBack}
+          <WizardPage
+            setCurrentStep={setCurrentStep}
             onNext={onNext}
+            onBack={onBack}
             disableBlockingAndNavigateHome={disableBlockingAndNavigateHome}
-            positionRequest={unwrappedPositionRequestData}
+            positionRequest={wizardContextPositionRequestData}
           />
         );
 
       case 3:
         return (
-          <WizardReviewPage
-            onNext={onNext}
+          <WizardEditPage
+            setCurrentStep={setCurrentStep}
             onBack={onBack}
+            onNext={onNext}
             disableBlockingAndNavigateHome={disableBlockingAndNavigateHome}
-            positionRequest={unwrappedPositionRequestData}
+            positionRequest={wizardContextPositionRequestData}
           />
         );
+
       case 4:
         return (
-          <WizardConfirmDetailsPage
+          <WizardReviewPage
+            setCurrentStep={setCurrentStep}
             onNext={onNext}
             onBack={onBack}
             disableBlockingAndNavigateHome={disableBlockingAndNavigateHome}
-            positionRequest={unwrappedPositionRequestData}
+            positionRequest={wizardContextPositionRequestData}
           />
         );
+
       case 5:
         return (
           <WizardResultPage
+            setCurrentStep={setCurrentStep}
             onBack={onBack}
             setStep={setStep}
             switchParentMode={switchParentMode}
             switchParentReadonlyMode={switchParentReadonlyMode}
             setReadOnlySelectedTab={setReadOnlySelectedTab}
             disableBlockingAndNavigateHome={disableBlockingAndNavigateHome}
-            positionRequest={unwrappedPositionRequestData}
+            positionRequest={wizardContextPositionRequestData}
           />
         );
       default:
@@ -271,8 +364,8 @@ export const PositionRequestPage = () => {
   // READONLY MODE
 
   let snapshotCopy = { edges: [], nodes: [] };
-  if (unwrappedPositionRequestData?.orgchart_json)
-    snapshotCopy = JSON.parse(JSON.stringify(unwrappedPositionRequestData?.orgchart_json));
+  if (wizardContextPositionRequestData?.orgchart_json)
+    snapshotCopy = JSON.parse(JSON.stringify(wizardContextPositionRequestData?.orgchart_json));
 
   const tabItems = [
     {
@@ -280,7 +373,7 @@ export const PositionRequestPage = () => {
       label: 'Job details',
       children: (
         <ServiceRequestDetails
-          positionRequestData={{ positionRequest: unwrappedPositionRequestData } as GetPositionRequestResponse}
+          positionRequestData={{ positionRequest: wizardContextPositionRequestData } as GetPositionRequestResponse}
         ></ServiceRequestDetails>
       ),
     },
@@ -291,18 +384,24 @@ export const PositionRequestPage = () => {
         <div style={{ height: '100%' }}>
           <OrgChart
             type={OrgChartType.READONLY}
-            departmentId={unwrappedPositionRequestData?.department_id ?? ''}
+            departmentId={wizardContextPositionRequestData?.department_id ?? ''}
             elements={snapshotCopy}
           />
         </div>
       ),
     },
-    ...(!isSharedRoute || (isSharedRoute && unwrappedPositionRequestData?.profile_json_updated)
+    ...(!isSharedRoute || (isSharedRoute && wizardContextPositionRequestData?.profile_json)
       ? [
           {
             key: '3',
             label: 'Job Profile',
-            children: <JobProfileWithDiff positionRequestData={{ positionRequest: unwrappedPositionRequestData }} />,
+            children: (
+              <JobProfileWithDiff
+                positionRequestData={{ positionRequest: wizardContextPositionRequestData }}
+                rowProps={{ justify: 'center' }}
+                colProps={{ xs: 24, sm: 24, md: 24, lg: 20, xl: 16 }}
+              />
+            ),
           },
         ]
       : []),
@@ -316,11 +415,13 @@ export const PositionRequestPage = () => {
                 {readonlyMode === 'sentForVerification' && (
                   <>
                     <Result
-                      icon={<ClockCircleFilled style={{ color: '#9254DE' }} />}
+                      icon={cloneElement(statusIconColorMap['VERIFICATION'].icon, {
+                        style: { color: statusIconColorMap['VERIFICATION'].color },
+                      })}
                       title="Sent for verification"
                       subTitle={`The profile was submitted for review on: ${dayjs(
-                        unwrappedPositionRequestData?.updated_at,
-                      ).format('MMM d, YYYY')}`}
+                        wizardContextPositionRequestData?.resubmitted_at,
+                      ).format('MMM D, YYYY')}`}
                     />
 
                     <Row justify="center" style={{ padding: '0 1rem' }} data-testid="verification-success-message">
@@ -364,7 +465,9 @@ export const PositionRequestPage = () => {
                 {readonlyMode === 'reSubmittedForVerification' && (
                   <>
                     <Result
-                      icon={<ClockCircleFilled style={{ color: '#9254DE' }} />}
+                      icon={cloneElement(statusIconColorMap['VERIFICATION'].icon, {
+                        style: { color: statusIconColorMap['VERIFICATION'].color },
+                      })}
                       title="Sent for verification"
                       subTitle="The profile was re-submitted for verification on:" // todo: add date
                     />
@@ -420,7 +523,7 @@ export const PositionRequestPage = () => {
                   <>
                     <Result
                       status="error"
-                      icon={<FundFilled></FundFilled>}
+                      icon={statusIconColorMap['REVIEW'].icon}
                       title="Your classification review is in the queue"
                       subTitle="Thank you for your submission. A Classification specialist will reach out to you via email shortly."
                       extra={[
@@ -433,25 +536,25 @@ export const PositionRequestPage = () => {
                       <Col xs={24} md={24} lg={24} xl={14} xxl={18}>
                         <Card title="Information" bordered={false}>
                           <Descriptions bordered layout="horizontal" column={1}>
-                            <Descriptions.Item label="Position number">
+                            {/* <Descriptions.Item label="Position number">
                               <span data-testid="position-number">
-                                {unwrappedPositionRequestData?.position_number != null
-                                  ? `${unwrappedPositionRequestData?.position_number}`.padStart(8, '0')
+                                {wizardContextPositionRequestData?.position_number != null
+                                  ? `${wizardContextPositionRequestData?.position_number}`.padStart(8, '0')
                                   : ''}
                               </span>{' '}
                               <Button
                                 type="link"
                                 onClick={() =>
                                   handleCopy(
-                                    unwrappedPositionRequestData?.position_number != null
-                                      ? `${unwrappedPositionRequestData?.position_number}`.padStart(8, '0')
+                                    wizardContextPositionRequestData?.position_number != null
+                                      ? `${wizardContextPositionRequestData?.position_number}`.padStart(8, '0')
                                       : '',
                                   )
                                 }
                               >
                                 Copy
                               </Button>
-                            </Descriptions.Item>
+                            </Descriptions.Item> */}
                             {/* <Descriptions.Item label="Job Details">
                               <Button type="link">View</Button> | <Button type="link">Download</Button>
                             </Descriptions.Item>
@@ -467,7 +570,8 @@ export const PositionRequestPage = () => {
                             <Descriptions.Item label="Job profile">
                               <Button type="link">
                                 <DownloadJobProfileComponent
-                                  jobProfile={positionRequestData?.positionRequest?.profile_json_updated}
+                                  positionRequest={wizardContextPositionRequestData}
+                                  jobProfile={wizardContextPositionRequestData?.profile_json}
                                 >
                                   Download
                                 </DownloadJobProfileComponent>
@@ -492,22 +596,22 @@ export const PositionRequestPage = () => {
                         </Button>,
                       ]}
                     />
-                    <Row justify="center" style={{ padding: '0 1rem', marginBottom: '5rem' }}>
+                    <Row justify="center" style={{ padding: '0 1rem', marginBottom: '2rem' }}>
                       <Col xs={24} md={24} lg={24} xl={14} xxl={18}>
                         <Card title="Information" bordered={false}>
                           <Descriptions bordered layout="horizontal" column={1}>
                             <Descriptions.Item label="Position number">
                               <span data-testid="position-number">
-                                {unwrappedPositionRequestData?.position_number
-                                  ? `${unwrappedPositionRequestData?.position_number}`.padStart(8, '0')
+                                {wizardContextPositionRequestData?.position_number
+                                  ? `${wizardContextPositionRequestData?.position_number}`.padStart(8, '0')
                                   : ''}
                               </span>{' '}
                               <Button
                                 type="link"
                                 onClick={() =>
                                   handleCopy(
-                                    unwrappedPositionRequestData?.position_number
-                                      ? `${unwrappedPositionRequestData?.position_number}`.padStart(8, '0')
+                                    wizardContextPositionRequestData?.position_number
+                                      ? `${wizardContextPositionRequestData?.position_number}`.padStart(8, '0')
                                       : '',
                                   )
                                 }
@@ -526,7 +630,8 @@ export const PositionRequestPage = () => {
                             </Descriptions.Item> */}
                             <Descriptions.Item label="Job profile">
                               <DownloadJobProfileComponent
-                                jobProfile={unwrappedPositionRequestData?.profile_json_updated}
+                                positionRequest={wizardContextPositionRequestData}
+                                jobProfile={wizardContextPositionRequestData?.profile_json}
                                 useModal={true}
                               >
                                 <a href="#">Download</a>
@@ -536,6 +641,48 @@ export const PositionRequestPage = () => {
                         </Card>
                       </Col>
                     </Row>
+
+                    <Row justify="center" style={{ padding: '0 1rem', marginBottom: '5rem' }}>
+                      <Col xs={24} md={24} lg={24} xl={14} xxl={18}>
+                        <Card bordered={false}>
+                          <Row align="middle" gutter={16}>
+                            <Col>
+                              <BulbOutlined />
+                            </Col>
+                            <Col flex="auto">
+                              <Row justify="space-between" align="middle">
+                                <Col>
+                                  <Typography.Text strong>Help us make it better</Typography.Text>
+                                  <Typography.Text style={{ marginLeft: '1rem' }}>
+                                    How was your experience creating a position number?{' '}
+                                    <Typography.Link href="https://forms.office.com/r/R46ALagQzH" target="_blank">
+                                      Please share your feedback here
+                                    </Typography.Link>
+                                  </Typography.Text>
+                                </Col>
+                              </Row>
+                            </Col>
+                          </Row>
+                        </Card>
+                      </Col>
+                    </Row>
+                  </>
+                )}
+                {readonlyMode === 'cancelled' && (
+                  <>
+                    <Result
+                      status="error"
+                      icon={cloneElement(statusIconColorMap['CANCELLED'].icon, {
+                        style: { color: statusIconColorMap['CANCELLED'].color },
+                      })}
+                      title="Your position request has been cancelled."
+                      subTitle="Contact classifications for more details"
+                      extra={[
+                        <Button type="primary" key="console" onClick={() => navigate('/')}>
+                          Go to Dashboard
+                        </Button>,
+                      ]}
+                    />
                   </>
                 )}
               </>
@@ -545,9 +692,11 @@ export const PositionRequestPage = () => {
       : []),
   ];
 
-  if (classificationsDataLoading) return <LoadingSpinnerWithMessage />;
+  if (classificationsDataLoading || !classificationsFetched) return <LoadingSpinnerWithMessage />;
 
-  return (
+  return !wizardContextPositionRequestData ? (
+    <NotFoundComponent entity="position request" />
+  ) : (
     <>
       {mode === 'readonly' && (
         <>
@@ -558,9 +707,8 @@ export const PositionRequestPage = () => {
                 <Link to="/" aria-label="Go to dashboard">
                   <ArrowLeftOutlined aria-hidden style={{ color: 'black', marginRight: '1rem' }} />
                 </Link>
-                {positionRequestData?.positionRequest?.title &&
-                positionRequestData?.positionRequest?.title != 'Untitled'
-                  ? positionRequestData.positionRequest?.title
+                {wizardContextPositionRequestData?.title && wizardContextPositionRequestData?.title != 'Untitled'
+                  ? wizardContextPositionRequestData?.title
                   : 'New position'}
               </div>
             }
@@ -569,30 +717,33 @@ export const PositionRequestPage = () => {
                 <PositionProfile
                   prefix="Reporting to"
                   mode="compact"
-                  positionNumber={positionRequestData?.positionRequest?.reports_to_position_id}
-                  orgChartData={positionRequestData?.positionRequest?.orgchart_json}
+                  positionNumber={wizardContextPositionRequestData?.reports_to_position_id}
+                  positionProfile={wizardContextPositionRequestData?.reports_to_position}
+                  orgChartData={wizardContextPositionRequestData?.orgchart_json}
                 ></PositionProfile>
               </div>
             }
             pageHeaderExtra={[
-              <div style={{ marginRight: '1rem' }}>
-                <StatusIndicator status={positionRequestData?.positionRequest?.status ?? ''} />
+              <div style={{ marginRight: '1rem' }} key="statusIndicator">
+                <StatusIndicator status={wizardContextPositionRequestData?.status ?? ''} />
               </div>,
               (readonlyMode === 'completed' || readonlyMode === 'inQueue') && (
                 <DownloadJobProfileComponent
-                  jobProfile={positionRequestData?.positionRequest?.profile_json_updated}
+                  key="downloadJobProfile"
+                  positionRequest={wizardContextPositionRequestData}
+                  jobProfile={wizardContextPositionRequestData?.profile_json}
                   useModal={readonlyMode === 'completed'}
+                  buttonType="primary"
                 >
-                  <Button type="primary">Download profile</Button>
+                  {/* <Button type="primary">Download profile</Button> */}
                 </DownloadJobProfileComponent>
               ),
             ]}
-            spaceSize="small"
             hpad={false}
             additionalBreadcrumb={{
               title:
-                positionRequestData?.positionRequest?.title && positionRequestData?.positionRequest?.title != 'Untitled'
-                  ? positionRequestData.positionRequest?.title
+                wizardContextPositionRequestData?.title && wizardContextPositionRequestData?.title != 'Untitled'
+                  ? wizardContextPositionRequestData?.title
                   : 'New position',
             }}
             grayBg={false}
@@ -602,7 +753,7 @@ export const PositionRequestPage = () => {
                 overflow: 'hidden',
                 position: 'relative',
                 height: '100%',
-                background: 'rgb(240, 242, 245)',
+                background: '#f5f5f5',
                 marginLeft: '-1rem',
                 marginRight: '-1rem',
                 marginTop: '-1px',
@@ -635,7 +786,7 @@ export const PositionRequestPage = () => {
               }}
               onCancel={() => blocker.reset()}
             >
-              <p>You can resume the process from "My Positions" page</p>
+              <p>You can resume the process from "My Position Requests" page</p>
             </Modal>
           )}
           {currentStep !== null ? renderStepComponent() : <LoadingSpinnerWithMessage />}

@@ -1,21 +1,30 @@
-import { FileTextOutlined, PartitionOutlined, UserAddOutlined } from '@ant-design/icons';
+import { FileTextOutlined, PartitionOutlined } from '@ant-design/icons';
 import { createBrowserRouter } from 'react-router-dom';
 import { AppLayout } from '../components/app/app-layout.component';
 import RoleGuard from '../components/guards/role.guard';
 import { RouteGuard } from '../components/guards/route.guard';
+import { Redirect } from '../components/shared/redirect/redirect.component';
 import { AuthRoute } from '../routes/auth';
 import { LoginPage } from '../routes/auth/login.page';
 import { ClassificationTasksRoute } from '../routes/classification-tasks';
 import { ClassificationTaskPage } from '../routes/classification-tasks/classification-task.page';
 import { ClassificationTasksPage } from '../routes/classification-tasks/classification-tasks.page';
+import ErrorBoundary from '../routes/error-boundary/ErrorBoundary';
 import { HomeRoute } from '../routes/home';
-import { HomePage } from '../routes/home/home.page';
+import { HomePage } from '../routes/home/components/home-page.component';
 import { JobProfilesRoute } from '../routes/job-profiles';
 import { JobProfilesPage } from '../routes/job-profiles/job-profiles.page';
-import { MyPositionsRoute } from '../routes/my-positions';
-import { MyPositionsPage } from '../routes/my-positions/my-positions.page';
-import { OrgChartRoute as OrgChartOldRoute, OrgChartRoute } from '../routes/org-chart';
-import { OrgChartPage as OrgChartOldPage, OrgChartPage } from '../routes/org-chart/org-chart.page';
+import { MyPositionsRoute } from '../routes/my-position-requests';
+import { MyPositionsPage } from '../routes/my-position-requests/my-position-requests.page';
+import NotFoundComponent from '../routes/not-found/404';
+import { OrgChartRoute } from '../routes/org-chart';
+import { OrgChartPage } from '../routes/org-chart/org-chart.page';
+import { SettingsRoute } from '../routes/settings';
+import { DepartmentDetailPage } from '../routes/settings/department/department-detail.page';
+import { DepartmentListPage } from '../routes/settings/department/department-list.page';
+import { UserDetailPage } from '../routes/settings/user/user-detail.page';
+import { UserListPage } from '../routes/settings/user/user-list.page';
+import { WidgetListPage } from '../routes/settings/widget/widget-list-page.component';
 import { TotalCompApprovedRequestsRoute } from '../routes/total-comp-approved-requests';
 import { TotalCompApprovedRequestPage } from '../routes/total-comp-approved-requests/total-comp-approved-request.page';
 import { TotalCompApprovedRequestsPage } from '../routes/total-comp-approved-requests/total-comp-approved-requests.page';
@@ -30,12 +39,15 @@ import UnauthorizedPage from '../routes/unauthorized/unauthorized.page';
 import { WizardRoute } from '../routes/wizard';
 import { PositionRequestPage } from '../routes/wizard/position-request.page';
 import { WizardOrgChartPage } from '../routes/wizard/wizard-org-chart.page';
-import { RoleBasedRouting } from './role-based-component';
 
 export const router = createBrowserRouter([
   {
     path: 'auth',
-    element: <AuthRoute />,
+    element: (
+      <ErrorBoundary>
+        <AuthRoute />
+      </ErrorBoundary>
+    ),
     children: [
       {
         element: <AppLayout />,
@@ -53,7 +65,11 @@ export const router = createBrowserRouter([
     ],
   },
   {
-    element: <RouteGuard />,
+    element: (
+      <ErrorBoundary>
+        <RouteGuard />
+      </ErrorBoundary>
+    ),
     children: [
       {
         element: <AppLayout />,
@@ -62,262 +78,353 @@ export const router = createBrowserRouter([
             path: '/',
             element: <HomeRoute />,
             children: [
+              // Home
               {
                 index: true,
                 handle: {
                   // breadcrumb: () => 'My tasks',
                 },
-                element: (
-                  <RoleBasedRouting
-                    roleComponentMapping={{
-                      classification: ClassificationTasksPage,
-                      'total-compensation': TotalCompDraftProfilesPage,
-                      'hiring-manager': HomePage,
-                      user: UnauthorizedPage,
-                      default: UnauthorizedPage,
-
-                      // default: HomePage,
-                    }}
-                  />
-                ),
+                element: <HomePage />,
               },
-            ],
-          },
-
-          {
-            path: '/my-positions',
-            element: <MyPositionsRoute />,
-            handle: {
-              breadcrumb: () => 'My Positions',
-              icon: <UserAddOutlined />,
-            },
-            children: [
+              // Org Chart
               {
-                index: true,
-                element: <MyPositionsPage />,
-              },
-              {
-                path: 'create',
-                element: <WizardOrgChartPage />,
-              },
-              {
-                path: '/my-positions/:positionRequestId',
-                element: <WizardRoute />,
+                path: 'my-departments',
+                element: <OrgChartRoute />,
+                handle: {
+                  breadcrumb: () => 'My departments',
+                  icon: <PartitionOutlined />,
+                },
                 children: [
                   {
                     index: true,
-                    element: <PositionRequestPage />,
-                    handle: {
-                      icon: <FileTextOutlined />,
-                    },
+                    element: <OrgChartPage />,
                   },
                 ],
               },
+              // Job Profiles
               {
-                path: 'share/:positionRequestId',
-                element: <WizardRoute />,
-                children: [
-                  {
-                    index: true,
-                    element: <PositionRequestPage />,
-                    handle: {
-                      breadcrumb: () => 'My positions',
-                      icon: <FileTextOutlined />,
-                    },
-                  },
-                ],
-              },
-            ],
-          },
-          {
-            path: '/org-chart',
-            element: <OrgChartRoute />,
-            handle: {
-              breadcrumb: () => 'My organizations',
-              icon: <PartitionOutlined />,
-            },
-            children: [
-              {
-                index: true,
-                element: <OrgChartPage />,
-              },
-            ],
-          },
-          {
-            path: '/org-chart-old',
-            element: <OrgChartOldRoute />,
-            handle: {
-              breadcrumb: () => 'My organizations',
-              icon: <PartitionOutlined />,
-            },
-            children: [
-              {
-                index: true,
-                element: <OrgChartOldPage />,
-              },
-            ],
-          },
-          {
-            path: '/job-profiles',
-            element: <JobProfilesRoute />,
-            handle: {
-              icon: <FileTextOutlined />,
-            },
-            children: [
-              {
-                index: true,
-                element: <JobProfilesPage />,
-              },
-              {
-                path: ':id',
-                element: <JobProfilesPage />,
+                path: 'job-profiles',
+                element: <JobProfilesRoute />,
                 handle: {
                   icon: <FileTextOutlined />,
                 },
+                children: [
+                  {
+                    index: true,
+                    element: <JobProfilesPage />,
+                  },
+                  {
+                    path: ':number',
+                    element: <JobProfilesPage />,
+                    handle: {
+                      icon: <FileTextOutlined />,
+                    },
+                  },
+                  // {
+                  //   path: 'saved',
+                  //   element: <JobProfilesRoute />,
+                  //   handle: {
+                  //     icon: <FileTextOutlined />,
+                  //   },
+                  //   children: [
+                  //     {
+                  //       index: true,
+                  //       element: <SavedJobProfilesPage />,
+                  //     },
+                  //     {
+                  //       path: ':number',
+                  //       element: <SavedJobProfilesPage />,
+                  //       handle: {
+                  //         icon: <FileTextOutlined />,
+                  //       },
+                  //     },
+                  //   ],
+                  // },
+                  {
+                    path: 'manage',
+                    children: [
+                      {
+                        path: 'archived',
+                        element: (
+                          <RoleGuard roles={['total-compensation']}>
+                            <TotalCompPublishedProfilesRoute />
+                          </RoleGuard>
+                        ),
+                        handle: {
+                          breadcrumb: () => 'Archived Job Profiles',
+                        },
+                        children: [
+                          {
+                            index: true,
+                            element: <TotalCompArchivedProfilesPage />,
+                          },
+                          {
+                            path: ':id',
+                            element: <TotalCompCreateProfilePage />,
+                          },
+                        ],
+                      },
+                      {
+                        path: 'create',
+                        handle: {
+                          breadcrumb: () => 'Create profile',
+                        },
+                        element: (
+                          <RoleGuard roles={['total-compensation']}>
+                            <TotalCompDraftProfilesRoute />
+                          </RoleGuard>
+                        ),
+                        children: [
+                          {
+                            index: true,
+                            element: <TotalCompCreateProfilePage />,
+                          },
+                          {
+                            path: ':id',
+                            element: <TotalCompCreateProfilePage />,
+                          },
+                        ],
+                      },
+                      {
+                        path: 'draft',
+                        element: (
+                          <RoleGuard roles={['total-compensation']}>
+                            <TotalCompDraftProfilesRoute />
+                          </RoleGuard>
+                        ),
+                        handle: {
+                          breadcrumb: () => 'Draft Job Profiles',
+                        },
+                        children: [
+                          {
+                            path: ':id',
+                            element: <TotalCompCreateProfilePage />,
+                          },
+                          {
+                            index: true,
+                            element: <TotalCompDraftProfilesPage />,
+                          },
+                        ],
+                      },
+                      {
+                        path: 'published',
+                        element: (
+                          <RoleGuard roles={['total-compensation']}>
+                            <TotalCompPublishedProfilesRoute />
+                          </RoleGuard>
+                        ),
+                        handle: {
+                          breadcrumb: () => 'Published Job Profiles',
+                        },
+                        children: [
+                          {
+                            index: true,
+                            element: <TotalCompPublishedProfilesPage />,
+                          },
+                          {
+                            path: ':id',
+                            element: <TotalCompCreateProfilePage />,
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                ],
               },
-            ],
-          },
-
-          {
-            path: '/draft-job-profiles',
-            element: (
-              <RoleGuard requiredRole="total-compensation">
-                <TotalCompDraftProfilesRoute />
-              </RoleGuard>
-            ),
-            handle: {
-              breadcrumb: () => 'Draft Job Profiles',
-            },
-            children: [
+              // Requests
               {
-                path: 'create',
+                path: 'requests',
+                children: [
+                  {
+                    path: 'positions',
+                    element: <MyPositionsRoute />,
+                    children: [
+                      {
+                        index: true,
+                        element: <MyPositionsPage />,
+                      },
+                      {
+                        path: 'create',
+                        element: <WizardOrgChartPage />,
+                      },
+                      {
+                        path: 'manage',
+                        handle: {
+                          breadcrumb: () => 'Manage position requests',
+                        },
+                        children: [
+                          {
+                            element: (
+                              <RoleGuard roles={['classification']}>
+                                <ClassificationTasksRoute />
+                              </RoleGuard>
+                            ),
+                            children: [
+                              {
+                                index: true,
+                                element: <ClassificationTasksPage />,
+                              },
+                              {
+                                path: ':positionRequestId',
+                                element: <ClassificationTaskPage />,
+                              },
+                            ],
+                          },
+                          {
+                            path: 'approved',
+                            element: (
+                              <RoleGuard roles={['total-compensation']}>
+                                <TotalCompApprovedRequestsRoute />
+                              </RoleGuard>
+                            ),
+                            handle: {
+                              breadcrumb: () => 'Approved requests',
+                            },
+                            children: [
+                              {
+                                index: true,
+                                element: <TotalCompApprovedRequestsPage />,
+                              },
+                              {
+                                path: ':positionRequestId',
+                                element: <TotalCompApprovedRequestPage />,
+                              },
+                            ],
+                          },
+                        ],
+                      },
+                      {
+                        path: ':positionRequestId',
+                        element: <WizardRoute />,
+                        children: [
+                          {
+                            index: true,
+                            element: <PositionRequestPage />,
+                          },
+                        ],
+                      },
+                      {
+                        path: 'share/:positionRequestId([A-Za-z0-9-]+)',
+                        element: <WizardRoute />,
+                        children: [
+                          {
+                            index: true,
+                            element: <PositionRequestPage />,
+                          },
+                        ],
+                      },
+                    ],
+                  },
+                ],
+              },
+              // Settings
+              {
+                path: 'settings',
                 element: (
-                  <RoleGuard requiredRole="total-compensation">
-                    <TotalCompDraftProfilesRoute />
+                  <RoleGuard roles={['super-admin']}>
+                    <SettingsRoute />
                   </RoleGuard>
                 ),
                 children: [
                   {
-                    index: true,
-                    element: <TotalCompCreateProfilePage />,
+                    path: 'departments',
+                    handle: {
+                      breadcrumb: () => 'Departments',
+                    },
+                    children: [
+                      {
+                        index: true,
+                        element: <DepartmentListPage />,
+                      },
+                      {
+                        path: ':id',
+                        element: <DepartmentDetailPage />,
+                      },
+                    ],
                   },
                   {
-                    path: ':id',
-                    element: <TotalCompCreateProfilePage />,
+                    path: 'users',
+                    handle: {
+                      breadcrumb: () => 'Users',
+                    },
+                    children: [
+                      {
+                        index: true,
+                        element: <UserListPage />,
+                      },
+                      {
+                        path: ':id',
+                        element: <UserDetailPage />,
+                      },
+                    ],
+                  },
+                  {
+                    path: 'widgets',
+                    handle: {
+                      breadcrumb: () => 'Widgets',
+                    },
+                    children: [
+                      {
+                        index: true,
+                        element: <WidgetListPage />,
+                      },
+                    ],
                   },
                 ],
               },
+              // Unauthorized
               {
-                path: ':id',
-                element: <TotalCompCreateProfilePage />,
+                path: '/unauthorized',
+                element: <UnauthorizedRoute />,
+                children: [
+                  {
+                    index: true,
+                    element: <UnauthorizedPage />,
+                  },
+                ],
+              },
+              // Legacy redirects to support previous URL scheme
+              // These links specifically were used in share links, CRM service incidents
+              {
+                path: '/my-position-requests/share/:positionRequestId',
+                element: <Redirect to="/requests/positions/share/:positionRequestId" replace />,
               },
               {
-                handle: {
-                  breadcrumb: () => 'Create profile',
-                },
-                index: true,
-                element: <TotalCompDraftProfilesPage />,
-              },
-            ],
-          },
-          {
-            path: '/published-job-profiles',
-            element: (
-              <RoleGuard requiredRole="total-compensation">
-                <TotalCompPublishedProfilesRoute />
-              </RoleGuard>
-            ),
-            handle: {
-              breadcrumb: () => 'Published Job Profiles',
-            },
-            children: [
-              {
-                index: true,
-                element: <TotalCompPublishedProfilesPage />,
+                path: '/archived-job-profiles/:id',
+                element: <Redirect to="/job-profiles/manage/archived/:id" replace />,
               },
               {
-                path: ':id',
-                element: <TotalCompCreateProfilePage />,
-              },
-            ],
-          },
-          {
-            path: '/archived-job-profiles',
-            element: (
-              <RoleGuard requiredRole="total-compensation">
-                <TotalCompPublishedProfilesRoute />
-              </RoleGuard>
-            ),
-            handle: {
-              breadcrumb: () => 'Archived Job Profiles',
-            },
-            children: [
-              {
-                index: true,
-                element: <TotalCompArchivedProfilesPage />,
+                path: '/drafts-job-profiles/:id',
+                element: <Redirect to="/job-profiles/manage/draft/:id" replace />,
               },
               {
-                path: ':id',
-                element: <TotalCompCreateProfilePage />,
-              },
-            ],
-          },
-          {
-            path: '/approved-requests',
-            element: (
-              <RoleGuard requiredRole="total-compensation">
-                <TotalCompApprovedRequestsRoute />
-              </RoleGuard>
-            ),
-            handle: {
-              breadcrumb: () => 'Approved requests',
-            },
-            children: [
-              {
-                index: true,
-                element: <TotalCompApprovedRequestsPage />,
+                path: '/published-job-profiles/:id',
+                element: <Redirect to="/job-profiles/manage/published/:id" replace />,
               },
               {
-                path: ':positionRequestId',
-                element: <TotalCompApprovedRequestPage />,
-              },
-            ],
-          },
-
-          {
-            path: '/classification-tasks',
-            element: (
-              <RoleGuard requiredRole="classification">
-                <ClassificationTasksRoute />
-              </RoleGuard>
-            ),
-            handle: {
-              breadcrumb: () => 'My tasks',
-            },
-            children: [
-              {
-                index: true,
-                element: <ClassificationTasksPage />,
+                path: '/classification-tasks/:id',
+                element: <Redirect to="/requests/positions/manage/:id" replace />,
               },
               {
-                path: ':positionRequestId',
-                element: <ClassificationTaskPage />,
+                path: '*',
+                element: <Redirect to="/not-found" replace />,
               },
-            ],
-          },
-
-          {
-            path: '/unauthorized',
-            element: <UnauthorizedRoute />,
-            children: [
               {
-                index: true,
-                element: <UnauthorizedPage />,
+                path: '/not-found',
+                element: <NotFoundComponent />, // This will handle all unmatched routes
               },
             ],
           },
         ],
       },
     ],
+  },
+  {
+    path: '*',
+    element: <Redirect to="/not-found" replace />,
+  },
+  {
+    path: '/not-found',
+    element: <NotFoundComponent />, // This will handle all unmatched routes
   },
 ]);

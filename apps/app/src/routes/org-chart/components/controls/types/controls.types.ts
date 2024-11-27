@@ -11,6 +11,7 @@ export type ControlsProps = HTMLAttributes<HTMLDivElement> & {
   showInteractive?: boolean;
   fitViewOptions?: FitViewOptions;
   position?: PanelPosition;
+  focusable?: boolean;
 };
 
 export type ControlsButtonProps = ButtonHTMLAttributes<HTMLButtonElement>;

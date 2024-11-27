@@ -31,6 +31,12 @@ interface WizardContextProps {
   relWorkAlertShown: boolean;
   setRelWorkAlertShown: React.Dispatch<React.SetStateAction<boolean>>;
 
+  secAlertShown: boolean;
+  setSecAlertShown: React.Dispatch<React.SetStateAction<boolean>>;
+
+  profRegAlertShown: boolean;
+  setProfRegAlertShown: React.Dispatch<React.SetStateAction<boolean>>;
+
   originalValuesSet: boolean;
   originalAccReqFields: any[];
   originalOptReqFields: any[];
@@ -43,6 +49,9 @@ interface WizardContextProps {
 
   positionRequestProfileId: number | null;
   setPositionRequestProfileId: React.Dispatch<React.SetStateAction<number | null>>;
+
+  positionRequestProfileVersion: number | null;
+  setPositionRequestProfileVersion: React.Dispatch<React.SetStateAction<number | null>>;
 
   positionRequestDepartmentId: string | null;
   setPositionRequestDepartmentId: React.Dispatch<React.SetStateAction<string | null>>;
@@ -86,6 +95,7 @@ interface WizardContextProps {
   setRequiresVerification: React.Dispatch<React.SetStateAction<boolean>>;
 
   resetWizardContext: () => void;
+  // getClassificationById: (id: string) => ClassificationModel | undefined;
 }
 
 const WizardContext = React.createContext<WizardContextProps | null>(null);
@@ -94,6 +104,7 @@ interface WizardProviderProps {
   children: ReactNode;
 }
 
+// eslint-disable-next-line react-refresh/only-export-components
 export const useWizardContext = () => {
   const context = useContext(WizardContext);
   if (!context) {
@@ -107,6 +118,8 @@ export const WizardProvider: React.FC<WizardProviderProps> = ({ children }) => {
   const [classificationsData, setClassificationsData] = useState<GetClassificationsResponse | null>(null);
   const [minReqAlertShown, setMinReqAlertShown] = useState<boolean>(false);
   const [reqAlertShown, setReqAlertShown] = useState<boolean>(false);
+  const [secAlertShown, setSecAlertShown] = useState<boolean>(false);
+  const [profRegAlertShown, setProfRegAlertShown] = useState<boolean>(false);
   const [optionalAccountabilitiesAlertShown, setOptionalAccountabilitiesAlertShown] = useState<boolean>(false);
   const [originalValuesSet, setOriginalValuesSet] = useState<boolean>(false);
   const [originalAccReqFields, setOriginalAccReqFields] = useState<any[]>([]);
@@ -125,6 +138,7 @@ export const WizardProvider: React.FC<WizardProviderProps> = ({ children }) => {
 
   const [positionRequestId, setPositionRequestId] = useState<number | null>(null);
   const [positionRequestProfileId, setPositionRequestProfileId] = useState<number | null>(null);
+  const [positionRequestProfileVersion, setPositionRequestProfileVersion] = useState<number | null>(null);
   const [positionRequestDepartmentId, setPositionRequestDepartmentId] = useState<string | null>(null);
 
   const [originalProfessionalRegistrationFields, setOriginalProfessionalRegistrationFields] = useState<any[]>([]);
@@ -136,10 +150,23 @@ export const WizardProvider: React.FC<WizardProviderProps> = ({ children }) => {
   const [currentSection, setCurrentSection] = useState<string | null>(null);
   const [requiresVerification, setRequiresVerification] = useState(false);
 
+  // function getClassificationById(id: string): ClassificationModel | undefined {
+  //   // If data is loaded, find the classification by ID
+  //   // console.log('classificationsData: ', classificationsData, id);
+  //   if (classificationsData) {
+  //     return classificationsData.classifications.find(
+  //       (classification: ClassificationModel) => classification.id === id,
+  //     );
+  //   }
+  //   return;
+  // }
+
   const resetWizardContext = () => {
     setWizardData(null);
-    setClassificationsData(null);
+    // setClassificationsData(null); // do not reset this - it just stores the cache of all classifications, otherwise can't find proper classification later
     setMinReqAlertShown(false);
+    setSecAlertShown(false);
+    setProfRegAlertShown(false);
     setReqAlertShown(false);
     setOptionalAccountabilitiesAlertShown(false);
     setOriginalValuesSet(false);
@@ -156,6 +183,7 @@ export const WizardProvider: React.FC<WizardProviderProps> = ({ children }) => {
     setPositionRequestData(null);
     setPositionRequestId(null);
     setPositionRequestProfileId(null);
+    setPositionRequestProfileVersion(null);
     setPositionRequestDepartmentId(null);
     setOriginalProfessionalRegistrationFields([]);
     setOriginalOptionalRequirementsFields([]);
@@ -189,6 +217,12 @@ export const WizardProvider: React.FC<WizardProviderProps> = ({ children }) => {
 
     reqAlertShown,
     setReqAlertShown,
+    secAlertShown,
+    setSecAlertShown,
+
+    profRegAlertShown,
+    setProfRegAlertShown,
+
     optionalAccountabilitiesAlertShown,
     setOptionalAccountabilitiesAlertShown,
 
@@ -208,6 +242,8 @@ export const WizardProvider: React.FC<WizardProviderProps> = ({ children }) => {
     setPositionRequestId,
     positionRequestProfileId,
     setPositionRequestProfileId,
+    positionRequestProfileVersion,
+    setPositionRequestProfileVersion,
     positionRequestDepartmentId,
     setPositionRequestDepartmentId,
 
@@ -232,6 +268,7 @@ export const WizardProvider: React.FC<WizardProviderProps> = ({ children }) => {
     requiresVerification,
     setRequiresVerification,
     resetWizardContext,
+    // getClassificationById,
   };
 
   return <WizardContext.Provider value={value}>{children}</WizardContext.Provider>;

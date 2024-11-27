@@ -1,17 +1,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { Skeleton, Typography } from 'antd';
+import { CopyOutlined } from '@ant-design/icons';
+import { message, Skeleton, Typography } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { useGetOrganizationQuery } from '../../../../redux/services/graphql-api/organization';
-import {
-  PositionProfileModel,
-  useLazyGetPositionProfileQuery,
-} from '../../../../redux/services/graphql-api/position.api';
+import { PositionProfileModel, useGetPositionProfileQuery } from '../../../../redux/services/graphql-api/position.api';
 import LoadingSpinnerWithMessage from '../components/loading.component';
 
 interface PositionProfileProps {
-  positionNumber: number | string | null | undefined;
+  positionNumber?: number | string | null | undefined;
+  positionProfile?: PositionProfileModel;
   prefix?: string;
-  mode?: 'compact' | 'compact2' | 'full';
+  mode?: 'compact' | 'compact2' | 'contact' | 'full';
   unOccupiedText?: string;
   loadingStyle?: 'spinner' | 'skeleton';
   orgChartData?: any;
@@ -19,14 +18,25 @@ interface PositionProfileProps {
 
 const PositionProfile: React.FC<PositionProfileProps> = ({
   positionNumber,
+  positionProfile = null,
   prefix,
   mode = 'full',
   loadingStyle = 'spinner',
   unOccupiedText,
-  orgChartData,
+  orgChartData = null,
 }) => {
-  const [getPositionProfile, { data: positionProfileData, isFetching, error: positionProfileError }] =
-    useLazyGetPositionProfileQuery();
+  const {
+    data: positionProfileData,
+    isLoading,
+    error: positionProfileError,
+  } = useGetPositionProfileQuery(
+    {
+      positionNumber: positionNumber?.toString() ?? '',
+    },
+    { skip: (positionNumber?.toString() ?? '') == '' },
+  );
+  // const [getPositionProfile, { data: positionProfileData, isFetching, error: positionProfileError }] =
+  //   useLazyGetPositionProfileQuery();
   const [firstActivePosition, setFirstActivePosition] = useState<PositionProfileModel | null>(null);
   const [additionalPositions, setAdditionalPositions] = useState<number>(0);
   const [ministryId, setMinistryId] = useState<string | null>(null);
@@ -38,7 +48,14 @@ const PositionProfile: React.FC<PositionProfileProps> = ({
   } = useGetOrganizationQuery({ id: ministryId ?? '' }, { skip: !ministryId || mode === 'compact2' });
 
   useEffect(() => {
-    if (orgChartData && positionNumber) {
+    if (positionProfile && !firstActivePosition) {
+      setFirstActivePosition(positionProfile);
+      setAdditionalPositions(0);
+    }
+  }, [positionProfile, firstActivePosition]);
+
+  useEffect(() => {
+    if (orgChartData && positionNumber && !positionProfile) {
       const node = orgChartData.nodes.find((node: any) => node.id === positionNumber.toString());
       if (node) {
         const activePositions = node.data.employees.filter((employee: any) => employee.status === 'Active');
@@ -46,6 +63,7 @@ const PositionProfile: React.FC<PositionProfileProps> = ({
         if (firstActiveEmployee) {
           setFirstActivePosition({
             employeeName: firstActiveEmployee.name,
+            employeeEmail: firstActiveEmployee.email,
             ministry: node.data.department.organization_id || '',
             positionDescription: node.data.title,
             departmentName: node.data.department.name,
@@ -57,10 +75,8 @@ const PositionProfile: React.FC<PositionProfileProps> = ({
           setMinistryId(node.data.department.organization_id);
         }
       }
-    } else if (positionNumber) {
-      getPositionProfile({ positionNumber: positionNumber.toString() });
     }
-  }, [positionNumber, getPositionProfile, orgChartData]);
+  }, [positionNumber, orgChartData, positionProfile]);
 
   useEffect(() => {
     if (positionProfileData && positionProfileData.positionProfile) {
@@ -70,7 +86,7 @@ const PositionProfile: React.FC<PositionProfileProps> = ({
     }
   }, [positionProfileData]);
 
-  const ministryName = organizationData?.organization?.name || '';
+  const ministryName = organizationData?.organization?.name || positionProfile?.ministry || '';
 
   if (positionProfileError || organizationError) {
     return <span>Could not get position information, please reload the page.</span>;
@@ -78,7 +94,7 @@ const PositionProfile: React.FC<PositionProfileProps> = ({
 
   return (
     <>
-      {isFetching || isOrganizationFetching ? (
+      {isLoading || isOrganizationFetching ? (
         loadingStyle === 'spinner' ? (
           <LoadingSpinnerWithMessage mode="small" />
         ) : (
@@ -100,6 +116,21 @@ const PositionProfile: React.FC<PositionProfileProps> = ({
                 {`${firstActivePosition.positionDescription} · ${firstActivePosition.departmentName}`}
               </Typography.Text>
             </h1>
+          ) : mode === 'contact' ? (
+            <div>
+              {/* {JSON.stringify(firstActivePosition)} */}
+              {firstActivePosition.employeeName}, {firstActivePosition.ministry} {' - '}
+              <a href={`mailto:${firstActivePosition.employeeEmail}`}>{firstActivePosition.employeeEmail}</a>
+              {firstActivePosition.employeeEmail && (
+                <CopyOutlined
+                  onClick={() => {
+                    navigator.clipboard.writeText(firstActivePosition.employeeEmail || '');
+                    message.success('Email copied to clipboard');
+                  }}
+                  style={{ cursor: 'pointer' }}
+                />
+              )}
+            </div>
           ) : (
             <div>
               <p style={{ margin: 0 }}>{`${firstActivePosition.employeeName}, ${ministryName}`}</p>
@@ -112,8 +143,16 @@ const PositionProfile: React.FC<PositionProfileProps> = ({
             </div>
           )}
         </>
-      ) : (
+      ) : positionNumber ? (
         <div>{unOccupiedText === undefined ? `Position ${positionNumber} is unoccupied` : unOccupiedText}</div>
+      ) : (
+        firstActivePosition?.positionNumber && (
+          <div>
+            {unOccupiedText === undefined
+              ? `Position ${firstActivePosition?.positionNumber} is unoccupied`
+              : unOccupiedText}
+          </div>
+        )
       )}
     </>
   );

@@ -7,11 +7,18 @@ inputs:
   api-token:
     description: 'OpenShift service account API token'
     required: true
+  project:
+    description: 'Project to redeploy'
+    required: true
+  environment:
+    description: 'Deployment environment'
+    required: true
+    default: 'test'
 runs:
   using: 'composite'
   steps:
     - name: Rebuild the image streams
       run: |
-        chmod +x ./.github/actions/trigger-deploy/restart_imagestreams.sh
-        ./.github/actions/trigger-deploy/restart_imagestreams.sh "${{ inputs.openshift-server }}" "${{ inputs.api-token }}"
+        chmod +x ./.github/actions/trigger-deploy/redeploy.sh
+        ./.github/actions/trigger-deploy/redeploy.sh "${{ inputs.openshift-server }}" "${{ inputs.api-token }}" '${{ inputs.project }}' '${{ inputs.environment }}'
       shell: bash

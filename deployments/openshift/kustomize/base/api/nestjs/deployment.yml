@@ -1,0 +1,87 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: api
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      name: api
+  strategy:
+    type: RollingUpdate
+  template:
+    metadata:
+      labels:
+        name: api
+    spec:
+      automountServiceAccountToken: false
+      containers:
+      - name: api
+        image: artifacts.developer.gov.bc.ca/af3c-gen-docker-local/api:develop-latest
+        imagePullPolicy: Always 
+        readinessProbe:
+          httpGet:
+            path: /health/check
+            port: 4000
+          initialDelaySeconds: 15
+          periodSeconds: 10
+        ports:
+        - containerPort: 4000
+          protocol: TCP
+        volumeMounts:
+        - name: seed-volume
+          mountPath: /usr/src/apps/api/prisma/seed.ts
+          subPath: seed.ts
+        - name: log-volume
+          mountPath: /tmp/log
+        envFrom:
+        # - configMapRef:
+        #     name: api-configmap
+        - secretRef:
+            name: secrets
+        resources:
+          requests:
+            cpu: 200m 
+            memory: 600Mi 
+          limits:
+            cpu: 400m 
+            memory: 1000Mi
+      - name: filebeat
+        image: docker.elastic.co/beats/filebeat:8.16.1
+        args: ["-c", "/usr/share/filebeat/filebeat.yml", "-e"]
+        volumeMounts:
+        - name: log-volume
+          mountPath: /tmp/log/
+        - name: filebeat-config
+          mountPath: /usr/share/filebeat/filebeat.yml
+          subPath: filebeat.yml
+        resources:
+          requests:
+            cpu: 10m 
+            memory: 50Mi 
+          limits:
+            cpu: 20m 
+            memory: 100Mi
+      - name: logrotate
+        image: artifacts.developer.gov.bc.ca/af3c-gen-docker-local/logrotate:develop-latest
+        imagePullPolicy: Always 
+        volumeMounts:
+        - name: log-volume
+          mountPath: /tmp/log
+        command: ["/usr/local/bin/logrotate-script.sh"]
+        resources:
+          requests:
+            cpu: 10m 
+            memory: 50Mi 
+          limits:
+            cpu: 20m 
+            memory: 100Mi
+      volumes:
+      - name: log-volume
+        emptyDir: {}
+      - name: filebeat-config
+        configMap:
+          name: filebeat-configmap
+      - name: seed-volume
+        secret:
+          secretName: seed-secret
