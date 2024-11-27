@@ -10,8 +10,8 @@ import { UserResolver } from './user.resolver';
 import { UserService } from './user.service';
 
 @Module({
-  imports: [ExternalModule, HttpModule, KeycloakModule, PrismaModule, PrismaModule],
+  imports: [ExternalModule, HttpModule, KeycloakModule, PrismaModule],
   providers: [KeycloakService, PeoplesoftService, PeoplesoftV2Service, UserService, UserResolver],
-  exports: [KeycloakService, PeoplesoftV2Service],
+  exports: [KeycloakService, PeoplesoftV2Service, UserService],
 })
 export class UserModule {}

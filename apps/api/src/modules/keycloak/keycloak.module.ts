@@ -4,5 +4,6 @@ import { KeycloakService } from './keycloak.service';
 
 @Module({
   providers: [KeycloakService, KeycloakResolver],
+  exports: [KeycloakService],
 })
 export class KeycloakModule {}
