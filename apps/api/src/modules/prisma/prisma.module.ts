@@ -1,21 +1,20 @@
-import { Global, Module, forwardRef } from '@nestjs/common';
-import { SearchModule } from '../search/search.module';
-import { SearchService } from '../search/search.service';
+import { Global, Module } from '@nestjs/common';
+import { EventsService } from '../utils/event.service';
 import { PGLitePrismaService } from './pglite-prisma.service';
 import { PrismaService } from './prisma.service';
 
 @Global()
 @Module({
-  imports: [forwardRef(() => SearchModule)],
+  imports: [],
   providers: [
     {
       provide: PrismaService,
-      useFactory: (searchService: SearchService) => {
+      useFactory: (eventsService: EventsService) => {
         if (process.env.E2E_TESTING === 'true' && process.env.NODE_ENV != 'development')
-          return new PGLitePrismaService(searchService);
-        else return new PrismaService(searchService);
+          return new PGLitePrismaService(eventsService);
+        else return new PrismaService(eventsService);
       },
-      inject: [SearchService],
+      inject: [EventsService],
     },
   ],
   exports: [PrismaService],

@@ -102,6 +102,10 @@ To genereate coverage report, run with `--coverage` flag
 
 Project is also configured to generate reports with `jest-html-reporter`, which outputs test results to `app/test-report.html`
 
+## Running NestJS unit tests
+
+`npx -w api jest --no-cache`
+
 ## Updating seed file secret
 
 To update the seed file, run `oc set data secret/seed-secret --from-file=seed.ts`

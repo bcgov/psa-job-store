@@ -2,7 +2,7 @@ import { PGlite } from '@electric-sql/pglite';
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { PrismaPGlite } from 'pglite-prisma-adapter';
 import { seed } from '../../utils/e2e-test-data-seed';
-import { SearchService } from '../search/search.service';
+import { EventsService } from '../utils/event.service';
 import { ExtendedPrismaClient } from './extended-prisma-client.impl';
 
 @Injectable()
@@ -10,11 +10,14 @@ export class PGLitePrismaService extends ExtendedPrismaClient implements OnModul
   private static instance: PGLitePrismaService;
   private pglite: PGlite;
 
-  constructor(private readonly searchService: SearchService) {
-    if (PGLitePrismaService.instance) {
-      return PGLitePrismaService.instance;
+  static getInstance(eventsService: EventsService): PGLitePrismaService {
+    if (!PGLitePrismaService.instance) {
+      PGLitePrismaService.instance = new PGLitePrismaService(eventsService);
     }
+    return PGLitePrismaService.instance;
+  }
 
+  constructor(private readonly eventsService: EventsService) {
     console.log('creating prisma service: ', process.env.DATABASE_URL);
     const pglite = new PGlite(process.env.DATABASE_URL);
     const adapter = new PrismaPGlite(pglite);
@@ -45,8 +48,8 @@ export class PGLitePrismaService extends ExtendedPrismaClient implements OnModul
 
     console.log('reading schema file');
 
-    console.log('process.env.DB_SCHEMA is..: ');
-    console.log(process.env.DB_SCHEMA);
+    // console.log('process.env.DB_SCHEMA is..: ');
+    // console.log(process.env.DB_SCHEMA);
 
     const schema = process.env.DB_SCHEMA.replace(/\\n/g, '\n');
 
@@ -120,7 +123,15 @@ export class PGLitePrismaService extends ExtendedPrismaClient implements OnModul
     await seed(this);
 
     // reset index
-    await this.searchService.resetIndex();
+    // await this.searchService.resetIndex();
+    // to prevent circular depencency
+
+    // Reset should work because it fires on application bootstrap in searchService
+    // console.log('emitting search:resetIndex');
+    // const promise = this.eventsService.waitFor('search:resetIndex');
+    // await this.eventsService.emit('search:resetIndex', null);
+    // await promise;
+    // console.log('emitting search:resetIndex done');
 
     // console.log('classifications now are: ');
     // const classifications = await this.classification.findMany();

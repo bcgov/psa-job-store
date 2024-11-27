@@ -33,6 +33,7 @@ import { ScheduledTaskModule } from './modules/scheduled-task/scheduled-task.mod
 import { SearchModule } from './modules/search/search.module';
 import { SettingsModule } from './modules/settings/settings.module';
 import { UserModule } from './modules/user/user.module';
+import { EventModule } from './modules/utils/event.module';
 import { apolloPinoLoggingPlugin } from './utils/logging/apolloPinoLoggingPlugin';
 import { formatGraphQLError } from './utils/logging/graphql-error.formatter';
 import { loggerOptions } from './utils/logging/logger.factory';
@@ -55,6 +56,7 @@ import { validateAppConfig } from './utils/validate-app-config.util';
         pinoHttp: loggerOptions,
       }),
     }),
+    EventModule,
     HealthCheckModule,
     ScheduleModule.forRoot(),
     AuthModule,
