@@ -1,6 +1,6 @@
 import { Spin } from 'antd';
 import { useEffect, useState } from 'react';
-import { Outlet, useNavigate } from 'react-router-dom';
+import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useTypedSelector } from '../redux/redux.hooks';
 import { useAppDispatch } from '../redux/redux.store';
 import { setUser } from '../routes/auth/store/auth.slice';
@@ -9,6 +9,7 @@ export const NextRouteGuard = () => {
   const auth = useTypedSelector((state) => state.authReducer);
   const dispatch = useAppDispatch();
   const navigate = useNavigate();
+  const location = useLocation();
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
   useEffect(() => {
@@ -22,11 +23,11 @@ export const NextRouteGuard = () => {
           const json = await response.json();
           dispatch(setUser(json));
           setIsLoading(false);
-          navigate('/');
+          navigate(location.pathname);
         }
       })();
     }
-  }, [dispatch, navigate, auth]);
+  }, [dispatch, location.pathname, navigate, auth]);
 
   if (isLoading) {
     return (

@@ -6,7 +6,6 @@ import PositionProfile from '../../components/app/common/components/positionProf
 import ContentWrapper from '../../components/content-wrapper.component';
 import { useTypedSelector } from '../../redux/redux.hooks';
 import { useGetPositionRequestsCountQuery } from '../../redux/services/graphql-api/position-request.api';
-import { useGetProfileQuery } from '../../redux/services/graphql-api/profile.api';
 import MyPositionsTable from '../my-position-requests/components/my-position-requests-table.component';
 import { DepartmentFilter } from '../org-chart/components/department-filter.component';
 import { OrgChart } from '../org-chart/components/org-chart';
@@ -26,7 +25,6 @@ export const HomePage = () => {
   const auth = useTypedSelector((state) => state.authReducer);
   const { data: positionsCountData } = useGetPositionRequestsCountQuery();
   const { total = 0, completed = 0, verification = 0 } = positionsCountData?.positionRequestsCount || {};
-  const { data: profileData, isFetching: profileDataIsFetching } = useGetProfileQuery();
   const [currentView] = useState<'chart' | 'tree'>('chart');
   const [horizontal, setHorizontal] = useState(false);
   const [searchTerm, setSearchTerm] = useState<string | undefined>(undefined);
@@ -34,8 +32,8 @@ export const HomePage = () => {
   const [departmentId, setDepartmentId] = useState<string | null | undefined>(undefined);
 
   useEffect(() => {
-    setDepartmentId(profileData?.profile.department_id);
-  }, [profileData?.profile]);
+    setDepartmentId(auth.user?.metadata.peoplesoft.department_id);
+  }, [auth.user]);
 
   const handleSearch = useCallback((value: string) => {
     setSearchTerm(value);
@@ -65,7 +63,7 @@ export const HomePage = () => {
                     </Text>
                     <div style={{ height: '19px' }}>
                       <PositionProfile
-                        positionNumber={profileData?.profile.position_id}
+                        positionNumber={auth.user?.metadata.peoplesoft.position_id}
                         // positionNumber={'00121521'}
                         mode="compact2"
                         unOccupiedText=""
@@ -125,7 +123,6 @@ export const HomePage = () => {
           {/* Todo: pull in from actual user data */}
 
           <Card
-            loading={profileDataIsFetching}
             className="orgChartCard"
             style={{
               height: '500px',
@@ -183,8 +180,7 @@ export const HomePage = () => {
                 context={OrgChartContext.DEFAULT}
                 setDepartmentId={setDepartmentId}
                 departmentId={departmentId}
-                departmentIdIsLoading={profileDataIsFetching}
-                targetId={profileData?.profile.position_id}
+                targetId={auth.user?.metadata.peoplesoft.position_id}
                 wrapProvider={false}
               />
             </div>
@@ -202,7 +198,7 @@ export const HomePage = () => {
                         <TreeOrgChartSearch
                           setSearchTerm={setSearchTerm}
                           onSearch={handleSearch}
-                          disabled={departmentId == null || profileDataIsFetching}
+                          disabled={departmentId == null}
                           searchTerm={searchTerm}
                         />
                       )}
@@ -218,17 +214,12 @@ export const HomePage = () => {
                     <Col flex="auto"> {/* This empty column will create the gap */}</Col>
                     <Col flex="500px">
                       {currentView === 'tree' && (
-                        <DepartmentFilter
-                          setDepartmentId={setDepartmentId}
-                          departmentId={departmentId}
-                          loading={profileDataIsFetching}
-                        />
+                        <DepartmentFilter setDepartmentId={setDepartmentId} departmentId={departmentId} />
                       )}
                     </Col>
                   </Row>
                   <TreeOrgChart
                     source="home"
-                    departmentIdIsLoading={profileDataIsFetching}
                     departmentId={departmentId ?? ''}
                     isHorizontal={horizontal}
                     searchTerm={searchTerm}

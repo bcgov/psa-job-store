@@ -5,7 +5,6 @@ import { PositionProvider } from '../../../components/app/common/contexts/positi
 import { PageHeader } from '../../../components/app/page-header.component';
 import ContentWrapper from '../../../components/content-wrapper.component';
 import { useTypedSelector } from '../../../redux/redux.hooks';
-import { useGetProfileQuery } from '../../../redux/services/graphql-api/profile.api';
 import { getUserRoles } from '../../../utils/get-user-roles.util';
 import { ClassificationTasksPage } from '../../classification-tasks/classification-tasks.page';
 import { HomePage as LegacyHomePage } from '../../home-old/home.page';
@@ -19,7 +18,6 @@ const NewHomePage = () => {
   const roles = getUserRoles(auth.user);
 
   const { family_name, given_name } = (auth.user ?? {}) as Record<string, any>;
-  const { data: profileData } = useGetProfileQuery();
 
   const renderHomePageForRole = useMemo(() => {
     if (roles.includes('super-admin')) {
@@ -36,7 +34,7 @@ const NewHomePage = () => {
         title={auth.user ? (auth.user?.name as string) : ''}
         subTitle={
           <PositionProfile
-            positionNumber={profileData?.profile.position_id}
+            positionNumber={auth.user?.metadata.peoplesoft.position_id}
             mode="compact2"
             unOccupiedText=""
             loadingStyle="skeleton"
