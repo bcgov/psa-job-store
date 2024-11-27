@@ -1,6 +1,5 @@
-import axios, { AxiosRequestConfig } from 'axios';
-import { VITE_BACKEND_URL, VITE_KEYCLOAK_CLIENT_ID, VITE_KEYCLOAK_REALM_URL } from '../../envConfig';
-import { oidcConfig } from '../main';
+import axios from 'axios';
+import { VITE_BACKEND_URL } from '../../envConfig';
 
 // eslint-disable-next-line @typescript-eslint/no-explicit-any
 function checkForExpiredSessionError(response: any) {
@@ -32,18 +31,9 @@ export const sendLogToServer = async (error: Error): Promise<void> => {
     path: window.location.pathname,
   };
   // console.log(logMessage);
-  const storageString =
-    (await oidcConfig.userStore?.get(`user:${VITE_KEYCLOAK_REALM_URL}:${VITE_KEYCLOAK_CLIENT_ID}`)) ?? '{}';
 
-  const { access_token } = JSON.parse(storageString);
-
-  const config: AxiosRequestConfig = {
-    headers: {
-      Authorization: `Bearer ${access_token}`,
-    },
-  };
   try {
-    const result = await axios.post(VITE_BACKEND_URL + '/logs/log', logMessage, config);
+    const result = await axios.post(VITE_BACKEND_URL + '/logs/log', logMessage, { withCredentials: true });
     const isSessionExpired = checkForExpiredSessionError(result);
 
     if (isSessionExpired) {

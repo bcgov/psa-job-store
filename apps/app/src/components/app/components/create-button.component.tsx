@@ -2,8 +2,8 @@ import { FileAddOutlined, FileOutlined } from '@ant-design/icons';
 import { Button, Flex, Menu } from 'antd';
 import { MenuItemType } from 'antd/es/menu/hooks/useItems';
 import { useMemo } from 'react';
-import { useAuth } from 'react-oidc-context';
 import { Link, NavLink } from 'react-router-dom';
+import { useTypedSelector } from '../../../redux/redux.hooks';
 import { PositionRequestOutlined } from '../../icons/position-request-outlined';
 import AccessiblePopoverMenu from '../common/components/accessible-popover-menu';
 import { createMenuItem } from '../utils/nav-menu.utils';
@@ -12,7 +12,7 @@ import { userCanAccess } from '../utils/user-has-roles.util';
 export type CreateButtonProps = { collapsed: boolean };
 
 export const CreateButton = ({ collapsed }: CreateButtonProps) => {
-  const auth = useAuth();
+  const auth = useTypedSelector((state) => state.authReducer);
 
   const menuItems = useMemo(
     () => [

@@ -1,10 +1,10 @@
 import { Button, Card, Col, Divider, Radio, Row, Space, Typography } from 'antd';
 import { useCallback, useEffect, useState } from 'react';
-import { useAuth } from 'react-oidc-context';
 import { Link } from 'react-router-dom';
 import { ReactFlowProvider } from 'reactflow';
 import PositionProfile from '../../components/app/common/components/positionProfile';
 import ContentWrapper from '../../components/content-wrapper.component';
+import { useTypedSelector } from '../../redux/redux.hooks';
 import { useGetPositionRequestsCountQuery } from '../../redux/services/graphql-api/position-request.api';
 import { useGetProfileQuery } from '../../redux/services/graphql-api/profile.api';
 import MyPositionsTable from '../my-position-requests/components/my-position-requests-table.component';
@@ -23,7 +23,7 @@ import './home.page.css';
 const { Text } = Typography;
 
 export const HomePage = () => {
-  const auth = useAuth();
+  const auth = useTypedSelector((state) => state.authReducer);
   const { data: positionsCountData } = useGetPositionRequestsCountQuery();
   const { total = 0, completed = 0, verification = 0 } = positionsCountData?.positionRequestsCount || {};
   const { data: profileData, isFetching: profileDataIsFetching } = useGetProfileQuery();
@@ -49,7 +49,7 @@ export const HomePage = () => {
             <Col>
               <Space direction="vertical">
                 <Space align="center">
-                  <InitialsAvatar name={auth.user?.profile.given_name + ' ' + auth.user?.profile.family_name} />
+                  <InitialsAvatar name={auth.user?.given_name + ' ' + auth.user?.family_name} />
                   {/* <Avatar size={64} icon={<UserOutlined />} /> */}
                   <div>
                     <Text
@@ -61,7 +61,7 @@ export const HomePage = () => {
                         marginBottom: '0.5rem',
                       }}
                     >
-                      {auth.user?.profile.name}
+                      {auth.user?.name}
                     </Text>
                     <div style={{ height: '19px' }}>
                       <PositionProfile
