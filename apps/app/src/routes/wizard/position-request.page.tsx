@@ -259,13 +259,13 @@ export const PositionRequestPage = () => {
   // nav block
   const isBlocking = useRef(true);
   const blocker = useBlocker(({ currentLocation, nextLocation }) => {
-    console.log(
-      'blocker: currentLocation, nextLocation, currentStep, isBlocking.current: ',
-      currentLocation,
-      nextLocation,
-      currentStep,
-      isBlocking.current,
-    );
+    // console.log(
+    //   'blocker: currentLocation, nextLocation, currentStep, isBlocking.current: ',
+    //   currentLocation,
+    //   nextLocation,
+    //   currentStep,
+    //   isBlocking.current,
+    // );
     return (
       currentLocation.pathname !== nextLocation.pathname &&
       currentStep != 5 &&
