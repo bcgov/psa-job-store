@@ -538,6 +538,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
     modified: (string | TrackedFieldArrayItem | AccountabilitiesModel)[] | undefined,
     hideDisabled?: boolean,
   ): JSX.Element[] => {
+    console.log('compareLists');
     const comparisonResult: JSX.Element[] = [];
     if (!modified) return comparisonResult;
 
