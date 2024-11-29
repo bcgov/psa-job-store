@@ -25,7 +25,6 @@
     "@dagrejs/dagre": "^1.1.2",
     "dayjs": "^1.11.10",
     "docx": "^8.5.0",
-    "react-quill": "0.0.2",
     "reactflow": "^11.11.1"
   },
   "devDependencies": {
