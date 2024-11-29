@@ -52,7 +52,7 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
           contact_id: 231166,
         },
         org_chart: {
-          department_ids: ['112-0074', 'DEPT02'],
+          department_ids: ['112-0074', '123-4567'],
         },
         peoplesoft: {
           employee_id: '188146',
@@ -64,6 +64,60 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
     },
     update: {
       name: 'xxxx',
+    },
+  });
+
+  await prisma.user.upsert({
+    where: { id: '95cfdf78-95a5-4586-9a18-ff74aedd1ef2' },
+    create: {
+      id: '95cfdf78-95a5-4586-9a18-ff74aedd1ef2',
+      name: "D'Cruz, George CITZ:EX",
+      roles: ['hiring-manager'],
+      metadata: {
+        crm: {
+          account_id: null,
+          contact_id: 231166,
+        },
+        org_chart: {
+          department_ids: ['112-0074', '123-4567'],
+        },
+        peoplesoft: {
+          employee_id: '188147',
+          position_id: '00132137',
+          department_id: '112-0074',
+          organization_id: 'BC112',
+        },
+      },
+    },
+    update: {
+      name: "D'Cruz, George CITZ:EX",
+    },
+  });
+
+  await prisma.user.upsert({
+    where: { id: '0cd09b68-db66-4f29-9407-eba78d35230e' },
+    create: {
+      id: '0cd09b68-db66-4f29-9407-eba78d35230e',
+      name: 'Struk, Alex CITZ:EX',
+      roles: ['hiring-manager'],
+      metadata: {
+        crm: {
+          account_id: null,
+          contact_id: 231166,
+        },
+        org_chart: {
+          department_ids: ['112-0074', '123-4567'],
+        },
+        peoplesoft: {
+          employee_id: '188148',
+          position_id: '00132138',
+          department_id: '112-0074',
+          organization_id: 'BC112',
+        },
+      },
+    },
+    update: {
+      name: 'Struk, Alex CITZ:EX',
     },
   });
 
@@ -2862,7 +2916,7 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
         effective_date: new Date('2022-01-01'),
       },
       {
-        id: 'DEPT02',
+        id: '123-4567',
         location_id: 'LOC02',
         organization_id: 'BC000',
         peoplesoft_id: 'PSFT02',
@@ -2895,7 +2949,7 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
         is_statutorily_excluded: false,
       },
       {
-        department_id: 'DEPT02',
+        department_id: '123-4567',
         is_statutorily_excluded: false,
       },
       {
@@ -3577,7 +3631,7 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
         crm_assigned_to_account_id: 98765,
         step: 2,
         reports_to_position_id: 'POS456',
-        department_id: 'DEPT02',
+        department_id: '123-4567',
         parent_job_profile_id: profile200.id,
         parent_job_profile_version: 1,
         crm_json: null,

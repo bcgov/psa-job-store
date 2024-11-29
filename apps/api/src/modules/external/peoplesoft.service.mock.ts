@@ -151,7 +151,7 @@ export class MockPeoplesoftService {
 
   async getPositionsForDepartment(department_id: string) {
     console.log('Mock getPositionsForDepartment called with department_id:', department_id);
-    const positions = this.mockData.positions.filter(() => '112-0074' === department_id);
+    const positions = this.mockData.positions.filter((d) => d['A.DEPTID'] === department_id);
     const retObj = {
       data: {
         query: {

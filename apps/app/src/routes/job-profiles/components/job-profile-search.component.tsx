@@ -16,6 +16,7 @@ import {
   useGetJobProfilesMinistriesQuery,
 } from '../../../redux/services/graphql-api/job-profile.api';
 import './job-profile-search.component.css';
+import { useJobProfilesProvider } from './job-profiles.context';
 
 const { Search } = Input;
 
@@ -71,6 +72,7 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
   const location = useLocation();
+  const { clearingFilters, setClearingFilters, clearingSearch, setClearingSearch } = useJobProfilesProvider();
   const isPositionRequestRoute = location.pathname.includes('/requests/positions/');
 
   // const organizationData = useGetOrganizationsQuery().data?.organizations;
@@ -95,6 +97,10 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
     classificationData = useGetJobProfilesClassificationsQuery().data?.jobProfilesClassifications;
 
   const [searchText, setSearchText] = useState(searchParams.get('search') || '');
+
+  useEffect(() => {
+    setSearchText(searchParams.get('search') || '');
+  }, [searchParams]);
 
   // JOB FAMILIES AND STREAMS TREE VIEW
   const { data: jobFamiliesData } = useGetJobFamiliesQuery();
@@ -356,7 +362,7 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
     // If the job family or classification filters have changed, de-select the selected profile
     if (jobFamilyChanged || classificationChanged || ministryChanged || jobRoleTypeChanged || jobStreamChanged) {
       // do not run this if we're clearing filters - in that case we want to have the profile still selected
-      if (searchParams.get('clearFilters')) {
+      if (clearingFilters) {
         return;
       }
       newSearchParams.set('page', '1');
@@ -435,12 +441,20 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
 
   useEffect(() => {
     // if searchparams has clear filters flag, do that
-    if (searchParams.get('clearFilters')) {
+    if (clearingFilters) {
       setAllSelections([]);
-      searchParams.delete('clearFilters');
+      setClearingFilters(false);
       setSearchParams(searchParams);
     }
-  }, [searchParams, setAllSelections, setSearchParams]);
+  }, [searchParams, setAllSelections, setSearchParams, clearingFilters, setClearingFilters]);
+
+  useEffect(() => {
+    if (clearingSearch) {
+      setSearchText('');
+      handleSearch('');
+      setClearingSearch(false);
+    }
+  }, [clearingSearch, setClearingSearch, setSearchText, handleSearch]);
 
   const clearFilters = () => {
     // setAllSelections([]);
@@ -455,7 +469,8 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
     const searchFromUrl = searchParams.get('search');
     if (searchFromUrl) newSearchParams.set('search', searchFromUrl);
 
-    newSearchParams.set('clearFilters', 'true');
+    setClearingFilters(true);
+    // newSearchParams.set('clearFilters', 'true');
     // setSearchParams(newSearchParams);
 
     // console.log('location.pathname: ', location.pathname);

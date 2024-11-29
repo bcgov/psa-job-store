@@ -419,7 +419,7 @@ export const PositionRequestPage = () => {
                       })}
                       title="Sent for verification"
                       subTitle={`The profile was submitted for review on: ${dayjs(
-                        wizardContextPositionRequestData?.updated_at,
+                        wizardContextPositionRequestData?.resubmitted_at,
                       ).format('MMM D, YYYY')}`}
                     />
 
