@@ -40,6 +40,62 @@ jest.mock('./envConfig', () => ({
 //   ]),
 // }));
 
+jest.mock('./src/redux/services/graphql-api/job-profile.api', () => ({
+  useGetJobProfilesClassificationsQuery: jest.fn().mockReturnValue([
+    jest.fn(), // mock trigger function
+    {
+      data: {
+        jobProfilesClassifications: [
+          {
+            id: '501537',
+            employee_group_id: 'GEU',
+            peoplesoft_id: 'BCSET',
+            code: 'COMM O 30R',
+            name: 'Communications Officer R30',
+            grade: '30A',
+          },
+          {
+            id: '508010',
+            employee_group_id: 'GEU',
+            peoplesoft_id: 'BCSET',
+            code: 'ISL 24R',
+            name: 'Information Systems R24',
+            grade: '24A',
+          },
+        ],
+      },
+      isLoading: false,
+    }, // mock response object
+  ]),
+}));
+
+jest.mock('./src/redux/services/graphql-api/position.api', () => ({
+  useLazyGetPositionProfileQuery: jest.fn().mockReturnValue([
+    jest.fn(), // mock trigger function
+    {
+      data: {
+        positionProfile: [
+          {
+            positionNumber: '00543278',
+            positionDescription: 'Exec Dir, Digital Capacity',
+            departmentName: 'Informational Resource Management',
+            employeeName: 'Grace Thompson',
+            employeeEmail: null,
+            classification: 'Band 5',
+            ministry: "Citizens' Services",
+            status: 'Active',
+            classificationId: '',
+            classificationPeoplesoftId: '',
+            classificationEmployeeGroupId: '',
+            effectiveDate: '2024-07-20',
+          },
+        ],
+      },
+      isLoading: false,
+    }, // mock response object
+  ]),
+}));
+
 jest.mock('./src/redux/services/graphql-api/organization', () => ({
   useGetOrganizationsQuery: jest.fn().mockReturnValue({
     data: {

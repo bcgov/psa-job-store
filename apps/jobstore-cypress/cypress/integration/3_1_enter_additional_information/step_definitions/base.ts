@@ -51,13 +51,13 @@ When('the user changes the department dropdown value', () => {
 
   cy.get('.ant-select-selection-search-input').type('human resources');
 
-  cy.get('span[title="Human Resources (DEPT02)"]').click();
+  cy.get('span[title="Human Resources (123-4567)"]').click();
 });
 
 Then('the selected department changes accordingly', () => {
   cy.get('[data-testid="department-select"] .ant-select-selection-item').should(
     'contain.text',
-    'Human Resources (DEPT02)',
+    'Human Resources (123-4567)',
   );
 });
 
@@ -119,7 +119,7 @@ Then('the previously entered data is displayed on the form', () => {
   // cy.get('[data-testid="confirmation-switch"]').should('have.class', 'ant-switch-checked');
   cy.get('[data-testid="department-select"] .ant-select-selection-item').should(
     'contain.text',
-    'Human Resources (DEPT02)',
+    'Human Resources (123-4567)',
   );
 
   cy.get('[data-testid="branch-input"]').should('have.value', 'test branch');

@@ -17,6 +17,29 @@ const store = configureStore({
   middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(mockMiddleware),
 });
 
+// Mock the store
+jest.mock('../../redux/redux.store', () => ({
+  useAppDispatch: () => jest.fn(),
+  store: configureStore({
+    reducer: {
+      api: (state = {}) => state,
+    },
+    middleware: (getDefaultMiddleware) => getDefaultMiddleware(),
+  }),
+}));
+
+jest.mock('react-oidc-context', () => ({
+  useAuth: () => ({
+    isAuthenticated: false,
+    user: {
+      profile: {
+        idir_username: 'Bob',
+      },
+    },
+    isLoading: false,
+  }),
+}));
+
 describe('JobProfilesPage', () => {
   it('renders the page header and job profiles', () => {
     const router = createMemoryRouter([{ path: '/', element: <JobProfilesPage /> }]);

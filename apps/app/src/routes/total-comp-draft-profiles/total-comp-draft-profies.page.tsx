@@ -10,6 +10,7 @@ import {
   useGetJobProfilesDraftsMinistriesQuery,
 } from '../../redux/services/graphql-api/job-profile.api';
 import { JobProfileSearch } from '../job-profiles/components/job-profile-search.component';
+import { JobProfilesProvider } from '../job-profiles/components/job-profiles.context';
 import TotalCompProfilesTable from './components/total-comp-draft-profiles-table.component';
 
 export const TotalCompDraftProfilesPage = () => {
@@ -30,13 +31,15 @@ export const TotalCompDraftProfilesPage = () => {
 
       <ContentWrapper>
         {hasData && (
-          <JobProfileSearch
-            searchPlaceHolderText={'Search by job title or job store number'}
-            // additionalFilters={true}
-            fullWidth={true}
-            ministriesData={ministriesData}
-            classificationData={classificationData}
-          />
+          <JobProfilesProvider>
+            <JobProfileSearch
+              searchPlaceHolderText={'Search by job title or job store number'}
+              // additionalFilters={true}
+              fullWidth={true}
+              ministriesData={ministriesData}
+              classificationData={classificationData}
+            />
+          </JobProfilesProvider>
         )}
 
         <TotalCompProfilesTable

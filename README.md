@@ -92,7 +92,7 @@ Run `npx -w jobstore-cypress cypress open`
 
 To run in same environment as GitHub actions: `npx cypress run --browser edge --headless`
 
-## Running component tests
+## Running React component tests
 
 Run `npx -w app jest`
 
@@ -199,6 +199,8 @@ Import production data:
 If on local:
 
 `psql -U postgres -d api -f /home/backup.sql -h localhost -p 5432 -U admin`
+
+`npx -w api prisma migrate deploy`
 
 Clear position requests:
 
