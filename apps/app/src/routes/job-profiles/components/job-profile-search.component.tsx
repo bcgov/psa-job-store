@@ -92,9 +92,11 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
     [],
   );
 
-  if (!classificationData)
+  if (!classificationData) {
+    const classData = useGetJobProfilesClassificationsQuery();
     // eslint-disable-next-line react-hooks/rules-of-hooks
-    classificationData = useGetJobProfilesClassificationsQuery().data?.jobProfilesClassifications;
+    classificationData = classData.data?.jobProfilesClassifications;
+  }
 
   const [searchText, setSearchText] = useState(searchParams.get('search') || '');
 

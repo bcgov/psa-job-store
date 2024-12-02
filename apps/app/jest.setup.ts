@@ -2470,8 +2470,9 @@ jest.mock('./src/redux/services/graphql-api/job-profile.api', () => ({
       error: null,
     },
   ]),
-  useGetJobProfilesClassificationsQuery: jest.fn().mockReturnValue([
-    jest.fn(), // mock trigger function
+  useGetJobProfilesClassificationsQuery: jest.fn().mockReturnValue(
+    // [
+    // jest.fn(), // mock trigger function
     {
       data: {
         jobProfilesClassifications: [
@@ -2495,7 +2496,8 @@ jest.mock('./src/redux/services/graphql-api/job-profile.api', () => ({
       },
       isLoading: false,
     }, // mock response object
-  ]),
+    // ]
+  ),
   useGetJobProfilesMinistriesQuery: jest.fn().mockReturnValue({
     jobProfilesMinistries: [],
   }),
