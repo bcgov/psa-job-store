@@ -88,8 +88,7 @@ import { PositionService } from './position.service';
     PositionService,
     KeycloakService,
     PeoplesoftV2Service,
-    SearchService,
   ],
-  exports: [SearchService, PeoplesoftService, PeoplesoftV2Service, CrmService], // Export PeoplesoftService and CrmService
+  exports: [PeoplesoftService, PeoplesoftV2Service, CrmService],
 })
 export class ExternalModule {}

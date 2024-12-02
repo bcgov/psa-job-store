@@ -6,6 +6,7 @@ import LoadingComponent from '../../components/app/common/components/loading.com
 import '../../components/app/common/css/custom-form.css';
 import '../../components/app/common/css/filtered-table.page.css';
 import { useLazyGetJobProfileQuery } from '../../redux/services/graphql-api/job-profile.api';
+import NotFoundComponent from '../not-found/404';
 import { TotalCompCreateProfileComponent } from './components/total-comp-create-profile.component';
 
 export const TotalCompCreateProfilePage = () => {
@@ -41,7 +42,9 @@ export const TotalCompCreateProfilePage = () => {
   });
   if (isFetching) return <LoadingComponent />;
 
-  return (
+  return id && jobProfileData && !jobProfileData?.jobProfile && !isFetching ? (
+    <NotFoundComponent entity="Profile" />
+  ) : (
     <TotalCompCreateProfileComponent
       jobProfileData={jobProfileData}
       id={id}
@@ -49,14 +52,4 @@ export const TotalCompCreateProfilePage = () => {
       setVersion={setVersion}
     ></TotalCompCreateProfileComponent>
   );
-  // !jobProfileData && !isFetching ? (
-  //   <NotFoundComponent entity="profile" />
-  // ) : (
-  // <TotalCompCreateProfileComponent
-  //   jobProfileData={jobProfileData}
-  //   id={id}
-  //   setId={setId}
-  //   setVersion={setVersion}
-  // ></TotalCompCreateProfileComponent>
-  // );
 };

@@ -17,8 +17,8 @@ export const UserDetailPage = () => {
     if (id != null) userTrigger(id);
   }, [id]);
 
-  return !userIsFetching && !data?.user ? (
-    <NotFoundComponent entity="user" />
+  return !userIsFetching && data && !data?.user ? (
+    <NotFoundComponent entity="User" />
   ) : (
     <>
       <PageHeader

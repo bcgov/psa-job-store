@@ -163,7 +163,6 @@ export const PositionRequestPage = () => {
       // If it's a shared route, set modes or perform actions accordingly
       setMode('readonly');
     }
-    console.log(positionRequestData);
     setPositionRequestData(
       isSharedRoute
         ? (positionRequestData?.sharedPositionRequest ?? null)
@@ -271,7 +270,7 @@ export const PositionRequestPage = () => {
       currentLocation.pathname !== nextLocation.pathname &&
       currentStep != 5 &&
       isBlocking.current &&
-      !positionRequestData
+      !!(positionRequestData?.positionRequest || positionRequestData?.sharedPositionRequest)
     );
   });
 
@@ -695,7 +694,7 @@ export const PositionRequestPage = () => {
   if (classificationsDataLoading || !classificationsFetched) return <LoadingSpinnerWithMessage />;
 
   return !wizardContextPositionRequestData ? (
-    <NotFoundComponent entity="position request" />
+    <NotFoundComponent entity="Position request" />
   ) : (
     <>
       {mode === 'readonly' && (
