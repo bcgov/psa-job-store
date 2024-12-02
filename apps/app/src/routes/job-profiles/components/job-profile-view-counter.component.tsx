@@ -1,13 +1,18 @@
-import React, { ReactElement, useEffect, useState } from 'react';
+import React, { useEffect, useState } from 'react';
 import { JobProfileModel } from '../../../redux/services/graphql-api/job-profile-types';
-import { useUpdateJobProfileViewCountMutation } from '../../../redux/services/graphql-api/job-profile.api'; // Adjust the import according to your project structure
+import { useUpdateJobProfileViewCountMutation } from '../../../redux/services/graphql-api/job-profile.api';
 
 interface JobProfileViewCounterProps {
-  children: ReactElement;
+  // children: ReactElement;
   onProfileView: ((profile: JobProfileModel) => void) | undefined;
+  renderSearchResults: (onSelectProfile: any) => JSX.Element;
 }
 
-const JobProfileViewCounter: React.FC<JobProfileViewCounterProps> = ({ children, onProfileView }) => {
+const JobProfileViewCounter: React.FC<JobProfileViewCounterProps> = ({
+  // children,
+  onProfileView,
+  renderSearchResults,
+}) => {
   const [updateJobProfileViewCount] = useUpdateJobProfileViewCountMutation();
   const [viewedJobProfiles, setViewedJobProfiles] = useState<Set<number>>(new Set());
 
@@ -29,9 +34,10 @@ const JobProfileViewCounter: React.FC<JobProfileViewCounterProps> = ({ children,
     onProfileView && onProfileView(profile);
   };
 
-  return (
-    <div>{React.cloneElement(React.Children.only(children), { onSelectProfile: updateJobProfileViewCountCache })}</div>
-  );
+  return renderSearchResults(updateJobProfileViewCountCache);
+  // return React.cloneElement(children as React.ReactElement, {
+  //   onSelectProfile: updateJobProfileViewCountCache,
+  // });
 };
 
 export default JobProfileViewCounter;
