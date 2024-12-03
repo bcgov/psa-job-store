@@ -3088,8 +3088,8 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
   };
 
   try {
-    // const path = '../../job-profile-reports-to.ts.ts';
-    const path = '/tmp/log/job-profile-reports-to.ts.ts';
+    // const path = '../../job-profile-reports-to.ts';
+    const path = '/tmp/log/job-profile-reports-to.ts';
     const otherJobProfileReportsTo = (await import(path)).otherJobProfileReportsTo as unknown as any[];
     for (const reportsTo of otherJobProfileReportsTo) {
       try {
