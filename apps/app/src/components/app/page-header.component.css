@@ -45,3 +45,7 @@
   line-height: 22px; /* 157.143% */
   text-decoration-line: none;
 }
+
+.ant-page-header .ant-page-header-heading-sub-title {
+  text-wrap-mode: wrap;
+}
