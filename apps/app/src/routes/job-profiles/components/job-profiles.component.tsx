@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // JobProfilesContent.jsx
-import { FileTextFilled, LeftOutlined, RightOutlined } from '@ant-design/icons';
+import { ExclamationCircleFilled, FileTextFilled, LeftOutlined, RightOutlined } from '@ant-design/icons';
 import { Alert, Breakpoint, Col, Empty, Grid, Pagination, Row, Skeleton, Space, Tabs, Typography } from 'antd';
 import { MutableRefObject, forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
@@ -855,6 +855,18 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
 
     const renderProfileList = (onSelectProfileF: any, profiles: any[]) => (
       <>
+        {isSearchingOrFiltering && !isLoading && (
+          <Alert
+            role="info"
+            data-testid="verification-warning-message"
+            message=""
+            description={<span>Some profiles may be hidden based on the details you have already provided.</span>}
+            type="warning"
+            showIcon
+            icon={<ExclamationCircleFilled style={{ alignSelf: 'center' }} />}
+            style={{ padding: '10px', borderRadius: 0 }}
+          />
+        )}
         <div style={{ borderBottom: '1px solid #F0F0F0', padding: '0.5rem 1rem' }}>
           <Text style={{ fontSize: '14px', display: 'block', padding: '10px 0' }}>
             {totalResults === 0
