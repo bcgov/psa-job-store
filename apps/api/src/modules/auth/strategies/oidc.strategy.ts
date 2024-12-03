@@ -4,11 +4,22 @@ import { Client, Strategy, TokenSet, UserinfoResponse } from 'openid-client';
 import { UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { AppConfigDto } from '../../../dtos/app-config.dto';
-import { guidToUuid } from '../../../utils/guid-to-uuid.util';
 import { UserService } from '../../user/user.service';
+import { AuthService } from '../services/auth.service';
+
+export type KeycloakUserinfoResponse = UserinfoResponse<{
+  client_roles?: string[];
+  display_name?: string;
+  family_name?: string;
+  given_name?: string;
+  identity_provider?: string;
+  idir_user_guid: string;
+  idir_username?: string;
+}>;
 
 export class OIDCStrategy extends PassportStrategy(Strategy, 'oidc') {
   constructor(
+    private readonly authService: AuthService,
     private readonly configService: ConfigService<AppConfigDto, true>,
     private readonly oidcClient: Client,
     private readonly userService: UserService,
@@ -22,24 +33,13 @@ export class OIDCStrategy extends PassportStrategy(Strategy, 'oidc') {
   }
 
   async validate(tokenSet: TokenSet) {
-    const userinfo: UserinfoResponse = await this.oidcClient.userinfo(tokenSet);
+    const userinfo: KeycloakUserinfoResponse = await this.oidcClient.userinfo(tokenSet);
+    const sessionUser = await this.authService.validateUserinfo(userinfo);
 
-    const uuid = guidToUuid(userinfo.idir_user_guid as string);
-
-    await this.userService.syncUser(uuid);
-    const user = await this.userService.getUser({ where: { id: uuid } });
+    console.log('sessionUser: ', sessionUser);
 
     try {
-      return {
-        id: guidToUuid((userinfo.idir_user_guid as string) ?? ''),
-        name: userinfo.display_name,
-        given_name: userinfo.given_name,
-        family_name: userinfo.family_name,
-        email: userinfo.email,
-        username: userinfo.idir_username,
-        roles: userinfo.client_roles ?? [],
-        metadata: user.metadata ?? {},
-      };
+      return sessionUser;
     } catch (error) {
       throw new UnauthorizedException();
     }

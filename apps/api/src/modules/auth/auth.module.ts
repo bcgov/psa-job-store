@@ -1,5 +1,8 @@
 import { Module } from '@nestjs/common';
 import { PassportModule } from '@nestjs/passport';
+import { ExternalModule } from '../external/external.module';
+import { KeycloakModule } from '../keycloak/keycloak.module';
+import { PrismaModule } from '../prisma/prisma.module';
 import { UserModule } from '../user/user.module';
 import { AuthController } from './controllers/auth.controller';
 import { OIDCStrategyFactory } from './factories/oidc-strategy.factory';
@@ -15,6 +18,9 @@ import { AuthService } from './services/auth.service';
       // keepSessionInfo: true,
       session: true,
     }),
+    ExternalModule,
+    KeycloakModule,
+    PrismaModule,
     UserModule,
   ],
   providers: [AuthService, OIDCStrategyFactory, PublicRouteBypassGuard, SessionAuthGuard, SessionSerializer],

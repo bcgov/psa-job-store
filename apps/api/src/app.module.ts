@@ -38,7 +38,6 @@ import { APP_GUARD } from '@nestjs/core';
 import { AuthModule } from './modules/auth/auth.module';
 import { PublicRouteBypassGuard } from './modules/auth/guards/public-route-bypass.guard';
 import { SessionAuthGuard } from './modules/auth/guards/session-auth.guard';
-import { ScheduledTaskModule } from './modules/scheduled-task/scheduled-task.module';
 
 @Module({
   imports: [
@@ -80,7 +79,7 @@ import { ScheduledTaskModule } from './modules/scheduled-task/scheduled-task.mod
     SettingsModule,
     OrganizationModule,
     AuthModule,
-    ScheduledTaskModule,
+    // ScheduledTaskModule,
     // E2EAuthModule,
   ],
   controllers: [],
