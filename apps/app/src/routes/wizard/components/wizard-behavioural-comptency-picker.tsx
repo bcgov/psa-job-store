@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { DeleteOutlined } from '@ant-design/icons';
-import { Button, Col, Input, List, Row, Tag, Typography } from 'antd';
+import { InfoCircleFilled, MinusCircleOutlined } from '@ant-design/icons';
+import { Alert, Button, Col, Input, List, Row, Tag, Typography } from 'antd';
 import TextArea from 'antd/es/input/TextArea';
 import React, { useEffect, useState } from 'react';
 import { FieldArrayWithId, UseFieldArrayAppend, UseFieldArrayRemove, UseFormReturn } from 'react-hook-form';
@@ -136,6 +136,21 @@ const BehaviouralComptencyPicker: React.FC<BehaviouralComptencyPickerProps> = ({
   return (
     <Row justify="start">
       <Col xs={24} sm={24} md={24} lg={18} xl={16}>
+        <Alert
+          type="info"
+          role="note"
+          style={{ marginBottom: '24px' }}
+          description={
+            <ul style={{ margin: 0 }}>
+              <li>Adding behavioural competencies will not trigger a classification review.</li>
+              <li>
+                It is highly recommended that there be at least one Indigenous Behavioural Competency in a job profile.
+              </li>
+            </ul>
+          }
+          showIcon
+          icon={<InfoCircleFilled style={{ alignSelf: 'normal' }} />}
+        />
         <>
           {behavioural_competencies_fields.length > 0 && (
             <List
@@ -168,7 +183,7 @@ const BehaviouralComptencyPicker: React.FC<BehaviouralComptencyPickerProps> = ({
                       data-testid={`remove-behavioral-competency-${index}`}
                       type="text" // No button styling, just the icon
                       aria-label={`Remove ${field.behavioural_competency.name} behavioural competency`}
-                      icon={<DeleteOutlined aria-hidden />}
+                      icon={<MinusCircleOutlined aria-hidden />}
                       onClick={() => {
                         removeAction(index);
                       }}

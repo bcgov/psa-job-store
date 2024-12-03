@@ -82,9 +82,9 @@ export class SearchService {
 
   async searchJobProfiles(value: string) {
     // console.log('searchProfiles: ', value);
-
     const results = await this.elasticService.search({
       index: SearchIndex.JobProfile,
+      size: 20,
       query: {
         bool: {
           should: [
@@ -100,6 +100,11 @@ export class SearchService {
                   fuzziness: 1,
                   operator: 'and',
                 },
+              },
+            },
+            !isNaN(parseInt(value)) && {
+              term: {
+                number: { value: parseInt(value), boost: 5 },
               },
             },
             {
