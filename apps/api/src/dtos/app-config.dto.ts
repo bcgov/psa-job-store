@@ -52,18 +52,6 @@ export class AppConfigDto {
   @IsEnum(SSOEnvironment)
   SSO_ENVIRONMENT: SSOEnvironment;
 
-  @IsNotEmpty()
-  @IsString()
-  KEYCLOAK_REALM_URL: string;
-
-  @IsNotEmpty()
-  @IsString()
-  KEYCLOAK_CLIENT_ID_PRIVATE: string;
-
-  @IsNotEmpty()
-  @IsString()
-  KEYCLOAK_CLIENT_ID_PUBLIC: string;
-
   // NestJS
   // @IsNumber()
   // @IsNotEmpty()
@@ -74,10 +62,10 @@ export class AppConfigDto {
   @IsNotEmpty()
   SESSION_SECRET: string;
 
-  // Keycloak
-  // @IsString()
-  // @IsNotEmpty()
-  // KEYCLOAK_REALM_URL: string;
+  Keycloak;
+  @IsString()
+  @IsNotEmpty()
+  KEYCLOAK_REALM_URL: string;
 
   @IsString()
   @IsNotEmpty()
