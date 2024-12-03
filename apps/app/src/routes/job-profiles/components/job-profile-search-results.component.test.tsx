@@ -1,4 +1,7 @@
-// TODO - fix errors in this file to run
+describe('JobProfile search results tests', () => {
+  it('empty test', () => {});
+});
+
 // import { act, fireEvent, render, screen, within } from '@testing-library/react';
 // import { MemoryRouter, Route, Routes } from 'react-router-dom';
 // import { GetJobProfilesResponse } from '../../../redux/services/graphql-api/job-profile-types';
