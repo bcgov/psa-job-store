@@ -92,9 +92,11 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
     [],
   );
 
-  if (!classificationData)
+  if (!classificationData) {
+    const classData = useGetJobProfilesClassificationsQuery();
     // eslint-disable-next-line react-hooks/rules-of-hooks
-    classificationData = useGetJobProfilesClassificationsQuery().data?.jobProfilesClassifications;
+    classificationData = classData.data?.jobProfilesClassifications;
+  }
 
   const [searchText, setSearchText] = useState(searchParams.get('search') || '');
 
@@ -559,145 +561,143 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
       role="search"
       data-testid="job-profile-search"
     >
-      <Col sm={24} md={24} lg={24} xl={24} xxl={fullWidth ? 24 : 22}>
-        <Card style={{ marginTop: '1rem', marginBottom: '1rem', borderColor: '#D9D9D9' }} bordered={true}>
-          <Row gutter={24}>
-            <Col xl={6} lg={8} md={12} sm={24}>
-              <Search
-                // defaultValue={searchParams.get('search') ?? undefined}
-                enterButton="Find job profiles"
-                aria-label={searchPlaceHolderText}
-                onPressEnter={(e) => handleSearch(e.currentTarget.value)}
-                // allowClear
-                placeholder={searchPlaceHolderText}
-                onSearch={handleSearch}
-                style={{ width: '100%' }}
-                onChange={(e) => {
-                  setSearchText(e.target.value);
-                }}
-                value={searchText}
-                onBlur={() => {
-                  // doing on this blur causes unexpected behaviour when using keyboard navigation
-                  // for example there may be previously selected profile, then when user tabs through the fields
-                  // it gets deselected
-                  // handleSearch(searchText);
-                }}
-                suffix={
-                  <Tooltip placement="top" title={'Clear search'}>
-                    <CloseCircleFilled
-                      style={{ fontSize: '0.8rem', color: '#bfbfbf', display: searchText == '' ? 'none' : 'block' }}
-                      onClick={() => {
-                        setSearchText('');
-                        handleSearch('');
+      <Form style={{ width: '100%' }}>
+        <Col sm={24} md={24} lg={24} xl={24} xxl={fullWidth ? 24 : 22}>
+          <Card style={{ marginTop: '1rem', marginBottom: '1rem', borderColor: '#D9D9D9' }} bordered={true}>
+            <Row gutter={24}>
+              <Col xl={6} lg={8} md={12} sm={24}>
+                <Search
+                  // defaultValue={searchParams.get('search') ?? undefined}
+                  enterButton="Find job profiles"
+                  aria-label={searchPlaceHolderText}
+                  onPressEnter={(e) => handleSearch(e.currentTarget.value)}
+                  // allowClear
+                  placeholder={searchPlaceHolderText}
+                  onSearch={handleSearch}
+                  style={{ width: '100%' }}
+                  onChange={(e) => {
+                    setSearchText(e.target.value);
+                  }}
+                  value={searchText}
+                  onBlur={() => {
+                    // doing on this blur causes unexpected behaviour when using keyboard navigation
+                    // for example there may be previously selected profile, then when user tabs through the fields
+                    // it gets deselected
+                    // handleSearch(searchText);
+                  }}
+                  suffix={
+                    <Tooltip placement="top" title={'Clear search'}>
+                      <CloseCircleFilled
+                        style={{ fontSize: '0.8rem', color: '#bfbfbf', display: searchText == '' ? 'none' : 'block' }}
+                        onClick={() => {
+                          setSearchText('');
+                          handleSearch('');
+                        }}
+                      />
+                    </Tooltip>
+                  }
+                  // style={{ width: fullWidth ? 500 : 400 }}
+                />
+              </Col>
+              <Col xl={18} lg={16} md={12} sm={24}>
+                <Row gutter={8} justify="end">
+                  <Col data-testid="Ministry-filter" data-cy="Ministry-filter">
+                    {/* dragon naturally speaking doesn't pick up on aria-label alone */}
+                    <Form.Item label="Ministries" name="ministries" className="sr-only-label">
+                      <Select
+                        closeMenuOnSelect={false}
+                        isClearable={false}
+                        backspaceRemovesValue={false}
+                        hideSelectedOptions={false}
+                        value={ministriesFilterData.filter((jf) =>
+                          allSelections
+                            .filter((selection) => selection.type === 'ministry')
+                            .map((selection) => selection.value)
+                            .includes(jf.value),
+                        )}
+                        styles={{
+                          container: (css) => ({ ...css, width: '200px' }),
+                          menu: (styles) => ({ ...styles, width: 'max-content', minWidth: '100%' }),
+                        }}
+                        components={{
+                          ValueContainer: CustomValueContainer,
+                        }}
+                        classNamePrefix="react-select"
+                        isMulti
+                        aria-label="Ministries"
+                        placeholder="Ministries"
+                        options={ministriesFilterData}
+                        onChange={(selectedItems) => {
+                          const newValues = selectedItems.map((item) => item.value);
+                          if (newValues == null) return;
+
+                          newValues.forEach((val: any) => {
+                            if (!selectedMinistry.includes(val)) addSelection(val, 'ministry');
+                          });
+                          selectedMinistry.forEach((val) => {
+                            if (!newValues.includes(val)) removeSelection(val, 'ministry');
+                          });
+                        }}
+                      ></Select>
+                    </Form.Item>
+                  </Col>
+                  <Col data-testid="Job Family-filter" data-cy="Job Family-filter">
+                    <AccessibleTreeSelect
+                      width={'300px'}
+                      placeholderText={'Profession and Discipline'}
+                      treeData={JSON.parse(JSON.stringify(treeData))}
+                      value={treeSelectValues}
+                      onChange={(selectedItems) => {
+                        // separate selectedItems into jobFamily and jobStream
+                        const selectedJobFamilies: any[] = [];
+                        const selectedJobStreams: any[] = [];
+
+                        selectedItems.forEach((item: any) => {
+                          if (item.startsWith('job_family-')) {
+                            // Extract the job family ID and store it
+                            selectedJobFamilies.push(item.replace('job_family-', ''));
+                          } else if (item.startsWith('stream-')) {
+                            // Extract the job stream ID and store it
+                            selectedJobStreams.push(item.replace('stream-', ''));
+                          }
+                        });
+
+                        // console.log('tree on change: ', selectedJobFamilies, selectedJobStreams);
+
+                        const selections: { value: any; type: string }[] = [];
+                        const newValues = selectedJobFamilies;
+                        if (newValues != null) {
+                          newValues.forEach((val: any) => {
+                            selections.push({ value: val, type: 'jobFamily' });
+                          });
+                        }
+
+                        // console.log('selectedJobStream: ', selectedJobStream);
+                        const newValues2 = selectedJobStreams;
+                        if (newValues2 != null) {
+                          newValues2.forEach((val: any) => {
+                            selections.push({ value: val, type: 'jobStream' });
+                          });
+                        }
+
+                        // console.log('selections: ', selections);
+
+                        // remove previous settings and set new ones
+                        // get all the unique types from the selections, removing duplicates
+                        const types = ['jobStream', 'jobFamily'];
+
+                        // remove these types from the current selections
+                        const cleanedSelections = allSelections.filter((selection) => !types.includes(selection.type));
+
+                        // selections has value and type
+                        const newSelections = selections.map((item: any) => ({ value: item.value, type: item.type }));
+
+                        // console.log('cleaned, new: ', cleanedSelections, newSelections);
+                        setAllSelections([...cleanedSelections, ...newSelections]);
                       }}
                     />
-                  </Tooltip>
-                }
-                // style={{ width: fullWidth ? 500 : 400 }}
-              />
-            </Col>
-            <Col xl={18} lg={16} md={12} sm={24}>
-              <Row gutter={8} justify="end">
-                <Col data-testid="Ministry-filter" data-cy="Ministry-filter">
-                  {/* dragon naturally speaking doesn't pick up on aria-label alone */}
-                  <Form.Item label="Ministries" name="ministries" className="sr-only-label">
-                    <Select
-                      closeMenuOnSelect={false}
-                      isClearable={false}
-                      backspaceRemovesValue={false}
-                      hideSelectedOptions={false}
-                      value={ministriesFilterData.filter((jf) =>
-                        allSelections
-                          .filter((selection) => selection.type === 'ministry')
-                          .map((selection) => selection.value)
-                          .includes(jf.value),
-                      )}
-                      styles={{
-                        container: (css) => ({ ...css, width: '200px' }),
-                        menu: (styles) => ({ ...styles, width: 'max-content', minWidth: '100%' }),
-                      }}
-                      components={{
-                        ValueContainer: CustomValueContainer,
-                      }}
-                      classNamePrefix="react-select"
-                      isMulti
-                      aria-label="Ministries"
-                      placeholder="Ministries"
-                      options={ministriesFilterData}
-                      onChange={(selectedItems) => {
-                        const newValues = selectedItems.map((item) => item.value);
-                        if (newValues == null) return;
 
-                        newValues.forEach((val: any) => {
-                          if (!selectedMinistry.includes(val)) addSelection(val, 'ministry');
-                        });
-                        selectedMinistry.forEach((val) => {
-                          if (!newValues.includes(val)) removeSelection(val, 'ministry');
-                        });
-                      }}
-                    ></Select>
-                  </Form.Item>
-                </Col>
-                <Col data-testid="Job Family-filter" data-cy="Job Family-filter">
-                  <AccessibleTreeSelect
-                    width={'300px'}
-                    placeholderText={'Profession and Discipline'}
-                    treeData={JSON.parse(JSON.stringify(treeData))}
-                    value={treeSelectValues}
-                    onChange={(selectedItems) => {
-                      console.log('ONCHANGE');
-                      console.log('selectedItems: ', selectedItems);
-
-                      // separate selectedItems into jobFamily and jobStream
-                      const selectedJobFamilies: any[] = [];
-                      const selectedJobStreams: any[] = [];
-
-                      selectedItems.forEach((item: any) => {
-                        if (item.startsWith('job_family-')) {
-                          // Extract the job family ID and store it
-                          selectedJobFamilies.push(item.replace('job_family-', ''));
-                        } else if (item.startsWith('stream-')) {
-                          // Extract the job stream ID and store it
-                          selectedJobStreams.push(item.replace('stream-', ''));
-                        }
-                      });
-
-                      // console.log('tree on change: ', selectedJobFamilies, selectedJobStreams);
-
-                      const selections: { value: any; type: string }[] = [];
-                      const newValues = selectedJobFamilies;
-                      if (newValues != null) {
-                        newValues.forEach((val: any) => {
-                          selections.push({ value: val, type: 'jobFamily' });
-                        });
-                      }
-
-                      // console.log('selectedJobStream: ', selectedJobStream);
-                      const newValues2 = selectedJobStreams;
-                      if (newValues2 != null) {
-                        newValues2.forEach((val: any) => {
-                          selections.push({ value: val, type: 'jobStream' });
-                        });
-                      }
-
-                      // console.log('selections: ', selections);
-
-                      // remove previous settings and set new ones
-                      // get all the unique types from the selections, removing duplicates
-                      const types = ['jobStream', 'jobFamily'];
-
-                      // remove these types from the current selections
-                      const cleanedSelections = allSelections.filter((selection) => !types.includes(selection.type));
-
-                      // selections has value and type
-                      const newSelections = selections.map((item: any) => ({ value: item.value, type: item.type }));
-
-                      // console.log('cleaned, new: ', cleanedSelections, newSelections);
-                      setAllSelections([...cleanedSelections, ...newSelections]);
-                    }}
-                  />
-
-                  {/* <TreeSelect
+                    {/* <TreeSelect
                     className={`jobFamilyStreamFilter ${searchValue ? 'search-active' : 'no-search'}`}
                     value={treeSelectValues}
                     onSearch={(value) => {
@@ -768,91 +768,91 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
                       return <></>;
                     }}
                   /> */}
-                </Col>
-                <Col data-testid="Classification-filter" data-cy="Classification-filter">
-                  {/* dragon naturally speaking doesn't pick up on aria-label alone */}
-                  <Form.Item label="Classification" name="classification" className="sr-only-label">
-                    <Select
-                      closeMenuOnSelect={false}
-                      isClearable={false}
-                      backspaceRemovesValue={false}
-                      hideSelectedOptions={false}
-                      value={classificationFilterData.filter((jf) =>
-                        allSelections
-                          .filter((selection) => selection.type === 'classification')
-                          .map((selection) => selection.value)
-                          .includes(jf.value),
-                      )}
-                      styles={{
-                        container: (css) => ({ ...css, width: '200px' }),
-                        menu: (styles) => ({ ...styles, width: 'max-content', minWidth: '100%' }),
-                      }}
-                      components={{
-                        ValueContainer: CustomValueContainer,
-                      }}
-                      classNamePrefix="react-select"
-                      isMulti
-                      placeholder="Classification"
-                      aria-label="Classification"
-                      options={classificationFilterData}
-                      onChange={(selectedItems) => {
-                        const newValues = selectedItems.map((item) => item.value);
-                        if (newValues == null) return;
+                  </Col>
+                  <Col data-testid="Classification-filter" data-cy="Classification-filter">
+                    {/* dragon naturally speaking doesn't pick up on aria-label alone */}
+                    <Form.Item label="Classification" name="classification" className="sr-only-label">
+                      <Select
+                        closeMenuOnSelect={false}
+                        isClearable={false}
+                        backspaceRemovesValue={false}
+                        hideSelectedOptions={false}
+                        value={classificationFilterData.filter((jf) =>
+                          allSelections
+                            .filter((selection) => selection.type === 'classification')
+                            .map((selection) => selection.value)
+                            .includes(jf.value),
+                        )}
+                        styles={{
+                          container: (css) => ({ ...css, width: '200px' }),
+                          menu: (styles) => ({ ...styles, width: 'max-content', minWidth: '100%' }),
+                        }}
+                        components={{
+                          ValueContainer: CustomValueContainer,
+                        }}
+                        classNamePrefix="react-select"
+                        isMulti
+                        placeholder="Classification"
+                        aria-label="Classification"
+                        options={classificationFilterData}
+                        onChange={(selectedItems) => {
+                          const newValues = selectedItems.map((item) => item.value);
+                          if (newValues == null) return;
 
-                        newValues.forEach((val: any) => {
-                          if (!selectedClassification.includes(val)) addSelection(val, 'classification');
-                        });
-                        selectedClassification.forEach((val) => {
-                          if (!newValues.includes(val)) removeSelection(val, 'classification');
-                        });
-                      }}
-                    ></Select>
-                  </Form.Item>
-                </Col>
+                          newValues.forEach((val: any) => {
+                            if (!selectedClassification.includes(val)) addSelection(val, 'classification');
+                          });
+                          selectedClassification.forEach((val) => {
+                            if (!newValues.includes(val)) removeSelection(val, 'classification');
+                          });
+                        }}
+                      ></Select>
+                    </Form.Item>
+                  </Col>
 
-                <Col data-testid="Job role type-filter" data-cy="Job role type-filter">
-                  {/* dragon naturally speaking doesn't pick up on aria-label alone */}
-                  <Form.Item label="Role" name="role" className="sr-only-label">
-                    <Select
-                      closeMenuOnSelect={false}
-                      isClearable={false}
-                      backspaceRemovesValue={false}
-                      hideSelectedOptions={false}
-                      value={jobRoleTypeFilterData.filter((jf) =>
-                        allSelections
-                          .filter((selection) => selection.type === 'jobRoleType')
-                          .map((selection) => selection.value)
-                          .includes(jf.value),
-                      )}
-                      styles={{
-                        container: (css) => ({ ...css, width: '200px' }),
-                        menu: (styles) => ({ ...styles, width: 'max-content', minWidth: '100%' }),
-                      }}
-                      components={{
-                        ValueContainer: CustomValueContainer,
-                      }}
-                      classNamePrefix="react-select"
-                      isMulti
-                      placeholder="Role"
-                      aria-label="Role"
-                      options={jobRoleTypeFilterData}
-                      onChange={(selectedItems) => {
-                        const newValues = selectedItems.map((item) => item.value);
-                        if (newValues == null) return;
+                  <Col data-testid="Job role type-filter" data-cy="Job role type-filter">
+                    {/* dragon naturally speaking doesn't pick up on aria-label alone */}
+                    <Form.Item label="Role" name="role" className="sr-only-label">
+                      <Select
+                        closeMenuOnSelect={false}
+                        isClearable={false}
+                        backspaceRemovesValue={false}
+                        hideSelectedOptions={false}
+                        value={jobRoleTypeFilterData.filter((jf) =>
+                          allSelections
+                            .filter((selection) => selection.type === 'jobRoleType')
+                            .map((selection) => selection.value)
+                            .includes(jf.value),
+                        )}
+                        styles={{
+                          container: (css) => ({ ...css, width: '200px' }),
+                          menu: (styles) => ({ ...styles, width: 'max-content', minWidth: '100%' }),
+                        }}
+                        components={{
+                          ValueContainer: CustomValueContainer,
+                        }}
+                        classNamePrefix="react-select"
+                        isMulti
+                        placeholder="Role"
+                        aria-label="Role"
+                        options={jobRoleTypeFilterData}
+                        onChange={(selectedItems) => {
+                          const newValues = selectedItems.map((item) => item.value);
+                          if (newValues == null) return;
 
-                        newValues.forEach((val: any) => {
-                          if (!selectedJobRoleType.includes(val)) addSelection(val, 'jobRoleType');
-                        });
-                        selectedJobRoleType.forEach((val) => {
-                          if (!newValues.includes(val)) removeSelection(val, 'jobRoleType');
-                        });
-                      }}
-                    ></Select>
-                  </Form.Item>
-                </Col>
+                          newValues.forEach((val: any) => {
+                            if (!selectedJobRoleType.includes(val)) addSelection(val, 'jobRoleType');
+                          });
+                          selectedJobRoleType.forEach((val) => {
+                            if (!newValues.includes(val)) removeSelection(val, 'jobRoleType');
+                          });
+                        }}
+                      ></Select>
+                    </Form.Item>
+                  </Col>
 
-                {/* if filters contains careerGroup, then render it */}
-                {/* {additionalFilters && (
+                  {/* if filters contains careerGroup, then render it */}
+                  {/* {additionalFilters && (
                   <Col data-testid="Career-group-filter" data-cy="Career-group-filter">
                     <Select
                       closeMenuOnSelect={false}
@@ -890,66 +890,69 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
                     ></Select>
                   </Col>
                 )} */}
-              </Row>
-            </Col>
-            {allSelections.length > 0 && (
-              <Row>
-                <Col span={24} style={{ marginTop: '10px' }}>
-                  <span
-                    style={{
-                      fontWeight: 500,
-                      margin: '8px',
-                      marginLeft: 0,
-                      paddingRight: '8px',
-                      borderRight: '2px solid rgba(0, 0, 0, 0.06)',
-                      marginRight: '10px',
-                    }}
-                  >
-                    Applied filters
-                  </span>
-                  <Button
-                    onClick={clearFilters}
-                    type="link"
-                    style={{ padding: '0', fontWeight: 400 }}
-                    data-cy="clear-filters-button"
-                  >
-                    Clear all filters
-                  </Button>
-                </Col>
-              </Row>
-            )}
-          </Row>
-          <Row data-testid="filters-tags-section">
-            <Col lg={15} xs={24}>
-              {allSelections.map((selection) => (
-                <Tag
-                  closeIcon={
-                    <Button
-                      type="link"
-                      size="small"
-                      style={{ padding: '0', width: 'auto', height: 'auto' }}
-                      icon={<CloseOutlined aria-hidden style={{ fontSize: '0.7rem', color: 'rgba(0, 0, 0, 0.88)' }} />}
-                      aria-label={`Remove ${findLabel(selection.value, selection.type)} filter`}
-                      onKeyDown={(e) => {
-                        if (e.key === 'Enter' || e.key === ' ') {
-                          e.preventDefault();
-                          removeSelection(selection.value, selection.type);
-                        }
+                </Row>
+              </Col>
+              {allSelections.length > 0 && (
+                <Row>
+                  <Col span={24} style={{ marginTop: '10px' }}>
+                    <span
+                      style={{
+                        fontWeight: 500,
+                        margin: '8px',
+                        marginLeft: 0,
+                        paddingRight: '8px',
+                        borderRight: '2px solid rgba(0, 0, 0, 0.06)',
+                        marginRight: '10px',
                       }}
-                    />
-                  }
-                  style={{ marginTop: '10px' }}
-                  key={`${selection.type}-${selection.value}`}
-                  closable
-                  onClose={() => removeSelection(selection.value, selection.type)}
-                >
-                  {findLabel(selection.value, selection.type)}
-                </Tag>
-              ))}
-            </Col>
-          </Row>
-        </Card>
-      </Col>
+                    >
+                      Applied filters
+                    </span>
+                    <Button
+                      onClick={clearFilters}
+                      type="link"
+                      style={{ padding: '0', fontWeight: 400 }}
+                      data-cy="clear-filters-button"
+                    >
+                      Clear all filters
+                    </Button>
+                  </Col>
+                </Row>
+              )}
+            </Row>
+            <Row data-testid="filters-tags-section">
+              <Col lg={15} xs={24}>
+                {allSelections.map((selection) => (
+                  <Tag
+                    closeIcon={
+                      <Button
+                        type="link"
+                        size="small"
+                        style={{ padding: '0', width: 'auto', height: 'auto' }}
+                        icon={
+                          <CloseOutlined aria-hidden style={{ fontSize: '0.7rem', color: 'rgba(0, 0, 0, 0.88)' }} />
+                        }
+                        aria-label={`Remove ${findLabel(selection.value, selection.type)} filter`}
+                        onKeyDown={(e) => {
+                          if (e.key === 'Enter' || e.key === ' ') {
+                            e.preventDefault();
+                            removeSelection(selection.value, selection.type);
+                          }
+                        }}
+                      />
+                    }
+                    style={{ marginTop: '10px' }}
+                    key={`${selection.type}-${selection.value}`}
+                    closable
+                    onClose={() => removeSelection(selection.value, selection.type)}
+                  >
+                    {findLabel(selection.value, selection.type)}
+                  </Tag>
+                ))}
+              </Col>
+            </Row>
+          </Card>
+        </Col>
+      </Form>
     </Row>
   );
 };

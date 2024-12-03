@@ -68,6 +68,10 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
     const [tabSwitchedLoading, setTabSwitchedLoading] = useState(false);
     const { setShouldFetch, shouldFetch, clearingFilters, setClearingFilters, setClearingSearch } =
       useJobProfilesProvider();
+    const { positionRequestId, number } = useParams();
+    // console.log('number: ', number);
+
+    const params = useParams();
 
     const {
       data: savedJobProfileIds,
@@ -89,6 +93,7 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
           setLoadProfileIds(savedJobProfileIds.getSavedJobProfileIds);
           // setSearchParams(new URLSearchParams({ fetch: 'true' }));
           // searchParams.set('fetch', 'true');
+          // console.log('setSearchParams to empty A');
           setSearchParams(new URLSearchParams({}));
           setShouldFetch(true);
         }
@@ -107,14 +112,21 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
       // eslint-disable-next-line react-hooks/exhaustive-deps
     }, [savedJobProfileIds]);
 
+    const prevActiveTabRef = useRef(activeTab);
     useEffect(() => {
+      if (prevActiveTabRef.current == activeTab) {
+        return;
+      }
+
       if (activeTab === '1') {
         setLoadProfileIds(null);
+        // console.log('setSearchParams to empty B');
         setSearchParams(new URLSearchParams({}));
         setClearingFilters(true);
         setClearingSearch(true);
         setShouldFetch(true);
       } else if (activeTab === '2') {
+        // console.log('setSearchParams to empty C');
         setSearchParams(new URLSearchParams({}));
         setLoadProfileIds(savedJobProfileIds?.getSavedJobProfileIds ?? []);
         setClearingFilters(true);
@@ -127,8 +139,7 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
     // console.log('searchParams: ', searchParams.toString());
 
     const navigate = useNavigate();
-    const { positionRequestId, number } = useParams();
-    const params = useParams();
+
     const screens: Partial<Record<Breakpoint, boolean>> = useBreakpoint();
 
     // useref to keep track of whether we fetched with selectProfileId
@@ -209,12 +220,152 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
       [positionRequestId],
     );
 
+    // const prevClearingFilters = useRef(clearingFilters);
+    // const prevShouldFetch = useRef(shouldFetch);
+    // const prevSearchParams = useRef(searchParams);
+    // const prevTrigger = useRef(trigger);
+    // const prevCurrentPage = useRef(currentPage);
+    // const prevPageSize = useRef(pageSize);
+    // const prevClassificationIdFilter = useRef(classificationIdFilter);
+    // const prevPositionFilteringProcessActive = useRef(positionFilteringProcessActive);
+    // const prevInitialFetchDone = useRef(initialFetchDone);
+    // const prevSelectProfileNumber = useRef(selectProfileNumber);
+    // const prevOrganizationFilterExtra = useRef(organizationFilterExtra);
+    // const prevLoadProfileIds = useRef(loadProfileIds);
+    // const prevNumber = useRef(number);
+    // const prevDepartmentId = useRef(prData?.department_id);
+    // const prevPositionRequestId = useRef(positionRequestId);
+    // const prevSetShouldFetch = useRef(setShouldFetch);
+    // const prevGetBasePath = useRef(getBasePath);
+    // const prevNavigate = useRef(navigate);
+    // const prevSetClearingFilters = useRef(setClearingFilters);
+
     useEffect(() => {
+      // if (clearingFilters !== prevClearingFilters.current) {
+      //   console.log('clearingFilters changed:', {
+      //     from: prevClearingFilters.current,
+      //     to: clearingFilters,
+      //   });
+      // }
+      // if (shouldFetch !== prevShouldFetch.current) {
+      //   console.log('shouldFetch changed:', {
+      //     from: prevShouldFetch.current,
+      //     to: shouldFetch,
+      //   });
+      // }
+      // if (searchParams !== prevSearchParams.current) {
+      //   console.log('searchParams changed:', {
+      //     from: prevSearchParams.current,
+      //     to: searchParams,
+      //   });
+      // }
+      // if (trigger !== prevTrigger.current) {
+      //   console.log('trigger changed:', {
+      //     from: prevTrigger.current,
+      //     to: trigger,
+      //   });
+      // }
+      // if (currentPage !== prevCurrentPage.current) {
+      //   console.log('currentPage changed:', {
+      //     from: prevCurrentPage.current,
+      //     to: currentPage,
+      //   });
+      // }
+      // if (pageSize !== prevPageSize.current) {
+      //   console.log('pageSize changed:', {
+      //     from: prevPageSize.current,
+      //     to: pageSize,
+      //   });
+      // }
+      // if (classificationIdFilter !== prevClassificationIdFilter.current) {
+      //   console.log('classificationIdFilter changed:', {
+      //     from: prevClassificationIdFilter.current,
+      //     to: classificationIdFilter,
+      //   });
+      // }
+      // if (positionFilteringProcessActive !== prevPositionFilteringProcessActive.current) {
+      //   console.log('positionFilteringProcessActive changed:', {
+      //     from: prevPositionFilteringProcessActive.current,
+      //     to: positionFilteringProcessActive,
+      //   });
+      // }
+      // if (initialFetchDone !== prevInitialFetchDone.current) {
+      //   console.log('initialFetchDone changed:', {
+      //     from: prevInitialFetchDone.current,
+      //     to: initialFetchDone,
+      //   });
+      // }
+      // if (selectProfileNumber !== prevSelectProfileNumber.current) {
+      //   console.log('selectProfileNumber changed:', {
+      //     from: prevSelectProfileNumber.current,
+      //     to: selectProfileNumber,
+      //   });
+      // }
+      // if (organizationFilterExtra !== prevOrganizationFilterExtra.current) {
+      //   console.log('organizationFilterExtra changed:', {
+      //     from: prevOrganizationFilterExtra.current,
+      //     to: organizationFilterExtra,
+      //   });
+      // }
+      // if (loadProfileIds !== prevLoadProfileIds.current) {
+      //   console.log('loadProfileIds changed:', {
+      //     from: prevLoadProfileIds.current,
+      //     to: loadProfileIds,
+      //   });
+      // }
+      // if (number !== prevNumber.current) {
+      //   console.log('number changed:', {
+      //     from: prevNumber.current,
+      //     to: number,
+      //   });
+      // }
+      // if (prData?.department_id !== prevDepartmentId.current) {
+      //   console.log('department_id changed:', {
+      //     from: prevDepartmentId.current,
+      //     to: prData?.department_id,
+      //   });
+      // }
+      // if (positionRequestId !== prevPositionRequestId.current) {
+      //   console.log('positionRequestId changed:', {
+      //     from: prevPositionRequestId.current,
+      //     to: positionRequestId,
+      //   });
+      // }
+      // if (setShouldFetch !== prevSetShouldFetch.current) {
+      //   console.log('setShouldFetch changed:', {
+      //     from: prevSetShouldFetch.current,
+      //     to: setShouldFetch,
+      //   });
+      // }
+
+      // if (getBasePath !== prevGetBasePath.current) {
+      //   console.log('getBasePath changed:', {
+      //     from: prevGetBasePath.current,
+      //     to: getBasePath,
+      //   });
+      // }
+
+      // if (navigate !== prevNavigate.current) {
+      //   console.log('navigate changed:', {
+      //     from: prevNavigate.current,
+      //     to: navigate,
+      //   });
+      // }
+
+      // if (setClearingFilters !== prevSetClearingFilters.current) {
+      //   console.log('setClearingFilters changed:', {
+      //     from: prevSetClearingFilters.current,
+      //     to: setClearingFilters,
+      //   });
+      // }
+
       // console.log('fetch hook');
       // Use the following for the `search` property.
       // Search terms need to be joined with specific syntax, <-> in this case
       // const search = searchParams.get('search')?.replace(/(\w)\s+(\w)/g, '$1 <-> $2');
       const search = searchParams.get('search');
+      // console.log('searchParams search: ', search);
+
       const organizationFilter = searchParams.get('ministry_id__in');
       const jobRoleFilter = searchParams.get('job_role_type_id__in');
       const classificationFilter = searchParams.get('classification_id__in');
@@ -256,6 +407,7 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
       // console.log('filtersOrSearchApplied: ', filtersOrSearchApplied != null);
       setIsSearchingOrFiltering(filtersOrSearchApplied != null);
       if (filtersOrSearchApplied != null) {
+        // console.log('setting isLoadingCalculated to true A');
         setIsLoadingCalculated(true);
       }
       // use reloaded the page while having fitlers or search applied
@@ -266,12 +418,17 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
         // do this only if user is on the wizard page, e.g. /requests/positions/707
         // otherwise reloading on explore page with filters clears them
         if (positionRequestId) {
-          // console.log('clearing A');
+          // console.log('clearing A ');
           const basePath = getBasePath(location.pathname);
           const searchParams = new URLSearchParams();
-          if (searchParams.get('search')) searchParams.delete('search');
+          if (searchParams.get('search')) {
+            // console.log('deleting search');
+            searchParams.delete('search');
+          }
           // searchParams.set('clearFilters', 'true');
           setClearingFilters(true);
+          // console.log('navigate to C: ', searchParams.toString());
+
           navigate(
             {
               pathname: basePath,
@@ -307,6 +464,7 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
 
       selectProfileForPageNumber.current = toSelectProfileNumber ?? '';
 
+      // console.log('TRIGGER, search: ', search);
       trigger({
         ...(search != null && { search }),
         where: {
@@ -414,6 +572,27 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
 
       // Fetch job profiles based on other filters and search query
       // }
+
+      // Update all refs with current values
+      // prevClearingFilters.current = clearingFilters;
+      // prevShouldFetch.current = shouldFetch;
+      // prevSearchParams.current = searchParams;
+      // prevTrigger.current = trigger;
+      // prevCurrentPage.current = currentPage;
+      // prevPageSize.current = pageSize;
+      // prevClassificationIdFilter.current = classificationIdFilter;
+      // prevPositionFilteringProcessActive.current = positionFilteringProcessActive;
+      // prevInitialFetchDone.current = initialFetchDone;
+      // prevSelectProfileNumber.current = selectProfileNumber;
+      // prevOrganizationFilterExtra.current = organizationFilterExtra;
+      // prevLoadProfileIds.current = loadProfileIds;
+      // prevNumber.current = number;
+      // prevDepartmentId.current = prData?.department_id;
+      // prevPositionRequestId.current = positionRequestId;
+      // prevSetShouldFetch.current = setShouldFetch;
+      // prevGetBasePath.current = getBasePath;
+      // prevNavigate.current = navigate;
+      // prevSetClearingFilters.current = setClearingFilters;
     }, [
       clearingFilters,
       shouldFetch,
@@ -460,6 +639,7 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
     }));
 
     useEffect(() => {
+      // console.log('set? ', !data, isFetching, isLoading);
       if (data && !isFetching && !isLoading) {
         // console.log('setting useData: ', data.jobProfilesCount);
         setUseData({
@@ -482,6 +662,7 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
             ? location.pathname
             : getBasePath(location.pathname);
 
+          // console.log('navigate to A: ', searchParams.toString());
           navigate({
             pathname: basePath,
             search: searchParams.toString(),
@@ -521,6 +702,7 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
 
       const basePath = getBasePath(location.pathname);
 
+      // console.log('navigate to B: ', searchParams.toString());
       navigate(
         {
           pathname: basePath,
@@ -556,8 +738,12 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
     ];
 
     useEffect(() => {
-      if (useData == null || positionFilteringProcessActive || isLoading || isFetching) setIsLoadingCalculated(true);
-      else {
+      // console.log('flags: ', useData == null, positionFilteringProcessActive, isLoading, isFetching);
+      if (useData == null || positionFilteringProcessActive || isLoading || isFetching) {
+        // console.log('setting isLoadingCalculated to true B');
+        setIsLoadingCalculated(true);
+      } else {
+        // console.log('setting isLoadingCalculated to false');
         setIsLoadingCalculated(false);
         setTabSwitchedLoading(false);
       }
@@ -596,7 +782,8 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
       }
     }, [totalResults, announce, isSearchingOrFiltering, isLoadingCalcualted]);
 
-    const renderSearchResults = () => {
+    // console.log('isLoadingCalcualted, tabSwitchedLoading: ', isLoadingCalcualted, tabSwitchedLoading);
+    const renderSearchResults = (onSelectProfileF: any) => {
       return (
         <div
           style={{ border: '1px solid #D9D9D9', borderRadius: '8px', background: 'white' }}
@@ -629,7 +816,7 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
                   ) : data?.jobProfiles.length === 0 ? (
                     <Empty data-testid="empty-state" style={{ margin: '1rem' }} description="No profiles found" />
                   ) : (
-                    renderProfileList(data?.jobProfiles ?? [])
+                    renderProfileList(onSelectProfileF, data?.jobProfiles ?? [])
                   ),
               },
               {
@@ -655,7 +842,7 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
                       ) : (
                         ''
                       )}
-                      {renderProfileList(data?.jobProfiles ?? [])}
+                      {renderProfileList(onSelectProfileF, data?.jobProfiles ?? [])}
                     </>
                   ),
               },
@@ -666,7 +853,7 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
       );
     };
 
-    const renderProfileList = (profiles: any[]) => (
+    const renderProfileList = (onSelectProfileF: any, profiles: any[]) => (
       <>
         <div style={{ borderBottom: '1px solid #F0F0F0', padding: '0.5rem 1rem' }}>
           <Text style={{ fontSize: '14px', display: 'block', padding: '10px 0' }}>
@@ -686,7 +873,7 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
           style={{ padding: '0' }}
         >
           {profiles.map((d) => (
-            <li key={d.id} onClick={() => onSelectProfile && onSelectProfile(d)}>
+            <li key={d.id} onClick={() => onSelectProfileF && onSelectProfileF(d)}>
               <Link to={getLinkPath(d.number)} replace tabIndex={-1}>
                 <JobProfileCard
                   data={d}
@@ -727,19 +914,7 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
           {screens['xl'] === true ? (
             <>
               <Col span={8}>
-                <JobProfileViewCounter onProfileView={onSelectProfile}>
-                  {/* <JobProfileSearchResults
-                    data={useData}
-                    //  jobProfilesLoading || isLoading
-                    isLoading={isLoadingCalcualted}
-                    currentPage={currentPage}
-                    pageSize={pageSize}
-                    totalResults={totalResults}
-                    onPageChange={handlePageChange}
-                    isSearchingOrFiltering={isSearchingOrFiltering}
-                  /> */}
-                  {renderSearchResults()}
-                </JobProfileViewCounter>
+                <JobProfileViewCounter onProfileView={onSelectProfile} renderSearchResults={renderSearchResults} />
               </Col>
               <Col span={16} role="region" aria-label="Selected job profile contents">
                 {renderJobProfile()}
@@ -750,18 +925,9 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
               {renderJobProfile()}
             </Col>
           ) : (
-            <JobProfileViewCounter onProfileView={onSelectProfile}>
-              {/* <JobProfileSearchResults
-                data={useData}
-                isLoading={isLoading}
-                currentPage={currentPage}
-                pageSize={pageSize}
-                totalResults={totalResults}
-                onPageChange={handlePageChange}
-                isSearchingOrFiltering={isSearchingOrFiltering}
-              /> */}
-              {renderSearchResults()}
-            </JobProfileViewCounter>
+            <>
+              <JobProfileViewCounter onProfileView={onSelectProfile} renderSearchResults={renderSearchResults} />
+            </>
           )}
         </Row>
       </>
