@@ -15,6 +15,7 @@
     { "id": "00234589", "name": "Jack Wilson", "status": "Active" },
     { "id": "00543218", "name": "Jane Doe", "status": "Active" },
     { "id": "00812345", "name": "Sam Carter", "status": "Active" },
+    { "id": "00812345", "name": "Bob Doe", "status": "Active" },
     { "id": "00678901", "name": "Laura Wright", "status": "Active" },
     { "id": "00329871", "name": "Nick Anderson", "status": "Active" },
     { "id": "00432178", "name": "Olivia Brown", "status": "Active" },

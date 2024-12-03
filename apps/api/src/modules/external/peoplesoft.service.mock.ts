@@ -53,13 +53,14 @@ export class MockPeoplesoftService {
   async getEmployeesForPositions(positions: string[]): Promise<Map<string, Employee[]>> {
     console.log('Mock getEmployeesForPositions called with positions:', positions);
     const employeeMap: Map<string, Employee[]> = new Map();
+
     positions.forEach((position) => {
-      const mockEmployee = this.mockData.employees.find((emp) => {
-        return emp.id == position;
+      const matchingEmployees = this.mockData.employees.filter((emp) => {
+        return emp.id === position;
       });
-      if (!mockEmployee) employeeMap.set(position, []);
-      else employeeMap.set(position, [mockEmployee]);
+      employeeMap.set(position, matchingEmployees);
     });
+
     return employeeMap;
   }
 

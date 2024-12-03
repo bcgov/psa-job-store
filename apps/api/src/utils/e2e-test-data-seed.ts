@@ -79,7 +79,7 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
           contact_id: 231166,
         },
         org_chart: {
-          department_ids: ['112-0074', '123-4567'],
+          department_ids: ['112-0074', '123-4567', 'DEPT03'],
         },
         peoplesoft: {
           employee_id: '188147',
@@ -106,7 +106,7 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
           contact_id: 231166,
         },
         org_chart: {
-          department_ids: ['112-0074', '123-4567'],
+          department_ids: ['112-0074', '123-4567', 'DEPT03'],
         },
         peoplesoft: {
           employee_id: '188148',
@@ -2204,8 +2204,7 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
 
   let other_profiles: any[] = [] as any[];
   try {
-    // const path = '../../../other-profiles.js';
-    const path = '/tmp/log/other-profiles.js';
+    const path = process.env.NODE_ENV == 'development' ? '../../other-profiles.js' : '/tmp/log/other-profiles.js';
     other_profiles = (await import(path)).otherProfiles as unknown as any[];
     // Use the imported data
   } catch (error) {
@@ -2275,9 +2274,8 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
   let other_classifications: any[] = [] as any[];
   try {
     console.log('importing other classifications1');
-
-    // const path = '../../../other-classifications.js';
-    const path = '/tmp/log/other-classifications.js';
+    const path =
+      process.env.NODE_ENV == 'development' ? '../../other-classifications.js' : '/tmp/log/other-classifications.js';
 
     other_classifications = (await import(path)).otherClassifications1 as unknown as any[];
     // await prisma.classification.createMany({
@@ -2496,8 +2494,10 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
   }
 
   try {
-    const path = '/tmp/log/other-job-profile-classifications.js';
-    // const path = '../../../other-job-profile-classifications.js';
+    const path =
+      process.env.NODE_ENV == 'development'
+        ? '../../other-job-profile-classifications.js'
+        : '/tmp/log/other-job-profile-classifications.js';
     jobProfileClassifications = (await import(path)).otherProfileClassifications as unknown as any[];
     // Use the imported data
   } catch (error) {
@@ -2520,8 +2520,10 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
   // }
 
   try {
-    // const path = '../../../other-job-profile-family-link.js';
-    const path = '/tmp/log/other-job-profile-family-link.js';
+    const path =
+      process.env.NODE_ENV == 'development'
+        ? '../../other-job-profile-family-link.js'
+        : '/tmp/log/other-job-profile-family-link.js';
     const otherJobProfileFamilyLink = (await import(path)).otherJobProfileFamilyLink as unknown as any[];
     for (const familyLink of otherJobProfileFamilyLink) {
       try {
@@ -2555,8 +2557,10 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
   }
 
   try {
-    const path = '/tmp/log/other-job-profile-stream-link.js';
-    // const path = '../../../other-job-profile-stream-link.js';
+    const path =
+      process.env.NODE_ENV == 'development'
+        ? '../../other-job-profile-stream-link.js'
+        : '/tmp/log/other-job-profile-stream-link.js';
     const otherJobProfileStreamLink = (await import(path)).otherJobProfileStreamLink as unknown as any[];
     for (const streamLink of otherJobProfileStreamLink) {
       try {
@@ -2589,8 +2593,8 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
   }
 
   try {
-    const path = '/tmp/log/other-job-profile-bh.js';
-    // const path = '../../../other-job-profile-bh.js';
+    const path =
+      process.env.NODE_ENV == 'development' ? '../../other-job-profile-bh.js' : '/tmp/log/other-job-profile-bh.js';
     const otherJobProfileBh = (await import(path)).otherJobProfileBh as unknown as any[];
     for (const competency of otherJobProfileBh) {
       try {
@@ -3088,8 +3092,8 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
   };
 
   try {
-    // const path = '../../../job-profile-reports-to.js';
-    const path = '/tmp/log/job-profile-reports-to.js';
+    const path =
+      process.env.NODE_ENV == 'development' ? '../../job-profile-reports-to.js' : '/tmp/log/job-profile-reports-to.js';
     const otherJobProfileReportsTo = (await import(path)).otherJobProfileReportsTo as unknown as any[];
     for (const reportsTo of otherJobProfileReportsTo) {
       try {
@@ -3170,7 +3174,7 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
       BUSINESS_UNIT: 'BC000',
       SETID: 'ST000',
       DESCRSHORT: 'GOV',
-      DESCR: 'Government of B. C.',
+      DESCR: 'BC Public Service Agency',
       EFF_STATUS: 'Active',
       EFFDT: '2024-01-01',
     },
@@ -3208,25 +3212,62 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
     },
   ];
 
-  for await (const row of organizations) {
-    await prisma.organization.upsert({
-      where: { id: row.BUSINESS_UNIT },
-      create: {
-        id: row.BUSINESS_UNIT,
-        peoplesoft_id: row.SETID,
-        code: row.DESCRSHORT,
-        name: row.DESCR,
-        effective_status: row.EFF_STATUS,
-        effective_date: new Date(row.EFFDT),
-      },
-      update: {
-        peoplesoft_id: row.SETID,
-        code: row.DESCRSHORT,
-        name: row.DESCR,
-        effective_status: row.EFF_STATUS,
-        effective_date: new Date(row.EFFDT),
-      },
-    });
+  try {
+    const path = process.env.NODE_ENV == 'development' ? '../../organization.js' : '/tmp/log/organization.js';
+    const organization = (await import(path)).organization as unknown as any[];
+    for (const org of organization) {
+      try {
+        await prisma.organization.create({
+          data: org,
+        });
+      } catch (error) {
+        console.error(`Failed to create org for:`, org, error);
+      }
+    }
+    // Use the imported data
+  } catch (error) {
+    console.error('Error importing other job_profile_org: ', error);
+
+    for await (const row of organizations) {
+      await prisma.organization.upsert({
+        where: { id: row.BUSINESS_UNIT },
+        create: {
+          id: row.BUSINESS_UNIT,
+          peoplesoft_id: row.SETID,
+          code: row.DESCRSHORT,
+          name: row.DESCR,
+          effective_status: row.EFF_STATUS,
+          effective_date: new Date(row.EFFDT),
+        },
+        update: {
+          peoplesoft_id: row.SETID,
+          code: row.DESCRSHORT,
+          name: row.DESCR,
+          effective_status: row.EFF_STATUS,
+          effective_date: new Date(row.EFFDT),
+        },
+      });
+    }
+  }
+
+  try {
+    const path =
+      process.env.NODE_ENV == 'development'
+        ? '../../job_profile_organization.js'
+        : '/tmp/log/job_profile_organization.js';
+    const job_profile_organization = (await import(path)).job_profile_organization as unknown as any[];
+    for (const job_profile_org of job_profile_organization) {
+      try {
+        await prisma.jobProfileOrganization.create({
+          data: job_profile_org,
+        });
+      } catch (error) {
+        console.error(`Failed to create job_profile_org for:`, job_profile_org, error);
+      }
+    }
+    // Use the imported data
+  } catch (error) {
+    console.error('Error importing other job_profile_org: ', error);
   }
 
   // await prisma.jobProfileOrganization.createMany({
@@ -3305,7 +3346,7 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
       {
         id: 'DEPT03',
         location_id: 'LOC03',
-        organization_id: 'BC000',
+        organization_id: 'BC112',
         peoplesoft_id: 'PSFT03',
         code: 'DPT03',
         name: 'Information Technology',
