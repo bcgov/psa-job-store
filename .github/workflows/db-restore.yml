@@ -113,40 +113,40 @@ jobs:
           # Set the backup ID as an output
           echo "BACKUP_ID=$BACKUP_ID" >> $GITHUB_ENV
 
-      - name: Update cluster names and patch (Backup ID)
-        if: github.event_name == 'workflow_dispatch' && github.event.inputs.backup_id != ''
-        run: |
-          # Update only metadata.name in base postgrescluster.yml
-          sed -i '0,/name:/{s/name: .*/name: '"${{ steps.set-cluster.outputs.cluster_name }}"'/}' \
-            deployments/openshift/kustomize/base/crunchy/postgrescluster.yml
+      # - name: Update cluster names and patch (Backup ID)
+      #   if: github.event_name == 'workflow_dispatch' && github.event.inputs.backup_id != ''
+      #   run: |
+      #     # Update only metadata.name in base postgrescluster.yml
+      #     sed -i '0,/name:/{s/name: .*/name: '"${{ steps.set-cluster.outputs.cluster_name }}"'/}' \
+      #       deployments/openshift/kustomize/base/crunchy/postgrescluster.yml
 
-          # Use yq to append only the restore section
-          yq eval -i '.spec.backups.pgbackrest.restore = {
-            "enabled": true,
-            "repoName": "repo1",
-            "options": [
-              "--set=${{ env.BACKUP_ID }}",
-              "--type=immediate"
-            ]
-          }' deployments/openshift/kustomize/overlays/crunchy/${{ env.ENVIRONMENT }}/patch.yml
+      #     # Use yq to append only the restore section
+      #     yq eval -i '.spec.backups.pgbackrest.restore = {
+      #       "enabled": true,
+      #       "repoName": "repo1",
+      #       "options": [
+      #         "--set=${{ env.BACKUP_ID }}",
+      #         "--type=immediate"
+      #       ]
+      #     }' deployments/openshift/kustomize/overlays/crunchy/${{ env.ENVIRONMENT }}/patch.yml
 
-      - name: Update cluster names and patch (PITR)
-        if: github.event_name == 'workflow_dispatch' && github.event.inputs.restore_timestamp != ''
-        run: |
-          # Update only metadata.name in base postgrescluster.yml
-          sed -i '0,/name:/{s/name: .*/name: '"${{ steps.set-cluster.outputs.cluster_name }}"'/}' \
-            deployments/openshift/kustomize/base/crunchy/postgrescluster.yml
+      # - name: Update cluster names and patch (PITR)
+      #   if: github.event_name == 'workflow_dispatch' && github.event.inputs.restore_timestamp != ''
+      #   run: |
+      #     # Update only metadata.name in base postgrescluster.yml
+      #     sed -i '0,/name:/{s/name: .*/name: '"${{ steps.set-cluster.outputs.cluster_name }}"'/}' \
+      #       deployments/openshift/kustomize/base/crunchy/postgrescluster.yml
 
-          # Use yq to append only the restore section
-          yq eval -i '.spec.backups.pgbackrest.restore = {
-            "enabled": true,
-            "repoName": "repo1",
-            "options": [
-              "--type=time",
-              "--target=\"${{ env.RESTORE_TIMESTAMP }}\"",
-              "--target-timeline=current"
-            ]
-          }' deployments/openshift/kustomize/overlays/crunchy/${{ env.ENVIRONMENT }}/patch.yml
+      #     # Use yq to append only the restore section
+      #     yq eval -i '.spec.backups.pgbackrest.restore = {
+      #       "enabled": true,
+      #       "repoName": "repo1",
+      #       "options": [
+      #         "--type=time",
+      #         "--target=\"${{ env.RESTORE_TIMESTAMP }}\"",
+      #         "--target-timeline=current"
+      #       ]
+      #     }' deployments/openshift/kustomize/overlays/crunchy/${{ env.ENVIRONMENT }}/patch.yml
 
       - name: Debug - Show Updated Configuration
         run: |
@@ -157,10 +157,10 @@ jobs:
           echo "\nDebug kustomize build output:"
           oc kustomize deployments/openshift/kustomize/overlays/crunchy/${{ env.ENVIRONMENT }}
 
-      - name: Apply restore configuration
-        run: |
-          oc apply -k deployments/openshift/kustomize/overlays/crunchy/${{ env.ENVIRONMENT }} \
-            -n ${{ env.NAMESPACE }}
+      # - name: Apply restore configuration
+      #   run: |
+      #     oc apply -k deployments/openshift/kustomize/overlays/crunchy/${{ env.ENVIRONMENT }} \
+      #       -n ${{ env.NAMESPACE }}
 
       - name: Set Restore ID
         id: set-restore-id
@@ -168,89 +168,89 @@ jobs:
           RESTORE_ID="restore-$(date '+%Y%m%d-%H%M%S')"
           echo "id=$RESTORE_ID" >> $GITHUB_OUTPUT
 
-      - name: Trigger restore with annotation
-        run: |
-          oc annotate postgrescluster ${{ steps.set-cluster.outputs.cluster_name }} \
-            --overwrite \
-            postgres-operator.crunchydata.com/pgbackrest-restore="${{ steps.set-restore-id.outputs.id }}" \
-            -n ${{ env.NAMESPACE }}
+      # - name: Trigger restore with annotation
+      #   run: |
+      #     oc annotate postgrescluster ${{ steps.set-cluster.outputs.cluster_name }} \
+      #       --overwrite \
+      #       postgres-operator.crunchydata.com/pgbackrest-restore="${{ steps.set-restore-id.outputs.id }}" \
+      #       -n ${{ env.NAMESPACE }}
 
-      - name: Wait for specific restore completion
-        run: |
-          timeout=1200
-          while [ $timeout -gt 0 ]; do
-            status=$(oc get postgrescluster ${{ steps.set-cluster.outputs.cluster_name }} \
-              -n ${{ env.NAMESPACE }} \
-              -o jsonpath='{.status.pgbackrest.restore}')
-            
-            if [ -n "$status" ]; then
-              echo "Current restore status: $status"
-              
-              # Parse JSON and check ID
-              restore_id=$(echo "$status" | jq -r '.id')
-              finished=$(echo "$status" | jq -r '.finished')
-              
-              if [ "$restore_id" = "${{ steps.set-restore-id.outputs.id }}" ]; then
-                if [ "$finished" = "true" ]; then
-                  echo "Restore completed successfully"
-                  exit 0
-                fi
-              fi
-            fi
-            
-            echo "Restore in progress..."
-            sleep 10
-            timeout=$((timeout-10))
-          done
+      # - name: Wait for specific restore completion
+      #   run: |
+      #     timeout=1200
+      #     while [ $timeout -gt 0 ]; do
+      #       status=$(oc get postgrescluster ${{ steps.set-cluster.outputs.cluster_name }} \
+      #         -n ${{ env.NAMESPACE }} \
+      #         -o jsonpath='{.status.pgbackrest.restore}')
 
-          echo "Restore timed out"
-          exit 1
+      #       if [ -n "$status" ]; then
+      #         echo "Current restore status: $status"
 
-  cleanup:
-    needs: restore
-    if: always()
-    environment:
-      name: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.environment || (github.ref_name == 'main' && 'prod' || github.ref_name == 'stage' && 'test' || 'dev') }}
-    env:
-      ENVIRONMENT: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.environment || (github.ref_name == 'main' && 'prod' || github.ref_name == 'stage' && 'test' || 'dev') }}
-      BACKUP_ANNOTATION: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.backup_id || '20241125-163544' }}
-    runs-on: ubuntu-latest
-    steps:
-      - name: Checkout repository
-        uses: actions/checkout@v4
+      #         # Parse JSON and check ID
+      #         restore_id=$(echo "$status" | jq -r '.id')
+      #         finished=$(echo "$status" | jq -r '.finished')
 
-      - name: Set environment variables
-        run: |
-          echo "NAMESPACE=f3c07a-${{ env.ENVIRONMENT }}" >> $GITHUB_ENV
+      #         if [ "$restore_id" = "${{ steps.set-restore-id.outputs.id }}" ]; then
+      #           if [ "$finished" = "true" ]; then
+      #             echo "Restore completed successfully"
+      #             exit 0
+      #           fi
+      #         fi
+      #       fi
 
-      - name: Set Cluster Name
-        id: set-cluster
-        run: |
-          CLUSTER_NAME=${{ github.event.inputs.cluster_name || 'api-postgres-clone' }}
-          echo "cluster_name=$CLUSTER_NAME" >> $GITHUB_OUTPUT
+      #       echo "Restore in progress..."
+      #       sleep 10
+      #       timeout=$((timeout-10))
+      #     done
 
-      - name: Login to OpenShift
-        run: |
-          oc login ${{ secrets.OPENSHIFT_SERVER }} \
-            --token=${{ secrets.OPENSHIFT_API_TOKEN }} \
-            --insecure-skip-tls-verify=true
-          oc project ${{ env.NAMESPACE }}
+      #     echo "Restore timed out"
+      #     exit 1
 
-      - name: Remove restore annotation
-        continue-on-error: true
-        run: |
-          oc annotate postgrescluster ${{ steps.set-cluster.outputs.cluster_name }} \
-            postgres-operator.crunchydata.com/pgbackrest-restore- \
-            -n ${{ env.NAMESPACE }}
+  # cleanup:
+  #   needs: restore
+  #   if: always()
+  #   environment:
+  #     name: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.environment || (github.ref_name == 'main' && 'prod' || github.ref_name == 'stage' && 'test' || 'dev') }}
+  #   env:
+  #     ENVIRONMENT: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.environment || (github.ref_name == 'main' && 'prod' || github.ref_name == 'stage' && 'test' || 'dev') }}
+  #     BACKUP_ANNOTATION: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.backup_id || '20241125-163544' }}
+  #   runs-on: ubuntu-latest
+  #   steps:
+  #     - name: Checkout repository
+  #       uses: actions/checkout@v4
 
-      - name: Remove restore configuration
-        continue-on-error: true
-        run: |
-          # Update only metadata.name in base postgrescluster.yml
-          sed -i '0,/name:/{s/name: .*/name: '"${{ steps.set-cluster.outputs.cluster_name }}"'/}' \
-            deployments/openshift/kustomize/base/crunchy/postgrescluster.yml
+  #     - name: Set environment variables
+  #       run: |
+  #         echo "NAMESPACE=f3c07a-${{ env.ENVIRONMENT }}" >> $GITHUB_ENV
 
-      - name: Apply configuration
-        run: |
-          oc apply -k deployments/openshift/kustomize/overlays/crunchy/${{ env.ENVIRONMENT }} \
-            -n ${{ env.NAMESPACE }}
+  #     - name: Set Cluster Name
+  #       id: set-cluster
+  #       run: |
+  #         CLUSTER_NAME=${{ github.event.inputs.cluster_name || 'api-postgres-clone' }}
+  #         echo "cluster_name=$CLUSTER_NAME" >> $GITHUB_OUTPUT
+
+  #     - name: Login to OpenShift
+  #       run: |
+  #         oc login ${{ secrets.OPENSHIFT_SERVER }} \
+  #           --token=${{ secrets.OPENSHIFT_API_TOKEN }} \
+  #           --insecure-skip-tls-verify=true
+  #         oc project ${{ env.NAMESPACE }}
+
+  #     - name: Remove restore annotation
+  #       continue-on-error: true
+  #       run: |
+  #         oc annotate postgrescluster ${{ steps.set-cluster.outputs.cluster_name }} \
+  #           postgres-operator.crunchydata.com/pgbackrest-restore- \
+  #           -n ${{ env.NAMESPACE }}
+
+  #     - name: Remove restore configuration
+  #       continue-on-error: true
+  #       run: |
+  #         # Update only metadata.name in base postgrescluster.yml
+  #         sed -i '0,/name:/{s/name: .*/name: '"${{ steps.set-cluster.outputs.cluster_name }}"'/}' \
+  #           deployments/openshift/kustomize/base/crunchy/postgrescluster.yml
+
+  #     - name: Apply configuration
+  #       run: |
+  #         oc apply -k deployments/openshift/kustomize/overlays/crunchy/${{ env.ENVIRONMENT }} \
+  #           -n ${{ env.NAMESPACE }}
