@@ -1,7 +1,5 @@
 name: Database In-Place PITR
 on:
-  # push:
-  #   branches: ['stage', 'development']
   workflow_dispatch:
     inputs:
       cluster_name:
@@ -23,9 +21,10 @@ on:
         required: false
         type: string
       backup_id:
-        description: 'Restore id'
+        description: 'Restore annotation id'
         required: false
         type: string
+        default: 'manual_backup'
 
   # workflow_call:
   #   inputs:
