@@ -2204,8 +2204,8 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
 
   let other_profiles: any[] = [] as any[];
   try {
-    // const path = '../../other-profiles.mjs';
-    const path = '/tmp/log/other-profiles.mjs';
+    const path = '../../other-profiles';
+    // const path = '/tmp/log/other-profiles';
     other_profiles = (await import(path)).otherProfiles as unknown as any[];
     // Use the imported data
   } catch (error) {
@@ -2276,8 +2276,8 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
   try {
     console.log('importing other classifications1');
 
-    // const path = '../../other-classifications.mjs';
-    const path = '/tmp/log/other-classifications.mjs';
+    // const path = '../../other-classifications';
+    const path = '/tmp/log/other-classifications';
 
     other_classifications = (await import(path)).otherClassifications1 as unknown as any[];
     // await prisma.classification.createMany({
@@ -2496,8 +2496,8 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
   }
 
   try {
-    const path = '/tmp/log/other-job-profile-classifications.mjs';
-    // const path = '../../other-job-profile-classifications.mjs';
+    const path = '/tmp/log/other-job-profile-classifications';
+    // const path = '../../other-job-profile-classifications';
     jobProfileClassifications = (await import(path)).otherProfileClassifications as unknown as any[];
     // Use the imported data
   } catch (error) {
@@ -2520,8 +2520,8 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
   // }
 
   try {
-    // const path = '../../other-job-profile-family-link.mjs';
-    const path = '/tmp/log/other-job-profile-family-link.mjs';
+    // const path = '../../other-job-profile-family-link';
+    const path = '/tmp/log/other-job-profile-family-link';
     const otherJobProfileFamilyLink = (await import(path)).otherJobProfileFamilyLink as unknown as any[];
     for (const familyLink of otherJobProfileFamilyLink) {
       try {
@@ -2555,8 +2555,8 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
   }
 
   try {
-    const path = '/tmp/log/other-job-profile-stream-link.mjs';
-    // const path = '../../other-job-profile-stream-link.mjs';
+    const path = '/tmp/log/other-job-profile-stream-link';
+    // const path = '../../other-job-profile-stream-link';
     const otherJobProfileStreamLink = (await import(path)).otherJobProfileStreamLink as unknown as any[];
     for (const streamLink of otherJobProfileStreamLink) {
       try {
@@ -2589,8 +2589,8 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
   }
 
   try {
-    // const path = '../../other-job-profile-bh.mjs';
-    const path = '/tmp/log/other-job-profile-bh.mjs';
+    // const path = '../../other-job-profile-bh';
+    const path = '/tmp/log/other-job-profile-bh';
     const otherJobProfileBh = (await import(path)).otherJobProfileBh as unknown as any[];
     for (const competency of otherJobProfileBh) {
       try {
@@ -3088,8 +3088,8 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
   };
 
   try {
-    // const path = '../../job-profile-reports-to.mjs';
-    const path = '/tmp/log/job-profile-reports-to.mjs';
+    // const path = '../../job-profile-reports-to';
+    const path = '/tmp/log/job-profile-reports-to';
     const otherJobProfileReportsTo = (await import(path)).otherJobProfileReportsTo as unknown as any[];
     for (const reportsTo of otherJobProfileReportsTo) {
       try {
