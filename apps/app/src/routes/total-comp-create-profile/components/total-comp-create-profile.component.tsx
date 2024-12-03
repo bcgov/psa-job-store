@@ -53,10 +53,10 @@ import {
 import copy from 'copy-to-clipboard';
 import DOMPurify from 'dompurify';
 import debounce from 'lodash.debounce';
+import Quill from 'quill';
 import 'quill/dist/quill.snow.css';
 import { CSSProperties, useCallback, useEffect, useMemo, useRef, useState } from 'react';
 import { Controller, useFieldArray, useForm, useWatch } from 'react-hook-form';
-import ReactQuill, { Quill } from 'react-quill';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import StickyBox from 'react-sticky-box';
 import LoadingSpinnerWithMessage from '../../../components/app/common/components/loading.component';
@@ -116,24 +116,13 @@ import WizardValidationError from '../../wizard/components/wizard-edit-profile-v
 import WizardPicker from '../../wizard/components/wizard-picker';
 import WizardProfessionalRegistrationPicker from '../../wizard/components/wizard-professional-registration-picker';
 import JobStreamDiscipline from './jobstream-discipline.component';
+import QuillEditor from './quill-editor';
 import ReorderButtons from './reorder-buttons';
 
 const { Option } = Select;
 const { Text } = Typography;
 
 const employeeGroupIds: string[] = ['MGT', 'GEU', 'OEX', 'NUR', 'PEA', 'LGL'];
-
-// Define a custom clipboard to handle paste events
-class PlainTextClipboard extends Quill.import('modules/clipboard') {
-  onPaste(event: any) {
-    event.preventDefault();
-    const text = event.clipboardData.getData('text/plain');
-    this.quill.clipboard.dangerouslyPasteHTML(this.quill.getSelection().index, text);
-  }
-}
-
-// Register the custom clipboard module
-Quill.register('modules/clipboard', PlainTextClipboard, true);
 
 export interface AccountabilityItem {
   text: string;
@@ -338,6 +327,8 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
   } else {
     link = '/job-profiles/manage/published/';
   }
+
+  const quillRef = useRef<Quill>(null);
 
   const isTestUser = useTestUser();
 
@@ -817,33 +808,6 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
   //   },
   //   [jobStreams],
   // );
-
-  // const handlePaste = (event, editor, next) => {
-  //   // Prevent the default paste behavior
-  //   event.preventDefault();
-
-  //   // Get the plain text from the clipboard
-  //   const text = event.clipboardData.getData('text/plain');
-
-  //   // Insert the plain text at the current cursor position
-  //   editor.clipboard.dangerouslyPasteHTML(editor.getSelection().index, text);
-  // };
-
-  //quill modules for rich text editing
-  const quill_modules = {
-    toolbar: [
-      [{ list: 'ordered' }, { list: 'bullet' }],
-      ['bold', 'italic'],
-      ['link'],
-      [{ indent: '+1' }, { indent: '-1' }],
-    ],
-    clipboard: true,
-    // clipboard: {
-    //   // Use the custom paste handler
-    //   matchVisual: false,
-    //   matchers: [['', handlePaste]],
-    // },
-  };
 
   // END BASIC DETAILS FORM
 
@@ -1811,7 +1775,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
   const [createJobProfile] = useCreateOrUpdateJobProfileMutation();
 
   function transformFormDataToApiSchema(formData: any): CreateJobProfileInput {
-    // console.log('transformFormDataToApiSchema formData: ', formData, ', jobProfileData: ', jobProfileData);
+    // console.log('transformFormDataToApiSchema formData: ', formData);
     return {
       data: {
         state: formData.state,
@@ -2048,6 +2012,8 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
     // console.log('save, isPublishing: ', isPublishing);
     const basicDetails = getBasicDetailsValues();
     const profileDetails = getProfileValues();
+
+    // console.log('basicDetails: ', basicDetails);
 
     if (isUnpublishing) isPublishing = false;
     const newState = isPublishing ? 'PUBLISHED' : isUnpublishing ? 'DRAFT' : state;
@@ -3276,19 +3242,21 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                           <Controller
                             control={control}
                             name="jobContext"
-                            render={({ field: { onChange, onBlur, value } }) => (
-                              <ReactQuill
-                                modules={quill_modules}
-                                theme="snow"
-                                placeholder="Add job context"
-                                value={value}
-                                onBlur={onBlur}
-                                onChange={(v: any) => {
-                                  onChange(v);
-                                  triggerBasicDetailsValidation();
-                                }}
-                              />
-                            )}
+                            render={({ field: { onChange, onBlur, value } }) => {
+                              return (
+                                <QuillEditor
+                                  ref={quillRef}
+                                  value={value}
+                                  onTextChange={() => {
+                                    const content = quillRef?.current?.root.innerHTML;
+                                    onChange(content);
+                                    triggerBasicDetailsValidation();
+                                  }}
+                                  onBlur={onBlur}
+                                  readOnly={false}
+                                />
+                              );
+                            }}
                           />
                           <WizardValidationError formErrors={basicFormErrors} fieldName="jobContext" />
                         </>

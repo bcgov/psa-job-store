@@ -87,7 +87,24 @@ import { PositionService } from './position.service';
     LocationResolver,
     PositionService,
     KeycloakService,
-    PeoplesoftV2Service,
+    {
+      provide: PeoplesoftV2Service,
+      useFactory: (
+        configService: ConfigService<AppConfigDto, true>,
+        httpService: HttpService,
+        prisma: PrismaService,
+      ) => {
+        if (configService.get('USE_MOCKS') === 'true') {
+          // return new PeoplesoftV2Service(configService, httpService, prisma);
+          return new MockPeoplesoftService(configService);
+        } else {
+          return new PeoplesoftV2Service(configService, httpService, prisma);
+        }
+      },
+      inject: [ConfigService, HttpService, PrismaService],
+    },
+    // PeoplesoftV2Service,
+    // SearchService,
   ],
   exports: [PeoplesoftService, PeoplesoftV2Service, CrmService],
 })

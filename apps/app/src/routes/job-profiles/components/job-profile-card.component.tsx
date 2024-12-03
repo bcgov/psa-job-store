@@ -116,7 +116,7 @@ export const JobProfileCard = ({ data, onSavedCallback }: JobProfileCardProps) =
         <Paragraph ellipsis={{ rows: 3 }}>
           <span
             dangerouslySetInnerHTML={{
-              __html: DOMPurify.sanitize(typeof data?.context === 'string' ? data.context : data.context ?? ''),
+              __html: DOMPurify.sanitize(typeof data?.context === 'string' ? data.context : (data.context ?? '')),
             }}
           ></span>
         </Paragraph>
