@@ -1,12 +1,18 @@
+import { OrGuard } from '@nest-lab/or-guard';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { CacheModule } from '@nestjs/cache-manager';
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
 import { ConfigModule, ConfigService } from '@nestjs/config';
+import { APP_GUARD } from '@nestjs/core';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ScheduleModule } from '@nestjs/schedule';
 import { LoggerModule } from 'nestjs-pino';
 import { RequestIdMiddleware } from './middleware/request-id.middleware';
 import { AppLogModule } from './modules/app-log/app-log.module';
+import { AuthModule } from './modules/auth/auth.module';
+import { E2EAuthModule } from './modules/auth/e2e-auth.module';
+import { PublicRouteBypassGuard } from './modules/auth/guards/public-route-bypass.guard';
+import { SessionAuthGuard } from './modules/auth/guards/session-auth.guard';
 import { BehaviouralComptencyModule } from './modules/behavioral-comptency/behavioural-comptency.module';
 import { ClassificationModule } from './modules/classification/classification.module';
 import { CommentModule } from './modules/comment/comment.module';
@@ -30,13 +36,6 @@ import { apolloPinoLoggingPlugin } from './utils/logging/apolloPinoLoggingPlugin
 import { formatGraphQLError } from './utils/logging/graphql-error.formatter';
 import { loggerOptions } from './utils/logging/logger.factory';
 import { validateAppConfig } from './utils/validate-app-config.util';
-// AL-1020
-// import { E2EAuthModule } from './modules/auth/e2e-auth.module';
-import { OrGuard } from '@nest-lab/or-guard';
-import { APP_GUARD } from '@nestjs/core';
-import { AuthModule } from './modules/auth/auth.module';
-import { PublicRouteBypassGuard } from './modules/auth/guards/public-route-bypass.guard';
-import { SessionAuthGuard } from './modules/auth/guards/session-auth.guard';
 
 @Module({
   imports: [
@@ -78,7 +77,7 @@ import { SessionAuthGuard } from './modules/auth/guards/session-auth.guard';
     OrganizationModule,
     AuthModule,
     // ScheduledTaskModule,
-    // E2EAuthModule,
+    E2EAuthModule,
   ],
   controllers: [],
   providers: [
