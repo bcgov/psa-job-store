@@ -1,5 +1,17 @@
 # app
 
+## 0.15.0
+
+### Minor Changes
+
+- [#1043](https://github.com/bcgov/psa-job-store/pull/1043) [`bd3fd3f`](https://github.com/bcgov/psa-job-store/commit/bd3fd3f90183f48253c8db4605fb3753f598a0e9) Thanks [@alex-struk](https://github.com/alex-struk)! - AL-838 Saved profiles functionality
+
+- [#1043](https://github.com/bcgov/psa-job-store/pull/1043) [`475b3c0`](https://github.com/bcgov/psa-job-store/commit/475b3c0cf6d62987daf0fd4a37f4bca23990036f) Thanks [@alex-struk](https://github.com/alex-struk)! - AL-977 Improve submitted date when user submits for verification
+
+- [#1043](https://github.com/bcgov/psa-job-store/pull/1043) [`475b3c0`](https://github.com/bcgov/psa-job-store/commit/475b3c0cf6d62987daf0fd4a37f4bca23990036f) Thanks [@alex-struk](https://github.com/alex-struk)! - AL-1013 Job profile number validation
+
+- [#1103](https://github.com/bcgov/psa-job-store/pull/1103) [`b733f10`](https://github.com/bcgov/psa-job-store/commit/b733f10ec2597cfc5aeccfe763e7c0a47791a83a) Thanks [@alex-struk](https://github.com/alex-struk)! - AX-702 Replace react-quill with a different package
+
 ## 0.14.3
 
 ### Patch Changes
