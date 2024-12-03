@@ -104,7 +104,7 @@ import { PositionService } from './position.service';
       inject: [ConfigService, HttpService, PrismaService],
     },
     // PeoplesoftV2Service,
-    SearchService,
+    // SearchService,
   ],
   exports: [PeoplesoftService, PeoplesoftV2Service, CrmService],
 })
