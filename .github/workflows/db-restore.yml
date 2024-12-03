@@ -10,14 +10,22 @@ on:
         default: 'api-postgres-clone'
         type: string
       environment:
-        description: 'Environment to backup'
+        description: 'Environment to restore'
         required: true
         default: 'development'
         type: choice
         options:
-          - development
-          - stage
-          - main
+          - dev
+          - test
+          - prod
+      restore_timestamp:
+        description: 'Restore timestamp (e.g. 2024-11-25 18:30:04+00) OR'
+        required: false
+        type: string
+      backup_id:
+        description: 'Restore id'
+        required: false
+        type: string
 
   # workflow_call:
   #   inputs:
@@ -42,11 +50,18 @@ jobs:
     env:
       ENVIRONMENT: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.environment || (github.ref_name == 'main' && 'prod' || github.ref_name == 'stage' && 'test' || 'dev') }}
       BACKUP_ANNOTATION: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.backup_id }}
-      RESTORE_TIMESTAMP: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.restore_timestamp || '2024-11-25 18:30:04+00' }}
+      RESTORE_TIMESTAMP: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.restore_timestamp }}
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Validate Inputs
+        run: |
+          if [[ -z "${{ github.event.inputs.restore_timestamp }}" && -z "${{ github.event.inputs.backup_id }}" ]]; then
+            echo "Error: Either restore_timestamp or backup_id must be provided"
+            exit 1
+          fi
 
       - name: Set environment variables
         run: |
@@ -116,7 +131,7 @@ jobs:
           }' deployments/openshift/kustomize/overlays/crunchy/${{ env.ENVIRONMENT }}/patch.yml
 
       - name: Update cluster names and patch (PITR)
-        if: github.event_name == 'workflow_dispatch' && github.event.inputs.timestamp != ''
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.restore_timestamp != ''
         run: |
           # Update only metadata.name in base postgrescluster.yml
           sed -i '0,/name:/{s/name: .*/name: '"${{ steps.set-cluster.outputs.cluster_name }}"'/}' \
@@ -162,7 +177,7 @@ jobs:
 
       - name: Wait for specific restore completion
         run: |
-          timeout=900 # 15 minutes timeout
+          timeout=1200
           while [ $timeout -gt 0 ]; do
             status=$(oc get postgrescluster ${{ steps.set-cluster.outputs.cluster_name }} \
               -n ${{ env.NAMESPACE }} \
