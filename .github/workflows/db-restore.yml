@@ -70,7 +70,7 @@ jobs:
       - name: Set Cluster Name
         id: set-cluster
         run: |
-          CLUSTER_NAME=${{ github.event.inputs.cluster_name || 'api-postgres-clone' }}
+          CLUSTER_NAME='${{ github.event.inputs.cluster_name || 'api-postgres-clone' }}'
           echo "cluster_name=$CLUSTER_NAME" >> $GITHUB_OUTPUT
 
       - name: Debug - Show Environment Variables
