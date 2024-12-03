@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { Issuer } from 'openid-client';
 import { AppConfigDto } from '../../../dtos/app-config.dto';
 import { UserService } from '../../user/user.service';
+import { AuthService } from '../services/auth.service';
 import { OIDCStrategy } from '../strategies/oidc.strategy';
 
 const buildOIDCClient = async (configService: ConfigService<AppConfigDto, true>) => {
@@ -17,9 +18,14 @@ const buildOIDCClient = async (configService: ConfigService<AppConfigDto, true>)
 
 export const OIDCStrategyFactory: FactoryProvider = {
   provide: OIDCStrategy.name,
-  useFactory: async (configService: ConfigService<AppConfigDto, true>, userService: UserService) => {
+  useFactory: async (
+    authService: AuthService,
+    configService: ConfigService<AppConfigDto, true>,
+    userService: UserService,
+  ) => {
     const oidcClient = await buildOIDCClient(configService);
-    return new OIDCStrategy(configService, oidcClient, userService);
+    return new OIDCStrategy(authService, configService, oidcClient, userService);
   },
-  inject: [ConfigService, UserService],
+  inject: [AuthService, ConfigService, UserService],
 };
+//
