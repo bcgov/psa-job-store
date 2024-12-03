@@ -46,7 +46,7 @@ export class PGLitePrismaService extends ExtendedPrismaClient implements OnModul
     console.log('connecting to database...');
     await this.$connect();
 
-    console.log('reading schema file');
+    console.log('reading schema file..');
 
     // console.log('process.env.DB_SCHEMA is..: ');
     // console.log(process.env.DB_SCHEMA);

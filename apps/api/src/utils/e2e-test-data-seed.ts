@@ -959,6 +959,9 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
       { id: 19, name: 'Students/Internships' },
       { id: 20, name: 'Trades and Operational' },
       { id: 21, name: 'Veterinary Services' },
+      { id: 22, name: 'Information Management' },
+      { id: 23, name: 'Information Technology and Digital Talent' },
+      { id: 24, name: 'Legal Counsel' },
     ],
   });
 
@@ -1050,6 +1053,51 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
       { id: 84, job_family_id: 19, name: 'Work-able' },
       { id: 85, job_family_id: 19, name: 'Youth Employment Program' },
       { id: 86, job_family_id: 21, name: 'Veterinarians' },
+      { id: 87, job_family_id: 22, name: 'Archival' },
+      { id: 88, job_family_id: 23, name: 'Business Analysis' },
+      { id: 89, job_family_id: 22, name: 'Data Management' },
+      { id: 90, job_family_id: 22, name: 'Records Management' },
+      { id: 91, job_family_id: 23, name: 'Data/Database Administration' },
+      { id: 92, job_family_id: 23, name: 'Digital Talent - Dev Ops' },
+      { id: 93, job_family_id: 23, name: 'Digital Talent - Developers' },
+      { id: 94, job_family_id: 23, name: 'Digital Talent - Product Managers' },
+      { id: 95, job_family_id: 23, name: 'Digital Talent - Scrum Masters' },
+      { id: 96, job_family_id: 23, name: 'Digital Talent - Service Design' },
+      { id: 97, job_family_id: 23, name: 'Digital Talent - Site Reliability' },
+      { id: 98, job_family_id: 23, name: 'Digital Talent - User Experience' },
+      { id: 99, job_family_id: 23, name: 'Engineering/Architecture' },
+      { id: 100, job_family_id: 23, name: 'Governance' },
+      { id: 101, job_family_id: 23, name: 'Helpdesk' },
+      { id: 102, job_family_id: 23, name: 'Management' },
+      { id: 103, job_family_id: 23, name: 'Network' },
+      { id: 104, job_family_id: 23, name: 'Programming and Software' },
+      { id: 105, job_family_id: 23, name: 'Security' },
+      { id: 106, job_family_id: 23, name: 'Service Management' },
+      { id: 107, job_family_id: 23, name: 'Technical Analysis' },
+      { id: 108, job_family_id: 23, name: 'Web Design' },
+      { id: 109, job_family_id: 22, name: 'Freedom of Information (FOI)' },
+      { id: 110, job_family_id: 1, name: 'Customer Service' },
+      { id: 111, job_family_id: 3, name: 'Administrative Compliance' },
+      { id: 112, job_family_id: 10, name: 'Diversity, Equity and Inclusion' },
+      { id: 113, job_family_id: 10, name: 'Employee Relations' },
+      { id: 114, job_family_id: 10, name: 'HR Policy' },
+      { id: 115, job_family_id: 10, name: 'Job Classification' },
+      { id: 116, job_family_id: 10, name: 'Labour Relations' },
+      { id: 117, job_family_id: 10, name: 'Leadership Development/Coaching' },
+      { id: 118, job_family_id: 10, name: 'Organizational Development' },
+      { id: 119, job_family_id: 10, name: 'Performance Management' },
+      { id: 120, job_family_id: 10, name: 'Workplace Health and Safety' },
+      { id: 121, job_family_id: 11, name: 'Consultation' },
+      { id: 122, job_family_id: 11, name: 'Issues Management' },
+      { id: 123, job_family_id: 11, name: 'Negotiation' },
+      { id: 124, job_family_id: 15, name: 'Change Management' },
+      { id: 125, job_family_id: 17, name: 'Forestry' },
+      { id: 126, job_family_id: 17, name: 'Planning' },
+      { id: 127, job_family_id: 17, name: 'Research' },
+      { id: 128, job_family_id: 24, name: 'Justice Services' },
+      { id: 129, job_family_id: 24, name: 'Legal Services' },
+      { id: 130, job_family_id: 24, name: 'Other' },
+      { id: 131, job_family_id: 24, name: 'Prosecution Services' },
     ],
   });
 
@@ -1108,15 +1156,97 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
     ],
   });
 
-  await prisma.employeeGroup.createMany({
+  const employeeGroups = {
     data: [
       { id: 'GEU', name: "BC General Employees' Union" },
       { id: 'MGT', name: 'Management' },
       { id: 'OEX', name: 'Schedule A' },
       { id: 'PEA', name: 'Professional Employees Association' },
       { id: '805G', name: '805G' },
+      { id: 'LBS', name: 'LBS' },
+      { id: 'VAR', name: 'VAR' },
+      { id: 'CEB', name: 'CEB' },
+      { id: 'TIC', name: 'TIC' },
+      { id: 'LAZ', name: 'LAZ' },
+      { id: 'OPP', name: 'OPP' },
+      { id: 'INU', name: 'INU' },
+      // { id: 'NUR', name: 'Nursing' },
+      { id: 'CA', name: 'CA' },
+      { id: 'OPZ', name: 'OPZ' },
+      { id: 'OPB', name: 'OPB' },
+      { id: 'TIN', name: 'TIN' },
+      { id: 'LKH', name: 'LKH' },
+      { id: 'OPQ', name: 'OPQ' },
+      { id: 'OPC', name: 'OPC' },
+      { id: 'LAF', name: 'LAF' },
+      { id: 'PL', name: 'PL' },
+      { id: 'LIN', name: 'LIN' },
+      { id: 'OPF', name: 'OPF' },
+      { id: 'TEK', name: 'TEK' },
+      { id: 'PLC', name: 'PLC' },
+      { id: 'LA', name: 'LA' },
+      { id: 'TEF', name: 'TEF' },
+      { id: 'LPB', name: 'LPB' },
+      { id: 'OP', name: 'OP' },
+      { id: 'CAP', name: 'CAP' },
+      { id: 'CAB', name: 'CAB' },
+      { id: 'CAK', name: 'CAK' },
+      { id: 'OIN', name: 'OIN' },
+      { id: 'IRI', name: 'IRI' },
+      { id: 'PAI', name: 'PAI' },
+      { id: 'IR', name: 'IR' },
+      { id: 'INBC', name: 'INBC' },
+      { id: 'LAQ', name: 'LAQ' },
+      { id: 'TEQ', name: 'TEQ' },
+      { id: 'PLH', name: 'PLH' },
+      { id: 'OPK', name: 'OPK' },
+      { id: 'CE', name: 'CE' },
+      { id: 'LLM', name: 'LLM' },
+      { id: 'FSA', name: 'FSA' },
+      { id: 'OF', name: 'OF' },
+      { id: 'LAB', name: 'LAB' },
+      { id: 'CRN', name: 'CRN' },
+      { id: 'SH', name: 'SH' },
+      { id: 'LAP', name: 'LAP' },
+      { id: 'BCU', name: 'BCU' },
+      { id: 'PHY', name: 'PHY' },
+      { id: 'QP', name: 'QP' },
+      { id: 'NEX', name: 'NEX' },
+      { id: 'LGL', name: 'LGL' },
+      { id: 'MLA', name: 'MLA' },
+      { id: 'TS', name: 'TS' },
+      { id: '805M', name: '805M' },
+      { id: 'POI', name: 'POI' },
+      { id: '805N', name: '805N' },
+      { id: 'SAT', name: 'SAT' },
+      { id: 'SGEU', name: 'SGEU' },
+      { id: '805P', name: '805P' },
+      { id: 'TOEX', name: 'TOEX' },
+      { id: 'TMGT', name: 'TMGT' },
+      { id: 'AOEX', name: 'AOEX' },
+      { id: 'AMGT', name: 'AMGT' },
+      { id: 'TGEU', name: 'TGEU' },
+      { id: 'HEA', name: 'HEA' },
+      { id: 'PBC', name: 'PBC' },
+      { id: 'PAR', name: 'PAR' },
+      { id: 'CLU', name: 'CLU' },
+      { id: 'SYS', name: 'SYS' },
+      { id: 'SRS', name: 'SRS' },
+      { id: 'QPA', name: 'QPA' },
+      { id: '', name: '' },
     ],
-  });
+  };
+
+  for (const group of employeeGroups.data) {
+    try {
+      // console.log('Creating group:', group);
+      await prisma.employeeGroup.create({
+        data: group,
+      });
+    } catch (error) {
+      console.error('Failed to create group:', group.id, error);
+    }
+  }
 
   // Job Profiles, Behavioural Competencies and Reporting Relationships
 
@@ -2074,8 +2204,9 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
 
   let other_profiles: any[] = [] as any[];
   try {
-    const path = '/tmp/log/other_profiles';
-    other_profiles = (await import(path)).other_profiles as unknown as any[];
+    // const path = '../../other-profiles.cjs';
+    const path = '/tmp/log/other-profiles.cjs';
+    other_profiles = (await import(path)).otherProfiles as unknown as any[];
     // Use the imported data
   } catch (error) {
     console.error('Error importing other profiles: ', error);
@@ -2093,10 +2224,13 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
   //   // File written successfully
   // });
 
+  console.log('inserting profiles: ', other_profiles.length);
   const jobProfiles =
     other_profiles.length > 0
       ? other_profiles
       : [profile189, profile194, profile200, profile208, profile210, profile212, profile247];
+
+  // await prisma.jobProfile.createMany({ data: jobProfiles });
 
   for await (const profile of jobProfiles) {
     const { id, version, ...rest } = profile;
@@ -2114,6 +2248,9 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
       },
     });
   }
+
+  other_profiles.length = 0;
+  jobProfiles.length = 0;
 
   // await prisma.jobProfile.createMany({
   //   data: jobProfiles,
@@ -2135,7 +2272,109 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
 
   await resetAutoIncrement();
 
-  const jobProfileClassifications = [
+  let other_classifications: any[] = [] as any[];
+  try {
+    console.log('importing other classifications1');
+
+    // const path = '../../other-classifications.cjs';
+    const path = '/tmp/log/other-classifications.cjs';
+
+    other_classifications = (await import(path)).otherClassifications1 as unknown as any[];
+    // await prisma.classification.createMany({
+    //   data: other_classifications,
+    // });
+
+    for (const classification of other_classifications) {
+      try {
+        const created = await prisma.classification.create({
+          data: classification,
+        });
+        // console.log(`Created classification: ${JSON.stringify(created)}`);
+      } catch (error) {
+        console.error(`Failed to create classification: ${JSON.stringify(classification)}`);
+        console.error(error);
+      }
+    }
+
+    console.log('importing other classifications2');
+
+    other_classifications = (await import(path)).otherClassifications2 as unknown as any[];
+    // await prisma.classification.createMany({
+    //   data: other_classifications,
+    // });
+    for (const classification of other_classifications) {
+      try {
+        const created = await prisma.classification.create({
+          data: classification,
+        });
+        // console.log(`Created classification: ${JSON.stringify(created)}`);
+      } catch (error) {
+        console.error(`Failed to create classification: ${JSON.stringify(classification)}`);
+        console.error(error);
+      }
+    }
+
+    console.log('importing other classifications3');
+
+    other_classifications = (await import(path)).otherClassifications3 as unknown as any[];
+    // await prisma.classification.createMany({
+    //   data: other_classifications,
+    // });
+    for (const classification of other_classifications) {
+      try {
+        const created = await prisma.classification.create({
+          data: classification,
+        });
+        // console.log(`Created classification: ${JSON.stringify(created)}`);
+      } catch (error) {
+        console.error(`Failed to create classification: ${JSON.stringify(classification)}`);
+        console.error(error);
+      }
+    }
+
+    // Use the imported data
+  } catch (error) {
+    console.error('Error importing other classifications: ', error);
+
+    const classifications = [
+      {
+        id: 'CLS01',
+        peoplesoft_id: 'PSFTCLASS01',
+        code: 'ENG',
+        name: 'Engineer',
+        employee_group_id: 'GEU', // Ensure this matches an existing EmployeeGroup ID
+        grade: 'G1',
+        effective_status: 'Active',
+        effective_date: new Date('2022-01-01'),
+      },
+      {
+        id: 'CLS02',
+        peoplesoft_id: 'PSFTCLASS02',
+        code: 'PRJMGR',
+        name: 'Project Manager',
+        employee_group_id: 'GEU', // Ensure this matches an existing EmployeeGroup ID
+        grade: 'G2',
+        effective_status: 'Active',
+        effective_date: new Date('2022-01-01'),
+      },
+      {
+        id: 'CLS03',
+        peoplesoft_id: 'PSFTCLASS03',
+        code: 'UXDSGN',
+        name: 'UX Designer',
+        employee_group_id: 'GEU', // Ensure this matches an existing EmployeeGroup ID
+        grade: 'G3',
+        effective_status: 'Active',
+        effective_date: new Date('2022-01-01'),
+      },
+    ];
+
+    await prisma.classification.createMany({
+      data: classifications,
+    });
+  }
+
+  let jobProfileClassifications = [
     {
       classification_id: '508011',
       classification_employee_group_id: 'GEU',
@@ -2257,182 +2496,252 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
   }
 
   try {
-    await prisma.jobProfileClassification.createMany({
-      data: jobProfileClassifications,
-    });
-  } catch (e) {
-    console.log('ERROR: failed to create jobProfileClassification');
+    const path = '/tmp/log/other-job-profile-classifications.cjs';
+    // const path = '../../other-job-profile-classifications.cjs';
+    jobProfileClassifications = (await import(path)).otherProfileClassifications as unknown as any[];
+    // Use the imported data
+  } catch (error) {
+    console.error('Error importing other jobProfileClassifications: ', error);
+  }
+
+  // try {
+  for (const classification of jobProfileClassifications) {
+    try {
+      await prisma.jobProfileClassification.create({
+        data: classification,
+      });
+      // console.log(`Successfully created: ${classification.name}`);
+    } catch (error) {
+      console.error(`Failed to create:`, classification, error);
+    }
+  }
+  // } catch (e) {
+  //   console.log('ERROR: failed to create jobProfileClassification: ', e);
+  // }
+
+  try {
+    // const path = '../../other-job-profile-family-link.cjs';
+    const path = '/tmp/log/other-job-profile-family-link.cjs';
+    const otherJobProfileFamilyLink = (await import(path)).otherJobProfileFamilyLink as unknown as any[];
+    for (const familyLink of otherJobProfileFamilyLink) {
+      try {
+        await prisma.jobProfileJobFamilyLink.create({
+          data: familyLink,
+        });
+      } catch (error) {
+        console.error(`Failed to create job family link for:`, familyLink, error);
+      }
+    }
+    // Use the imported data
+  } catch (error) {
+    console.error('Error importing other otherJobProfileFamilyLink: ', error);
+
+    try {
+      await prisma.jobProfileJobFamilyLink.createMany({
+        data: [
+          { jobProfileId: profile189.id, jobProfileVersion: profile189.version, jobFamilyId: 7 },
+          { jobProfileId: profile194.id, jobProfileVersion: profile194.version, jobFamilyId: 1 },
+          { jobProfileId: profile200.id, jobProfileVersion: profile200.version, jobFamilyId: 1 },
+          { jobProfileId: profile208.id, jobProfileVersion: profile208.version, jobFamilyId: 1 },
+          { jobProfileId: profile210.id, jobProfileVersion: profile210.version, jobFamilyId: 7 },
+          { jobProfileId: profile212.id, jobProfileVersion: profile212.version, jobFamilyId: 1 },
+          // there's a mismatch with the stream, it's ok (if it's 1 it will be in admin and education verification won't trigger)
+          { jobProfileId: profile247.id, jobProfileVersion: profile247.version, jobFamilyId: 7 },
+        ],
+      });
+    } catch (e) {
+      console.log('ERROR: failed to create jobProfileJobFamilyLink');
+    }
   }
 
   try {
-    await prisma.jobProfileJobFamilyLink.createMany({
-      data: [
-        { jobProfileId: profile189.id, jobProfileVersion: profile189.version, jobFamilyId: 7 },
-        { jobProfileId: profile194.id, jobProfileVersion: profile194.version, jobFamilyId: 1 },
-        { jobProfileId: profile200.id, jobProfileVersion: profile200.version, jobFamilyId: 1 },
-        { jobProfileId: profile208.id, jobProfileVersion: profile208.version, jobFamilyId: 1 },
-        { jobProfileId: profile210.id, jobProfileVersion: profile210.version, jobFamilyId: 7 },
-        { jobProfileId: profile212.id, jobProfileVersion: profile212.version, jobFamilyId: 1 },
-        // there's a mismatch with the stream, it's ok (if it's 1 it will be in admin and education verification won't trigger)
-        { jobProfileId: profile247.id, jobProfileVersion: profile247.version, jobFamilyId: 7 },
-      ],
-    });
-  } catch (e) {
-    console.log('ERROR: failed to create jobProfileJobFamilyLink');
+    const path = '/tmp/log/other-job-profile-stream-link.cjs';
+    // const path = '../../other-job-profile-stream-link.cjs';
+    const otherJobProfileStreamLink = (await import(path)).otherJobProfileStreamLink as unknown as any[];
+    for (const streamLink of otherJobProfileStreamLink) {
+      try {
+        await prisma.jobProfileStreamLink.create({
+          data: streamLink,
+        });
+      } catch (error) {
+        console.error(`Failed to create stream link for:`, streamLink, error);
+      }
+    }
+    // Use the imported data
+  } catch (error) {
+    console.error('Error importing other otherJobProfileStreamLink: ', error);
+
+    try {
+      await prisma.jobProfileStreamLink.createMany({
+        data: [
+          { jobProfileId: profile189.id, jobProfileVersion: profile189.version, streamId: 33 },
+          { jobProfileId: profile194.id, jobProfileVersion: profile194.version, streamId: 1 },
+          { jobProfileId: profile200.id, jobProfileVersion: profile200.version, streamId: 1 },
+          { jobProfileId: profile208.id, jobProfileVersion: profile208.version, streamId: 1 },
+          { jobProfileId: profile210.id, jobProfileVersion: profile210.version, streamId: 33 },
+          { jobProfileId: profile212.id, jobProfileVersion: profile212.version, streamId: 1 },
+          { jobProfileId: profile247.id, jobProfileVersion: profile247.version, streamId: 1 },
+        ],
+      });
+    } catch (e) {
+      console.log('ERROR: failed to create jobProfileStreamLink');
+    }
   }
 
   try {
-    await prisma.jobProfileStreamLink.createMany({
-      data: [
-        { jobProfileId: profile189.id, jobProfileVersion: profile189.version, streamId: 33 },
-        { jobProfileId: profile194.id, jobProfileVersion: profile194.version, streamId: 1 },
-        { jobProfileId: profile200.id, jobProfileVersion: profile200.version, streamId: 1 },
-        { jobProfileId: profile208.id, jobProfileVersion: profile208.version, streamId: 1 },
-        { jobProfileId: profile210.id, jobProfileVersion: profile210.version, streamId: 33 },
-        { jobProfileId: profile212.id, jobProfileVersion: profile212.version, streamId: 1 },
-        { jobProfileId: profile247.id, jobProfileVersion: profile247.version, streamId: 1 },
-      ],
-    });
-  } catch (e) {
-    console.log('ERROR: failed to create jobProfileStreamLink');
-  }
+    // const path = '../../other-job-profile-bh.cjs';
+    const path = '/tmp/log/other-job-profile-bh.cjs';
+    const otherJobProfileBh = (await import(path)).otherJobProfileBh as unknown as any[];
+    for (const competency of otherJobProfileBh) {
+      try {
+        await prisma.jobProfileBehaviouralCompetency.create({
+          data: competency,
+        });
+      } catch (error) {
+        console.error(`Failed to create behavioural competency for:`, competency, error);
+      }
+    }
+    // Use the imported data
+  } catch (error) {
+    console.error('Error importing other otherJobProfileBh: ', error);
 
-  try {
-    await prisma.jobProfileBehaviouralCompetency.createMany({
-      data: [
-        {
-          behavioural_competency_id: 45,
-          job_profile_id: profile194.id,
-          job_profile_version: profile194.version,
-        },
-        {
-          behavioural_competency_id: 22,
-          job_profile_id: profile194.id,
-          job_profile_version: profile194.version,
-        },
-        {
-          behavioural_competency_id: 36,
-          job_profile_id: profile194.id,
-          job_profile_version: profile194.version,
-        },
-        {
-          behavioural_competency_id: 45,
-          job_profile_id: profile200.id,
-          job_profile_version: profile200.version,
-        },
-        {
-          behavioural_competency_id: 41,
-          job_profile_id: profile200.id,
-          job_profile_version: profile200.version,
-        },
-        {
-          behavioural_competency_id: 22,
-          job_profile_id: profile200.id,
-          job_profile_version: profile200.version,
-        },
-        {
-          behavioural_competency_id: 45,
-          job_profile_id: profile208.id,
-          job_profile_version: profile208.version,
-        },
-        {
-          behavioural_competency_id: 41,
-          job_profile_id: profile208.id,
-          job_profile_version: profile208.version,
-        },
-        {
-          behavioural_competency_id: 22,
-          job_profile_id: profile208.id,
-          job_profile_version: profile208.version,
-        },
-        {
-          behavioural_competency_id: 45,
-          job_profile_id: profile189.id,
-          job_profile_version: profile189.version,
-        },
-        {
-          behavioural_competency_id: 35,
-          job_profile_id: profile189.id,
-          job_profile_version: profile189.version,
-        },
-        {
-          behavioural_competency_id: 36,
-          job_profile_id: profile189.id,
-          job_profile_version: profile189.version,
-        },
-        {
-          behavioural_competency_id: 17,
-          job_profile_id: profile210.id,
-          job_profile_version: profile210.version,
-        },
-        {
-          behavioural_competency_id: 21,
-          job_profile_id: profile210.id,
-          job_profile_version: profile210.version,
-        },
-        {
-          behavioural_competency_id: 23,
-          job_profile_id: profile210.id,
-          job_profile_version: profile210.version,
-        },
-        {
-          behavioural_competency_id: 22,
-          job_profile_id: profile210.id,
-          job_profile_version: profile210.version,
-        },
-        // {
-        //   behavioural_competency_id: 22,
-        //   job_profile_id: profile212.id,
-        // },
-        {
-          behavioural_competency_id: 17,
-          job_profile_id: profile212.id,
-          job_profile_version: profile212.version,
-        },
-        {
-          behavioural_competency_id: 21,
-          job_profile_id: profile212.id,
-          job_profile_version: profile212.version,
-        },
-        {
-          behavioural_competency_id: 23,
-          job_profile_id: profile212.id,
-          job_profile_version: profile212.version,
-        },
-        {
-          behavioural_competency_id: 22,
-          job_profile_id: profile212.id,
-          job_profile_version: profile212.version,
-        },
-        {
-          behavioural_competency_id: 17,
-          job_profile_id: profile247.id,
-          job_profile_version: profile247.version,
-        },
-        {
-          behavioural_competency_id: 21,
-          job_profile_id: profile247.id,
-          job_profile_version: profile247.version,
-        },
-        {
-          behavioural_competency_id: 23,
-          job_profile_id: profile247.id,
-          job_profile_version: profile247.version,
-        },
-        {
-          behavioural_competency_id: 22,
-          job_profile_id: profile247.id,
-          job_profile_version: profile247.version,
-        },
-        {
-          behavioural_competency_id: 42,
-          job_profile_id: profile247.id,
-          job_profile_version: profile247.version,
-        },
-      ],
-    });
-  } catch (e) {
-    console.log('ERROR: failed to create jobProfileBehaviouralCompetency');
+    try {
+      await prisma.jobProfileBehaviouralCompetency.createMany({
+        data: [
+          {
+            behavioural_competency_id: 45,
+            job_profile_id: profile194.id,
+            job_profile_version: profile194.version,
+          },
+          {
+            behavioural_competency_id: 22,
+            job_profile_id: profile194.id,
+            job_profile_version: profile194.version,
+          },
+          {
+            behavioural_competency_id: 36,
+            job_profile_id: profile194.id,
+            job_profile_version: profile194.version,
+          },
+          {
+            behavioural_competency_id: 45,
+            job_profile_id: profile200.id,
+            job_profile_version: profile200.version,
+          },
+          {
+            behavioural_competency_id: 41,
+            job_profile_id: profile200.id,
+            job_profile_version: profile200.version,
+          },
+          {
+            behavioural_competency_id: 22,
+            job_profile_id: profile200.id,
+            job_profile_version: profile200.version,
+          },
+          {
+            behavioural_competency_id: 45,
+            job_profile_id: profile208.id,
+            job_profile_version: profile208.version,
+          },
+          {
+            behavioural_competency_id: 41,
+            job_profile_id: profile208.id,
+            job_profile_version: profile208.version,
+          },
+          {
+            behavioural_competency_id: 22,
+            job_profile_id: profile208.id,
+            job_profile_version: profile208.version,
+          },
+          {
+            behavioural_competency_id: 45,
+            job_profile_id: profile189.id,
+            job_profile_version: profile189.version,
+          },
+          {
+            behavioural_competency_id: 35,
+            job_profile_id: profile189.id,
+            job_profile_version: profile189.version,
+          },
+          {
+            behavioural_competency_id: 36,
+            job_profile_id: profile189.id,
+            job_profile_version: profile189.version,
+          },
+          {
+            behavioural_competency_id: 17,
+            job_profile_id: profile210.id,
+            job_profile_version: profile210.version,
+          },
+          {
+            behavioural_competency_id: 21,
+            job_profile_id: profile210.id,
+            job_profile_version: profile210.version,
+          },
+          {
+            behavioural_competency_id: 23,
+            job_profile_id: profile210.id,
+            job_profile_version: profile210.version,
+          },
+          {
+            behavioural_competency_id: 22,
+            job_profile_id: profile210.id,
+            job_profile_version: profile210.version,
+          },
+          // {
+          //   behavioural_competency_id: 22,
+          //   job_profile_id: profile212.id,
+          // },
+          {
+            behavioural_competency_id: 17,
+            job_profile_id: profile212.id,
+            job_profile_version: profile212.version,
+          },
+          {
+            behavioural_competency_id: 21,
+            job_profile_id: profile212.id,
+            job_profile_version: profile212.version,
+          },
+          {
+            behavioural_competency_id: 23,
+            job_profile_id: profile212.id,
+            job_profile_version: profile212.version,
+          },
+          {
+            behavioural_competency_id: 22,
+            job_profile_id: profile212.id,
+            job_profile_version: profile212.version,
+          },
+          {
+            behavioural_competency_id: 17,
+            job_profile_id: profile247.id,
+            job_profile_version: profile247.version,
+          },
+          {
+            behavioural_competency_id: 21,
+            job_profile_id: profile247.id,
+            job_profile_version: profile247.version,
+          },
+          {
+            behavioural_competency_id: 23,
+            job_profile_id: profile247.id,
+            job_profile_version: profile247.version,
+          },
+          {
+            behavioural_competency_id: 22,
+            job_profile_id: profile247.id,
+            job_profile_version: profile247.version,
+          },
+          {
+            behavioural_competency_id: 42,
+            job_profile_id: profile247.id,
+            job_profile_version: profile247.version,
+          },
+        ],
+      });
+    } catch (e) {
+      console.log('ERROR: failed to create jobProfileBehaviouralCompetency');
+    }
   }
 
   const jobProfileReportsTo = [
@@ -2779,63 +3088,81 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
   };
 
   try {
-    for await (const reportsTo of jobProfileReportsTo) {
-      const {
-        classification_id,
-        classification_employee_group_id,
-        classification_peoplesoft_id,
-        job_profile_id,
-        job_profile_version,
-      } = reportsTo;
+    // const path = '../../job-profile-reports-to.cjs';
+    const path = '/tmp/log/job-profile-reports-to.cjs';
+    const otherJobProfileReportsTo = (await import(path)).otherJobProfileReportsTo as unknown as any[];
+    for (const reportsTo of otherJobProfileReportsTo) {
+      try {
+        await prisma.jobProfileReportsTo.create({
+          data: reportsTo,
+        });
+      } catch (error) {
+        console.error(`Failed to create reports-to record for ID:`, reportsTo, error);
+      }
+    }
+    // Use the imported data
+  } catch (error) {
+    console.error('Error importing other otherJobProfileReportsTo: ', error);
 
-      const data = classificationData2[classification_id] || {
-        code: '',
-        name: '',
-        grade: '',
-        effective_status: '',
-        effective_date: new Date('1900-01-01'),
-      };
-
-      await prisma.classification.upsert({
-        where: {
-          id_employee_group_id_peoplesoft_id: {
-            id: classification_id,
-            employee_group_id: classification_employee_group_id,
-            peoplesoft_id: classification_peoplesoft_id,
-          },
-        },
-        create: {
-          id: classification_id,
-          peoplesoft_id: classification_peoplesoft_id,
-          ...data,
-          employee_group_id: classification_employee_group_id,
-        },
-        update: {},
-      });
-
-      await prisma.jobProfileReportsTo.upsert({
-        where: {
-          job_profile_id_job_profile_version_classification_id_classification_employee_group_id_classification_peoplesoft_id:
-            {
-              job_profile_id,
-              job_profile_version,
-              classification_id,
-              classification_employee_group_id,
-              classification_peoplesoft_id,
-            },
-        },
-        create: {
+    try {
+      for await (const reportsTo of jobProfileReportsTo) {
+        const {
           classification_id,
           classification_employee_group_id,
           classification_peoplesoft_id,
           job_profile_id,
           job_profile_version,
-        },
-        update: {},
-      });
+        } = reportsTo;
+
+        const data = classificationData2[classification_id] || {
+          code: '',
+          name: '',
+          grade: '',
+          effective_status: '',
+          effective_date: new Date('1900-01-01'),
+        };
+
+        await prisma.classification.upsert({
+          where: {
+            id_employee_group_id_peoplesoft_id: {
+              id: classification_id,
+              employee_group_id: classification_employee_group_id,
+              peoplesoft_id: classification_peoplesoft_id,
+            },
+          },
+          create: {
+            id: classification_id,
+            peoplesoft_id: classification_peoplesoft_id,
+            ...data,
+            employee_group_id: classification_employee_group_id,
+          },
+          update: {},
+        });
+
+        await prisma.jobProfileReportsTo.upsert({
+          where: {
+            job_profile_id_job_profile_version_classification_id_classification_employee_group_id_classification_peoplesoft_id:
+              {
+                job_profile_id,
+                job_profile_version,
+                classification_id,
+                classification_employee_group_id,
+                classification_peoplesoft_id,
+              },
+          },
+          create: {
+            classification_id,
+            classification_employee_group_id,
+            classification_peoplesoft_id,
+            job_profile_id,
+            job_profile_version,
+          },
+          update: {},
+        });
+      }
+    } catch (e) {
+      console.log('ERROR: failed to create jobProfileReportsTo');
     }
-  } catch (e) {
-    console.log('ERROR: failed to create jobProfileReportsTo');
   }
 
   const organizations = [
@@ -3005,41 +3332,6 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
       {
         department_id: 'DEPT03',
         is_statutorily_excluded: false,
-      },
-    ],
-  });
-
-  await prisma.classification.createMany({
-    data: [
-      {
-        id: 'CLS01',
-        peoplesoft_id: 'PSFTCLASS01',
-        code: 'ENG',
-        name: 'Engineer',
-        employee_group_id: 'GEU', // Ensure this matches an existing EmployeeGroup ID
-        grade: 'G1',
-        effective_status: 'Active',
-        effective_date: new Date('2022-01-01'),
-      },
-      {
-        id: 'CLS02',
-        peoplesoft_id: 'PSFTCLASS02',
-        code: 'PRJMGR',
-        name: 'Project Manager',
-        employee_group_id: 'GEU', // Ensure this matches an existing EmployeeGroup ID
-        grade: 'G2',
-        effective_status: 'Active',
-        effective_date: new Date('2022-01-01'),
-      },
-      {
-        id: 'CLS03',
-        peoplesoft_id: 'PSFTCLASS03',
-        code: 'UXDSGN',
-        name: 'UX Designer',
-        employee_group_id: 'GEU', // Ensure this matches an existing EmployeeGroup ID
-        grade: 'G3',
-        effective_status: 'Active',
-        effective_date: new Date('2022-01-01'),
       },
     ],
   });
