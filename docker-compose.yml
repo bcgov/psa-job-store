@@ -39,9 +39,6 @@ services:
   #     dockerfile: apps/app/Dockerfile
   #     args:
   #       - VITE_BACKEND_URL=${VITE_BACKEND_URL}
-  #       - VITE_KEYCLOAK_REALM_URL=${VITE_KEYCLOAK_REALM_URL}
-  #       - VITE_KEYCLOAK_CLIENT_ID=${VITE_KEYCLOAK_CLIENT_ID}
-  #       - VITE_KEYCLOAK_REDIRECT_URL=${VITE_KEYCLOAK_REDIRECT_URL}
   #   ports:
   #     - 5173:5173
   #   volumes:
