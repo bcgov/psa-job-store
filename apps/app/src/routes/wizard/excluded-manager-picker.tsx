@@ -97,32 +97,6 @@ export const ExcludedManagerPicker: React.FC<ExcludedManagerPickerProps> = ({
   const options = useMemo(() => {
     const groups = [];
 
-    // Show Search Results section when loading, has results, or has performed a search
-    if (isLoading || searchResults.length > 0 || searchText) {
-      groups.push({
-        label: 'Search Results',
-        options: isLoading
-          ? [{ value: 'loading', label: 'Loading...', disabled: true }]
-          : searchResults.length > 0
-            ? [
-                ...searchResults.map((option) => ({
-                  ...option,
-                })),
-                ...(totalResults > 10
-                  ? [
-                      {
-                        value: 'more-results',
-                        label:
-                          'Additional results may be available. Please refine your search to see more specific matches.',
-                        disabled: true,
-                      },
-                    ]
-                  : []),
-              ]
-            : [{ value: 'no-results', label: 'No results found', disabled: true }],
-      });
-    }
-
     // Create a suggestions group that includes both suggested managers and the selected option
     const suggestedOptions = [
       ...(suggestedManagers?.suggestedManagers || []).map(
@@ -140,10 +114,47 @@ export const ExcludedManagerPicker: React.FC<ExcludedManagerPickerProps> = ({
         : []),
     ];
 
+    const totalOptions = suggestedOptions.length + searchResults.length;
+    let currentPosition = 1;
+
+    // Show Search Results section when loading, has results, or has performed a search
+    if (isLoading || searchResults.length > 0 || searchText) {
+      groups.push({
+        label: <div role="presentation">Search Results</div>,
+        options: isLoading
+          ? [{ value: 'loading', label: 'Loading...', disabled: true }]
+          : searchResults.length > 0
+            ? [
+                ...searchResults.map((option) => ({
+                  ...option,
+                  'aria-label': `${option.label} - Search Result`,
+                  'aria-setsize': totalOptions,
+                  'aria-posinset': currentPosition++,
+                })),
+                ...(totalResults > 10
+                  ? [
+                      {
+                        value: 'more-results',
+                        label:
+                          'Additional results may be available. Please refine your search to see more specific matches.',
+                        disabled: true,
+                      },
+                    ]
+                  : []),
+              ]
+            : [{ value: 'no-results', label: 'No results found', disabled: true }],
+      });
+    }
+
     if (suggestedOptions.length > 0) {
       groups.push({
-        label: 'Suggestions',
-        options: suggestedOptions,
+        label: <div role="presentation">Suggestions</div>,
+        options: suggestedOptions.map((option) => ({
+          ...option,
+          'aria-label': `${option.label} - Suggestion`,
+          'aria-setsize': totalOptions,
+          'aria-posinset': currentPosition++,
+        })),
       });
     }
 
@@ -159,11 +170,21 @@ export const ExcludedManagerPicker: React.FC<ExcludedManagerPickerProps> = ({
           validateStatus={errors.excludedManagerPositionNumberAndName ? 'error' : ''}
           help={errors.excludedManagerPositionNumberAndName?.message}
         >
+          <div aria-live="polite" style={{ height: '0' }}>
+            {isLoading
+              ? 'Loading search results'
+              : searchResults.length
+                ? `${searchResults.length} results found`
+                : searchText
+                  ? 'No results found'
+                  : ''}
+          </div>
           <Controller
             name="excludedManagerPositionNumberAndName"
             control={control}
             render={({ field: { value, onChange, onBlur } }) => (
               <Select
+                aria-label="Select the excluded manager who approved the use of the job profile."
                 showSearch
                 value={value}
                 onBlur={onBlur}
@@ -184,7 +205,9 @@ export const ExcludedManagerPicker: React.FC<ExcludedManagerPickerProps> = ({
                 style={{ width: '100%' }}
                 notFoundContent={
                   isLoading || suggestedIsLoading || suggestedIsFetching ? (
-                    <span style={{ margin: '8px 13px 0 13px' }}>Loading...</span>
+                    <span style={{ margin: '8px 13px 0 13px' }} aria-live="polite">
+                      Loading...
+                    </span>
                   ) : (
                     <Empty
                       style={{ margin: '10px' }}

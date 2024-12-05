@@ -534,7 +534,13 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
                               <Controller
                                 name="branch"
                                 control={control}
-                                render={({ field }) => <Input data-testid="branch-input" {...field} />}
+                                render={({ field }) => (
+                                  <Input
+                                    aria-label="Branch Name (Please use full name, avoid acronyms)"
+                                    data-testid="branch-input"
+                                    {...field}
+                                  />
+                                )}
                               />
                             </Form.Item>
 
@@ -547,7 +553,9 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
                               <Controller
                                 name="division"
                                 control={control}
-                                render={({ field }) => <Input data-testid="division-input" {...field} />}
+                                render={({ field }) => (
+                                  <Input aria-label="Division" data-testid="division-input" {...field} />
+                                )}
                               />
                             </Form.Item>
                           </Col>
