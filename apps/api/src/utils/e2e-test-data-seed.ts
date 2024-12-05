@@ -121,6 +121,33 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
     },
   });
 
+  await prisma.user.upsert({
+    where: { id: '1e6ccd64-9c17-4df7-a7e6-c120e125f05e' },
+    create: {
+      id: '1e6ccd64-9c17-4df7-a7e6-c120e125f05e',
+      name: 'Morgan, Hannah CITZ:EX',
+      roles: ['hiring-manager'],
+      metadata: {
+        crm: {
+          account_id: null,
+          contact_id: 231166,
+        },
+        org_chart: {
+          department_ids: ['112-0074', '123-4567', 'DEPT03'],
+        },
+        peoplesoft: {
+          employee_id: '188149',
+          position_id: '00132139',
+          department_id: '112-0074',
+          organization_id: 'BC112',
+        },
+      },
+    },
+    update: {
+      name: 'Morgan, Hannah CITZ:EX',
+    },
+  });
+
   await prisma.jobProfileMinimumRequirements.createMany({
     data: [
       {
@@ -2208,7 +2235,7 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
     other_profiles = (await import(path)).otherProfiles as unknown as any[];
     // Use the imported data
   } catch (error) {
-    console.error('Error importing other profiles: ', error);
+    // console.error('Error importing other profiles: ', error);
   }
 
   // const fs = require('node:fs');
@@ -2332,7 +2359,7 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
 
     // Use the imported data
   } catch (error) {
-    console.error('Error importing other classifications: ', error);
+    // console.error('Error importing other classifications: ', error);
 
     const classifications = [
       {
@@ -2501,7 +2528,7 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
     jobProfileClassifications = (await import(path)).otherProfileClassifications as unknown as any[];
     // Use the imported data
   } catch (error) {
-    console.error('Error importing other jobProfileClassifications: ', error);
+    // console.error('Error importing other jobProfileClassifications: ', error);
   }
 
   // try {
@@ -2536,7 +2563,7 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
     }
     // Use the imported data
   } catch (error) {
-    console.error('Error importing other otherJobProfileFamilyLink: ', error);
+    // console.error('Error importing other otherJobProfileFamilyLink: ', error);
 
     try {
       await prisma.jobProfileJobFamilyLink.createMany({
@@ -2573,7 +2600,7 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
     }
     // Use the imported data
   } catch (error) {
-    console.error('Error importing other otherJobProfileStreamLink: ', error);
+    // console.error('Error importing other otherJobProfileStreamLink: ', error);
 
     try {
       await prisma.jobProfileStreamLink.createMany({
@@ -2607,7 +2634,7 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
     }
     // Use the imported data
   } catch (error) {
-    console.error('Error importing other otherJobProfileBh: ', error);
+    // console.error('Error importing other otherJobProfileBh: ', error);
 
     try {
       await prisma.jobProfileBehaviouralCompetency.createMany({
@@ -3106,7 +3133,7 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
     }
     // Use the imported data
   } catch (error) {
-    console.error('Error importing other otherJobProfileReportsTo: ', error);
+    // console.error('Error importing other otherJobProfileReportsTo: ', error);
 
     try {
       for await (const reportsTo of jobProfileReportsTo) {
@@ -3226,7 +3253,7 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
     }
     // Use the imported data
   } catch (error) {
-    console.error('Error importing other job_profile_org: ', error);
+    // console.error('Error importing other job_profile_org: ', error);
 
     for await (const row of organizations) {
       await prisma.organization.upsert({
@@ -3267,7 +3294,7 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
     }
     // Use the imported data
   } catch (error) {
-    console.error('Error importing other job_profile_org: ', error);
+    // console.error('Error importing other job_profile_org: ', error);
   }
 
   // await prisma.jobProfileOrganization.createMany({
@@ -3594,6 +3621,7 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
             work_location_id: 'V8V4W803',
             work_location_name: '3-835 Humboldt St.',
             excluded_mgr_position_number: '00054971',
+            excluded_mgr_name: 'John Doe',
           },
         },
         {
@@ -4414,6 +4442,7 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
             work_location_id: 'V8W9V1',
             work_location_name: '049-617 GOVERNMENT ST',
             excluded_mgr_position_number: '00129934',
+            excluded_mgr_name: 'Bob Doe',
           },
         },
         {
@@ -4820,6 +4849,7 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
             work_location_id: 'V5G3H302',
             work_location_name: '100 -3705 Willingdon Avenue',
             excluded_mgr_position_number: '00125168',
+            excluded_mgr_name: 'Jane Doe',
           },
         },
       ],

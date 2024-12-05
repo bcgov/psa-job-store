@@ -87,6 +87,7 @@ export class PositionService {
     let employeesForPositions = new Map<string, Employee[]>();
 
     employeesForPositions = await this.peoplesoftService.getEmployeesForPositions([positionNumber]);
+    // console.log('employeesForPositions: ', employeesForPositions);
 
     const employeesInPosition = employeesForPositions.get(positionNumber) ?? [];
     if (employeesInPosition.length === 0) {
@@ -114,7 +115,9 @@ export class PositionService {
       employeesInPosition.map(async (employee) => {
         const employeeResponse = await this.peoplesoftService.getEmployee(employee.id);
         const employeeDetail = employeeResponse?.data?.query?.rows?.[0];
+        // console.log('employeeDetail: ', employeeDetail);
         const profile = await this.peoplesoftV2Service.getProfile(null, employeeDetail?.EMPLID ?? '');
+        // console.log('profile: ', profile);
         return {
           positionNumber: positionNumber,
           positionDescription: positionDetails.title,
