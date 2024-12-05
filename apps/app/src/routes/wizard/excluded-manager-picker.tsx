@@ -1,4 +1,4 @@
-import { Col, Form, Row, Select, Space, Typography } from 'antd';
+import { Col, Empty, Form, Row, Select, Space, Typography } from 'antd';
 import { debounce } from 'lodash';
 import { useCallback, useMemo, useState } from 'react';
 import { Control, Controller } from 'react-hook-form';
@@ -40,7 +40,11 @@ export const ExcludedManagerPicker: React.FC<ExcludedManagerPickerProps> = ({
   const [searchText, setSearchText] = useState('');
 
   const [getPositionProfile] = useLazyGetPositionProfileQuery();
-  const { data: suggestedManagers } = useGetSuggestedManagersQuery(
+  const {
+    data: suggestedManagers,
+    isLoading: suggestedIsLoading,
+    isFetching: suggestedIsFetching,
+  } = useGetSuggestedManagersQuery(
     {
       positionNumber,
       positionRequestId,
@@ -164,7 +168,17 @@ export const ExcludedManagerPicker: React.FC<ExcludedManagerPickerProps> = ({
                 options={options}
                 placeholder="Select an excluded manager"
                 style={{ width: '100%' }}
-                notFoundContent={isLoading ? 'Loading...' : 'No matches found'}
+                notFoundContent={
+                  isLoading ? (
+                    <span style={{ margin: '8px 13px 0 13px' }}>Loading...</span>
+                  ) : (
+                    <Empty
+                      style={{ margin: '10px' }}
+                      image={Empty.PRESENTED_IMAGE_SIMPLE}
+                      description="No suggestions"
+                    />
+                  )
+                }
                 defaultActiveFirstOption={false}
                 optionRender={(option) => (
                   <Space direction="vertical" size={0}>
