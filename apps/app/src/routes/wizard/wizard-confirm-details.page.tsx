@@ -492,7 +492,9 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
                         title={
                           <>
                             <span id="excluded-manager-id-label">
-                              <h3 style={{ fontWeight: '600', fontSize: '16px' }}>Excluded manager</h3>
+                              <h3 style={{ fontWeight: '600', fontSize: '16px', marginTop: '15px' }}>
+                                Excluded manager
+                              </h3>
                             </span>
                             <Typography.Paragraph type="secondary" style={{ fontWeight: 'normal' }}>
                               Please select the excluded manager who approved the use of the job profile.

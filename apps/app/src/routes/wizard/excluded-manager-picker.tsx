@@ -3,7 +3,8 @@ import { debounce } from 'lodash';
 import { useCallback, useMemo, useState } from 'react';
 import { Control, Controller } from 'react-hook-form';
 import { useGetSuggestedManagersQuery } from '../../redux/services/graphql-api/position-request.api';
-import { PositionProfileModel, useLazyGetPositionProfileQuery } from '../../redux/services/graphql-api/position.api';
+import { PositionProfileModel } from '../../redux/services/graphql-api/position.api';
+import { useLazySearchUsersQuery } from '../../redux/services/graphql-api/user.api';
 import { WizardConfirmDetailsModel } from './wizard-confirm-details.page';
 
 interface ExcludedManagerPickerProps {
@@ -38,8 +39,8 @@ export const ExcludedManagerPicker: React.FC<ExcludedManagerPickerProps> = ({
   // console.log('selectedOption: ', selectedOption);
   const [isLoading, setIsLoading] = useState(false);
   const [searchText, setSearchText] = useState('');
+  const [totalResults, setTotalResults] = useState<number>(0);
 
-  const [getPositionProfile] = useLazyGetPositionProfileQuery();
   const {
     data: suggestedManagers,
     isLoading: suggestedIsLoading,
@@ -52,44 +53,44 @@ export const ExcludedManagerPicker: React.FC<ExcludedManagerPickerProps> = ({
     { skip: !positionNumber || !positionRequestId },
   );
 
+  const [searchUsers] = useLazySearchUsersQuery();
+
   const handleSearch = useCallback(
     debounce(async (searchText: string) => {
-      setSearchText(searchText); // Add this line to update searchText state
+      setSearchText(searchText);
 
       if (!searchText) {
         setSearchResults([]);
+        setTotalResults(0);
         return;
       }
 
+      if (searchText.length < 2) return;
       setIsLoading(true);
       try {
-        const response = await getPositionProfile({
-          positionNumber: searchText,
-          uniqueKey: 'excludedManagerProfile',
-          suppressGlobalError: true,
-        }).unwrap();
+        const response = await searchUsers(searchText).unwrap();
 
-        if (response?.positionProfile) {
-          const activePositions = response.positionProfile
-            .filter((p) => p.status === 'Active')
-            .map((position) => ({
-              value: `${position.positionNumber}|${position.employeeName}`,
-              label: `${position.positionNumber} ${position.employeeName}`,
-              key: `sr${position.positionNumber}|${position.employeeName}`,
-              // position,
-            }));
+        if (response?.searchUsers.results.length > 0) {
+          const activePositions = response.searchUsers.results.map((result) => ({
+            value: `${result.position_number}|${result.name}`,
+            label: `${result.position_number} ${result.name}`,
+            key: `sr${result.position_number}|${result.name}`,
+          }));
           setSearchResults(activePositions);
+          setTotalResults(response.searchUsers.numberOfResults);
         } else {
-          setSearchResults([]); // Ensure empty results are set when no active positions are found
+          setSearchResults([]);
+          setTotalResults(0);
         }
       } catch (error) {
         setSearchResults([]);
-        console.error('Error fetching position profile:', error);
+        setTotalResults(0);
+        console.error('Error searching users:', error);
       } finally {
         setIsLoading(false);
       }
     }, 300),
-    [getPositionProfile],
+    [searchUsers],
   );
 
   // Transform suggestions into grouped format
@@ -103,9 +104,21 @@ export const ExcludedManagerPicker: React.FC<ExcludedManagerPickerProps> = ({
         options: isLoading
           ? [{ value: 'loading', label: 'Loading...', disabled: true }]
           : searchResults.length > 0
-            ? searchResults.map((option) => ({
-                ...option,
-              }))
+            ? [
+                ...searchResults.map((option) => ({
+                  ...option,
+                })),
+                ...(totalResults > 10
+                  ? [
+                      {
+                        value: 'more-results',
+                        label:
+                          'Additional results may be available. Please refine your search to see more specific matches.',
+                        disabled: true,
+                      },
+                    ]
+                  : []),
+              ]
             : [{ value: 'no-results', label: 'No results found', disabled: true }],
       });
     }
@@ -161,6 +174,7 @@ export const ExcludedManagerPicker: React.FC<ExcludedManagerPickerProps> = ({
                   setSearchResults([]);
                   setSearchText('');
                   onChange(newValue);
+                  setTotalResults(0);
                 }}
                 onSearch={handleSearch}
                 loading={isLoading}
@@ -194,6 +208,7 @@ export const ExcludedManagerPicker: React.FC<ExcludedManagerPickerProps> = ({
                   if (!open) {
                     setSearchResults([]);
                     setSearchText('');
+                    setTotalResults(0);
                   }
                 }}
                 dropdownRender={(menu) => (
