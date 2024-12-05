@@ -215,11 +215,11 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
     control,
     handleSubmit,
     setValue,
-    setError,
-    clearErrors,
+    // setError,
+    // clearErrors,
     getValues,
     formState: { errors },
-    trigger,
+    // trigger,
   } = useForm<WizardConfirmDetailsModel>({
     resolver: classValidatorResolver(WizardConfirmDetailsModel),
     defaultValues: {
