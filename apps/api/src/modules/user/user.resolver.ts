@@ -1,4 +1,4 @@
-import { Args, Mutation, Query, Resolver } from '@nestjs/graphql';
+import { Args, Field, Mutation, ObjectType, Query, Resolver } from '@nestjs/graphql';
 import { FindManyUserArgs, FindUniqueUserArgs, User } from '../../@generated/prisma-nestjs-graphql';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { AssignUserRolesInput } from './inputs/assign-user-roles.input';
@@ -6,6 +6,24 @@ import { SetUserOrgChartAccessInput } from './inputs/set-user-org-chart-access.i
 import { UnassignUserRoleInput } from './inputs/unassign-user-role.input';
 import { PaginatedUsersResponse } from './outputs/paginated-users-response.output';
 import { UserService } from './user.service';
+
+@ObjectType()
+export class UserSearchResult {
+  @Field(() => String)
+  position_number: string;
+
+  @Field(() => String)
+  name: string;
+}
+
+@ObjectType()
+export class UserSearchResponse {
+  @Field(() => Number)
+  numberOfResults: number;
+
+  @Field(() => [UserSearchResult])
+  results: UserSearchResult[];
+}
 
 @Resolver()
 export class UserResolver {
@@ -56,7 +74,7 @@ export class UserResolver {
   }
 
   @Roles('hiring-manager')
-  @Query(() => [User], { name: 'searchUsers' })
+  @Query(() => UserSearchResponse, { name: 'searchUsers' })
   searchUsers(@Args('search') search: string) {
     return this.userService.searchUsers(search);
   }

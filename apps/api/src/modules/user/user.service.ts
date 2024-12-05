@@ -7,10 +7,12 @@ import { FindManyUserArgs, FindUniqueUserArgs, User, UserUpdateInput } from '../
 import { CACHE_USER_PREFIX } from '../auth/auth.constants';
 import { CrmService } from '../external/crm.service';
 import { PeoplesoftV2Service } from '../external/peoplesoft-v2.service';
+import { PeoplesoftService } from '../external/peoplesoft.service';
 import { KeycloakService } from '../keycloak/keycloak.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { SetUserOrgChartAccessInput } from './inputs/set-user-org-chart-access.input';
 import { PaginatedUsersResponse } from './outputs/paginated-users-response.output';
+import { UserSearchResponse } from './user.resolver';
 
 enum PeoplesoftMetadataChanged {
   POSITION = 'POSITION',
@@ -28,7 +30,8 @@ export class UserService {
     @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
     private readonly crmService: CrmService,
     private readonly keycloakService: KeycloakService,
-    private readonly peoplesoftService: PeoplesoftV2Service,
+    private readonly peoplesoftV2Service: PeoplesoftV2Service,
+    private readonly peoplesoftService: PeoplesoftService,
     private readonly prisma: PrismaService,
   ) {}
 
@@ -40,8 +43,8 @@ export class UserService {
   }
 
   private async getPeoplesoftMetadata(username: string) {
-    const profile = await this.peoplesoftService.getProfile(username);
-    const employee = profile ? await this.peoplesoftService.getEmployee(profile.EMPLID) : undefined;
+    const profile = await this.peoplesoftV2Service.getProfileV2(username);
+    const employee = profile ? await this.peoplesoftV2Service.getEmployee(profile.EMPLID) : undefined;
 
     // todo: how will potential null values here have downstream effects?
     return {
@@ -286,12 +289,70 @@ export class UserService {
     return user;
   }
 
-  async searchUsers(search: string) {
-    // if search is a number, query peoplesoft for position number
-    // if search is a string, query keycloak for name using email field
-    const users = await this.getUsers({ where: { name: { contains: search } } });
+  async searchUsers(search: string): Promise<UserSearchResponse> {
+    // since we're searching the email field, we need to replace spaces with dots
+    const searchTerm = search.replace(/\s+/g, '.');
 
-    return users;
+    // Check if search is a number
+    if (/^\d+$/.test(searchTerm)) {
+      // Query peoplesoft for position number
+      const employeesForPositions = await this.peoplesoftService.getEmployeesForPositions([searchTerm]);
+
+      // Extract individual position/name pairs
+      const results: Array<{ position_number: string; name: string }> = [];
+      employeesForPositions.forEach((employees, positionNumber) => {
+        employees.forEach((employee) => {
+          results.push({
+            position_number: positionNumber,
+            name: employee.name,
+          });
+        });
+      });
+
+      return { numberOfResults: results.length, results: results };
+    } else {
+      // Search by name/email in Keycloak
+      const keycloakResponse = await this.keycloakService.findUsers('email', searchTerm);
+
+      // console.log('keycloakResponse: ', JSON.stringify(keycloakResponse, null, 2));
+
+      // Extract IDIR usernames from Keycloak results and limit to 10
+      let idirUsernames = keycloakResponse.map((user) => (user.attributes as any).idir_username[0]);
+      const searchCount = idirUsernames.length;
+      idirUsernames = idirUsernames.slice(0, 10);
+
+      // console.log('idirUsernames: ', idirUsernames);
+
+      // Get profiles for each IDIR username
+      const profiles = await Promise.all(
+        idirUsernames.map((username) => this.peoplesoftV2Service.getProfileV2(username, null)),
+      );
+
+      // console.log('profiles: ', JSON.stringify(profiles, null, 2));
+
+      // Filter out undefined profiles and get employee details
+      const validProfiles = profiles.filter((profile) => profile !== undefined);
+      const employeeDetails = await Promise.all(
+        validProfiles.map((profile) => this.peoplesoftService.getEmployee(profile.EMPLID)),
+      );
+
+      // console.log('employeeDetails: ', JSON.stringify(employeeDetails, null, 2));
+
+      // Compile final results
+      const ret = employeeDetails
+        .filter((detail) => detail?.data?.query?.rows?.[0])
+        .map((detail) => {
+          const employeeData = detail.data.query.rows[0];
+          // console.log('employeeData: ', JSON.stringify(employeeData, null, 2));
+          return {
+            position_number: employeeData.POSITION_NBR,
+            name: employeeData.NAME_DISPLAY,
+          };
+        });
+
+      // console.log('ret: ', JSON.stringify(ret, null, 2));
+      return { numberOfResults: searchCount, results: ret };
+    }
   }
 
   // async assignUserRoles(id: string, roles: string[]) {

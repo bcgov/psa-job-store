@@ -123,6 +123,8 @@ export class MockPeoplesoftService {
               EMPLID: employee.id,
               NAME_DISPLAY: employee.name,
               EMPL_STATUS: employee.status,
+              // if employee has a positionId, use it, otherwise use employee.id as position number
+              POSITION_NBR: employee.positionId ?? employee.id,
             },
           ],
         },
@@ -132,22 +134,44 @@ export class MockPeoplesoftService {
 
   async getProfile(idir: string) {
     console.log('Mock getProfile called with idir:', idir);
-    const profile = this.mockData.profiles.find((prof) => prof.idir === idir) || {
-      idir,
-      name: 'Unknown User',
-      role: 'Guest',
-    };
+    const profile = this.mockData.profiles.find((prof) => prof.idir === idir) || undefined;
+
+    if (!profile)
+      return {
+        data: {
+          query: {
+            rows: [undefined],
+          },
+        },
+      };
     return {
       data: {
         query: {
           rows: [
             {
-              USERID: profile.idir,
-              NAME: profile.name,
+              OPRID: profile.idir,
+              OPRDEFNDESC: profile.name,
+              EMPLID: profile.employee_id,
+              EMAILID: profile.email,
+              GUID: '123456',
             },
           ],
         },
       },
+    };
+  }
+
+  async getProfileV2(idir?: string, emplid?: string) {
+    console.log('Mock getProfile called with idir:', idir);
+    const profile = this.mockData.profiles.find((prof) => prof.idir === idir) || undefined;
+
+    if (!profile) return undefined;
+    return {
+      OPRID: profile.idir,
+      OPRDEFNDESC: profile.name,
+      EMPLID: profile.employee_id,
+      EMAILID: profile.email,
+      GUID: '123456',
     };
   }
 
