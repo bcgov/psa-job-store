@@ -48,6 +48,46 @@ export const ExcludedManagerPicker: React.FC<ExcludedManagerPickerProps> = ({
     { skip: !positionNumber || !positionRequestId },
   );
 
+  const handleSearch = useCallback(
+    debounce(async (searchText: string) => {
+      setSearchText(searchText); // Add this line to update searchText state
+
+      if (!searchText) {
+        setSearchResults([]);
+        return;
+      }
+
+      setIsLoading(true);
+      try {
+        const response = await getPositionProfile({
+          positionNumber: searchText,
+          uniqueKey: 'excludedManagerProfile',
+          suppressGlobalError: true,
+        }).unwrap();
+
+        if (response?.positionProfile) {
+          const activePositions = response.positionProfile
+            .filter((p) => p.status === 'Active')
+            .map((position) => ({
+              value: `${position.positionNumber}|${position.employeeName}`,
+              label: `${position.positionNumber} ${position.employeeName}`,
+              key: `sr${position.positionNumber}|${position.employeeName}`,
+              // position,
+            }));
+          setSearchResults(activePositions);
+        } else {
+          setSearchResults([]); // Ensure empty results are set when no active positions are found
+        }
+      } catch (error) {
+        setSearchResults([]);
+        console.error('Error fetching position profile:', error);
+      } finally {
+        setIsLoading(false);
+      }
+    }, 300),
+    [getPositionProfile],
+  );
+
   // Transform suggestions into grouped format
   const options = useMemo(() => {
     const groups = [];
@@ -92,46 +132,6 @@ export const ExcludedManagerPicker: React.FC<ExcludedManagerPickerProps> = ({
 
     return groups;
   }, [searchResults, suggestedManagers, selectedOption, isLoading]);
-
-  const handleSearch = useCallback(
-    debounce(async (searchText: string) => {
-      setSearchText(searchText); // Add this line to update searchText state
-
-      if (!searchText) {
-        setSearchResults([]);
-        return;
-      }
-
-      setIsLoading(true);
-      try {
-        const response = await getPositionProfile({
-          positionNumber: searchText,
-          uniqueKey: 'excludedManagerProfile',
-          suppressGlobalError: true,
-        }).unwrap();
-
-        if (response?.positionProfile) {
-          const activePositions = response.positionProfile
-            .filter((p) => p.status === 'Active')
-            .map((position) => ({
-              value: `${position.positionNumber}|${position.employeeName}`,
-              label: `${position.positionNumber} ${position.employeeName}`,
-              key: `sr${position.positionNumber}|${position.employeeName}`,
-              // position,
-            }));
-          setSearchResults(activePositions);
-        } else {
-          setSearchResults([]); // Ensure empty results are set when no active positions are found
-        }
-      } catch (error) {
-        setSearchResults([]);
-        console.error('Error fetching position profile:', error);
-      } finally {
-        setIsLoading(false);
-      }
-    }, 300),
-    [getPositionProfile],
-  );
 
   return (
     <Row justify="start">
