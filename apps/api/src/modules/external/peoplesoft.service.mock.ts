@@ -56,7 +56,8 @@ export class MockPeoplesoftService {
 
     positions.forEach((position) => {
       const matchingEmployees = this.mockData.employees.filter((emp) => {
-        return emp.id === position;
+        if (emp.positionId) return emp.positionId === position;
+        else return emp.id === position;
       });
       employeeMap.set(position, matchingEmployees);
     });

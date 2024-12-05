@@ -69,7 +69,7 @@ export class MockCrmService {
   }
 
   async createIncident(data: IncidentCreateUpdateInput) {
-    console.log('Creating mock incident with data:', data);
+    console.log('Creating mock incident');
 
     let lookupName: string;
     let isUnique = false;
@@ -104,7 +104,7 @@ export class MockCrmService {
       throw new Error('Generated ID already exists. Please try again.');
     }
 
-    console.log('pushing new incident:', JSON.stringify(newIncident, null, 2));
+    console.log('pushing new incident');
     this.mockData.incidents.push(newIncident);
     return newIncident;
   }
@@ -197,7 +197,7 @@ export class MockCrmService {
       throw new Error(`Incident with id ${id} not found`);
     }
 
-    console.log('parsing incident:', incident);
+    // console.log('parsing incident:', incident);
     const parsed = {
       crm_id: parseInt(incident.id),
       crm_lookup_name: incident.lookupName,
@@ -205,7 +205,7 @@ export class MockCrmService {
       crm_category: incident.category?.lookupName || 'Unknown',
     };
 
-    console.log('parsed: ', parsed);
+    // console.log('parsed: ', parsed);
     return parsed;
   }
 
