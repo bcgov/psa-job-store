@@ -169,7 +169,7 @@ export const ExcludedManagerPicker: React.FC<ExcludedManagerPickerProps> = ({
                 placeholder="Select an excluded manager"
                 style={{ width: '100%' }}
                 notFoundContent={
-                  isLoading ? (
+                  isLoading || suggestedIsLoading || suggestedIsFetching ? (
                     <span style={{ margin: '8px 13px 0 13px' }}>Loading...</span>
                   ) : (
                     <Empty
