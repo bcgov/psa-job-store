@@ -54,4 +54,10 @@ export class UserResolver {
 
     return this.userService.unassignUserRole(id, role);
   }
+
+  @Roles('hiring-manager')
+  @Query(() => [User], { name: 'searchUsers' })
+  searchUsers(@Args('search') search: string) {
+    return this.userService.searchUsers(search);
+  }
 }

@@ -286,6 +286,14 @@ export class UserService {
     return user;
   }
 
+  async searchUsers(search: string) {
+    // if search is a number, query peoplesoft for position number
+    // if search is a string, query keycloak for name using email field
+    const users = await this.getUsers({ where: { name: { contains: search } } });
+
+    return users;
+  }
+
   // async assignUserRoles(id: string, roles: string[]) {
   //   await this.keycloakService.assignUserRoles(id, roles);
   //   await this.syncUser(id);

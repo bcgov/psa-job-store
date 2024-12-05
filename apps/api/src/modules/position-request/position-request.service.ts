@@ -1589,7 +1589,7 @@ export class PositionRequestApiService {
               <li>Is the position full-time or part-time?    Full-time</li>
               <li>What is the job title?    ${positionRequest.title}</li>
               <li>Is this a regular or temporary position?    Regular</li>
-              <li>Who is the first level excluded manager for this position?    ${
+              <li>Who is the excluded manager who approved the profile?    ${
                 positionRequest.reports_to_position_id
               }</li>
               <li>Where is the position location?    ${location.name}</li>
