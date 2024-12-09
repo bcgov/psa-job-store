@@ -23,7 +23,7 @@ interface GraphQLResponseMeta {
   };
 }
 
-export const client = new GraphQLClient(`${VITE_BACKEND_URL}/graphql`);
+export const client = new GraphQLClient(`${VITE_BACKEND_URL}/graphql`, { credentials: 'include' });
 
 const rawBaseQuery = graphqlRequestBaseQuery({ client: client as any });
 

@@ -8,6 +8,10 @@ export class AppConfigDto {
 
   @IsNotEmpty()
   @IsString()
+  REACT_APP_URL: string;
+
+  @IsNotEmpty()
+  @IsString()
   CRM_APPLICATION_CONTEXT: string;
 
   @IsNotEmpty()

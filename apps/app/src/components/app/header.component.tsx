@@ -14,7 +14,7 @@ export const AppHeader = () => {
   const auth = useTypedSelector((state) => state.authReducer);
 
   const handleLogout = async () => {
-    window.location.href = 'http://localhost:3000/api/auth/logout';
+    window.location.href = `${import.meta.env.VITE_BACKEND_URL}/auth/logout`;
   };
 
   const content = (

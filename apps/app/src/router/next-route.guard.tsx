@@ -15,15 +15,20 @@ export const NextRouteGuard = () => {
   useEffect(() => {
     if (!auth.isAuthenticated) {
       (async () => {
-        const response = await fetch('http://localhost:3000/api/auth/user');
-        if (!response.ok) {
+        try {
+          const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/auth/user`, { credentials: 'include' });
+          if (!response.ok) {
+            setIsLoading(false);
+            navigate('/auth/login');
+          } else {
+            const json = await response.json();
+            dispatch(setUser(json));
+            setIsLoading(false);
+            navigate(location.pathname);
+          }
+        } catch (error) {
           setIsLoading(false);
           navigate('/auth/login');
-        } else {
-          const json = await response.json();
-          dispatch(setUser(json));
-          setIsLoading(false);
-          navigate(location.pathname);
         }
       })();
     }

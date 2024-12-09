@@ -1,6 +1,7 @@
 import { ValidationPipe } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { NestFactory } from '@nestjs/core';
+import { NestExpressApplication } from '@nestjs/platform-express';
 import connectPg from 'connect-pg-simple';
 import { json } from 'express';
 import session from 'express-session';
@@ -13,10 +14,11 @@ import { AppConfigDto } from './dtos/app-config.dto';
 const PostgresSessionStore = connectPg(session);
 
 async function bootstrap() {
-  const app = await NestFactory.create(AppModule, { bufferLogs: true });
+  const app = await NestFactory.create<NestExpressApplication>(AppModule, { bufferLogs: true });
   const configService = app.get<ConfigService<AppConfigDto, true>>(ConfigService);
   app.enableCors({
     credentials: true,
+    origin: configService.get('REACT_APP_URL'),
   });
 
   app.use(
