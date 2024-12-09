@@ -19,7 +19,7 @@ const mockStore = configureStore({
 const onChange = jest.fn();
 jest.mock('react-hook-form', () => ({
   ...jest.requireActual('react-hook-form'),
-  Controller: ({ render }) =>
+  Controller: ({ render }: any) =>
     render({
       field: {
         value: '',
