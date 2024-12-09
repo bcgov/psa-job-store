@@ -20,7 +20,7 @@ export class AuthService {
   ) {}
 
   private async getPeoplesoftMetadata(idir: string) {
-    const userProfile = await this.peoplesoftService.getProfile(idir);
+    const userProfile = await this.peoplesoftService.getProfileV2(idir);
     const employee = userProfile ? await this.peoplesoftService.getEmployee(userProfile.EMPLID) : undefined;
 
     return {
@@ -191,7 +191,7 @@ export class AuthService {
   }
 
   async getPeoplesoftDetails(idir: string) {
-    const profile = await this.peoplesoftService.getProfile(idir);
+    const profile = await this.peoplesoftService.getProfileV2(idir);
     const employee = profile ? await this.peoplesoftService.getEmployee(profile.EMPLID) : undefined;
 
     return {

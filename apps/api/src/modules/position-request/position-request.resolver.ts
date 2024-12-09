@@ -290,7 +290,7 @@ export class PositionRequestApiResolver {
   async suggestedManagers(
     @Args('positionNumber') positionNumber: string,
     @Args('positionRequestId') positionRequestId: number, // Fixed parameter name
-    @CurrentUser() user: Express.User,
+    @GqlCurrentUser() user: Express.User,
   ) {
     return await this.positionRequestService.getSuggestedManagers(positionNumber, positionRequestId);
   }
