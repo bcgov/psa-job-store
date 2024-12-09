@@ -1,4 +1,4 @@
-import { User } from 'oidc-client-ts';
+/* eslint-disable @typescript-eslint/no-explicit-any */
 import { getUserRoles } from '../../../utils/get-user-roles.util';
 
 export enum UserCanAccessMode {
@@ -7,7 +7,7 @@ export enum UserCanAccessMode {
 }
 
 export const userCanAccess = (
-  user: User | null | undefined,
+  user: Record<string, any> | null | undefined,
   roles: string[],
   mode: UserCanAccessMode = UserCanAccessMode.Some,
 ) => {

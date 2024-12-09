@@ -584,3 +584,12 @@ model Organization {
 
   @@map("organization")
 }
+
+model Session {
+  sid    String   @id
+  sess   Json     @db.JsonB
+  expire DateTime @db.Timestamptz(6)
+
+  @@index([expire])
+  @@map("_session")
+}

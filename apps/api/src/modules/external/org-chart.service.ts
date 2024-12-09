@@ -1,5 +1,7 @@
 import { Injectable } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { isEmpty } from 'class-validator';
+import { AppConfigDto } from '../../dtos/app-config.dto';
 import { DepartmentService } from '../organization/department/department.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { ClassificationService } from './classification.service';
@@ -12,6 +14,7 @@ import { PeoplesoftService } from './peoplesoft.service';
 export class OrgChartService {
   constructor(
     private readonly classificationService: ClassificationService,
+    private readonly configService: ConfigService<AppConfigDto, true>,
     private readonly departmentService: DepartmentService,
     private readonly peoplesoftService: PeoplesoftService,
     private readonly prisma: PrismaService,
@@ -48,7 +51,7 @@ export class OrgChartService {
     const positionsWithIncumbentsIds = filteredPositions.map((row) => row['A.POSITION_NBR']);
 
     const employees: Map<string, Employee[]> = await this.peoplesoftService.getEmployeesForPositions(
-      process.env.TEST_ENV === 'true'
+      this.configService.get('TEST_ENV') === 'true'
         ? ['00054971', '00100306', '00033584', '00109865', '00078742', '00022287']
         : positionsWithIncumbentsIds,
     );

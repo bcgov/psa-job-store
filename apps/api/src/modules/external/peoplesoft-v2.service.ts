@@ -8,8 +8,28 @@ import { PrismaService } from '../prisma/prisma.service';
 
 enum Endpoint {
   Employee = 'PJS_TGB_REST_EMPLOYEE',
+  HRScope = 'PJS_TGB_REST_HRSCOPE',
   Profile = 'PJS_TGB_REST_USER_PROFILE',
 }
+
+type HRScopeResponse = {
+  'A.POSITION_NBR': string;
+  'A.EFFDT': string;
+  'A.EFF_STATUS': string;
+  'A.DESCR': string;
+  'A.DESCRSHORT': string;
+  'A.BUSINESS_UNIT': string;
+  'A.DEPTID': string;
+  'B.DESCR': string;
+  'A.JOBCODE': string;
+  'A.POSN_STATUS': string;
+  'A.STATUS_DT': string;
+  'A.REPORTS_TO': string;
+  'A.SAL_ADMIN_PLAN': string;
+  'A.TGB_E_CLASS': string;
+  'A.LOCATION': string;
+  'A.UPDATE_INCUMBENTS': string;
+};
 
 @Injectable()
 export class PeoplesoftV2Service {
@@ -147,6 +167,68 @@ export class PeoplesoftV2Service {
               } else {
                 return undefined;
               }
+            }
+
+            return undefined;
+          }),
+          retry(3),
+          catchError((err) => {
+            throw new Error(err);
+          }),
+        ),
+    );
+
+    return response;
+  }
+
+  async getSubordinates(reporting_to: string) {
+    return await this.getHRScope(undefined, undefined, reporting_to);
+  }
+
+  private async getHRScope(
+    dept_id?: string,
+    position_nbr?: string,
+    reports_to?: string,
+  ): Promise<HRScopeResponse[] | undefined> {
+    const value =
+      dept_id != null
+        ? `${dept_id},,`
+        : position_nbr != null
+          ? `,${position_nbr},`
+          : reports_to != null
+            ? `,,${reports_to}`
+            : null;
+    if (value === null) throw new Error('Must have one of: dept_id, position_nbr or reports_to');
+
+    const response = await firstValueFrom(
+      this.httpService
+        .get(
+          [
+            this.configService.get('PEOPLESOFT_URL'),
+            [
+              [Endpoint.HRScope, 'JSON', 'NONFILE'].join('/'),
+              [
+                'isconnectedquery=n',
+                'maxrows=1',
+                'prompt_uniquepromptname=DEPTID,POSITION_NBR,REPORTS_TO',
+                `prompt_fieldvalue=${value}`,
+                'json_resp=true',
+              ].join('&'),
+            ].join('?'),
+          ].join('/'),
+          {
+            headers: this.headers,
+          },
+        )
+        .pipe(
+          map((r) => {
+            if (r.data.status === 'success') {
+              const { rows } = r.data.data.query;
+
+              return rows.map((row) => {
+                delete row['attr:rownumber'];
+                return row;
+              });
             }
 
             return undefined;

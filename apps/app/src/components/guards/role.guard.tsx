@@ -1,6 +1,6 @@
 import React from 'react';
-import { useAuth } from 'react-oidc-context';
 import { Navigate } from 'react-router-dom';
+import { useTypedSelector } from '../../redux/redux.hooks';
 import LoadingSpinnerWithMessage from '../app/common/components/loading.component';
 
 interface RoleGuardProps {
@@ -9,7 +9,7 @@ interface RoleGuardProps {
 }
 
 const RoleGuard: React.FC<RoleGuardProps> = ({ children, roles }) => {
-  const auth = useAuth();
+  const auth = useTypedSelector((state) => state.authReducer);
 
   if (auth.isLoading) {
     // Render a loading indicator or any appropriate content while loading
@@ -21,7 +21,7 @@ const RoleGuard: React.FC<RoleGuardProps> = ({ children, roles }) => {
     return <Navigate to="/login" />;
   }
 
-  const userRoles = (auth.user?.profile['client_roles'] as string[]) || [];
+  const userRoles = (auth.user?.roles as string[]) || [];
 
   if (!roles.some((role) => userRoles.includes(role))) {
     // Redirect to unauthorized if the user does not have the required role
