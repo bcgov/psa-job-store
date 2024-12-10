@@ -2,8 +2,8 @@
 import { CheckCircleFilled } from '@ant-design/icons';
 import { Card, Col, Row, Tag, Tooltip, Typography } from 'antd';
 import { CSSProperties } from 'react';
-import { useAuth } from 'react-oidc-context';
 import { Handle, NodeProps, Position } from 'reactflow';
+import { useTypedSelector } from '../../../redux/redux.hooks';
 import { getUserRoles } from '../../../utils/get-user-roles.util';
 import { OrgChartContext } from '../enums/org-chart-context.enum';
 import { OrgChartType } from '../enums/org-chart-type.enum';
@@ -73,7 +73,7 @@ export const OrgChartNode = ({
   orgChartData,
   orgChartType,
 }: OrgChartNodeProps) => {
-  const auth = useAuth();
+  const auth = useTypedSelector((state) => state.authReducer);
   const positionIsVacant = data.employees.length === 0;
 
   const roles: string[] = getUserRoles(auth.user);

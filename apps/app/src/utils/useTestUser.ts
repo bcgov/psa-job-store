@@ -1,8 +1,8 @@
-import { useAuth } from 'react-oidc-context';
+import { useTypedSelector } from '../redux/redux.hooks';
 
 export const useTestUser = () => {
-  const auth = useAuth();
-  const isTestUser = auth.user?.profile?.idir_username === 'TEST';
+  const auth = useTypedSelector((state) => state.authReducer);
+  const isTestUser = auth.user?.username === 'TEST';
 
   return isTestUser;
 };

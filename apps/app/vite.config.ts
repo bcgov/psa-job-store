@@ -50,12 +50,19 @@ export default defineConfig({
   },
   server: {
     host: true,
-    port: 5173,
+    port: 3000,
     watch: {
       usePolling: true,
     },
+    proxy: {
+      '/api': {
+        target: 'http://localhost:4000',
+        changeOrigin: true,
+        rewrite: (path) => path.replace('/api', '/'),
+      },
+    },
   },
   preview: {
-    port: 5173,
+    port: 3000,
   },
 });

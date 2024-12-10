@@ -67,6 +67,50 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
     },
   });
 
+  const now = new Date();
+  const oneDayFromNow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
+
+  await prisma.session.create({
+    data: {
+      sid: 'iHcbWqNHyasCGNOEThqpyORKtLU-wR4r',
+      expire: oneDayFromNow.toISOString(),
+      sess: {
+        cookie: {
+          path: '/',
+          expires: oneDayFromNow.toISOString(),
+          httpOnly: true,
+          originalMaxAge: 24 * 60 * 60 * 1000,
+        },
+        passport: {
+          user: {
+            id: TEST_USER_ID,
+            name: 'xxxx',
+            roles: ['hiring-manager'],
+            email: 'tuser@gov.bc.ca',
+            metadata: {
+              crm: {
+                account_id: null,
+                contact_id: 231166,
+              },
+              org_chart: {
+                department_ids: ['112-0074', '123-4567'],
+              },
+              peoplesoft: {
+                employee_id: '188146',
+                position_id: '00132136',
+                department_id: '112-0074',
+                organization_id: 'BC112',
+              },
+            },
+            username: 'TESTINGUSER',
+            given_name: 'Test',
+            family_name: 'User',
+          },
+        },
+      },
+    },
+  });
+
   await prisma.user.upsert({
     where: { id: '95cfdf78-95a5-4586-9a18-ff74aedd1ef2' },
     create: {

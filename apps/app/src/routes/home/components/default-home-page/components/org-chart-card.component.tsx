@@ -2,24 +2,23 @@ import { Button, Card, Col, Row, Space } from 'antd';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import { ReactFlowProvider } from 'reactflow';
-import { useGetProfileQuery } from '../../../../../redux/services/graphql-api/profile.api';
+import { useTypedSelector } from '../../../../../redux/redux.hooks';
 import { OrgChart } from '../../../../org-chart/components/org-chart';
 import { OrgChartHelpButton } from '../../../../org-chart/components/org-chart-help-button.component';
 import { OrgChartContext } from '../../../../org-chart/enums/org-chart-context.enum';
 import { OrgChartType } from '../../../../org-chart/enums/org-chart-type.enum';
 
 export const OrgChartCard = () => {
-  const { data: profileData, isFetching: profileDataIsFetching } = useGetProfileQuery();
+  const auth = useTypedSelector((state) => state.authReducer);
   const [departmentId, setDepartmentId] = useState<string | null | undefined>(undefined);
 
   useEffect(() => {
-    setDepartmentId(profileData?.profile.department_id);
-  }, [profileData?.profile]);
+    setDepartmentId(auth.user?.metadata.peoplesoft.department_id);
+  }, [auth.user]);
 
   return (
     <ReactFlowProvider>
       <Card
-        loading={profileDataIsFetching}
         className="orgChartCard"
         style={{
           height: '500px',
@@ -65,8 +64,7 @@ export const OrgChartCard = () => {
             context={OrgChartContext.DEFAULT}
             setDepartmentId={setDepartmentId}
             departmentId={departmentId}
-            departmentIdIsLoading={profileDataIsFetching}
-            targetId={profileData?.profile.position_id}
+            targetId={auth.user?.metadata.peoplesoft.position_id}
             wrapProvider={false}
           />
         </div>

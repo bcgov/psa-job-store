@@ -1,6 +1,6 @@
 import { Args, Field, ObjectType, Query, Resolver } from '@nestjs/graphql';
 import { Classification, FindManyClassificationArgs } from '../../@generated/prisma-nestjs-graphql';
-import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { GqlCurrentUser } from '../auth/decorators/gql-current-user.decorator';
 import { ClassificationService } from './classification.service';
 
 // @ObjectType()
@@ -68,13 +68,13 @@ export class ClassificationResolver {
   constructor(private readonly classificationService: ClassificationService) {}
 
   @Query(() => [Classification], { name: 'classifications' })
-  getClassifications(@CurrentUser() user: Express.User, @Args() args?: FindManyClassificationArgs) {
+  getClassifications(@GqlCurrentUser() user: Express.User, @Args() args?: FindManyClassificationArgs) {
     return this.classificationService.getClassifications(args);
   }
 
   @Query(() => [GroupedClassification], { name: 'groupedClassifications' })
   async getGroupedClassifications(
-    @CurrentUser() user: Express.User,
+    @GqlCurrentUser() user: Express.User,
     @Args() args?: FindManyClassificationArgs,
   ): Promise<GroupedClassification[]> {
     // Overview
