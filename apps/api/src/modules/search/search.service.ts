@@ -3,7 +3,6 @@ import { Injectable } from '@nestjs/common';
 import { ElasticsearchService } from '@nestjs/elasticsearch';
 import { JobProfileState, Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
-import { EventsService } from '../utils/event.service';
 
 export enum SearchIndex {
   JobProfile = 'job-profile',
@@ -15,14 +14,14 @@ export class SearchService {
   constructor(
     private readonly elasticService: ElasticsearchService,
     private readonly prisma: PrismaService,
-    private readonly eventsService: EventsService,
+    // private readonly eventsService: EventsService,
   ) {
     // console.log('searchServcie constructor');
-    this.eventsService.on('search:resetIndex', async (data) => {
-      console.log('received search:resetIndex event');
-      await this.resetIndex();
-      console.log('done resetting index');
-    });
+    // this.eventsService.on('search:resetIndex', async (data) => {
+    //   console.log('received search:resetIndex event');
+    //   await this.resetIndex();
+    //   console.log('done resetting index');
+    // });
   }
 
   async onModuleInit() {}
