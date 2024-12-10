@@ -4,8 +4,15 @@ import { EventsService } from './event.service';
 
 @Global()
 @Module({
-  imports: [EventEmitterModule.forRoot()],
+  imports: [
+    EventEmitterModule.forRoot({
+      // Add global configuration if needed
+      wildcard: true,
+      delimiter: '.',
+      maxListeners: 10,
+    }),
+  ],
   providers: [EventsService],
-  exports: [EventsService],
+  exports: [EventsService, EventEmitterModule],
 })
 export class EventModule {}

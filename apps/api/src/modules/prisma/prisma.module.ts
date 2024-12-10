@@ -1,5 +1,4 @@
 import { Global, Module } from '@nestjs/common';
-import { EventsService } from '../utils/event.service';
 import { PGLitePrismaService } from './pglite-prisma.service';
 import { PrismaService } from './prisma.service';
 
@@ -9,12 +8,13 @@ import { PrismaService } from './prisma.service';
   providers: [
     {
       provide: PrismaService,
-      useFactory: (eventsService: EventsService) => {
+      useFactory: () => {
+        // eventsService: EventsService
         if (process.env.E2E_TESTING === 'true' && process.env.NODE_ENV != 'development')
-          return new PGLitePrismaService(eventsService);
-        else return new PrismaService(eventsService);
+          return new PGLitePrismaService(); //eventsService
+        else return new PrismaService(); // eventsService
       },
-      inject: [EventsService],
+      // inject: [EventsService],
     },
   ],
   exports: [PrismaService],

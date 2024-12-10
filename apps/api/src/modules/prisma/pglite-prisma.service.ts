@@ -2,7 +2,6 @@ import { PGlite } from '@electric-sql/pglite';
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { PrismaPGlite } from 'pglite-prisma-adapter';
 import { seed } from '../../utils/e2e-test-data-seed';
-import { EventsService } from '../utils/event.service';
 import { ExtendedPrismaClient } from './extended-prisma-client.impl';
 
 @Injectable()
@@ -10,14 +9,16 @@ export class PGLitePrismaService extends ExtendedPrismaClient implements OnModul
   private static instance: PGLitePrismaService;
   private pglite: PGlite;
 
-  static getInstance(eventsService: EventsService): PGLitePrismaService {
+  static getInstance() // eventsService: EventsService
+  : PGLitePrismaService {
     if (!PGLitePrismaService.instance) {
-      PGLitePrismaService.instance = new PGLitePrismaService(eventsService);
+      PGLitePrismaService.instance = new PGLitePrismaService(); // eventsService
     }
     return PGLitePrismaService.instance;
   }
 
-  constructor(private readonly eventsService: EventsService) {
+  constructor() {
+    // private readonly eventsService: EventsService
     console.log('creating prisma service: ', process.env.DATABASE_URL);
     const pglite = new PGlite(process.env.DATABASE_URL);
     const adapter = new PrismaPGlite(pglite);
