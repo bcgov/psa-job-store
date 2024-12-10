@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import { AppConfigDto } from '../../dtos/app-config.dto';
+import { MockIncident } from './crm.mock.resolver';
 import { IncidentCreateUpdateInput } from './models/incident-create.input';
 
 @Injectable()
@@ -110,6 +111,7 @@ export class MockCrmService {
   }
 
   async updateIncident(id: number, data: IncidentCreateUpdateInput) {
+    console.log('Updating mock incident with id:', id);
     const incidentIndex = this.mockData.incidents.findIndex((inc) => inc.id === String(id));
 
     if (incidentIndex === -1) {
@@ -141,7 +143,7 @@ export class MockCrmService {
         },
       },
       category: {
-        lookupName: data.category || this.mockData.incidents[incidentIndex].category?.lookupName,
+        lookupName: this.mockData.incidents[incidentIndex].category?.lookupName, // || data.category  - this is in format like this: "{ id: 1930 }"
       },
     };
 
@@ -210,6 +212,8 @@ export class MockCrmService {
   }
 
   async updateIncidentStatus(incidentId: number, newStatus: number) {
+    console.log('Updating mock incident status with id:', incidentId, newStatus);
+
     const incidentIndex = this.mockData.incidents.findIndex((inc) => inc.id === String(incidentId));
 
     if (incidentIndex === -1) {
@@ -226,5 +230,9 @@ export class MockCrmService {
       crm_lookup_name: incident.lookupName,
       crm_category: incident.category?.lookupName || 'Unknown',
     };
+  }
+
+  async getAllIncidents(): Promise<MockIncident[]> {
+    return this.mockData.incidents;
   }
 }
