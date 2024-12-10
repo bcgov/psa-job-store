@@ -44,7 +44,7 @@ export const ContextOptions: React.FC<ContextOptionsProps> = ({
   confirmRemoveModal,
   focusFallback,
 }) => {
-  const tooltipTitle = isReadonly ? 'Required' : 'Delete';
+  const tooltipTitle = isReadonly ? 'Required' : isCustom ? 'Remove' : 'Delete';
 
   const focusOnInput = () => {
     // normally when popover closes we focus back on the button that openned it
@@ -93,7 +93,7 @@ export const ContextOptions: React.FC<ContextOptionsProps> = ({
   //   </span>
   // )
   !isSignificant || isCustom ? (
-    <DeleteOutlined style={isReadonly ? {} : { color: '#000000' }} />
+    <DeleteOutlined />
   ) : (
     <span role="img" aria-label="delete" className="anticon anticon-delete">
       <img style={{ width: '16px', height: '16px', alignItems: 'center' }} src={RemoveSignificant} alt="Remove" />

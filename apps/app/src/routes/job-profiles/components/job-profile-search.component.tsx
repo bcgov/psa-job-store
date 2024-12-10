@@ -599,48 +599,51 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
                   // style={{ width: fullWidth ? 500 : 400 }}
                 />
               </Col>
+
               <Col xl={18} lg={16} md={12} sm={24}>
                 <Row gutter={8} justify="end">
-                  <Col data-testid="Ministry-filter" data-cy="Ministry-filter">
-                    {/* dragon naturally speaking doesn't pick up on aria-label alone */}
-                    <Form.Item label="Ministries" name="ministries" className="sr-only-label">
-                      <Select
-                        closeMenuOnSelect={false}
-                        isClearable={false}
-                        backspaceRemovesValue={false}
-                        hideSelectedOptions={false}
-                        value={ministriesFilterData.filter((jf) =>
-                          allSelections
-                            .filter((selection) => selection.type === 'ministry')
-                            .map((selection) => selection.value)
-                            .includes(jf.value),
-                        )}
-                        styles={{
-                          container: (css) => ({ ...css, width: '200px' }),
-                          menu: (styles) => ({ ...styles, width: 'max-content', minWidth: '100%' }),
-                        }}
-                        components={{
-                          ValueContainer: CustomValueContainer,
-                        }}
-                        classNamePrefix="react-select"
-                        isMulti
-                        aria-label="Ministries"
-                        placeholder="Ministries"
-                        options={ministriesFilterData}
-                        onChange={(selectedItems) => {
-                          const newValues = selectedItems.map((item) => item.value);
-                          if (newValues == null) return;
+                  {ministriesFilterData.length > 1 && (
+                    <Col data-testid="Ministry-filter" data-cy="Ministry-filter">
+                      {/* dragon naturally speaking doesn't pick up on aria-label alone */}
+                      <Form.Item label="Ministries" name="ministries" className="sr-only-label">
+                        <Select
+                          closeMenuOnSelect={false}
+                          isClearable={false}
+                          backspaceRemovesValue={false}
+                          hideSelectedOptions={false}
+                          value={ministriesFilterData.filter((jf) =>
+                            allSelections
+                              .filter((selection) => selection.type === 'ministry')
+                              .map((selection) => selection.value)
+                              .includes(jf.value),
+                          )}
+                          styles={{
+                            container: (css) => ({ ...css, width: '200px' }),
+                            menu: (styles) => ({ ...styles, width: 'max-content', minWidth: '100%' }),
+                          }}
+                          components={{
+                            ValueContainer: CustomValueContainer,
+                          }}
+                          classNamePrefix="react-select"
+                          isMulti
+                          aria-label="Ministries"
+                          placeholder="Ministries"
+                          options={ministriesFilterData}
+                          onChange={(selectedItems) => {
+                            const newValues = selectedItems.map((item) => item.value);
+                            if (newValues == null) return;
 
-                          newValues.forEach((val: any) => {
-                            if (!selectedMinistry.includes(val)) addSelection(val, 'ministry');
-                          });
-                          selectedMinistry.forEach((val) => {
-                            if (!newValues.includes(val)) removeSelection(val, 'ministry');
-                          });
-                        }}
-                      ></Select>
-                    </Form.Item>
-                  </Col>
+                            newValues.forEach((val: any) => {
+                              if (!selectedMinistry.includes(val)) addSelection(val, 'ministry');
+                            });
+                            selectedMinistry.forEach((val) => {
+                              if (!newValues.includes(val)) removeSelection(val, 'ministry');
+                            });
+                          }}
+                        ></Select>
+                      </Form.Item>
+                    </Col>
+                  )}
                   <Col data-testid="Job Family-filter" data-cy="Job Family-filter">
                     <AccessibleTreeSelect
                       width={'300px'}

@@ -113,6 +113,7 @@ const KnowledgeSkillsAbilities: React.FC<KnowledgeSkillsAbilitiesProps> = ({
           <Col>
             <WizardEditAddButton
               testId="add-knowledge-skills-ability-button"
+              isSignificant={false}
               onClick={() => {
                 handleAddNew();
               }}

@@ -51,7 +51,7 @@ const OptionalList: React.FC<OptionalListProps> = ({ useFormReturn, label, field
 
           <div>{field.text}</div>
           <div>
-            <Tooltip title={'Delete'}>
+            <Tooltip title={field.isCustom ? 'Delete' : 'Remove'}>
               <Button
                 className="remove-item-btn"
                 icon={<MinusCircleOutlined />}

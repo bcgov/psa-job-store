@@ -1,6 +1,6 @@
 // /* eslint-disable @typescript-eslint/no-explicit-any */
-// import { LeftOutlined, RightOutlined } from '@ant-design/icons';
-// import { Empty, Pagination, Skeleton, Tabs, Typography } from 'antd';
+// import { ExclamationCircleFilled, LeftOutlined, RightOutlined } from '@ant-design/icons';
+// import { Alert, Empty, Pagination, Skeleton, Tabs, Typography } from 'antd';
 // import { useEffect, useState } from 'react';
 // import { Link, useLocation, useParams, useSearchParams } from 'react-router-dom';
 // import useAnnounce from '../../../components/app/common/hooks/announce';
@@ -84,7 +84,19 @@
 
 //   const renderProfileList = (profiles: any[]) => (
 //     <>
-//       <div style={{ borderBottom: '1px solid #F0F0F0', padding: '0.5rem 1rem' }}>
+// {isSearchingOrFiltering && !isLoading && (
+//   <Alert
+//     role="info"
+//     data-testid="verification-warning-message"
+//     message=""
+//     description={<span>Some profiles may be hidden based on the details you have already provided.</span>}
+//     type="warning"
+//     showIcon
+//     icon={<ExclamationCircleFilled style={{ alignSelf: 'center' }} />}
+//     style={{ padding: '10px', borderRadius: 0 }}
+//   />
+// )}
+// <div style={{ borderBottom: '1px solid #F0F0F0', padding: '0.5rem 1rem' }}>
 //         <Text style={{ fontSize: '14px', display: 'block', padding: '10px 0' }}>
 //           {totalResults === 0
 //             ? '0 results'

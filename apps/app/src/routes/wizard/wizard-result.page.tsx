@@ -483,7 +483,7 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
           <WizardContentWrapper>
             {mode === 'readyToCreatePositionNumber' && (
               <ContentWrapper>
-                <Result icon={<CheckCircleOutlined />} title="The job profile is ready!" />
+                <Result icon={<CheckCircleOutlined />} title="Request is ready" />
 
                 <Row justify="center" style={{ padding: '0 1rem' }}>
                   <Col xs={24} md={24} lg={24} xl={14} xxl={18}>

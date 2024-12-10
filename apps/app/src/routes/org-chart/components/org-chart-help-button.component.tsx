@@ -1,4 +1,4 @@
-import { QuestionCircleFilled } from '@ant-design/icons';
+import { SettingOutlined } from '@ant-design/icons';
 import { Button, Menu } from 'antd';
 import AccessiblePopoverMenu from '../../../components/app/common/components/accessible-popover-menu';
 import './org-chart-help-button.component.css';
@@ -8,7 +8,7 @@ export const OrgChartHelpButton = () => {
     <>
       <AccessiblePopoverMenu
         padding={'0px'}
-        triggerButton={<Button type="link" icon={<QuestionCircleFilled />} />}
+        triggerButton={<Button type="link" icon={<SettingOutlined />} />}
         content={
           <Menu selectedKeys={[]} className="org-chart-help-button">
             <Menu.ItemGroup title="Org chart need updating?">
