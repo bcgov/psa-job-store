@@ -2,7 +2,6 @@ import { Args, Field, Int, Mutation, ObjectType, Parent, Query, ResolveField, Re
 import {
   Classification,
   JobProfile,
-  JobProfileBehaviouralCompetency,
   JobProfileJobFamily,
   JobProfileReportsTo,
   JobProfileStream,
@@ -218,10 +217,10 @@ export class JobProfileResolver {
     return this.jobProfileService.getJobProfilesDraftsClassifications();
   }
 
-  @ResolveField(() => JobProfileBehaviouralCompetency)
-  async behavioural_competencies(@Parent() { id, version }: JobProfile) {
-    return this.jobProfileService.getBehaviouralCompetencies(id, version);
-  }
+  // @ResolveField(() => JobProfileBehaviouralCompetency)
+  // async behavioural_competencies(@Parent() { id, version }: JobProfile) {
+  //   return this.jobProfileService.getBehaviouralCompetencies(id, version);
+  // }
 
   @Mutation(() => Int)
   @Roles('total-compensation')

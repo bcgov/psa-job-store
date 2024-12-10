@@ -1276,9 +1276,28 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
   }
 
   // Job Profiles, Behavioural Competencies and Reporting Relationships
+  const bcProfile194 = [45, 22, 36];
+  const bcProfile200 = [45, 41, 22];
+  const bcProfile208 = [45, 41, 22];
+  const bcProfile189 = [45, 35, 36];
+  const bcProfile210 = [17, 21, 23, 22];
+  const bcProfile212 = [17, 21, 23, 22];
+  const bcProfile247 = [17, 21, 23, 22, 42];
 
+  // fetch competencies and return them in a JSON structure
+  async function getCompetencies(ids) {
+    const competencies = await prisma.behaviouralCompetency.findMany({ where: { id: { in: ids } } });
+    return competencies.map((bc) => ({
+      id: bc.id,
+      name: bc.name,
+      description: bc.description,
+      category: bc.category,
+      type: bc.type,
+    }));
+  }
   const profile189: JobProfile = {
     id: 4,
+    behavioural_competencies: await getCompetencies(bcProfile189),
     optional_requirements: [],
     review_required: false,
     program_overview: '',
@@ -1386,6 +1405,7 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
 
   const profile194: JobProfile = {
     id: 1,
+    behavioural_competencies: await getCompetencies(bcProfile194),
     optional_requirements: [],
     review_required: false,
     program_overview: '',
@@ -1498,6 +1518,7 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
 
   const profile200: JobProfile = {
     id: 2,
+    behavioural_competencies: await getCompetencies(bcProfile200),
     optional_requirements: [],
     review_required: false,
     program_overview: '',
@@ -1640,6 +1661,7 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
 
   const profile208: JobProfile = {
     id: 3,
+    behavioural_competencies: await getCompetencies(bcProfile208),
     optional_requirements: [],
     review_required: false,
     program_overview: '',
@@ -1767,6 +1789,7 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
 
   const profile210: JobProfile = {
     id: 5,
+    behavioural_competencies: await getCompetencies(bcProfile210),
     optional_requirements: [],
     review_required: false,
     program_overview: '',
@@ -1909,6 +1932,7 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
 
   const profile212: JobProfile = {
     id: 6,
+    behavioural_competencies: await getCompetencies(bcProfile212),
     optional_requirements: [],
     review_required: false,
     program_overview: '',
@@ -2055,6 +2079,7 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
 
   const profile247: JobProfile = {
     id: 7,
+    behavioural_competencies: await getCompetencies(bcProfile247),
     review_required: false,
     program_overview: '',
     total_comp_create_form_misc: { employeeGroup: 'GEU' },
