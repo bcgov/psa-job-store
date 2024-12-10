@@ -125,7 +125,7 @@ export interface ScopeItem {
 export interface JobProfileModel {
   id: number;
   accountabilities: AccountabilitiesModel[];
-  behavioural_competencies: BehaviouralCompetencies[];
+  behavioural_competencies: BehaviouralCompetency[];
   classifications?: ClassificationModelWrapped[] | null;
   education: AccountabilitiesModel[];
   job_experience: AccountabilitiesModel[];
@@ -371,7 +371,7 @@ export interface CreateJobProfileInput {
     willingness_statements: string[];
     security_screenings: string[];
     total_comp_create_form_misc: any;
-    behavioural_competencies: BehaviouralCompetenciesInput;
+    behavioural_competencies: BehaviouralCompetency[];
     classifications: {
       create: ClassificationConnectInput[];
     };

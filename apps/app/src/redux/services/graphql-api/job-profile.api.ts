@@ -77,13 +77,7 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
                 accountabilities
                 education
                 job_experience
-                behavioural_competencies {
-                  behavioural_competency {
-                    id
-                    name
-                    description
-                  }
-                }
+                behavioural_competencies
                 classifications {
                   classification {
                     id
@@ -208,13 +202,7 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
                 accountabilities
                 education
                 job_experience
-                behavioural_competencies {
-                  behavioural_competency {
-                    id
-                    name
-                    description
-                  }
-                }
+                behavioural_competencies
                 classifications {
                   classification {
                     id
@@ -321,13 +309,7 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
                 accountabilities
                 education
                 job_experience
-                behavioural_competencies {
-                  behavioural_competency {
-                    id
-                    name
-                    description
-                  }
-                }
+                behavioural_competencies
                 classifications {
                   classification {
                     id
@@ -439,13 +421,7 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
                   id
                   name
                 }
-                behavioural_competencies {
-                  behavioural_competency {
-                    id
-                    name
-                    description
-                  }
-                }
+                behavioural_competencies
                 classifications {
                   classification {
                     id
@@ -549,13 +525,7 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
                   id
                   name
                 }
-                behavioural_competencies {
-                  behavioural_competency {
-                    id
-                    name
-                    description
-                  }
-                }
+                behavioural_competencies
                 classifications {
                   classification {
                     id
