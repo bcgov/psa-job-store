@@ -1,4 +1,5 @@
 import { Injectable, UnauthorizedException } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { updatedDiff } from 'deep-object-diff';
 import { User } from '../../../@generated/prisma-nestjs-graphql';
 import { guidToUuid } from '../../../utils/guid-to-uuid.util';
@@ -17,6 +18,7 @@ export class AuthService {
     private readonly peoplesoftService: PeoplesoftV2Service,
     private readonly prisma: PrismaService,
     private readonly userService: UserService,
+    private readonly configService: ConfigService,
   ) {}
 
   private async getPeoplesoftMetadata(idir: string) {
@@ -37,6 +39,27 @@ export class AuthService {
     return subordinates.length > 0;
   }
 
+  /**
+   * Validates and processes IDIR user information during authentication.
+   *
+   * This function performs the following operations:
+   * 1. Converts IDIR GUID to UUID format and checks for existing user
+   * 2. Constructs session user object with basic user information
+   * 3. Retrieves CRM metadata (account and contact IDs) if username exists
+   * 4. Fetches PeopleSoft metadata for the user
+   *
+   * For new users:
+   * - Checks for subordinates and assigns 'hiring-manager' role if applicable
+   * - Creates user record with metadata from CRM and PeopleSoft
+   *
+   * For existing users:
+   * - Detects changes in PeopleSoft metadata
+   * - Updates department associations based on organization/position changes
+   * - Updates user record with any changes to metadata or roles
+   *
+   * @param userinfo - Keycloak user information response containing IDIR details
+   * @returns Promise resolving to Express.User object with complete user profile
+   */
   private async validateIDIRUserinfo(userinfo: KeycloakUserinfoResponse): Promise<Express.User> {
     const id = guidToUuid(userinfo.idir_user_guid);
     const existingUser = await this.userService.getUser({ where: { id } });
@@ -87,7 +110,8 @@ export class AuthService {
           peoplesoft: peoplesoftMetadata,
         };
       }
-    } else {
+    } else if (this.configService.get('E2E_TESTING') !== 'true') {
+      // If we're e2e testing, use the data from the database as is without updates
       // Check for differences between `existingUser.metadata.peoplesoft` and peoplesoftMetadata
       const metadataUpdates: Record<string, any> = this.getPeoplesoftMetadataUpdates(existingUser, peoplesoftMetadata);
 
@@ -148,24 +172,41 @@ export class AuthService {
 
       const { name, email, username, roles, metadata } = sessionUser;
 
-      await this.prisma.user.upsert({
-        where: { id },
-        create: {
-          id,
-          name,
-          email,
-          username,
-          roles,
-          metadata,
-        },
-        update: {
-          name,
-          email,
-          username,
-          roles,
-          metadata,
-        },
-      });
+      // if E2E_TESTING is true, do not update the database
+      // if user exists, don't update, if user doesn't exist, create
+      if (this.configService.get('E2E_TESTING') === 'true') {
+        if (!existingUser) {
+          await this.prisma.user.create({
+            data: {
+              id,
+              name,
+              email,
+              username,
+              roles,
+              metadata,
+            },
+          });
+        }
+      } else {
+        await this.prisma.user.upsert({
+          where: { id },
+          create: {
+            id,
+            name,
+            email,
+            username,
+            roles,
+            metadata,
+          },
+          update: {
+            name,
+            email,
+            username,
+            roles,
+            metadata,
+          },
+        });
+      }
     }
 
     return sessionUser;
