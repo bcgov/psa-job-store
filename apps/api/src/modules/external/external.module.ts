@@ -104,8 +104,8 @@ import { PositionService } from './position.service';
       inject: [ConfigService, HttpService, PrismaService],
     },
     // PeoplesoftV2Service,
-    SearchService,
+    // SearchService,
   ],
-  exports: [SearchService, PeoplesoftService, PeoplesoftV2Service, CrmService], // Export PeoplesoftService and CrmService
+  exports: [PeoplesoftService, PeoplesoftV2Service, CrmService],
 })
 export class ExternalModule {}

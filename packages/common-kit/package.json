@@ -19,7 +19,7 @@
     "build": "tsc && vite build",
     "dev": "vite",
     "preview": "vite preview",
-    "test": "vitest"
+    "test": "jest"
   },
   "dependencies": {
     "@dagrejs/dagre": "^1.1.4",

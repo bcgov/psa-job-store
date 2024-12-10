@@ -79,7 +79,7 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
           contact_id: 231166,
         },
         org_chart: {
-          department_ids: ['112-0074', '123-4567'],
+          department_ids: ['112-0074', '123-4567', 'DEPT03'],
         },
         peoplesoft: {
           employee_id: '188147',
@@ -106,7 +106,7 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
           contact_id: 231166,
         },
         org_chart: {
-          department_ids: ['112-0074', '123-4567'],
+          department_ids: ['112-0074', '123-4567', 'DEPT03'],
         },
         peoplesoft: {
           employee_id: '188148',
@@ -118,6 +118,33 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
     },
     update: {
       name: 'Struk, Alex CITZ:EX',
+    },
+  });
+
+  await prisma.user.upsert({
+    where: { id: '691c22b1-6c96-4d1a-8209-596b1811ca45' },
+    create: {
+      id: '691c22b1-6c96-4d1a-8209-596b1811ca45',
+      name: 'Morgan, Hannah CITZ:EX',
+      roles: ['hiring-manager'],
+      metadata: {
+        crm: {
+          account_id: null,
+          contact_id: 231166,
+        },
+        org_chart: {
+          department_ids: ['112-0074', '123-4567', 'DEPT03'],
+        },
+        peoplesoft: {
+          employee_id: '188149',
+          position_id: '00132139',
+          department_id: '112-0074',
+          organization_id: 'BC112',
+        },
+      },
+    },
+    update: {
+      name: 'Morgan, Hannah CITZ:EX',
     },
   });
 
@@ -959,6 +986,9 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
       { id: 19, name: 'Students/Internships' },
       { id: 20, name: 'Trades and Operational' },
       { id: 21, name: 'Veterinary Services' },
+      { id: 22, name: 'Information Management' },
+      { id: 23, name: 'Information Technology and Digital Talent' },
+      { id: 24, name: 'Legal Counsel' },
     ],
   });
 
@@ -1050,6 +1080,51 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
       { id: 84, job_family_id: 19, name: 'Work-able' },
       { id: 85, job_family_id: 19, name: 'Youth Employment Program' },
       { id: 86, job_family_id: 21, name: 'Veterinarians' },
+      { id: 87, job_family_id: 22, name: 'Archival' },
+      { id: 88, job_family_id: 23, name: 'Business Analysis' },
+      { id: 89, job_family_id: 22, name: 'Data Management' },
+      { id: 90, job_family_id: 22, name: 'Records Management' },
+      { id: 91, job_family_id: 23, name: 'Data/Database Administration' },
+      { id: 92, job_family_id: 23, name: 'Digital Talent - Dev Ops' },
+      { id: 93, job_family_id: 23, name: 'Digital Talent - Developers' },
+      { id: 94, job_family_id: 23, name: 'Digital Talent - Product Managers' },
+      { id: 95, job_family_id: 23, name: 'Digital Talent - Scrum Masters' },
+      { id: 96, job_family_id: 23, name: 'Digital Talent - Service Design' },
+      { id: 97, job_family_id: 23, name: 'Digital Talent - Site Reliability' },
+      { id: 98, job_family_id: 23, name: 'Digital Talent - User Experience' },
+      { id: 99, job_family_id: 23, name: 'Engineering/Architecture' },
+      { id: 100, job_family_id: 23, name: 'Governance' },
+      { id: 101, job_family_id: 23, name: 'Helpdesk' },
+      { id: 102, job_family_id: 23, name: 'Management' },
+      { id: 103, job_family_id: 23, name: 'Network' },
+      { id: 104, job_family_id: 23, name: 'Programming and Software' },
+      { id: 105, job_family_id: 23, name: 'Security' },
+      { id: 106, job_family_id: 23, name: 'Service Management' },
+      { id: 107, job_family_id: 23, name: 'Technical Analysis' },
+      { id: 108, job_family_id: 23, name: 'Web Design' },
+      { id: 109, job_family_id: 22, name: 'Freedom of Information (FOI)' },
+      { id: 110, job_family_id: 1, name: 'Customer Service' },
+      { id: 111, job_family_id: 3, name: 'Administrative Compliance' },
+      { id: 112, job_family_id: 10, name: 'Diversity, Equity and Inclusion' },
+      { id: 113, job_family_id: 10, name: 'Employee Relations' },
+      { id: 114, job_family_id: 10, name: 'HR Policy' },
+      { id: 115, job_family_id: 10, name: 'Job Classification' },
+      { id: 116, job_family_id: 10, name: 'Labour Relations' },
+      { id: 117, job_family_id: 10, name: 'Leadership Development/Coaching' },
+      { id: 118, job_family_id: 10, name: 'Organizational Development' },
+      { id: 119, job_family_id: 10, name: 'Performance Management' },
+      { id: 120, job_family_id: 10, name: 'Workplace Health and Safety' },
+      { id: 121, job_family_id: 11, name: 'Consultation' },
+      { id: 122, job_family_id: 11, name: 'Issues Management' },
+      { id: 123, job_family_id: 11, name: 'Negotiation' },
+      { id: 124, job_family_id: 15, name: 'Change Management' },
+      { id: 125, job_family_id: 17, name: 'Forestry' },
+      { id: 126, job_family_id: 17, name: 'Planning' },
+      { id: 127, job_family_id: 17, name: 'Research' },
+      { id: 128, job_family_id: 24, name: 'Justice Services' },
+      { id: 129, job_family_id: 24, name: 'Legal Services' },
+      { id: 130, job_family_id: 24, name: 'Other' },
+      { id: 131, job_family_id: 24, name: 'Prosecution Services' },
     ],
   });
 
@@ -1108,15 +1183,97 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
     ],
   });
 
-  await prisma.employeeGroup.createMany({
+  const employeeGroups = {
     data: [
       { id: 'GEU', name: "BC General Employees' Union" },
       { id: 'MGT', name: 'Management' },
       { id: 'OEX', name: 'Schedule A' },
       { id: 'PEA', name: 'Professional Employees Association' },
       { id: '805G', name: '805G' },
+      { id: 'LBS', name: 'LBS' },
+      { id: 'VAR', name: 'VAR' },
+      { id: 'CEB', name: 'CEB' },
+      { id: 'TIC', name: 'TIC' },
+      { id: 'LAZ', name: 'LAZ' },
+      { id: 'OPP', name: 'OPP' },
+      { id: 'INU', name: 'INU' },
+      { id: 'NUR', name: 'Nursing' },
+      { id: 'CA', name: 'CA' },
+      { id: 'OPZ', name: 'OPZ' },
+      { id: 'OPB', name: 'OPB' },
+      { id: 'TIN', name: 'TIN' },
+      { id: 'LKH', name: 'LKH' },
+      { id: 'OPQ', name: 'OPQ' },
+      { id: 'OPC', name: 'OPC' },
+      { id: 'LAF', name: 'LAF' },
+      { id: 'PL', name: 'PL' },
+      { id: 'LIN', name: 'LIN' },
+      { id: 'OPF', name: 'OPF' },
+      { id: 'TEK', name: 'TEK' },
+      { id: 'PLC', name: 'PLC' },
+      { id: 'LA', name: 'LA' },
+      { id: 'TEF', name: 'TEF' },
+      { id: 'LPB', name: 'LPB' },
+      { id: 'OP', name: 'OP' },
+      { id: 'CAP', name: 'CAP' },
+      { id: 'CAB', name: 'CAB' },
+      { id: 'CAK', name: 'CAK' },
+      { id: 'OIN', name: 'OIN' },
+      { id: 'IRI', name: 'IRI' },
+      { id: 'PAI', name: 'PAI' },
+      { id: 'IR', name: 'IR' },
+      { id: 'INBC', name: 'INBC' },
+      { id: 'LAQ', name: 'LAQ' },
+      { id: 'TEQ', name: 'TEQ' },
+      { id: 'PLH', name: 'PLH' },
+      { id: 'OPK', name: 'OPK' },
+      { id: 'CE', name: 'CE' },
+      { id: 'LLM', name: 'LLM' },
+      { id: 'FSA', name: 'FSA' },
+      { id: 'OF', name: 'OF' },
+      { id: 'LAB', name: 'LAB' },
+      { id: 'CRN', name: 'CRN' },
+      { id: 'SH', name: 'SH' },
+      { id: 'LAP', name: 'LAP' },
+      { id: 'BCU', name: 'BCU' },
+      { id: 'PHY', name: 'PHY' },
+      { id: 'QP', name: 'QP' },
+      { id: 'NEX', name: 'NEX' },
+      { id: 'LGL', name: 'LGL' },
+      { id: 'MLA', name: 'MLA' },
+      { id: 'TS', name: 'TS' },
+      { id: '805M', name: '805M' },
+      { id: 'POI', name: 'POI' },
+      { id: '805N', name: '805N' },
+      { id: 'SAT', name: 'SAT' },
+      { id: 'SGEU', name: 'SGEU' },
+      { id: '805P', name: '805P' },
+      { id: 'TOEX', name: 'TOEX' },
+      { id: 'TMGT', name: 'TMGT' },
+      { id: 'AOEX', name: 'AOEX' },
+      { id: 'AMGT', name: 'AMGT' },
+      { id: 'TGEU', name: 'TGEU' },
+      { id: 'HEA', name: 'HEA' },
+      { id: 'PBC', name: 'PBC' },
+      { id: 'PAR', name: 'PAR' },
+      { id: 'CLU', name: 'CLU' },
+      { id: 'SYS', name: 'SYS' },
+      { id: 'SRS', name: 'SRS' },
+      { id: 'QPA', name: 'QPA' },
+      { id: '', name: '' },
     ],
-  });
+  };
+
+  for (const group of employeeGroups.data) {
+    try {
+      // console.log('Creating group:', group);
+      await prisma.employeeGroup.create({
+        data: group,
+      });
+    } catch (error) {
+      console.error('Failed to create group:', group.id, error);
+    }
+  }
 
   // Job Profiles, Behavioural Competencies and Reporting Relationships
 
@@ -2072,10 +2229,39 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
     views: 0,
   };
 
-  const jobProfiles = [profile189, profile194, profile200, profile208, profile210, profile212, profile247];
+  let other_profiles: any[] = [] as any[];
+  try {
+    const path = process.env.NODE_ENV == 'development' ? '../../other-profiles.js' : '/tmp/log/other-profiles.js';
+    other_profiles = (await import(path)).otherProfiles as unknown as any[];
+    // Use the imported data
+  } catch (error) {
+    // console.error('Error importing other profiles: ', error);
+  }
+
+  // const fs = require('node:fs');
+  // const content = JSON.stringify(otherProfiles);
+
+  // // Asynchronous
+  // fs.writeFile('output.txt', content, (err) => {
+  //   if (err) {
+  //     console.error(err);
+  //     return;
+  //   }
+  //   // File written successfully
+  // });
+
+  console.log('inserting profiles: ', other_profiles.length);
+  const jobProfiles =
+    other_profiles.length > 0
+      ? other_profiles
+      : [profile189, profile194, profile200, profile208, profile210, profile212, profile247];
+
+  // await prisma.jobProfile.createMany({ data: jobProfiles });
+
   for await (const profile of jobProfiles) {
     const { id, version, ...rest } = profile;
 
+    // console.log('inserting profile id: ', id);
     await prisma.jobProfile.upsert({
       where: { id_version: { id, version } },
       create: {
@@ -2088,6 +2274,9 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
       },
     });
   }
+
+  other_profiles.length = 0;
+  jobProfiles.length = 0;
 
   // await prisma.jobProfile.createMany({
   //   data: jobProfiles,
@@ -2109,7 +2298,108 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
 
   await resetAutoIncrement();
 
-  const jobProfileClassifications = [
+  let other_classifications: any[] = [] as any[];
+  try {
+    console.log('importing other classifications1');
+    const path =
+      process.env.NODE_ENV == 'development' ? '../../other-classifications.js' : '/tmp/log/other-classifications.js';
+
+    other_classifications = (await import(path)).otherClassifications1 as unknown as any[];
+    // await prisma.classification.createMany({
+    //   data: other_classifications,
+    // });
+
+    for (const classification of other_classifications) {
+      try {
+        const created = await prisma.classification.create({
+          data: classification,
+        });
+        // console.log(`Created classification: ${JSON.stringify(created)}`);
+      } catch (error) {
+        console.error(`Failed to create classification: ${JSON.stringify(classification)}`);
+        console.error(error);
+      }
+    }
+
+    console.log('importing other classifications2');
+
+    other_classifications = (await import(path)).otherClassifications2 as unknown as any[];
+    // await prisma.classification.createMany({
+    //   data: other_classifications,
+    // });
+    for (const classification of other_classifications) {
+      try {
+        const created = await prisma.classification.create({
+          data: classification,
+        });
+        // console.log(`Created classification: ${JSON.stringify(created)}`);
+      } catch (error) {
+        console.error(`Failed to create classification: ${JSON.stringify(classification)}`);
+        console.error(error);
+      }
+    }
+
+    console.log('importing other classifications3');
+
+    other_classifications = (await import(path)).otherClassifications3 as unknown as any[];
+    // await prisma.classification.createMany({
+    //   data: other_classifications,
+    // });
+    for (const classification of other_classifications) {
+      try {
+        const created = await prisma.classification.create({
+          data: classification,
+        });
+        // console.log(`Created classification: ${JSON.stringify(created)}`);
+      } catch (error) {
+        console.error(`Failed to create classification: ${JSON.stringify(classification)}`);
+        console.error(error);
+      }
+    }
+
+    // Use the imported data
+  } catch (error) {
+    // console.error('Error importing other classifications: ', error);
+
+    const classifications = [
+      {
+        id: 'CLS01',
+        peoplesoft_id: 'PSFTCLASS01',
+        code: 'ENG',
+        name: 'Engineer',
+        employee_group_id: 'GEU', // Ensure this matches an existing EmployeeGroup ID
+        grade: 'G1',
+        effective_status: 'Active',
+        effective_date: new Date('2022-01-01'),
+      },
+      {
+        id: 'CLS02',
+        peoplesoft_id: 'PSFTCLASS02',
+        code: 'PRJMGR',
+        name: 'Project Manager',
+        employee_group_id: 'GEU', // Ensure this matches an existing EmployeeGroup ID
+        grade: 'G2',
+        effective_status: 'Active',
+        effective_date: new Date('2022-01-01'),
+      },
+      {
+        id: 'CLS03',
+        peoplesoft_id: 'PSFTCLASS03',
+        code: 'UXDSGN',
+        name: 'UX Designer',
+        employee_group_id: 'GEU', // Ensure this matches an existing EmployeeGroup ID
+        grade: 'G3',
+        effective_status: 'Active',
+        effective_date: new Date('2022-01-01'),
+      },
+    ];
+
+    await prisma.classification.createMany({
+      data: classifications,
+    });
+  }
+
+  let jobProfileClassifications = [
     {
       classification_id: '508011',
       classification_employee_group_id: 'GEU',
@@ -2199,195 +2489,291 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
     },
   };
 
-  for await (const jobProfileClassification of jobProfileClassifications) {
-    const data = classificationData[jobProfileClassification.classification_id] || {
-      code: '',
-      name: '',
-      grade: '',
-      effective_status: '',
-      effective_date: new Date('1900-01-01'),
-    };
+  try {
+    for await (const jobProfileClassification of jobProfileClassifications) {
+      const data = classificationData[jobProfileClassification.classification_id] || {
+        code: '',
+        name: '',
+        grade: '',
+        effective_status: '',
+        effective_date: new Date('1900-01-01'),
+      };
 
-    await prisma.classification.upsert({
-      where: {
-        id_employee_group_id_peoplesoft_id: {
-          id: jobProfileClassification.classification_id,
-          employee_group_id: jobProfileClassification.classification_employee_group_id,
-          peoplesoft_id: jobProfileClassification.classification_peoplesoft_id,
+      await prisma.classification.upsert({
+        where: {
+          id_employee_group_id_peoplesoft_id: {
+            id: jobProfileClassification.classification_id,
+            employee_group_id: jobProfileClassification.classification_employee_group_id,
+            peoplesoft_id: jobProfileClassification.classification_peoplesoft_id,
+          },
         },
-      },
-      create: {
-        id: jobProfileClassification.classification_id,
-        peoplesoft_id: jobProfileClassification.classification_peoplesoft_id,
-        ...data,
-        employee_group_id: jobProfileClassification.classification_employee_group_id,
-      },
-      update: {},
-    });
+        create: {
+          id: jobProfileClassification.classification_id,
+          peoplesoft_id: jobProfileClassification.classification_peoplesoft_id,
+          ...data,
+          employee_group_id: jobProfileClassification.classification_employee_group_id,
+        },
+        update: {},
+      });
+    }
+  } catch (e) {
+    console.log('ERROR: failed to create classifications');
   }
 
-  await prisma.jobProfileClassification.createMany({
-    data: jobProfileClassifications,
-  });
+  try {
+    const path =
+      process.env.NODE_ENV == 'development'
+        ? '../../other-job-profile-classifications.js'
+        : '/tmp/log/other-job-profile-classifications.js';
+    jobProfileClassifications = (await import(path)).otherProfileClassifications as unknown as any[];
+    // Use the imported data
+  } catch (error) {
+    // console.error('Error importing other jobProfileClassifications: ', error);
+  }
 
-  await prisma.jobProfileJobFamilyLink.createMany({
-    data: [
-      { jobProfileId: profile189.id, jobProfileVersion: profile189.version, jobFamilyId: 7 },
-      { jobProfileId: profile194.id, jobProfileVersion: profile194.version, jobFamilyId: 1 },
-      { jobProfileId: profile200.id, jobProfileVersion: profile200.version, jobFamilyId: 1 },
-      { jobProfileId: profile208.id, jobProfileVersion: profile208.version, jobFamilyId: 1 },
-      { jobProfileId: profile210.id, jobProfileVersion: profile210.version, jobFamilyId: 7 },
-      { jobProfileId: profile212.id, jobProfileVersion: profile212.version, jobFamilyId: 1 },
-      // there's a mismatch with the stream, it's ok (if it's 1 it will be in admin and education verification won't trigger)
-      { jobProfileId: profile247.id, jobProfileVersion: profile247.version, jobFamilyId: 7 },
-    ],
-  });
+  // try {
+  for (const classification of jobProfileClassifications) {
+    try {
+      await prisma.jobProfileClassification.create({
+        data: classification,
+      });
+      // console.log(`Successfully created: ${classification.name}`);
+    } catch (error) {
+      console.error(`Failed to create:`, classification, error);
+    }
+  }
+  // } catch (e) {
+  //   console.log('ERROR: failed to create jobProfileClassification: ', e);
+  // }
 
-  await prisma.jobProfileStreamLink.createMany({
-    data: [
-      { jobProfileId: profile189.id, jobProfileVersion: profile189.version, streamId: 33 },
-      { jobProfileId: profile194.id, jobProfileVersion: profile194.version, streamId: 1 },
-      { jobProfileId: profile200.id, jobProfileVersion: profile200.version, streamId: 1 },
-      { jobProfileId: profile208.id, jobProfileVersion: profile208.version, streamId: 1 },
-      { jobProfileId: profile210.id, jobProfileVersion: profile210.version, streamId: 33 },
-      { jobProfileId: profile212.id, jobProfileVersion: profile212.version, streamId: 1 },
-      { jobProfileId: profile247.id, jobProfileVersion: profile247.version, streamId: 1 },
-    ],
-  });
+  try {
+    const path =
+      process.env.NODE_ENV == 'development'
+        ? '../../other-job-profile-family-link.js'
+        : '/tmp/log/other-job-profile-family-link.js';
+    const otherJobProfileFamilyLink = (await import(path)).otherJobProfileFamilyLink as unknown as any[];
+    for (const familyLink of otherJobProfileFamilyLink) {
+      try {
+        await prisma.jobProfileJobFamilyLink.create({
+          data: familyLink,
+        });
+      } catch (error) {
+        console.error(`Failed to create job family link for:`, familyLink, error);
+      }
+    }
+    // Use the imported data
+  } catch (error) {
+    // console.error('Error importing other otherJobProfileFamilyLink: ', error);
 
-  await prisma.jobProfileBehaviouralCompetency.createMany({
-    data: [
-      {
-        behavioural_competency_id: 45,
-        job_profile_id: profile194.id,
-        job_profile_version: profile194.version,
-      },
-      {
-        behavioural_competency_id: 22,
-        job_profile_id: profile194.id,
-        job_profile_version: profile194.version,
-      },
-      {
-        behavioural_competency_id: 36,
-        job_profile_id: profile194.id,
-        job_profile_version: profile194.version,
-      },
-      {
-        behavioural_competency_id: 45,
-        job_profile_id: profile200.id,
-        job_profile_version: profile200.version,
-      },
-      {
-        behavioural_competency_id: 41,
-        job_profile_id: profile200.id,
-        job_profile_version: profile200.version,
-      },
-      {
-        behavioural_competency_id: 22,
-        job_profile_id: profile200.id,
-        job_profile_version: profile200.version,
-      },
-      {
-        behavioural_competency_id: 45,
-        job_profile_id: profile208.id,
-        job_profile_version: profile208.version,
-      },
-      {
-        behavioural_competency_id: 41,
-        job_profile_id: profile208.id,
-        job_profile_version: profile208.version,
-      },
-      {
-        behavioural_competency_id: 22,
-        job_profile_id: profile208.id,
-        job_profile_version: profile208.version,
-      },
-      {
-        behavioural_competency_id: 45,
-        job_profile_id: profile189.id,
-        job_profile_version: profile189.version,
-      },
-      {
-        behavioural_competency_id: 35,
-        job_profile_id: profile189.id,
-        job_profile_version: profile189.version,
-      },
-      {
-        behavioural_competency_id: 36,
-        job_profile_id: profile189.id,
-        job_profile_version: profile189.version,
-      },
-      {
-        behavioural_competency_id: 17,
-        job_profile_id: profile210.id,
-        job_profile_version: profile210.version,
-      },
-      {
-        behavioural_competency_id: 21,
-        job_profile_id: profile210.id,
-        job_profile_version: profile210.version,
-      },
-      {
-        behavioural_competency_id: 23,
-        job_profile_id: profile210.id,
-        job_profile_version: profile210.version,
-      },
-      {
-        behavioural_competency_id: 22,
-        job_profile_id: profile210.id,
-        job_profile_version: profile210.version,
-      },
-      // {
-      //   behavioural_competency_id: 22,
-      //   job_profile_id: profile212.id,
-      // },
-      {
-        behavioural_competency_id: 17,
-        job_profile_id: profile212.id,
-        job_profile_version: profile212.version,
-      },
-      {
-        behavioural_competency_id: 21,
-        job_profile_id: profile212.id,
-        job_profile_version: profile212.version,
-      },
-      {
-        behavioural_competency_id: 23,
-        job_profile_id: profile212.id,
-        job_profile_version: profile212.version,
-      },
-      {
-        behavioural_competency_id: 22,
-        job_profile_id: profile212.id,
-        job_profile_version: profile212.version,
-      },
-      {
-        behavioural_competency_id: 17,
-        job_profile_id: profile247.id,
-        job_profile_version: profile247.version,
-      },
-      {
-        behavioural_competency_id: 21,
-        job_profile_id: profile247.id,
-        job_profile_version: profile247.version,
-      },
-      {
-        behavioural_competency_id: 23,
-        job_profile_id: profile247.id,
-        job_profile_version: profile247.version,
-      },
-      {
-        behavioural_competency_id: 22,
-        job_profile_id: profile247.id,
-        job_profile_version: profile247.version,
-      },
-      {
-        behavioural_competency_id: 42,
-        job_profile_id: profile247.id,
-        job_profile_version: profile247.version,
-      },
-    ],
-  });
+    try {
+      await prisma.jobProfileJobFamilyLink.createMany({
+        data: [
+          { jobProfileId: profile189.id, jobProfileVersion: profile189.version, jobFamilyId: 7 },
+          { jobProfileId: profile194.id, jobProfileVersion: profile194.version, jobFamilyId: 1 },
+          { jobProfileId: profile200.id, jobProfileVersion: profile200.version, jobFamilyId: 1 },
+          { jobProfileId: profile208.id, jobProfileVersion: profile208.version, jobFamilyId: 1 },
+          { jobProfileId: profile210.id, jobProfileVersion: profile210.version, jobFamilyId: 7 },
+          { jobProfileId: profile212.id, jobProfileVersion: profile212.version, jobFamilyId: 1 },
+          // there's a mismatch with the stream, it's ok (if it's 1 it will be in admin and education verification won't trigger)
+          { jobProfileId: profile247.id, jobProfileVersion: profile247.version, jobFamilyId: 7 },
+        ],
+      });
+    } catch (e) {
+      console.log('ERROR: failed to create jobProfileJobFamilyLink');
+    }
+  }
+
+  try {
+    const path =
+      process.env.NODE_ENV == 'development'
+        ? '../../other-job-profile-stream-link.js'
+        : '/tmp/log/other-job-profile-stream-link.js';
+    const otherJobProfileStreamLink = (await import(path)).otherJobProfileStreamLink as unknown as any[];
+    for (const streamLink of otherJobProfileStreamLink) {
+      try {
+        await prisma.jobProfileStreamLink.create({
+          data: streamLink,
+        });
+      } catch (error) {
+        console.error(`Failed to create stream link for:`, streamLink, error);
+      }
+    }
+    // Use the imported data
+  } catch (error) {
+    // console.error('Error importing other otherJobProfileStreamLink: ', error);
+
+    try {
+      await prisma.jobProfileStreamLink.createMany({
+        data: [
+          { jobProfileId: profile189.id, jobProfileVersion: profile189.version, streamId: 33 },
+          { jobProfileId: profile194.id, jobProfileVersion: profile194.version, streamId: 1 },
+          { jobProfileId: profile200.id, jobProfileVersion: profile200.version, streamId: 1 },
+          { jobProfileId: profile208.id, jobProfileVersion: profile208.version, streamId: 1 },
+          { jobProfileId: profile210.id, jobProfileVersion: profile210.version, streamId: 33 },
+          { jobProfileId: profile212.id, jobProfileVersion: profile212.version, streamId: 1 },
+          { jobProfileId: profile247.id, jobProfileVersion: profile247.version, streamId: 1 },
+        ],
+      });
+    } catch (e) {
+      console.log('ERROR: failed to create jobProfileStreamLink');
+    }
+  }
+
+  try {
+    const path =
+      process.env.NODE_ENV == 'development' ? '../../other-job-profile-bh.js' : '/tmp/log/other-job-profile-bh.js';
+    const otherJobProfileBh = (await import(path)).otherJobProfileBh as unknown as any[];
+    for (const competency of otherJobProfileBh) {
+      try {
+        await prisma.jobProfileBehaviouralCompetency.create({
+          data: competency,
+        });
+      } catch (error) {
+        console.error(`Failed to create behavioural competency for:`, competency, error);
+      }
+    }
+    // Use the imported data
+  } catch (error) {
+    // console.error('Error importing other otherJobProfileBh: ', error);
+
+    try {
+      await prisma.jobProfileBehaviouralCompetency.createMany({
+        data: [
+          {
+            behavioural_competency_id: 45,
+            job_profile_id: profile194.id,
+            job_profile_version: profile194.version,
+          },
+          {
+            behavioural_competency_id: 22,
+            job_profile_id: profile194.id,
+            job_profile_version: profile194.version,
+          },
+          {
+            behavioural_competency_id: 36,
+            job_profile_id: profile194.id,
+            job_profile_version: profile194.version,
+          },
+          {
+            behavioural_competency_id: 45,
+            job_profile_id: profile200.id,
+            job_profile_version: profile200.version,
+          },
+          {
+            behavioural_competency_id: 41,
+            job_profile_id: profile200.id,
+            job_profile_version: profile200.version,
+          },
+          {
+            behavioural_competency_id: 22,
+            job_profile_id: profile200.id,
+            job_profile_version: profile200.version,
+          },
+          {
+            behavioural_competency_id: 45,
+            job_profile_id: profile208.id,
+            job_profile_version: profile208.version,
+          },
+          {
+            behavioural_competency_id: 41,
+            job_profile_id: profile208.id,
+            job_profile_version: profile208.version,
+          },
+          {
+            behavioural_competency_id: 22,
+            job_profile_id: profile208.id,
+            job_profile_version: profile208.version,
+          },
+          {
+            behavioural_competency_id: 45,
+            job_profile_id: profile189.id,
+            job_profile_version: profile189.version,
+          },
+          {
+            behavioural_competency_id: 35,
+            job_profile_id: profile189.id,
+            job_profile_version: profile189.version,
+          },
+          {
+            behavioural_competency_id: 36,
+            job_profile_id: profile189.id,
+            job_profile_version: profile189.version,
+          },
+          {
+            behavioural_competency_id: 17,
+            job_profile_id: profile210.id,
+            job_profile_version: profile210.version,
+          },
+          {
+            behavioural_competency_id: 21,
+            job_profile_id: profile210.id,
+            job_profile_version: profile210.version,
+          },
+          {
+            behavioural_competency_id: 23,
+            job_profile_id: profile210.id,
+            job_profile_version: profile210.version,
+          },
+          {
+            behavioural_competency_id: 22,
+            job_profile_id: profile210.id,
+            job_profile_version: profile210.version,
+          },
+          // {
+          //   behavioural_competency_id: 22,
+          //   job_profile_id: profile212.id,
+          // },
+          {
+            behavioural_competency_id: 17,
+            job_profile_id: profile212.id,
+            job_profile_version: profile212.version,
+          },
+          {
+            behavioural_competency_id: 21,
+            job_profile_id: profile212.id,
+            job_profile_version: profile212.version,
+          },
+          {
+            behavioural_competency_id: 23,
+            job_profile_id: profile212.id,
+            job_profile_version: profile212.version,
+          },
+          {
+            behavioural_competency_id: 22,
+            job_profile_id: profile212.id,
+            job_profile_version: profile212.version,
+          },
+          {
+            behavioural_competency_id: 17,
+            job_profile_id: profile247.id,
+            job_profile_version: profile247.version,
+          },
+          {
+            behavioural_competency_id: 21,
+            job_profile_id: profile247.id,
+            job_profile_version: profile247.version,
+          },
+          {
+            behavioural_competency_id: 23,
+            job_profile_id: profile247.id,
+            job_profile_version: profile247.version,
+          },
+          {
+            behavioural_competency_id: 22,
+            job_profile_id: profile247.id,
+            job_profile_version: profile247.version,
+          },
+          {
+            behavioural_competency_id: 42,
+            job_profile_id: profile247.id,
+            job_profile_version: profile247.version,
+          },
+        ],
+      });
+    } catch (e) {
+      console.log('ERROR: failed to create jobProfileBehaviouralCompetency');
+    }
+  }
 
   const jobProfileReportsTo = [
     {
@@ -2732,60 +3118,82 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
     },
   };
 
-  for await (const reportsTo of jobProfileReportsTo) {
-    const {
-      classification_id,
-      classification_employee_group_id,
-      classification_peoplesoft_id,
-      job_profile_id,
-      job_profile_version,
-    } = reportsTo;
+  try {
+    const path =
+      process.env.NODE_ENV == 'development' ? '../../job-profile-reports-to.js' : '/tmp/log/job-profile-reports-to.js';
+    const otherJobProfileReportsTo = (await import(path)).otherJobProfileReportsTo as unknown as any[];
+    for (const reportsTo of otherJobProfileReportsTo) {
+      try {
+        await prisma.jobProfileReportsTo.create({
+          data: reportsTo,
+        });
+      } catch (error) {
+        console.error(`Failed to create reports-to record for ID:`, reportsTo, error);
+      }
+    }
+    // Use the imported data
+  } catch (error) {
+    // console.error('Error importing other otherJobProfileReportsTo: ', error);
 
-    const data = classificationData2[classification_id] || {
-      code: '',
-      name: '',
-      grade: '',
-      effective_status: '',
-      effective_date: new Date('1900-01-01'),
-    };
+    try {
+      for await (const reportsTo of jobProfileReportsTo) {
+        const {
+          classification_id,
+          classification_employee_group_id,
+          classification_peoplesoft_id,
+          job_profile_id,
+          job_profile_version,
+        } = reportsTo;
 
-    await prisma.classification.upsert({
-      where: {
-        id_employee_group_id_peoplesoft_id: {
-          id: classification_id,
-          employee_group_id: classification_employee_group_id,
-          peoplesoft_id: classification_peoplesoft_id,
-        },
-      },
-      create: {
-        id: classification_id,
-        peoplesoft_id: classification_peoplesoft_id,
-        ...data,
-        employee_group_id: classification_employee_group_id,
-      },
-      update: {},
-    });
+        const data = classificationData2[classification_id] || {
+          code: '',
+          name: '',
+          grade: '',
+          effective_status: '',
+          effective_date: new Date('1900-01-01'),
+        };
 
-    await prisma.jobProfileReportsTo.upsert({
-      where: {
-        job_profile_id_job_profile_version_classification_id_classification_employee_group_id_classification_peoplesoft_id:
-          {
-            job_profile_id,
-            job_profile_version,
+        await prisma.classification.upsert({
+          where: {
+            id_employee_group_id_peoplesoft_id: {
+              id: classification_id,
+              employee_group_id: classification_employee_group_id,
+              peoplesoft_id: classification_peoplesoft_id,
+            },
+          },
+          create: {
+            id: classification_id,
+            peoplesoft_id: classification_peoplesoft_id,
+            ...data,
+            employee_group_id: classification_employee_group_id,
+          },
+          update: {},
+        });
+
+        await prisma.jobProfileReportsTo.upsert({
+          where: {
+            job_profile_id_job_profile_version_classification_id_classification_employee_group_id_classification_peoplesoft_id:
+              {
+                job_profile_id,
+                job_profile_version,
+                classification_id,
+                classification_employee_group_id,
+                classification_peoplesoft_id,
+              },
+          },
+          create: {
             classification_id,
             classification_employee_group_id,
             classification_peoplesoft_id,
+            job_profile_id,
+            job_profile_version,
           },
-      },
-      create: {
-        classification_id,
-        classification_employee_group_id,
-        classification_peoplesoft_id,
-        job_profile_id,
-        job_profile_version,
-      },
-      update: {},
-    });
+          update: {},
+        });
+      }
+    } catch (e) {
+      console.log('ERROR: failed to create jobProfileReportsTo');
+    }
   }
 
   const organizations = [
@@ -2793,7 +3201,7 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
       BUSINESS_UNIT: 'BC000',
       SETID: 'ST000',
       DESCRSHORT: 'GOV',
-      DESCR: 'Government of B. C.',
+      DESCR: 'BC Public Service Agency',
       EFF_STATUS: 'Active',
       EFFDT: '2024-01-01',
     },
@@ -2831,25 +3239,62 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
     },
   ];
 
-  for await (const row of organizations) {
-    await prisma.organization.upsert({
-      where: { id: row.BUSINESS_UNIT },
-      create: {
-        id: row.BUSINESS_UNIT,
-        peoplesoft_id: row.SETID,
-        code: row.DESCRSHORT,
-        name: row.DESCR,
-        effective_status: row.EFF_STATUS,
-        effective_date: new Date(row.EFFDT),
-      },
-      update: {
-        peoplesoft_id: row.SETID,
-        code: row.DESCRSHORT,
-        name: row.DESCR,
-        effective_status: row.EFF_STATUS,
-        effective_date: new Date(row.EFFDT),
-      },
-    });
+  try {
+    const path = process.env.NODE_ENV == 'development' ? '../../organization.js' : '/tmp/log/organization.js';
+    const organization = (await import(path)).organization as unknown as any[];
+    for (const org of organization) {
+      try {
+        await prisma.organization.create({
+          data: org,
+        });
+      } catch (error) {
+        console.error(`Failed to create org for:`, org, error);
+      }
+    }
+    // Use the imported data
+  } catch (error) {
+    // console.error('Error importing other job_profile_org: ', error);
+
+    for await (const row of organizations) {
+      await prisma.organization.upsert({
+        where: { id: row.BUSINESS_UNIT },
+        create: {
+          id: row.BUSINESS_UNIT,
+          peoplesoft_id: row.SETID,
+          code: row.DESCRSHORT,
+          name: row.DESCR,
+          effective_status: row.EFF_STATUS,
+          effective_date: new Date(row.EFFDT),
+        },
+        update: {
+          peoplesoft_id: row.SETID,
+          code: row.DESCRSHORT,
+          name: row.DESCR,
+          effective_status: row.EFF_STATUS,
+          effective_date: new Date(row.EFFDT),
+        },
+      });
+    }
+  }
+
+  try {
+    const path =
+      process.env.NODE_ENV == 'development'
+        ? '../../job_profile_organization.js'
+        : '/tmp/log/job_profile_organization.js';
+    const job_profile_organization = (await import(path)).job_profile_organization as unknown as any[];
+    for (const job_profile_org of job_profile_organization) {
+      try {
+        await prisma.jobProfileOrganization.create({
+          data: job_profile_org,
+        });
+      } catch (error) {
+        console.error(`Failed to create job_profile_org for:`, job_profile_org, error);
+      }
+    }
+    // Use the imported data
+  } catch (error) {
+    // console.error('Error importing other job_profile_org: ', error);
   }
 
   // await prisma.jobProfileOrganization.createMany({
@@ -2928,7 +3373,7 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
       {
         id: 'DEPT03',
         location_id: 'LOC03',
-        organization_id: 'BC000',
+        organization_id: 'BC112',
         peoplesoft_id: 'PSFT03',
         code: 'DPT03',
         name: 'Information Technology',
@@ -2959,1487 +3404,1459 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
     ],
   });
 
-  await prisma.classification.createMany({
-    data: [
-      {
-        id: 'CLS01',
-        peoplesoft_id: 'PSFTCLASS01',
-        code: 'ENG',
-        name: 'Engineer',
-        employee_group_id: 'GEU', // Ensure this matches an existing EmployeeGroup ID
-        grade: 'G1',
-        effective_status: 'Active',
-        effective_date: new Date('2022-01-01'),
-      },
-      {
-        id: 'CLS02',
-        peoplesoft_id: 'PSFTCLASS02',
-        code: 'PRJMGR',
-        name: 'Project Manager',
-        employee_group_id: 'GEU', // Ensure this matches an existing EmployeeGroup ID
-        grade: 'G2',
-        effective_status: 'Active',
-        effective_date: new Date('2022-01-01'),
-      },
-      {
-        id: 'CLS03',
-        peoplesoft_id: 'PSFTCLASS03',
-        code: 'UXDSGN',
-        name: 'UX Designer',
-        employee_group_id: 'GEU', // Ensure this matches an existing EmployeeGroup ID
-        grade: 'G3',
-        effective_status: 'Active',
-        effective_date: new Date('2022-01-01'),
-      },
-    ],
-  });
-
-  await prisma.positionRequest.createMany({
-    data: [
-      {
-        crm_id: 12345,
-        crm_assigned_to_account_id: 67890,
-        step: 3,
-        reports_to_position_id: '00121521',
-        department_id: '112-0074',
-        parent_job_profile_id: profile247.id,
-        parent_job_profile_version: 1,
-        crm_json: null,
-        profile_json: null,
-        orgchart_json: {
-          edges: [
-            { id: '00054345-00008599', type: 'smoothstep', source: '00054345', target: '00008599' },
-            { id: '00008599-00081675', type: 'smoothstep', source: '00008599', target: '00081675' },
-            { id: '00008599-00038563', type: 'smoothstep', source: '00008599', target: '00038563' },
-            { id: '00008599-00042391', type: 'smoothstep', source: '00008599', target: '00042391' },
-            { id: '00008599-00093866', type: 'smoothstep', source: '00008599', target: '00093866' },
-            { id: '00008599-00030150', type: 'smoothstep', source: '00008599', target: '00030150' },
-            { id: '00008599-00079380', type: 'smoothstep', source: '00008599', target: '00079380' },
-            { id: '00126684-00057755', type: 'smoothstep', source: '00126684', target: '00057755' },
-            { id: '00008599-00067309 ', type: 'smoothstep', source: '00008599', target: '00067309 ' },
-            { id: '00008599-00030112', type: 'smoothstep', source: '00008599', target: '00030112' },
-            { id: '00008599-00092685', type: 'smoothstep', source: '00008599', target: '00092685' },
-            { id: '00008599-00023206', type: 'smoothstep', source: '00008599', target: '00023206' },
-          ],
-          nodes: [
-            {
-              id: '00008599',
-              data: {
+  try {
+    await prisma.positionRequest.createMany({
+      data: [
+        {
+          crm_id: 12345,
+          crm_assigned_to_account_id: 67890,
+          step: 3,
+          reports_to_position_id: '00121521',
+          department_id: '112-0074',
+          parent_job_profile_id: profile247.id,
+          parent_job_profile_version: 1,
+          crm_json: null,
+          profile_json: null,
+          orgchart_json: {
+            edges: [
+              { id: '00054345-00008599', type: 'smoothstep', source: '00054345', target: '00008599' },
+              { id: '00008599-00081675', type: 'smoothstep', source: '00008599', target: '00081675' },
+              { id: '00008599-00038563', type: 'smoothstep', source: '00008599', target: '00038563' },
+              { id: '00008599-00042391', type: 'smoothstep', source: '00008599', target: '00042391' },
+              { id: '00008599-00093866', type: 'smoothstep', source: '00008599', target: '00093866' },
+              { id: '00008599-00030150', type: 'smoothstep', source: '00008599', target: '00030150' },
+              { id: '00008599-00079380', type: 'smoothstep', source: '00008599', target: '00079380' },
+              { id: '00126684-00057755', type: 'smoothstep', source: '00126684', target: '00057755' },
+              { id: '00008599-00067309 ', type: 'smoothstep', source: '00008599', target: '00067309 ' },
+              { id: '00008599-00030112', type: 'smoothstep', source: '00008599', target: '00030112' },
+              { id: '00008599-00092685', type: 'smoothstep', source: '00008599', target: '00092685' },
+              { id: '00008599-00023206', type: 'smoothstep', source: '00008599', target: '00023206' },
+            ],
+            nodes: [
+              {
                 id: '00008599',
-                title: 'Exec Dir & Chief Fin Officer',
-                employees: [{ id: '000324', name: 'Alice Johnson', status: 'Active' }],
-                department: { id: '026-4240', name: 'CFO', organization_id: 'BC026' },
-                classification: { id: '185005', code: 'Band 4', name: 'Band 4' },
+                data: {
+                  id: '00008599',
+                  title: 'Exec Dir & Chief Fin Officer',
+                  employees: [{ id: '000324', name: 'Alice Johnson', status: 'Active' }],
+                  department: { id: '026-4240', name: 'CFO', organization_id: 'BC026' },
+                  classification: { id: '185005', code: 'Band 4', name: 'Band 4' },
+                },
+                type: 'org-chart-card',
+                position: { x: 59325, y: 50 },
+                sourcePosition: 'bottom',
+                targetPosition: 'top',
               },
-              type: 'org-chart-card',
-              position: { x: 59325, y: 50 },
-              sourcePosition: 'bottom',
-              targetPosition: 'top',
-            },
-            {
-              id: '00081675',
-              data: {
+              {
                 id: '00081675',
-                title: 'Senior Project Manager',
-                employees: [{ id: '001456', name: 'Bob Smith', status: 'Active' }],
-                department: { id: '026-4240', name: 'CFO', organization_id: 'BC026' },
-                classification: { id: '363104', code: 'CLK ST 12R', name: 'Clerk Stenographer R12' },
+                data: {
+                  id: '00081675',
+                  title: 'Senior Project Manager',
+                  employees: [{ id: '001456', name: 'Bob Smith', status: 'Active' }],
+                  department: { id: '026-4240', name: 'CFO', organization_id: 'BC026' },
+                  classification: { id: '363104', code: 'CLK ST 12R', name: 'Clerk Stenographer R12' },
+                },
+                type: 'org-chart-card',
+                position: { x: 57400, y: 300 },
+                sourcePosition: 'bottom',
+                targetPosition: 'top',
               },
-              type: 'org-chart-card',
-              position: { x: 57400, y: 300 },
-              sourcePosition: 'bottom',
-              targetPosition: 'top',
-            },
-            {
-              id: '00038563',
-              data: {
+              {
                 id: '00038563',
-                title: 'Lead Software Engineer',
-                employees: [],
-                department: { id: '026-4240', name: 'CFO', organization_id: 'BC026' },
-                classification: { id: '181004', code: 'MGMT LV 04', name: 'Management Level 04' },
+                data: {
+                  id: '00038563',
+                  title: 'Lead Software Engineer',
+                  employees: [],
+                  department: { id: '026-4240', name: 'CFO', organization_id: 'BC026' },
+                  classification: { id: '181004', code: 'MGMT LV 04', name: 'Management Level 04' },
+                },
+                type: 'org-chart-card',
+                position: { x: 57750, y: 300 },
+                sourcePosition: 'bottom',
+                targetPosition: 'top',
               },
-              type: 'org-chart-card',
-              position: { x: 57750, y: 300 },
-              sourcePosition: 'bottom',
-              targetPosition: 'top',
-            },
-            {
-              id: '00042391',
-              data: {
+              {
                 id: '00042391',
-                title: 'HR Manager',
-                employees: [],
-                department: { id: '026-4240', name: 'CFO', organization_id: 'BC026' },
-                classification: { id: '181004', code: 'MGMT LV 04', name: 'Management Level 04' },
+                data: {
+                  id: '00042391',
+                  title: 'HR Manager',
+                  employees: [],
+                  department: { id: '026-4240', name: 'CFO', organization_id: 'BC026' },
+                  classification: { id: '181004', code: 'MGMT LV 04', name: 'Management Level 04' },
+                },
+                type: 'org-chart-card',
+                position: { x: 58100, y: 300 },
+                sourcePosition: 'bottom',
+                targetPosition: 'top',
               },
-              type: 'org-chart-card',
-              position: { x: 58100, y: 300 },
-              sourcePosition: 'bottom',
-              targetPosition: 'top',
-            },
-            {
-              id: '00093866',
-              data: {
+              {
                 id: '00093866',
-                title: 'Coor.Transition Planning',
-                employees: [],
-                department: { id: '026-4240', name: 'CFO', organization_id: 'BC026' },
-                classification: { id: '181003', code: 'MGMT LV 03', name: 'Management Level 03' },
+                data: {
+                  id: '00093866',
+                  title: 'Coor.Transition Planning',
+                  employees: [],
+                  department: { id: '026-4240', name: 'CFO', organization_id: 'BC026' },
+                  classification: { id: '181003', code: 'MGMT LV 03', name: 'Management Level 03' },
+                },
+                type: 'org-chart-card',
+                position: { x: 58450, y: 300 },
+                sourcePosition: 'bottom',
+                targetPosition: 'top',
               },
-              type: 'org-chart-card',
-              position: { x: 58450, y: 300 },
-              sourcePosition: 'bottom',
-              targetPosition: 'top',
-            },
-            {
-              id: '00030150',
-              data: {
+              {
                 id: '00030150',
-                title: 'Clerk Stenographer R9',
-                employees: [],
-                department: { id: '026-4240', name: 'CFO', organization_id: 'BC026' },
-                classification: { id: '363103', code: 'CLK ST 09R', name: 'Clerk Stenographer R9' },
+                data: {
+                  id: '00030150',
+                  title: 'Clerk Stenographer R9',
+                  employees: [],
+                  department: { id: '026-4240', name: 'CFO', organization_id: 'BC026' },
+                  classification: { id: '363103', code: 'CLK ST 09R', name: 'Clerk Stenographer R9' },
+                },
+                type: 'org-chart-card',
+                position: { x: 58800, y: 300 },
+                sourcePosition: 'bottom',
+                targetPosition: 'top',
               },
-              type: 'org-chart-card',
-              position: { x: 58800, y: 300 },
-              sourcePosition: 'bottom',
-              targetPosition: 'top',
-            },
-            {
-              id: '00079380',
-              data: {
+              {
                 id: '00079380',
-                title: 'Manager, Capital Finance',
-                employees: [],
-                department: { id: '026-4240', name: 'CFO', organization_id: 'BC026' },
-                classification: { id: '181005', code: 'MGMT LV 05', name: 'Management Level 05' },
+                data: {
+                  id: '00079380',
+                  title: 'Manager, Capital Finance',
+                  employees: [],
+                  department: { id: '026-4240', name: 'CFO', organization_id: 'BC026' },
+                  classification: { id: '181005', code: 'MGMT LV 05', name: 'Management Level 05' },
+                },
+                type: 'org-chart-card',
+                position: { x: 59150, y: 300 },
+                sourcePosition: 'bottom',
+                targetPosition: 'top',
               },
-              type: 'org-chart-card',
-              position: { x: 59150, y: 300 },
-              sourcePosition: 'bottom',
-              targetPosition: 'top',
-            },
-            {
-              id: '00057755',
-              data: {
+              {
                 id: '00057755',
-                title: 'Financial Analyst',
-                employees: [],
-                department: { id: '026-4240', name: 'CFO', organization_id: 'BC026' },
-                classification: { id: '551402', code: 'FO 18R', name: 'Financial Officer R18' },
+                data: {
+                  id: '00057755',
+                  title: 'Financial Analyst',
+                  employees: [],
+                  department: { id: '026-4240', name: 'CFO', organization_id: 'BC026' },
+                  classification: { id: '551402', code: 'FO 18R', name: 'Financial Officer R18' },
+                },
+                type: 'org-chart-card',
+                position: { x: 59675, y: 50 },
+                sourcePosition: 'bottom',
+                targetPosition: 'top',
               },
-              type: 'org-chart-card',
-              position: { x: 59675, y: 50 },
-              sourcePosition: 'bottom',
-              targetPosition: 'top',
-            },
-            {
-              id: '00067309 ',
-              data: {
+              {
                 id: '00067309 ',
-                title: 'Sr. Project Management Analyst',
-                employees: [],
-                department: { id: '026-4240', name: 'CFO', organization_id: 'BC026' },
-                classification: { id: '551505', code: 'ADMN O 24R', name: 'Administrative Officer R24' },
+                data: {
+                  id: '00067309 ',
+                  title: 'Sr. Project Management Analyst',
+                  employees: [],
+                  department: { id: '026-4240', name: 'CFO', organization_id: 'BC026' },
+                  classification: { id: '551505', code: 'ADMN O 24R', name: 'Administrative Officer R24' },
+                },
+                type: 'org-chart-card',
+                position: { x: 59500, y: 300 },
+                sourcePosition: 'bottom',
+                targetPosition: 'top',
               },
-              type: 'org-chart-card',
-              position: { x: 59500, y: 300 },
-              sourcePosition: 'bottom',
-              targetPosition: 'top',
-            },
-            {
-              id: '00030112',
-              data: {
+              {
                 id: '00030112',
-                title: 'Sr Dir, Financial Operations',
-                employees: [],
-                department: { id: '026-4240', name: 'CFO', organization_id: 'BC026' },
-                classification: { id: '185004', code: 'Band 4', name: 'Band 4' },
+                data: {
+                  id: '00030112',
+                  title: 'Sr Dir, Financial Operations',
+                  employees: [],
+                  department: { id: '026-4240', name: 'CFO', organization_id: 'BC026' },
+                  classification: { id: '185004', code: 'Band 4', name: 'Band 4' },
+                },
+                type: 'org-chart-card',
+                position: { x: 59850, y: 300 },
+                sourcePosition: 'bottom',
+                targetPosition: 'top',
               },
-              type: 'org-chart-card',
-              position: { x: 59850, y: 300 },
-              sourcePosition: 'bottom',
-              targetPosition: 'top',
-            },
-            {
-              id: '00092685',
-              data: {
+              {
                 id: '00092685',
-                title: 'Level 1 Co-op',
-                employees: [],
-                department: { id: '026-4240', name: 'CFO', organization_id: 'BC026' },
-                classification: { id: '361301', code: 'COOP LVL 1', name: 'Coop Education Train Prgm Lv1' },
+                data: {
+                  id: '00092685',
+                  title: 'Level 1 Co-op',
+                  employees: [],
+                  department: { id: '026-4240', name: 'CFO', organization_id: 'BC026' },
+                  classification: { id: '361301', code: 'COOP LVL 1', name: 'Coop Education Train Prgm Lv1' },
+                },
+                type: 'org-chart-card',
+                position: { x: 60200, y: 300 },
+                sourcePosition: 'bottom',
+                targetPosition: 'top',
               },
-              type: 'org-chart-card',
-              position: { x: 60200, y: 300 },
-              sourcePosition: 'bottom',
-              targetPosition: 'top',
-            },
-            {
-              id: '00023206',
-              data: {
+              {
                 id: '00023206',
-                title: 'Fun CEO',
-                employees: [],
-                department: { id: '026-4240', name: 'CFO', organization_id: 'BC026' },
-                classification: { id: '551104', code: 'CLK 12R', name: 'Clerk R12' },
+                data: {
+                  id: '00023206',
+                  title: 'Fun CEO',
+                  employees: [],
+                  department: { id: '026-4240', name: 'CFO', organization_id: 'BC026' },
+                  classification: { id: '551104', code: 'CLK 12R', name: 'Clerk R12' },
+                },
+                type: 'org-chart-card',
+                position: { x: 60550, y: 300 },
+                sourcePosition: 'bottom',
+                targetPosition: 'top',
               },
-              type: 'org-chart-card',
-              position: { x: 60550, y: 300 },
-              sourcePosition: 'bottom',
-              targetPosition: 'top',
-            },
-          ],
+            ],
+          },
+          user_id: TEST_USER_ID,
+          title: 'Senior Analyst',
+          position_number: null,
+          classification_id: '508011',
+          submission_id: 'SUB001',
+          submitted_at: new Date(),
+          approved_at: new Date(),
+          status: 'DRAFT',
+          updated_at: new Date(),
+          classification_employee_group_id: 'GEU',
+          classification_peoplesoft_id: 'BCSET',
+          additional_info: {
+            branch: 'branch1',
+            division: 'division1',
+            department_id: '019-1960',
+            work_location_id: 'V8V4W803',
+            work_location_name: '3-835 Humboldt St.',
+            excluded_mgr_position_number: '00054971',
+            excluded_mgr_name: 'John Doe',
+          },
         },
-        user_id: TEST_USER_ID,
-        title: 'Senior Analyst',
-        position_number: null,
-        classification_id: '508011',
-        submission_id: 'SUB001',
-        submitted_at: new Date(),
-        approved_at: new Date(),
-        status: 'DRAFT',
-        updated_at: new Date(),
-        classification_employee_group_id: 'GEU',
-        classification_peoplesoft_id: 'BCSET',
-        additional_info: {
-          branch: 'branch1',
-          division: 'division1',
-          department_id: '019-1960',
-          work_location_id: 'V8V4W803',
-          work_location_name: '3-835 Humboldt St.',
-          excluded_mgr_position_number: '00054971',
-        },
-      },
-      {
-        crm_id: 54322,
-        crm_assigned_to_account_id: 98765,
-        step: 1,
-        reports_to_position_id: '00121521',
-        department_id: '112-0074',
-        parent_job_profile_id: profile200.id,
-        parent_job_profile_version: 1,
-        crm_json: null,
-        profile_json: null,
-        // {
-        //   id: profile200.id,
-        //   role: { id: null },
-        //   type: 'USER',
-        //   scope: { id: null },
-        //   title: { value: 'Financial Analyst - Additional info step', disabled: false, isCustom: false },
-        //   number: 247,
-        //   context:
-        //     'The job holder is part of the human resources team and is supervised by the HR Director, who sets policies for employee relations and development, offering mentorship and policy guidance.',
-        //   streams: [],
-        //   overview: {
-        //     value:
-        //       'Detail-oriented Financial Analyst to provide analysis of financial data, forecast future trends, and advise on investment decisions.',
-        //     disabled: false,
-        //     isCustom: false,
-        //   },
-        //   education: [
-        //     {
-        //       is_significant: true,
-        //       is_readonly: true,
-        //       text: 'Bachelor’s degree in Finance, Economics, Accounting, Mathematics, Statistics, or related field.',
-        //     },
-        //     {
-        //       is_significant: true,
-        //       is_readonly: false,
-        //       text: "Master's degree in Finance, Business Administration (MBA), or related field preferred.",
-        //     },
-        //     {
-        //       is_significant: true,
-        //       is_readonly: false,
-        //       text: 'Certifications such as Chartered Financial Analyst (CFA) or Certified Public Accountant (CPA) are advantageous.',
-        //     },
-        //     {
-        //       is_significant: true,
-        //       is_readonly: false,
-        //       text: 'Proven work experience as a Financial Analyst, Financial Consultant, or similar role.',
-        //     },
-        //     {
-        //       is_significant: true,
-        //       is_readonly: false,
-        //       text: 'Strong working knowledge of financial forecasting, corporate finance, information analysis, and financial modeling techniques.',
-        //     },
-        //     {
-        //       is_significant: true,
-        //       is_readonly: false,
-        //       text: 'Experience with statistical analysis and financial forecasting.',
-        //     },
-        //     {
-        //       is_significant: true,
-        //       is_readonly: false,
-        //       text: 'Attention to detail and the ability to identify data patterns.',
-        //     },
-        //     {
-        //       is_significant: true,
-        //       is_readonly: false,
-        //       text: 'Good verbal and written communication skills.',
-        //     },
-        //     {
-        //       is_significant: true,
-        //       is_readonly: false,
-        //       text: 'Advanced knowledge of Excel, including pivot tables, formulas, and charts.',
-        //     },
-        //   ],
-        //   role_type: { id: null },
-        //   reports_to: [],
-        //   jobFamilies: [],
-        //   preferences: [],
-        //   professions: [],
-        //   organizations: [],
-        //   all_reports_to: false,
-        //   job_experience: [],
-        //   classifications: [
-        //     {
-        //       classification: {
-        //         id: '551404',
-        //         code: 'FO 21R',
-        //         name: 'Financial Officer R21',
-        //         grade: '21A',
-        //         employee_group_id: 'GEU',
-        //       },
-        //     },
-        //   ],
-        //   organization_id: '-1',
-        //   review_required: false,
-        //   accountabilities: [
-        //     {
-        //       text: 'Analyze financial data and create financial models for decision support.',
-        //       is_significant: true,
-        //       is_readonly: true,
-        //     },
-        //     {
-        //       text: 'Report on financial performance and prepare for regular leadership reviews.',
-        //       is_significant: false,
-        //       is_readonly: false,
-        //     },
-        //     {
-        //       text: 'Analyze past results, perform variance analysis, identify trends, and make recommendations for improvements.',
-        //       is_significant: false,
-        //       is_readonly: false,
-        //     },
-        //     {
-        //       text: 'Work closely with the accounting team to ensure accurate financial reporting.',
-        //       is_significant: false,
-        //       is_readonly: false,
-        //     },
-        //     {
-        //       text: 'Evaluate financial performance by comparing and analyzing actual results with plans and forecasts.',
-        //       is_significant: true,
-        //       is_readonly: false,
-        //     },
-        //     {
-        //       text: 'Guide the cost analysis process by establishing and enforcing policies and procedures.',
-        //       is_significant: true,
-        //       is_readonly: false,
-        //     },
-        //     {
-        //       text: 'Provide analysis of trends and forecasts and recommend actions for optimization.',
-        //       is_significant: true,
-        //       is_readonly: false,
-        //     },
-        //     {
-        //       text: 'Recommend actions by analyzing and interpreting data and making comparative analyses; study proposed changes in methods and materials.',
-        //       is_significant: true,
-        //       is_readonly: false,
-        //     },
-        //     {
-        //       text: 'Identify and drive process improvements, including the creation of standard and ad-hoc reports, tools, and Excel dashboards.',
-        //       is_significant: true,
-        //       is_readonly: false,
-        //     },
-        //     {
-        //       text: 'Increase productivity by developing automated reporting/forecasting tools.',
-        //       is_significant: true,
-        //       is_readonly: false,
-        //     },
-        //     {
-        //       text: 'Market research, data mining, business intelligence, and valuation comps.',
-        //       is_significant: true,
-        //       is_readonly: false,
-        //     },
-        //   ],
-        //   program_overview: { value: '', disabled: false, isCustom: false },
-        //   all_organizations: true,
-        //   security_screenings: [],
-        //   optional_requirements: [],
-        //   willingness_statements: [],
-        //   behavioural_competencies: [
-        //     {
-        //       behavioural_competency: {
-        //         id: 17,
-        //         name: 'Business acumen',
-        //         description:
-        //           'is the ability to understand the business implications of decisions and the ability to strive to improve organizational performance. It requires an awareness of business issues, processes and outcomes as they impact the client’s and the organization’s business needs.',
-        //       },
-        //     },
-        //     {
-        //       behavioural_competency: {
-        //         id: 21,
-        //         name: 'Managing organizational resources',
-        //         description:
-        //           'is the ability to understand and effectively manage organizational resources (for example: people, materials, assets, budgets). This is demonstrated through measurement, planning and control of resources to maximize results. It requires an evaluation of qualitative (for example: client satisfaction) and quantitative (for example: service costs) needs.',
-        //       },
-        //     },
-        //     {
-        //       behavioural_competency: {
-        //         id: 23,
-        //         name: 'Problem solving and judgement',
-        //         description:
-        //           'is the ability to analyze problems systematically, organize information, identify key factors, identify underlying causes and generate solutions.',
-        //       },
-        //     },
-        //     {
-        //       behavioural_competency: {
-        //         id: 22,
-        //         name: 'Planning, organizing and coordinating',
-        //         description:
-        //           "involves proactively planning, establishing priorities and allocating resources. It's expressed by developing and implementing increasingly complex plans. It also involves monitoring and adjusting work to accomplish goals and deliver to the organization’s mandate.",
-        //       },
-        //     },
-        //     {
-        //       behavioural_competency: {
-        //         id: 42,
-        //         name: 'Leadership',
-        //         description:
-        //           "implies a desire to lead others, including diverse teams. Leadership is generally, but not always, demonstrated from a position of formal authority. The 'team' here should be understood broadly as any group with which the person interacts regularly.",
-        //       },
-        //     },
-        //   ],
-        //   knowledge_skills_abilities: [],
-        //   professional_registration_requirements: [],
-        // },
-        orgchart_json: {
-          edges: [
-            { id: '00054345-00008599', type: 'smoothstep', source: '00054345', target: '00008599' },
-            { id: '00008599-00081675', type: 'smoothstep', source: '00008599', target: '00081675' },
-            { id: '00008599-00038563', type: 'smoothstep', source: '00008599', target: '00038563' },
-            { id: '00008599-00042391', type: 'smoothstep', source: '00008599', target: '00042391' },
-            { id: '00008599-00093866', type: 'smoothstep', source: '00008599', target: '00093866' },
-            { id: '00008599-00030150', type: 'smoothstep', source: '00008599', target: '00030150' },
-            { id: '00008599-00079380', type: 'smoothstep', source: '00008599', target: '00079380' },
-            { id: '00126684-00057755', type: 'smoothstep', source: '00126684', target: '00057755' },
-            { id: '00008599-00067309 ', type: 'smoothstep', source: '00008599', target: '00067309 ' },
-            { id: '00008599-00030112', type: 'smoothstep', source: '00008599', target: '00030112' },
-            { id: '00008599-00092685', type: 'smoothstep', source: '00008599', target: '00092685' },
-            { id: '00008599-00023206', type: 'smoothstep', source: '00008599', target: '00023206' },
-          ],
-          nodes: [
-            {
-              id: '00008599',
-              data: {
+        {
+          crm_id: 54322,
+          crm_assigned_to_account_id: 98765,
+          step: 1,
+          reports_to_position_id: '00121521',
+          department_id: '112-0074',
+          parent_job_profile_id: profile200.id,
+          parent_job_profile_version: 1,
+          crm_json: null,
+          profile_json: null,
+          // {
+          //   id: profile200.id,
+          //   role: { id: null },
+          //   type: 'USER',
+          //   scope: { id: null },
+          //   title: { value: 'Financial Analyst - Additional info step', disabled: false, isCustom: false },
+          //   number: 247,
+          //   context:
+          //     'The job holder is part of the human resources team and is supervised by the HR Director, who sets policies for employee relations and development, offering mentorship and policy guidance.',
+          //   streams: [],
+          //   overview: {
+          //     value:
+          //       'Detail-oriented Financial Analyst to provide analysis of financial data, forecast future trends, and advise on investment decisions.',
+          //     disabled: false,
+          //     isCustom: false,
+          //   },
+          //   education: [
+          //     {
+          //       is_significant: true,
+          //       is_readonly: true,
+          //       text: 'Bachelor’s degree in Finance, Economics, Accounting, Mathematics, Statistics, or related field.',
+          //     },
+          //     {
+          //       is_significant: true,
+          //       is_readonly: false,
+          //       text: "Master's degree in Finance, Business Administration (MBA), or related field preferred.",
+          //     },
+          //     {
+          //       is_significant: true,
+          //       is_readonly: false,
+          //       text: 'Certifications such as Chartered Financial Analyst (CFA) or Certified Public Accountant (CPA) are advantageous.',
+          //     },
+          //     {
+          //       is_significant: true,
+          //       is_readonly: false,
+          //       text: 'Proven work experience as a Financial Analyst, Financial Consultant, or similar role.',
+          //     },
+          //     {
+          //       is_significant: true,
+          //       is_readonly: false,
+          //       text: 'Strong working knowledge of financial forecasting, corporate finance, information analysis, and financial modeling techniques.',
+          //     },
+          //     {
+          //       is_significant: true,
+          //       is_readonly: false,
+          //       text: 'Experience with statistical analysis and financial forecasting.',
+          //     },
+          //     {
+          //       is_significant: true,
+          //       is_readonly: false,
+          //       text: 'Attention to detail and the ability to identify data patterns.',
+          //     },
+          //     {
+          //       is_significant: true,
+          //       is_readonly: false,
+          //       text: 'Good verbal and written communication skills.',
+          //     },
+          //     {
+          //       is_significant: true,
+          //       is_readonly: false,
+          //       text: 'Advanced knowledge of Excel, including pivot tables, formulas, and charts.',
+          //     },
+          //   ],
+          //   role_type: { id: null },
+          //   reports_to: [],
+          //   jobFamilies: [],
+          //   preferences: [],
+          //   professions: [],
+          //   organizations: [],
+          //   all_reports_to: false,
+          //   job_experience: [],
+          //   classifications: [
+          //     {
+          //       classification: {
+          //         id: '551404',
+          //         code: 'FO 21R',
+          //         name: 'Financial Officer R21',
+          //         grade: '21A',
+          //         employee_group_id: 'GEU',
+          //       },
+          //     },
+          //   ],
+          //   organization_id: '-1',
+          //   review_required: false,
+          //   accountabilities: [
+          //     {
+          //       text: 'Analyze financial data and create financial models for decision support.',
+          //       is_significant: true,
+          //       is_readonly: true,
+          //     },
+          //     {
+          //       text: 'Report on financial performance and prepare for regular leadership reviews.',
+          //       is_significant: false,
+          //       is_readonly: false,
+          //     },
+          //     {
+          //       text: 'Analyze past results, perform variance analysis, identify trends, and make recommendations for improvements.',
+          //       is_significant: false,
+          //       is_readonly: false,
+          //     },
+          //     {
+          //       text: 'Work closely with the accounting team to ensure accurate financial reporting.',
+          //       is_significant: false,
+          //       is_readonly: false,
+          //     },
+          //     {
+          //       text: 'Evaluate financial performance by comparing and analyzing actual results with plans and forecasts.',
+          //       is_significant: true,
+          //       is_readonly: false,
+          //     },
+          //     {
+          //       text: 'Guide the cost analysis process by establishing and enforcing policies and procedures.',
+          //       is_significant: true,
+          //       is_readonly: false,
+          //     },
+          //     {
+          //       text: 'Provide analysis of trends and forecasts and recommend actions for optimization.',
+          //       is_significant: true,
+          //       is_readonly: false,
+          //     },
+          //     {
+          //       text: 'Recommend actions by analyzing and interpreting data and making comparative analyses; study proposed changes in methods and materials.',
+          //       is_significant: true,
+          //       is_readonly: false,
+          //     },
+          //     {
+          //       text: 'Identify and drive process improvements, including the creation of standard and ad-hoc reports, tools, and Excel dashboards.',
+          //       is_significant: true,
+          //       is_readonly: false,
+          //     },
+          //     {
+          //       text: 'Increase productivity by developing automated reporting/forecasting tools.',
+          //       is_significant: true,
+          //       is_readonly: false,
+          //     },
+          //     {
+          //       text: 'Market research, data mining, business intelligence, and valuation comps.',
+          //       is_significant: true,
+          //       is_readonly: false,
+          //     },
+          //   ],
+          //   program_overview: { value: '', disabled: false, isCustom: false },
+          //   all_organizations: true,
+          //   security_screenings: [],
+          //   optional_requirements: [],
+          //   willingness_statements: [],
+          //   behavioural_competencies: [
+          //     {
+          //       behavioural_competency: {
+          //         id: 17,
+          //         name: 'Business acumen',
+          //         description:
+          //           'is the ability to understand the business implications of decisions and the ability to strive to improve organizational performance. It requires an awareness of business issues, processes and outcomes as they impact the client’s and the organization’s business needs.',
+          //       },
+          //     },
+          //     {
+          //       behavioural_competency: {
+          //         id: 21,
+          //         name: 'Managing organizational resources',
+          //         description:
+          //           'is the ability to understand and effectively manage organizational resources (for example: people, materials, assets, budgets). This is demonstrated through measurement, planning and control of resources to maximize results. It requires an evaluation of qualitative (for example: client satisfaction) and quantitative (for example: service costs) needs.',
+          //       },
+          //     },
+          //     {
+          //       behavioural_competency: {
+          //         id: 23,
+          //         name: 'Problem solving and judgement',
+          //         description:
+          //           'is the ability to analyze problems systematically, organize information, identify key factors, identify underlying causes and generate solutions.',
+          //       },
+          //     },
+          //     {
+          //       behavioural_competency: {
+          //         id: 22,
+          //         name: 'Planning, organizing and coordinating',
+          //         description:
+          //           "involves proactively planning, establishing priorities and allocating resources. It's expressed by developing and implementing increasingly complex plans. It also involves monitoring and adjusting work to accomplish goals and deliver to the organization’s mandate.",
+          //       },
+          //     },
+          //     {
+          //       behavioural_competency: {
+          //         id: 42,
+          //         name: 'Leadership',
+          //         description:
+          //           "implies a desire to lead others, including diverse teams. Leadership is generally, but not always, demonstrated from a position of formal authority. The 'team' here should be understood broadly as any group with which the person interacts regularly.",
+          //       },
+          //     },
+          //   ],
+          //   knowledge_skills_abilities: [],
+          //   professional_registration_requirements: [],
+          // },
+          orgchart_json: {
+            edges: [
+              { id: '00054345-00008599', type: 'smoothstep', source: '00054345', target: '00008599' },
+              { id: '00008599-00081675', type: 'smoothstep', source: '00008599', target: '00081675' },
+              { id: '00008599-00038563', type: 'smoothstep', source: '00008599', target: '00038563' },
+              { id: '00008599-00042391', type: 'smoothstep', source: '00008599', target: '00042391' },
+              { id: '00008599-00093866', type: 'smoothstep', source: '00008599', target: '00093866' },
+              { id: '00008599-00030150', type: 'smoothstep', source: '00008599', target: '00030150' },
+              { id: '00008599-00079380', type: 'smoothstep', source: '00008599', target: '00079380' },
+              { id: '00126684-00057755', type: 'smoothstep', source: '00126684', target: '00057755' },
+              { id: '00008599-00067309 ', type: 'smoothstep', source: '00008599', target: '00067309 ' },
+              { id: '00008599-00030112', type: 'smoothstep', source: '00008599', target: '00030112' },
+              { id: '00008599-00092685', type: 'smoothstep', source: '00008599', target: '00092685' },
+              { id: '00008599-00023206', type: 'smoothstep', source: '00008599', target: '00023206' },
+            ],
+            nodes: [
+              {
                 id: '00008599',
-                title: 'Exec Dir & Chief Fin Officer',
-                employees: [{ id: '000324', name: 'Alice Johnson', status: 'Active' }],
-                department: { id: '026-4240', name: 'CFO', organization_id: 'BC026' },
-                classification: { id: '185005', code: 'Band 4', name: 'Band 4' },
+                data: {
+                  id: '00008599',
+                  title: 'Exec Dir & Chief Fin Officer',
+                  employees: [{ id: '000324', name: 'Alice Johnson', status: 'Active' }],
+                  department: { id: '026-4240', name: 'CFO', organization_id: 'BC026' },
+                  classification: { id: '185005', code: 'Band 4', name: 'Band 4' },
+                },
+                type: 'org-chart-card',
+                position: { x: 59325, y: 50 },
+                sourcePosition: 'bottom',
+                targetPosition: 'top',
               },
-              type: 'org-chart-card',
-              position: { x: 59325, y: 50 },
-              sourcePosition: 'bottom',
-              targetPosition: 'top',
-            },
-            {
-              id: '00081675',
-              data: {
+              {
                 id: '00081675',
-                title: 'Senior Project Manager',
-                employees: [{ id: '001456', name: 'Bob Smith', status: 'Active' }],
-                department: { id: '026-4240', name: 'CFO', organization_id: 'BC026' },
-                classification: { id: '363104', code: 'CLK ST 12R', name: 'Clerk Stenographer R12' },
+                data: {
+                  id: '00081675',
+                  title: 'Senior Project Manager',
+                  employees: [{ id: '001456', name: 'Bob Smith', status: 'Active' }],
+                  department: { id: '026-4240', name: 'CFO', organization_id: 'BC026' },
+                  classification: { id: '363104', code: 'CLK ST 12R', name: 'Clerk Stenographer R12' },
+                },
+                type: 'org-chart-card',
+                position: { x: 57400, y: 300 },
+                sourcePosition: 'bottom',
+                targetPosition: 'top',
               },
-              type: 'org-chart-card',
-              position: { x: 57400, y: 300 },
-              sourcePosition: 'bottom',
-              targetPosition: 'top',
-            },
-            {
-              id: '00038563',
-              data: {
+              {
                 id: '00038563',
-                title: 'Lead Software Engineer',
-                employees: [],
-                department: { id: '026-4240', name: 'CFO', organization_id: 'BC026' },
-                classification: { id: '181004', code: 'MGMT LV 04', name: 'Management Level 04' },
+                data: {
+                  id: '00038563',
+                  title: 'Lead Software Engineer',
+                  employees: [],
+                  department: { id: '026-4240', name: 'CFO', organization_id: 'BC026' },
+                  classification: { id: '181004', code: 'MGMT LV 04', name: 'Management Level 04' },
+                },
+                type: 'org-chart-card',
+                position: { x: 57750, y: 300 },
+                sourcePosition: 'bottom',
+                targetPosition: 'top',
               },
-              type: 'org-chart-card',
-              position: { x: 57750, y: 300 },
-              sourcePosition: 'bottom',
-              targetPosition: 'top',
-            },
-            {
-              id: '00042391',
-              data: {
+              {
                 id: '00042391',
-                title: 'HR Manager',
-                employees: [],
-                department: { id: '026-4240', name: 'CFO', organization_id: 'BC026' },
-                classification: { id: '181004', code: 'MGMT LV 04', name: 'Management Level 04' },
+                data: {
+                  id: '00042391',
+                  title: 'HR Manager',
+                  employees: [],
+                  department: { id: '026-4240', name: 'CFO', organization_id: 'BC026' },
+                  classification: { id: '181004', code: 'MGMT LV 04', name: 'Management Level 04' },
+                },
+                type: 'org-chart-card',
+                position: { x: 58100, y: 300 },
+                sourcePosition: 'bottom',
+                targetPosition: 'top',
               },
-              type: 'org-chart-card',
-              position: { x: 58100, y: 300 },
-              sourcePosition: 'bottom',
-              targetPosition: 'top',
-            },
-            {
-              id: '00093866',
-              data: {
+              {
                 id: '00093866',
-                title: 'Coor.Transition Planning',
-                employees: [],
-                department: { id: '026-4240', name: 'CFO', organization_id: 'BC026' },
-                classification: { id: '181003', code: 'MGMT LV 03', name: 'Management Level 03' },
+                data: {
+                  id: '00093866',
+                  title: 'Coor.Transition Planning',
+                  employees: [],
+                  department: { id: '026-4240', name: 'CFO', organization_id: 'BC026' },
+                  classification: { id: '181003', code: 'MGMT LV 03', name: 'Management Level 03' },
+                },
+                type: 'org-chart-card',
+                position: { x: 58450, y: 300 },
+                sourcePosition: 'bottom',
+                targetPosition: 'top',
               },
-              type: 'org-chart-card',
-              position: { x: 58450, y: 300 },
-              sourcePosition: 'bottom',
-              targetPosition: 'top',
-            },
-            {
-              id: '00030150',
-              data: {
+              {
                 id: '00030150',
-                title: 'Clerk Stenographer R9',
-                employees: [],
-                department: { id: '026-4240', name: 'CFO', organization_id: 'BC026' },
-                classification: { id: '363103', code: 'CLK ST 09R', name: 'Clerk Stenographer R9' },
+                data: {
+                  id: '00030150',
+                  title: 'Clerk Stenographer R9',
+                  employees: [],
+                  department: { id: '026-4240', name: 'CFO', organization_id: 'BC026' },
+                  classification: { id: '363103', code: 'CLK ST 09R', name: 'Clerk Stenographer R9' },
+                },
+                type: 'org-chart-card',
+                position: { x: 58800, y: 300 },
+                sourcePosition: 'bottom',
+                targetPosition: 'top',
               },
-              type: 'org-chart-card',
-              position: { x: 58800, y: 300 },
-              sourcePosition: 'bottom',
-              targetPosition: 'top',
-            },
-            {
-              id: '00079380',
-              data: {
+              {
                 id: '00079380',
-                title: 'Manager, Capital Finance',
-                employees: [],
-                department: { id: '026-4240', name: 'CFO', organization_id: 'BC026' },
-                classification: { id: '181005', code: 'MGMT LV 05', name: 'Management Level 05' },
+                data: {
+                  id: '00079380',
+                  title: 'Manager, Capital Finance',
+                  employees: [],
+                  department: { id: '026-4240', name: 'CFO', organization_id: 'BC026' },
+                  classification: { id: '181005', code: 'MGMT LV 05', name: 'Management Level 05' },
+                },
+                type: 'org-chart-card',
+                position: { x: 59150, y: 300 },
+                sourcePosition: 'bottom',
+                targetPosition: 'top',
               },
-              type: 'org-chart-card',
-              position: { x: 59150, y: 300 },
-              sourcePosition: 'bottom',
-              targetPosition: 'top',
-            },
-            {
-              id: '00057755',
-              data: {
+              {
                 id: '00057755',
-                title: 'Financial Analyst',
-                employees: [],
-                department: { id: '026-4240', name: 'CFO', organization_id: 'BC026' },
-                classification: { id: '551402', code: 'FO 18R', name: 'Financial Officer R18' },
+                data: {
+                  id: '00057755',
+                  title: 'Financial Analyst',
+                  employees: [],
+                  department: { id: '026-4240', name: 'CFO', organization_id: 'BC026' },
+                  classification: { id: '551402', code: 'FO 18R', name: 'Financial Officer R18' },
+                },
+                type: 'org-chart-card',
+                position: { x: 59675, y: 50 },
+                sourcePosition: 'bottom',
+                targetPosition: 'top',
               },
-              type: 'org-chart-card',
-              position: { x: 59675, y: 50 },
-              sourcePosition: 'bottom',
-              targetPosition: 'top',
-            },
-            {
-              id: '00067309 ',
-              data: {
+              {
                 id: '00067309 ',
-                title: 'Sr. Project Management Analyst',
-                employees: [],
-                department: { id: '026-4240', name: 'CFO', organization_id: 'BC026' },
-                classification: { id: '551505', code: 'ADMN O 24R', name: 'Administrative Officer R24' },
+                data: {
+                  id: '00067309 ',
+                  title: 'Sr. Project Management Analyst',
+                  employees: [],
+                  department: { id: '026-4240', name: 'CFO', organization_id: 'BC026' },
+                  classification: { id: '551505', code: 'ADMN O 24R', name: 'Administrative Officer R24' },
+                },
+                type: 'org-chart-card',
+                position: { x: 59500, y: 300 },
+                sourcePosition: 'bottom',
+                targetPosition: 'top',
               },
-              type: 'org-chart-card',
-              position: { x: 59500, y: 300 },
-              sourcePosition: 'bottom',
-              targetPosition: 'top',
-            },
-            {
-              id: '00030112',
-              data: {
+              {
                 id: '00030112',
-                title: 'Sr Dir, Financial Operations',
-                employees: [],
-                department: { id: '026-4240', name: 'CFO', organization_id: 'BC026' },
-                classification: { id: '185004', code: 'Band 4', name: 'Band 4' },
+                data: {
+                  id: '00030112',
+                  title: 'Sr Dir, Financial Operations',
+                  employees: [],
+                  department: { id: '026-4240', name: 'CFO', organization_id: 'BC026' },
+                  classification: { id: '185004', code: 'Band 4', name: 'Band 4' },
+                },
+                type: 'org-chart-card',
+                position: { x: 59850, y: 300 },
+                sourcePosition: 'bottom',
+                targetPosition: 'top',
               },
-              type: 'org-chart-card',
-              position: { x: 59850, y: 300 },
-              sourcePosition: 'bottom',
-              targetPosition: 'top',
-            },
-            {
-              id: '00092685',
-              data: {
+              {
                 id: '00092685',
-                title: 'Level 1 Co-op',
-                employees: [],
-                department: { id: '026-4240', name: 'CFO', organization_id: 'BC026' },
-                classification: { id: '361301', code: 'COOP LVL 1', name: 'Coop Education Train Prgm Lv1' },
+                data: {
+                  id: '00092685',
+                  title: 'Level 1 Co-op',
+                  employees: [],
+                  department: { id: '026-4240', name: 'CFO', organization_id: 'BC026' },
+                  classification: { id: '361301', code: 'COOP LVL 1', name: 'Coop Education Train Prgm Lv1' },
+                },
+                type: 'org-chart-card',
+                position: { x: 60200, y: 300 },
+                sourcePosition: 'bottom',
+                targetPosition: 'top',
               },
-              type: 'org-chart-card',
-              position: { x: 60200, y: 300 },
-              sourcePosition: 'bottom',
-              targetPosition: 'top',
-            },
-            {
-              id: '00023206',
-              data: {
+              {
                 id: '00023206',
-                title: 'Fun CEO',
-                employees: [],
-                department: { id: '026-4240', name: 'CFO', organization_id: 'BC026' },
-                classification: { id: '551104', code: 'CLK 12R', name: 'Clerk R12' },
+                data: {
+                  id: '00023206',
+                  title: 'Fun CEO',
+                  employees: [],
+                  department: { id: '026-4240', name: 'CFO', organization_id: 'BC026' },
+                  classification: { id: '551104', code: 'CLK 12R', name: 'Clerk R12' },
+                },
+                type: 'org-chart-card',
+                position: { x: 60550, y: 300 },
+                sourcePosition: 'bottom',
+                targetPosition: 'top',
               },
-              type: 'org-chart-card',
-              position: { x: 60550, y: 300 },
-              sourcePosition: 'bottom',
-              targetPosition: 'top',
-            },
-            {
-              id: '00121521',
-              data: {
+              {
                 id: '00121521',
-                title: 'Digital CEO',
-                employees: [{ id: '000324', name: 'Alice Johnson', status: 'Active' }],
-                department: { id: '026-4240', name: 'CFO', organization_id: 'BC112' },
-                classification: { id: '551104', code: 'CLK 12R', name: 'Clerk R12' },
+                data: {
+                  id: '00121521',
+                  title: 'Digital CEO',
+                  employees: [{ id: '000324', name: 'Alice Johnson', status: 'Active' }],
+                  department: { id: '026-4240', name: 'CFO', organization_id: 'BC112' },
+                  classification: { id: '551104', code: 'CLK 12R', name: 'Clerk R12' },
+                },
+                type: 'org-chart-card',
+                position: { x: 60550, y: 300 },
+                sourcePosition: 'bottom',
+                targetPosition: 'top',
               },
-              type: 'org-chart-card',
-              position: { x: 60550, y: 300 },
-              sourcePosition: 'bottom',
-              targetPosition: 'top',
-            },
-          ],
-        },
-        user_id: TEST_USER_ID,
-        title: 'Project Manager - Additional info step',
-        position_number: null,
-        classification_id: '752203',
-        submission_id: 'SUB002',
-        submitted_at: new Date(),
-        approved_at: new Date(),
-        status: 'DRAFT',
-        updated_at: new Date(),
-        classification_employee_group_id: 'GEU',
-        classification_peoplesoft_id: 'BCSET',
-        additional_info: Prisma.DbNull,
-      },
-      {
-        crm_id: 54321,
-        crm_assigned_to_account_id: 98765,
-        step: 2,
-        reports_to_position_id: 'POS456',
-        department_id: '123-4567',
-        parent_job_profile_id: profile200.id,
-        parent_job_profile_version: 1,
-        crm_json: null,
-        profile_json: {
-          id: profile200.id,
-          role: { id: null },
-          type: 'USER',
-          scope: { id: null },
-          title: { value: 'Financial Analyst', disabled: false, isCustom: false },
-          number: 247,
-          context:
-            'The job holder is part of the human resources team and is supervised by the HR Director, who sets policies for employee relations and development, offering mentorship and policy guidance.',
-          streams: [],
-          overview: {
-            value:
-              'Detail-oriented Financial Analyst to provide analysis of financial data, forecast future trends, and advise on investment decisions.',
-            disabled: false,
-            isCustom: false,
+            ],
           },
-          education: [
-            {
-              is_significant: true,
-              is_readonly: true,
-              text: 'Bachelor’s degree in Finance, Economics, Accounting, Mathematics, Statistics, or related field.',
-            },
-            {
-              is_significant: true,
-              is_readonly: false,
-              text: "Master's degree in Finance, Business Administration (MBA), or related field preferred.",
-            },
-            {
-              is_significant: true,
-              is_readonly: false,
-              text: 'Certifications such as Chartered Financial Analyst (CFA) or Certified Public Accountant (CPA) are advantageous.',
-            },
-            {
-              is_significant: true,
-              is_readonly: false,
-              text: 'Proven work experience as a Financial Analyst, Financial Consultant, or similar role.',
-            },
-            {
-              is_significant: true,
-              is_readonly: false,
-              text: 'Strong working knowledge of financial forecasting, corporate finance, information analysis, and financial modeling techniques.',
-            },
-            {
-              is_significant: true,
-              is_readonly: false,
-              text: 'Experience with statistical analysis and financial forecasting.',
-            },
-            {
-              is_significant: true,
-              is_readonly: false,
-              text: 'Attention to detail and the ability to identify data patterns.',
-            },
-            {
-              is_significant: true,
-              is_readonly: false,
-              text: 'Good verbal and written communication skills.',
-            },
-            {
-              is_significant: true,
-              is_readonly: false,
-              text: 'Advanced knowledge of Excel, including pivot tables, formulas, and charts.',
-            },
-          ],
-          role_type: { id: null },
-          reports_to: [],
-          jobFamilies: [],
-          preferences: [],
-          professions: [],
-          organizations: [],
-          all_reports_to: false,
-          job_experience: [],
-          classifications: [
-            {
-              classification: {
-                id: '551404',
-                code: 'FO 21R',
-                name: 'Financial Officer R21',
-                grade: '21A',
-                employee_group_id: 'GEU',
-              },
-            },
-          ],
-          organization_id: '-1',
-          review_required: false,
-          accountabilities: [
-            {
-              text: 'Analyze financial data and create financial models for decision support.',
-              is_significant: true,
-              is_readonly: true,
-            },
-            {
-              text: 'Report on financial performance and prepare for regular leadership reviews.',
-              is_significant: false,
-              is_readonly: false,
-            },
-            {
-              text: 'Analyze past results, perform variance analysis, identify trends, and make recommendations for improvements.',
-              is_significant: false,
-              is_readonly: false,
-            },
-            {
-              text: 'Work closely with the accounting team to ensure accurate financial reporting.',
-              is_significant: false,
-              is_readonly: false,
-            },
-            {
-              text: 'Evaluate financial performance by comparing and analyzing actual results with plans and forecasts.',
-              is_significant: true,
-              is_readonly: false,
-            },
-            {
-              text: 'Guide the cost analysis process by establishing and enforcing policies and procedures.',
-              is_significant: true,
-              is_readonly: false,
-            },
-            {
-              text: 'Provide analysis of trends and forecasts and recommend actions for optimization.',
-              is_significant: true,
-              is_readonly: false,
-            },
-            {
-              text: 'Recommend actions by analyzing and interpreting data and making comparative analyses; study proposed changes in methods and materials.',
-              is_significant: true,
-              is_readonly: false,
-            },
-            {
-              text: 'Identify and drive process improvements, including the creation of standard and ad-hoc reports, tools, and Excel dashboards.',
-              is_significant: true,
-              is_readonly: false,
-            },
-            {
-              text: 'Increase productivity by developing automated reporting/forecasting tools.',
-              is_significant: true,
-              is_readonly: false,
-            },
-            {
-              text: 'Market research, data mining, business intelligence, and valuation comps.',
-              is_significant: true,
-              is_readonly: false,
-            },
-          ],
-          program_overview: { value: '', disabled: false, isCustom: false },
-          all_organizations: true,
-          security_screenings: [],
-          optional_requirements: [],
-          willingness_statements: [],
-          behavioural_competencies: [
-            {
-              behavioural_competency: {
-                id: 17,
-                name: 'Business acumen',
-                description:
-                  'is the ability to understand the business implications of decisions and the ability to strive to improve organizational performance. It requires an awareness of business issues, processes and outcomes as they impact the client’s and the organization’s business needs.',
-              },
-            },
-            {
-              behavioural_competency: {
-                id: 21,
-                name: 'Managing organizational resources',
-                description:
-                  'is the ability to understand and effectively manage organizational resources (for example: people, materials, assets, budgets). This is demonstrated through measurement, planning and control of resources to maximize results. It requires an evaluation of qualitative (for example: client satisfaction) and quantitative (for example: service costs) needs.',
-              },
-            },
-            {
-              behavioural_competency: {
-                id: 23,
-                name: 'Problem solving and judgement',
-                description:
-                  'is the ability to analyze problems systematically, organize information, identify key factors, identify underlying causes and generate solutions.',
-              },
-            },
-            {
-              behavioural_competency: {
-                id: 22,
-                name: 'Planning, organizing and coordinating',
-                description:
-                  "involves proactively planning, establishing priorities and allocating resources. It's expressed by developing and implementing increasingly complex plans. It also involves monitoring and adjusting work to accomplish goals and deliver to the organization’s mandate.",
-              },
-            },
-            {
-              behavioural_competency: {
-                id: 42,
-                name: 'Leadership',
-                description:
-                  "implies a desire to lead others, including diverse teams. Leadership is generally, but not always, demonstrated from a position of formal authority. The 'team' here should be understood broadly as any group with which the person interacts regularly.",
-              },
-            },
-          ],
-          knowledge_skills_abilities: [],
-          professional_registration_requirements: [],
+          user_id: TEST_USER_ID,
+          title: 'Project Manager - Additional info step',
+          position_number: null,
+          classification_id: '752203',
+          submission_id: 'SUB002',
+          submitted_at: new Date(),
+          approved_at: new Date(),
+          status: 'DRAFT',
+          updated_at: new Date(),
+          classification_employee_group_id: 'GEU',
+          classification_peoplesoft_id: 'BCSET',
+          additional_info: Prisma.DbNull,
         },
-        orgchart_json: {
-          edges: [
-            { id: '00054345-00008599', type: 'smoothstep', source: '00054345', target: '00008599' },
-            { id: '00008599-00081675', type: 'smoothstep', source: '00008599', target: '00081675' },
-            { id: '00008599-00038563', type: 'smoothstep', source: '00008599', target: '00038563' },
-            { id: '00008599-00042391', type: 'smoothstep', source: '00008599', target: '00042391' },
-            { id: '00008599-00093866', type: 'smoothstep', source: '00008599', target: '00093866' },
-            { id: '00008599-00030150', type: 'smoothstep', source: '00008599', target: '00030150' },
-            { id: '00008599-00079380', type: 'smoothstep', source: '00008599', target: '00079380' },
-            { id: '00126684-00057755', type: 'smoothstep', source: '00126684', target: '00057755' },
-            { id: '00008599-00067309 ', type: 'smoothstep', source: '00008599', target: '00067309 ' },
-            { id: '00008599-00030112', type: 'smoothstep', source: '00008599', target: '00030112' },
-            { id: '00008599-00092685', type: 'smoothstep', source: '00008599', target: '00092685' },
-            { id: '00008599-00023206', type: 'smoothstep', source: '00008599', target: '00023206' },
-          ],
-          nodes: [
-            {
-              id: '00008599',
-              data: {
-                id: '00008599',
-                title: 'Exec Dir & Chief Fin Officer',
-                employees: [{ id: '000324', name: 'Alice Johnson', status: 'Active' }],
-                department: { id: '026-4240', name: 'CFO', organization_id: 'BC026' },
-                classification: { id: '185005', code: 'Band 4', name: 'Band 4' },
-              },
-              type: 'org-chart-card',
-              position: { x: 59325, y: 50 },
-              sourcePosition: 'bottom',
-              targetPosition: 'top',
+        {
+          crm_id: 54321,
+          crm_assigned_to_account_id: 98765,
+          step: 2,
+          reports_to_position_id: 'POS456',
+          department_id: '123-4567',
+          parent_job_profile_id: profile200.id,
+          parent_job_profile_version: 1,
+          crm_json: null,
+          profile_json: {
+            id: profile200.id,
+            role: { id: null },
+            type: 'USER',
+            scope: { id: null },
+            title: { value: 'Financial Analyst', disabled: false, isCustom: false },
+            number: 247,
+            context:
+              'The job holder is part of the human resources team and is supervised by the HR Director, who sets policies for employee relations and development, offering mentorship and policy guidance.',
+            streams: [],
+            overview: {
+              value:
+                'Detail-oriented Financial Analyst to provide analysis of financial data, forecast future trends, and advise on investment decisions.',
+              disabled: false,
+              isCustom: false,
             },
-            {
-              id: '00081675',
-              data: {
-                id: '00081675',
-                title: 'Senior Project Manager',
-                employees: [{ id: '001456', name: 'Bob Smith', status: 'Active' }],
-                department: { id: '026-4240', name: 'CFO', organization_id: 'BC026' },
-                classification: { id: '363104', code: 'CLK ST 12R', name: 'Clerk Stenographer R12' },
+            education: [
+              {
+                is_significant: true,
+                is_readonly: true,
+                text: 'Bachelor’s degree in Finance, Economics, Accounting, Mathematics, Statistics, or related field.',
               },
-              type: 'org-chart-card',
-              position: { x: 57400, y: 300 },
-              sourcePosition: 'bottom',
-              targetPosition: 'top',
-            },
-            {
-              id: '00038563',
-              data: {
-                id: '00038563',
-                title: 'Lead Software Engineer',
-                employees: [],
-                department: { id: '026-4240', name: 'CFO', organization_id: 'BC026' },
-                classification: { id: '181004', code: 'MGMT LV 04', name: 'Management Level 04' },
+              {
+                is_significant: true,
+                is_readonly: false,
+                text: "Master's degree in Finance, Business Administration (MBA), or related field preferred.",
               },
-              type: 'org-chart-card',
-              position: { x: 57750, y: 300 },
-              sourcePosition: 'bottom',
-              targetPosition: 'top',
-            },
-            {
-              id: '00042391',
-              data: {
-                id: '00042391',
-                title: 'HR Manager',
-                employees: [],
-                department: { id: '026-4240', name: 'CFO', organization_id: 'BC026' },
-                classification: { id: '181004', code: 'MGMT LV 04', name: 'Management Level 04' },
+              {
+                is_significant: true,
+                is_readonly: false,
+                text: 'Certifications such as Chartered Financial Analyst (CFA) or Certified Public Accountant (CPA) are advantageous.',
               },
-              type: 'org-chart-card',
-              position: { x: 58100, y: 300 },
-              sourcePosition: 'bottom',
-              targetPosition: 'top',
-            },
-            {
-              id: '00093866',
-              data: {
-                id: '00093866',
-                title: 'Coor.Transition Planning',
-                employees: [],
-                department: { id: '026-4240', name: 'CFO', organization_id: 'BC026' },
-                classification: { id: '181003', code: 'MGMT LV 03', name: 'Management Level 03' },
+              {
+                is_significant: true,
+                is_readonly: false,
+                text: 'Proven work experience as a Financial Analyst, Financial Consultant, or similar role.',
               },
-              type: 'org-chart-card',
-              position: { x: 58450, y: 300 },
-              sourcePosition: 'bottom',
-              targetPosition: 'top',
-            },
-            {
-              id: '00030150',
-              data: {
-                id: '00030150',
-                title: 'Clerk Stenographer R9',
-                employees: [],
-                department: { id: '026-4240', name: 'CFO', organization_id: 'BC026' },
-                classification: { id: '363103', code: 'CLK ST 09R', name: 'Clerk Stenographer R9' },
+              {
+                is_significant: true,
+                is_readonly: false,
+                text: 'Strong working knowledge of financial forecasting, corporate finance, information analysis, and financial modeling techniques.',
               },
-              type: 'org-chart-card',
-              position: { x: 58800, y: 300 },
-              sourcePosition: 'bottom',
-              targetPosition: 'top',
-            },
-            {
-              id: '00079380',
-              data: {
-                id: '00079380',
-                title: 'Manager, Capital Finance',
-                employees: [],
-                department: { id: '026-4240', name: 'CFO', organization_id: 'BC026' },
-                classification: { id: '181005', code: 'MGMT LV 05', name: 'Management Level 05' },
+              {
+                is_significant: true,
+                is_readonly: false,
+                text: 'Experience with statistical analysis and financial forecasting.',
               },
-              type: 'org-chart-card',
-              position: { x: 59150, y: 300 },
-              sourcePosition: 'bottom',
-              targetPosition: 'top',
-            },
-            {
-              id: '00057755',
-              data: {
-                id: '00057755',
-                title: 'Financial Analyst',
-                employees: [],
-                department: { id: '026-4240', name: 'CFO', organization_id: 'BC026' },
-                classification: { id: '551402', code: 'FO 18R', name: 'Financial Officer R18' },
+              {
+                is_significant: true,
+                is_readonly: false,
+                text: 'Attention to detail and the ability to identify data patterns.',
               },
-              type: 'org-chart-card',
-              position: { x: 59675, y: 50 },
-              sourcePosition: 'bottom',
-              targetPosition: 'top',
-            },
-            {
-              id: '00067309 ',
-              data: {
-                id: '00067309 ',
-                title: 'Sr. Project Management Analyst',
-                employees: [],
-                department: { id: '026-4240', name: 'CFO', organization_id: 'BC026' },
-                classification: { id: '551505', code: 'ADMN O 24R', name: 'Administrative Officer R24' },
+              {
+                is_significant: true,
+                is_readonly: false,
+                text: 'Good verbal and written communication skills.',
               },
-              type: 'org-chart-card',
-              position: { x: 59500, y: 300 },
-              sourcePosition: 'bottom',
-              targetPosition: 'top',
-            },
-            {
-              id: '00030112',
-              data: {
-                id: '00030112',
-                title: 'Sr Dir, Financial Operations',
-                employees: [],
-                department: { id: '026-4240', name: 'CFO', organization_id: 'BC026' },
-                classification: { id: '185004', code: 'Band 4', name: 'Band 4' },
+              {
+                is_significant: true,
+                is_readonly: false,
+                text: 'Advanced knowledge of Excel, including pivot tables, formulas, and charts.',
               },
-              type: 'org-chart-card',
-              position: { x: 59850, y: 300 },
-              sourcePosition: 'bottom',
-              targetPosition: 'top',
-            },
-            {
-              id: '00092685',
-              data: {
-                id: '00092685',
-                title: 'Level 1 Co-op',
-                employees: [],
-                department: { id: '026-4240', name: 'CFO', organization_id: 'BC026' },
-                classification: { id: '361301', code: 'COOP LVL 1', name: 'Coop Education Train Prgm Lv1' },
+            ],
+            role_type: { id: null },
+            reports_to: [],
+            jobFamilies: [],
+            preferences: [],
+            professions: [],
+            organizations: [],
+            all_reports_to: false,
+            job_experience: [],
+            classifications: [
+              {
+                classification: {
+                  id: '551404',
+                  code: 'FO 21R',
+                  name: 'Financial Officer R21',
+                  grade: '21A',
+                  employee_group_id: 'GEU',
+                },
               },
-              type: 'org-chart-card',
-              position: { x: 60200, y: 300 },
-              sourcePosition: 'bottom',
-              targetPosition: 'top',
-            },
-            {
-              id: '00023206',
-              data: {
-                id: '00023206',
-                title: 'Fun CEO',
-                employees: [],
-                department: { id: '026-4240', name: 'CFO', organization_id: 'BC026' },
-                classification: { id: '551104', code: 'CLK 12R', name: 'Clerk R12' },
+            ],
+            organization_id: '-1',
+            review_required: false,
+            accountabilities: [
+              {
+                text: 'Analyze financial data and create financial models for decision support.',
+                is_significant: true,
+                is_readonly: true,
               },
-              type: 'org-chart-card',
-              position: { x: 60550, y: 300 },
-              sourcePosition: 'bottom',
-              targetPosition: 'top',
-            },
-          ],
-        },
-        user_id: TEST_USER_ID,
-        title: 'Project Manager',
-        position_number: 20002,
-        classification_id: '508013',
-        submission_id: 'SUB002',
-        submitted_at: new Date(),
-        approved_at: new Date(),
-        status: 'VERIFICATION',
-        updated_at: new Date(),
-        classification_employee_group_id: 'GEU',
-        classification_peoplesoft_id: 'BCSET',
-        additional_info: {
-          branch: 'branch3',
-          division: 'division3',
-          department_id: '004-0042',
-          work_location_id: 'V8W9V1',
-          work_location_name: '049-617 GOVERNMENT ST',
-          excluded_mgr_position_number: '00129934',
-        },
-      },
-      {
-        crm_id: 67890,
-        crm_assigned_to_account_id: 12345,
-        step: 4,
-        reports_to_position_id: 'POS789',
-        department_id: 'DEPT03',
-        parent_job_profile_id: profile208.id,
-        parent_job_profile_version: 1,
-        crm_json: null,
-        profile_json: {
-          id: profile208.id,
-          role: { id: null },
-          type: 'USER',
-          scope: { id: null },
-          title: { value: 'Financial Analyst', disabled: false, isCustom: false },
-          number: 247,
-          context:
-            'The job holder is part of the human resources team and is supervised by the HR Director, who sets policies for employee relations and development, offering mentorship and policy guidance.',
-          streams: [],
-          overview: {
-            value:
-              'To provide advisory services in the preparation of annual budgets; conduct proactive reporting and analysis of financial information; participate in the development and maintenance of a framework for setting, measuring, analyzing and reporting on financial performance; integrate the reporting of financial and operational results; and assess and make recommendations on the financial implications of new initiatives.',
-            disabled: false,
-            isCustom: false,
+              {
+                text: 'Report on financial performance and prepare for regular leadership reviews.',
+                is_significant: false,
+                is_readonly: false,
+              },
+              {
+                text: 'Analyze past results, perform variance analysis, identify trends, and make recommendations for improvements.',
+                is_significant: false,
+                is_readonly: false,
+              },
+              {
+                text: 'Work closely with the accounting team to ensure accurate financial reporting.',
+                is_significant: false,
+                is_readonly: false,
+              },
+              {
+                text: 'Evaluate financial performance by comparing and analyzing actual results with plans and forecasts.',
+                is_significant: true,
+                is_readonly: false,
+              },
+              {
+                text: 'Guide the cost analysis process by establishing and enforcing policies and procedures.',
+                is_significant: true,
+                is_readonly: false,
+              },
+              {
+                text: 'Provide analysis of trends and forecasts and recommend actions for optimization.',
+                is_significant: true,
+                is_readonly: false,
+              },
+              {
+                text: 'Recommend actions by analyzing and interpreting data and making comparative analyses; study proposed changes in methods and materials.',
+                is_significant: true,
+                is_readonly: false,
+              },
+              {
+                text: 'Identify and drive process improvements, including the creation of standard and ad-hoc reports, tools, and Excel dashboards.',
+                is_significant: true,
+                is_readonly: false,
+              },
+              {
+                text: 'Increase productivity by developing automated reporting/forecasting tools.',
+                is_significant: true,
+                is_readonly: false,
+              },
+              {
+                text: 'Market research, data mining, business intelligence, and valuation comps.',
+                is_significant: true,
+                is_readonly: false,
+              },
+            ],
+            program_overview: { value: '', disabled: false, isCustom: false },
+            all_organizations: true,
+            security_screenings: [],
+            optional_requirements: [],
+            willingness_statements: [],
+            behavioural_competencies: [
+              {
+                behavioural_competency: {
+                  id: 17,
+                  name: 'Business acumen',
+                  description:
+                    'is the ability to understand the business implications of decisions and the ability to strive to improve organizational performance. It requires an awareness of business issues, processes and outcomes as they impact the client’s and the organization’s business needs.',
+                },
+              },
+              {
+                behavioural_competency: {
+                  id: 21,
+                  name: 'Managing organizational resources',
+                  description:
+                    'is the ability to understand and effectively manage organizational resources (for example: people, materials, assets, budgets). This is demonstrated through measurement, planning and control of resources to maximize results. It requires an evaluation of qualitative (for example: client satisfaction) and quantitative (for example: service costs) needs.',
+                },
+              },
+              {
+                behavioural_competency: {
+                  id: 23,
+                  name: 'Problem solving and judgement',
+                  description:
+                    'is the ability to analyze problems systematically, organize information, identify key factors, identify underlying causes and generate solutions.',
+                },
+              },
+              {
+                behavioural_competency: {
+                  id: 22,
+                  name: 'Planning, organizing and coordinating',
+                  description:
+                    "involves proactively planning, establishing priorities and allocating resources. It's expressed by developing and implementing increasingly complex plans. It also involves monitoring and adjusting work to accomplish goals and deliver to the organization’s mandate.",
+                },
+              },
+              {
+                behavioural_competency: {
+                  id: 42,
+                  name: 'Leadership',
+                  description:
+                    "implies a desire to lead others, including diverse teams. Leadership is generally, but not always, demonstrated from a position of formal authority. The 'team' here should be understood broadly as any group with which the person interacts regularly.",
+                },
+              },
+            ],
+            knowledge_skills_abilities: [],
+            professional_registration_requirements: [],
           },
-          education: [
-            {
-              is_significant: true,
-              is_readonly: true,
-              text: 'Bachelor’s degree in Finance, Economics, Accounting, Mathematics, Statistics, or related field.',
-            },
-            {
-              is_significant: true,
-              is_readonly: false,
-              text: "Master's degree in Finance, Business Administration (MBA), or related field preferred.",
-            },
-            {
-              is_significant: true,
-              is_readonly: false,
-              text: 'Certifications such as Chartered Financial Analyst (CFA) or Certified Public Accountant (CPA) are advantageous.',
-            },
-            {
-              is_significant: true,
-              is_readonly: false,
-              text: 'Proven work experience as a Financial Analyst, Financial Consultant, or similar role.',
-            },
-            {
-              is_significant: true,
-              is_readonly: false,
-              text: 'Strong working knowledge of financial forecasting, corporate finance, information analysis, and financial modeling techniques.',
-            },
-            {
-              is_significant: true,
-              is_readonly: false,
-              text: 'Experience with statistical analysis and financial forecasting.',
-            },
-            {
-              is_significant: true,
-              is_readonly: false,
-              text: 'Attention to detail and the ability to identify data patterns.',
-            },
-            {
-              is_significant: true,
-              is_readonly: false,
-              text: 'Good verbal and written communication skills.',
-            },
-            {
-              is_significant: true,
-              is_readonly: false,
-              text: 'Advanced knowledge of Excel, including pivot tables, formulas, and charts.',
-            },
-          ],
-          role_type: { id: null },
-          reports_to: [],
-          jobFamilies: [],
-          preferences: [],
-          professions: [],
-          organizations: [],
-          all_reports_to: false,
-          job_experience: [],
-          classifications: [
-            {
-              classification: {
-                id: '551404',
-                code: 'FO 21R',
-                name: 'Financial Officer R21',
-                grade: '21A',
-                employee_group_id: 'GEU',
-              },
-            },
-          ],
-          organization_id: '-1',
-          review_required: false,
-          accountabilities: [
-            {
-              text: 'Analyze financial data and create financial models for decision support.',
-              is_significant: true,
-              is_readonly: true,
-            },
-            {
-              text: 'Report on financial performance and prepare for regular leadership reviews.',
-              is_significant: false,
-              is_readonly: false,
-            },
-            {
-              text: 'Analyze past results, perform variance analysis, identify trends, and make recommendations for improvements.',
-              is_significant: false,
-              is_readonly: false,
-            },
-            {
-              text: 'Work closely with the accounting team to ensure accurate financial reporting.',
-              is_significant: false,
-              is_readonly: false,
-            },
-            {
-              text: 'Evaluate financial performance by comparing and analyzing actual results with plans and forecasts.',
-              is_significant: true,
-              is_readonly: false,
-            },
-            {
-              text: 'Guide the cost analysis process by establishing and enforcing policies and procedures.',
-              is_significant: true,
-              is_readonly: false,
-            },
-            {
-              text: 'Provide analysis of trends and forecasts and recommend actions for optimization.',
-              is_significant: true,
-              is_readonly: false,
-            },
-            {
-              text: 'Recommend actions by analyzing and interpreting data and making comparative analyses; study proposed changes in methods and materials.',
-              is_significant: true,
-              is_readonly: false,
-            },
-            {
-              text: 'Identify and drive process improvements, including the creation of standard and ad-hoc reports, tools, and Excel dashboards.',
-              is_significant: true,
-              is_readonly: false,
-            },
-            {
-              text: 'Increase productivity by developing automated reporting/forecasting tools.',
-              is_significant: true,
-              is_readonly: false,
-            },
-            {
-              text: 'Market research, data mining, business intelligence, and valuation comps.',
-              is_significant: true,
-              is_readonly: false,
-            },
-          ],
-          program_overview: { value: '', disabled: false, isCustom: false },
-          all_organizations: true,
-          security_screenings: [],
-          optional_requirements: [],
-          willingness_statements: [],
-          behavioural_competencies: [
-            {
-              behavioural_competency: {
-                id: 17,
-                name: 'Business acumen',
-                description:
-                  'is the ability to understand the business implications of decisions and the ability to strive to improve organizational performance. It requires an awareness of business issues, processes and outcomes as they impact the client’s and the organization’s business needs.',
-              },
-            },
-            {
-              behavioural_competency: {
-                id: 21,
-                name: 'Managing organizational resources',
-                description:
-                  'is the ability to understand and effectively manage organizational resources (for example: people, materials, assets, budgets). This is demonstrated through measurement, planning and control of resources to maximize results. It requires an evaluation of qualitative (for example: client satisfaction) and quantitative (for example: service costs) needs.',
-              },
-            },
-            {
-              behavioural_competency: {
-                id: 23,
-                name: 'Problem solving and judgement',
-                description:
-                  'is the ability to analyze problems systematically, organize information, identify key factors, identify underlying causes and generate solutions.',
-              },
-            },
-            {
-              behavioural_competency: {
-                id: 22,
-                name: 'Planning, organizing and coordinating',
-                description:
-                  "involves proactively planning, establishing priorities and allocating resources. It's expressed by developing and implementing increasingly complex plans. It also involves monitoring and adjusting work to accomplish goals and deliver to the organization’s mandate.",
-              },
-            },
-            {
-              behavioural_competency: {
-                id: 42,
-                name: 'Leadership',
-                description:
-                  "implies a desire to lead others, including diverse teams. Leadership is generally, but not always, demonstrated from a position of formal authority. The 'team' here should be understood broadly as any group with which the person interacts regularly.",
-              },
-            },
-          ],
-          knowledge_skills_abilities: [],
-          professional_registration_requirements: [],
-        },
-        orgchart_json: {
-          edges: [
-            { id: '00054345-00008599', type: 'smoothstep', source: '00054345', target: '00008599' },
-            { id: '00008599-00081675', type: 'smoothstep', source: '00008599', target: '00081675' },
-            { id: '00008599-00038563', type: 'smoothstep', source: '00008599', target: '00038563' },
-            { id: '00008599-00042391', type: 'smoothstep', source: '00008599', target: '00042391' },
-            { id: '00008599-00093866', type: 'smoothstep', source: '00008599', target: '00093866' },
-            { id: '00008599-00030150', type: 'smoothstep', source: '00008599', target: '00030150' },
-            { id: '00008599-00079380', type: 'smoothstep', source: '00008599', target: '00079380' },
-            { id: '00126684-00057755', type: 'smoothstep', source: '00126684', target: '00057755' },
-            { id: '00008599-00067309 ', type: 'smoothstep', source: '00008599', target: '00067309 ' },
-            { id: '00008599-00030112', type: 'smoothstep', source: '00008599', target: '00030112' },
-            { id: '00008599-00092685', type: 'smoothstep', source: '00008599', target: '00092685' },
-            { id: '00008599-00023206', type: 'smoothstep', source: '00008599', target: '00023206' },
-          ],
-          nodes: [
-            {
-              id: '00008599',
-              data: {
+          orgchart_json: {
+            edges: [
+              { id: '00054345-00008599', type: 'smoothstep', source: '00054345', target: '00008599' },
+              { id: '00008599-00081675', type: 'smoothstep', source: '00008599', target: '00081675' },
+              { id: '00008599-00038563', type: 'smoothstep', source: '00008599', target: '00038563' },
+              { id: '00008599-00042391', type: 'smoothstep', source: '00008599', target: '00042391' },
+              { id: '00008599-00093866', type: 'smoothstep', source: '00008599', target: '00093866' },
+              { id: '00008599-00030150', type: 'smoothstep', source: '00008599', target: '00030150' },
+              { id: '00008599-00079380', type: 'smoothstep', source: '00008599', target: '00079380' },
+              { id: '00126684-00057755', type: 'smoothstep', source: '00126684', target: '00057755' },
+              { id: '00008599-00067309 ', type: 'smoothstep', source: '00008599', target: '00067309 ' },
+              { id: '00008599-00030112', type: 'smoothstep', source: '00008599', target: '00030112' },
+              { id: '00008599-00092685', type: 'smoothstep', source: '00008599', target: '00092685' },
+              { id: '00008599-00023206', type: 'smoothstep', source: '00008599', target: '00023206' },
+            ],
+            nodes: [
+              {
                 id: '00008599',
-                title: 'Exec Dir & Chief Fin Officer',
-                employees: [{ id: '000324', name: 'Alice Johnson', status: 'Active' }],
-                department: { id: '026-4240', name: 'CFO', organization_id: 'BC026' },
-                classification: { id: '185005', code: 'Band 4', name: 'Band 4' },
+                data: {
+                  id: '00008599',
+                  title: 'Exec Dir & Chief Fin Officer',
+                  employees: [{ id: '000324', name: 'Alice Johnson', status: 'Active' }],
+                  department: { id: '026-4240', name: 'CFO', organization_id: 'BC026' },
+                  classification: { id: '185005', code: 'Band 4', name: 'Band 4' },
+                },
+                type: 'org-chart-card',
+                position: { x: 59325, y: 50 },
+                sourcePosition: 'bottom',
+                targetPosition: 'top',
               },
-              type: 'org-chart-card',
-              position: { x: 59325, y: 50 },
-              sourcePosition: 'bottom',
-              targetPosition: 'top',
-            },
-            {
-              id: '00081675',
-              data: {
+              {
                 id: '00081675',
-                title: 'Senior Project Manager',
-                employees: [{ id: '001456', name: 'Bob Smith', status: 'Active' }],
-                department: { id: '026-4240', name: 'CFO', organization_id: 'BC026' },
-                classification: { id: '363104', code: 'CLK ST 12R', name: 'Clerk Stenographer R12' },
+                data: {
+                  id: '00081675',
+                  title: 'Senior Project Manager',
+                  employees: [{ id: '001456', name: 'Bob Smith', status: 'Active' }],
+                  department: { id: '026-4240', name: 'CFO', organization_id: 'BC026' },
+                  classification: { id: '363104', code: 'CLK ST 12R', name: 'Clerk Stenographer R12' },
+                },
+                type: 'org-chart-card',
+                position: { x: 57400, y: 300 },
+                sourcePosition: 'bottom',
+                targetPosition: 'top',
               },
-              type: 'org-chart-card',
-              position: { x: 57400, y: 300 },
-              sourcePosition: 'bottom',
-              targetPosition: 'top',
-            },
-            {
-              id: '00038563',
-              data: {
+              {
                 id: '00038563',
-                title: 'Lead Software Engineer',
-                employees: [],
-                department: { id: '026-4240', name: 'CFO', organization_id: 'BC026' },
-                classification: { id: '181004', code: 'MGMT LV 04', name: 'Management Level 04' },
+                data: {
+                  id: '00038563',
+                  title: 'Lead Software Engineer',
+                  employees: [],
+                  department: { id: '026-4240', name: 'CFO', organization_id: 'BC026' },
+                  classification: { id: '181004', code: 'MGMT LV 04', name: 'Management Level 04' },
+                },
+                type: 'org-chart-card',
+                position: { x: 57750, y: 300 },
+                sourcePosition: 'bottom',
+                targetPosition: 'top',
               },
-              type: 'org-chart-card',
-              position: { x: 57750, y: 300 },
-              sourcePosition: 'bottom',
-              targetPosition: 'top',
-            },
-            {
-              id: '00042391',
-              data: {
+              {
                 id: '00042391',
-                title: 'HR Manager',
-                employees: [],
-                department: { id: '026-4240', name: 'CFO', organization_id: 'BC026' },
-                classification: { id: '181004', code: 'MGMT LV 04', name: 'Management Level 04' },
+                data: {
+                  id: '00042391',
+                  title: 'HR Manager',
+                  employees: [],
+                  department: { id: '026-4240', name: 'CFO', organization_id: 'BC026' },
+                  classification: { id: '181004', code: 'MGMT LV 04', name: 'Management Level 04' },
+                },
+                type: 'org-chart-card',
+                position: { x: 58100, y: 300 },
+                sourcePosition: 'bottom',
+                targetPosition: 'top',
               },
-              type: 'org-chart-card',
-              position: { x: 58100, y: 300 },
-              sourcePosition: 'bottom',
-              targetPosition: 'top',
-            },
-            {
-              id: '00093866',
-              data: {
+              {
                 id: '00093866',
-                title: 'Coor.Transition Planning',
-                employees: [],
-                department: { id: '026-4240', name: 'CFO', organization_id: 'BC026' },
-                classification: { id: '181003', code: 'MGMT LV 03', name: 'Management Level 03' },
+                data: {
+                  id: '00093866',
+                  title: 'Coor.Transition Planning',
+                  employees: [],
+                  department: { id: '026-4240', name: 'CFO', organization_id: 'BC026' },
+                  classification: { id: '181003', code: 'MGMT LV 03', name: 'Management Level 03' },
+                },
+                type: 'org-chart-card',
+                position: { x: 58450, y: 300 },
+                sourcePosition: 'bottom',
+                targetPosition: 'top',
               },
-              type: 'org-chart-card',
-              position: { x: 58450, y: 300 },
-              sourcePosition: 'bottom',
-              targetPosition: 'top',
-            },
-            {
-              id: '00030150',
-              data: {
+              {
                 id: '00030150',
-                title: 'Clerk Stenographer R9',
-                employees: [],
-                department: { id: '026-4240', name: 'CFO', organization_id: 'BC026' },
-                classification: { id: '363103', code: 'CLK ST 09R', name: 'Clerk Stenographer R9' },
+                data: {
+                  id: '00030150',
+                  title: 'Clerk Stenographer R9',
+                  employees: [],
+                  department: { id: '026-4240', name: 'CFO', organization_id: 'BC026' },
+                  classification: { id: '363103', code: 'CLK ST 09R', name: 'Clerk Stenographer R9' },
+                },
+                type: 'org-chart-card',
+                position: { x: 58800, y: 300 },
+                sourcePosition: 'bottom',
+                targetPosition: 'top',
               },
-              type: 'org-chart-card',
-              position: { x: 58800, y: 300 },
-              sourcePosition: 'bottom',
-              targetPosition: 'top',
-            },
-            {
-              id: '00079380',
-              data: {
+              {
                 id: '00079380',
-                title: 'Manager, Capital Finance',
-                employees: [],
-                department: { id: '026-4240', name: 'CFO', organization_id: 'BC026' },
-                classification: { id: '181005', code: 'MGMT LV 05', name: 'Management Level 05' },
+                data: {
+                  id: '00079380',
+                  title: 'Manager, Capital Finance',
+                  employees: [],
+                  department: { id: '026-4240', name: 'CFO', organization_id: 'BC026' },
+                  classification: { id: '181005', code: 'MGMT LV 05', name: 'Management Level 05' },
+                },
+                type: 'org-chart-card',
+                position: { x: 59150, y: 300 },
+                sourcePosition: 'bottom',
+                targetPosition: 'top',
               },
-              type: 'org-chart-card',
-              position: { x: 59150, y: 300 },
-              sourcePosition: 'bottom',
-              targetPosition: 'top',
-            },
-            {
-              id: '00057755',
-              data: {
+              {
                 id: '00057755',
-                title: 'Financial Analyst',
-                employees: [],
-                department: { id: '026-4240', name: 'CFO', organization_id: 'BC026' },
-                classification: { id: '551402', code: 'FO 18R', name: 'Financial Officer R18' },
+                data: {
+                  id: '00057755',
+                  title: 'Financial Analyst',
+                  employees: [],
+                  department: { id: '026-4240', name: 'CFO', organization_id: 'BC026' },
+                  classification: { id: '551402', code: 'FO 18R', name: 'Financial Officer R18' },
+                },
+                type: 'org-chart-card',
+                position: { x: 59675, y: 50 },
+                sourcePosition: 'bottom',
+                targetPosition: 'top',
               },
-              type: 'org-chart-card',
-              position: { x: 59675, y: 50 },
-              sourcePosition: 'bottom',
-              targetPosition: 'top',
-            },
-            {
-              id: '00067309 ',
-              data: {
+              {
                 id: '00067309 ',
-                title: 'Sr. Project Management Analyst',
-                employees: [],
-                department: { id: '026-4240', name: 'CFO', organization_id: 'BC026' },
-                classification: { id: '551505', code: 'ADMN O 24R', name: 'Administrative Officer R24' },
+                data: {
+                  id: '00067309 ',
+                  title: 'Sr. Project Management Analyst',
+                  employees: [],
+                  department: { id: '026-4240', name: 'CFO', organization_id: 'BC026' },
+                  classification: { id: '551505', code: 'ADMN O 24R', name: 'Administrative Officer R24' },
+                },
+                type: 'org-chart-card',
+                position: { x: 59500, y: 300 },
+                sourcePosition: 'bottom',
+                targetPosition: 'top',
               },
-              type: 'org-chart-card',
-              position: { x: 59500, y: 300 },
-              sourcePosition: 'bottom',
-              targetPosition: 'top',
-            },
-            {
-              id: '00030112',
-              data: {
+              {
                 id: '00030112',
-                title: 'Sr Dir, Financial Operations',
-                employees: [],
-                department: { id: '026-4240', name: 'CFO', organization_id: 'BC026' },
-                classification: { id: '185004', code: 'Band 4', name: 'Band 4' },
+                data: {
+                  id: '00030112',
+                  title: 'Sr Dir, Financial Operations',
+                  employees: [],
+                  department: { id: '026-4240', name: 'CFO', organization_id: 'BC026' },
+                  classification: { id: '185004', code: 'Band 4', name: 'Band 4' },
+                },
+                type: 'org-chart-card',
+                position: { x: 59850, y: 300 },
+                sourcePosition: 'bottom',
+                targetPosition: 'top',
               },
-              type: 'org-chart-card',
-              position: { x: 59850, y: 300 },
-              sourcePosition: 'bottom',
-              targetPosition: 'top',
-            },
-            {
-              id: '00092685',
-              data: {
+              {
                 id: '00092685',
-                title: 'Level 1 Co-op',
-                employees: [],
-                department: { id: '026-4240', name: 'CFO', organization_id: 'BC026' },
-                classification: { id: '361301', code: 'COOP LVL 1', name: 'Coop Education Train Prgm Lv1' },
+                data: {
+                  id: '00092685',
+                  title: 'Level 1 Co-op',
+                  employees: [],
+                  department: { id: '026-4240', name: 'CFO', organization_id: 'BC026' },
+                  classification: { id: '361301', code: 'COOP LVL 1', name: 'Coop Education Train Prgm Lv1' },
+                },
+                type: 'org-chart-card',
+                position: { x: 60200, y: 300 },
+                sourcePosition: 'bottom',
+                targetPosition: 'top',
               },
-              type: 'org-chart-card',
-              position: { x: 60200, y: 300 },
-              sourcePosition: 'bottom',
-              targetPosition: 'top',
-            },
-            {
-              id: '00023206',
-              data: {
+              {
                 id: '00023206',
-                title: 'Fun CEO',
-                employees: [],
-                department: { id: '026-4240', name: 'CFO', organization_id: 'BC026' },
-                classification: { id: '551104', code: 'CLK 12R', name: 'Clerk R12' },
+                data: {
+                  id: '00023206',
+                  title: 'Fun CEO',
+                  employees: [],
+                  department: { id: '026-4240', name: 'CFO', organization_id: 'BC026' },
+                  classification: { id: '551104', code: 'CLK 12R', name: 'Clerk R12' },
+                },
+                type: 'org-chart-card',
+                position: { x: 60550, y: 300 },
+                sourcePosition: 'bottom',
+                targetPosition: 'top',
               },
-              type: 'org-chart-card',
-              position: { x: 60550, y: 300 },
-              sourcePosition: 'bottom',
-              targetPosition: 'top',
+            ],
+          },
+          user_id: TEST_USER_ID,
+          title: 'Project Manager',
+          position_number: 20002,
+          classification_id: '508013',
+          submission_id: 'SUB002',
+          submitted_at: new Date(),
+          approved_at: new Date(),
+          status: 'VERIFICATION',
+          updated_at: new Date(),
+          classification_employee_group_id: 'GEU',
+          classification_peoplesoft_id: 'BCSET',
+          additional_info: {
+            branch: 'branch3',
+            division: 'division3',
+            department_id: '004-0042',
+            work_location_id: 'V8W9V1',
+            work_location_name: '049-617 GOVERNMENT ST',
+            excluded_mgr_position_number: '00129934',
+            excluded_mgr_name: 'Bob Doe',
+          },
+        },
+        {
+          crm_id: 67890,
+          crm_assigned_to_account_id: 12345,
+          step: 4,
+          reports_to_position_id: 'POS789',
+          department_id: 'DEPT03',
+          parent_job_profile_id: profile208.id,
+          parent_job_profile_version: 1,
+          crm_json: null,
+          profile_json: {
+            id: profile208.id,
+            role: { id: null },
+            type: 'USER',
+            scope: { id: null },
+            title: { value: 'Financial Analyst', disabled: false, isCustom: false },
+            number: 247,
+            context:
+              'The job holder is part of the human resources team and is supervised by the HR Director, who sets policies for employee relations and development, offering mentorship and policy guidance.',
+            streams: [],
+            overview: {
+              value:
+                'To provide advisory services in the preparation of annual budgets; conduct proactive reporting and analysis of financial information; participate in the development and maintenance of a framework for setting, measuring, analyzing and reporting on financial performance; integrate the reporting of financial and operational results; and assess and make recommendations on the financial implications of new initiatives.',
+              disabled: false,
+              isCustom: false,
             },
-          ],
+            education: [
+              {
+                is_significant: true,
+                is_readonly: true,
+                text: 'Bachelor’s degree in Finance, Economics, Accounting, Mathematics, Statistics, or related field.',
+              },
+              {
+                is_significant: true,
+                is_readonly: false,
+                text: "Master's degree in Finance, Business Administration (MBA), or related field preferred.",
+              },
+              {
+                is_significant: true,
+                is_readonly: false,
+                text: 'Certifications such as Chartered Financial Analyst (CFA) or Certified Public Accountant (CPA) are advantageous.',
+              },
+              {
+                is_significant: true,
+                is_readonly: false,
+                text: 'Proven work experience as a Financial Analyst, Financial Consultant, or similar role.',
+              },
+              {
+                is_significant: true,
+                is_readonly: false,
+                text: 'Strong working knowledge of financial forecasting, corporate finance, information analysis, and financial modeling techniques.',
+              },
+              {
+                is_significant: true,
+                is_readonly: false,
+                text: 'Experience with statistical analysis and financial forecasting.',
+              },
+              {
+                is_significant: true,
+                is_readonly: false,
+                text: 'Attention to detail and the ability to identify data patterns.',
+              },
+              {
+                is_significant: true,
+                is_readonly: false,
+                text: 'Good verbal and written communication skills.',
+              },
+              {
+                is_significant: true,
+                is_readonly: false,
+                text: 'Advanced knowledge of Excel, including pivot tables, formulas, and charts.',
+              },
+            ],
+            role_type: { id: null },
+            reports_to: [],
+            jobFamilies: [],
+            preferences: [],
+            professions: [],
+            organizations: [],
+            all_reports_to: false,
+            job_experience: [],
+            classifications: [
+              {
+                classification: {
+                  id: '551404',
+                  code: 'FO 21R',
+                  name: 'Financial Officer R21',
+                  grade: '21A',
+                  employee_group_id: 'GEU',
+                },
+              },
+            ],
+            organization_id: '-1',
+            review_required: false,
+            accountabilities: [
+              {
+                text: 'Analyze financial data and create financial models for decision support.',
+                is_significant: true,
+                is_readonly: true,
+              },
+              {
+                text: 'Report on financial performance and prepare for regular leadership reviews.',
+                is_significant: false,
+                is_readonly: false,
+              },
+              {
+                text: 'Analyze past results, perform variance analysis, identify trends, and make recommendations for improvements.',
+                is_significant: false,
+                is_readonly: false,
+              },
+              {
+                text: 'Work closely with the accounting team to ensure accurate financial reporting.',
+                is_significant: false,
+                is_readonly: false,
+              },
+              {
+                text: 'Evaluate financial performance by comparing and analyzing actual results with plans and forecasts.',
+                is_significant: true,
+                is_readonly: false,
+              },
+              {
+                text: 'Guide the cost analysis process by establishing and enforcing policies and procedures.',
+                is_significant: true,
+                is_readonly: false,
+              },
+              {
+                text: 'Provide analysis of trends and forecasts and recommend actions for optimization.',
+                is_significant: true,
+                is_readonly: false,
+              },
+              {
+                text: 'Recommend actions by analyzing and interpreting data and making comparative analyses; study proposed changes in methods and materials.',
+                is_significant: true,
+                is_readonly: false,
+              },
+              {
+                text: 'Identify and drive process improvements, including the creation of standard and ad-hoc reports, tools, and Excel dashboards.',
+                is_significant: true,
+                is_readonly: false,
+              },
+              {
+                text: 'Increase productivity by developing automated reporting/forecasting tools.',
+                is_significant: true,
+                is_readonly: false,
+              },
+              {
+                text: 'Market research, data mining, business intelligence, and valuation comps.',
+                is_significant: true,
+                is_readonly: false,
+              },
+            ],
+            program_overview: { value: '', disabled: false, isCustom: false },
+            all_organizations: true,
+            security_screenings: [],
+            optional_requirements: [],
+            willingness_statements: [],
+            behavioural_competencies: [
+              {
+                behavioural_competency: {
+                  id: 17,
+                  name: 'Business acumen',
+                  description:
+                    'is the ability to understand the business implications of decisions and the ability to strive to improve organizational performance. It requires an awareness of business issues, processes and outcomes as they impact the client’s and the organization’s business needs.',
+                },
+              },
+              {
+                behavioural_competency: {
+                  id: 21,
+                  name: 'Managing organizational resources',
+                  description:
+                    'is the ability to understand and effectively manage organizational resources (for example: people, materials, assets, budgets). This is demonstrated through measurement, planning and control of resources to maximize results. It requires an evaluation of qualitative (for example: client satisfaction) and quantitative (for example: service costs) needs.',
+                },
+              },
+              {
+                behavioural_competency: {
+                  id: 23,
+                  name: 'Problem solving and judgement',
+                  description:
+                    'is the ability to analyze problems systematically, organize information, identify key factors, identify underlying causes and generate solutions.',
+                },
+              },
+              {
+                behavioural_competency: {
+                  id: 22,
+                  name: 'Planning, organizing and coordinating',
+                  description:
+                    "involves proactively planning, establishing priorities and allocating resources. It's expressed by developing and implementing increasingly complex plans. It also involves monitoring and adjusting work to accomplish goals and deliver to the organization’s mandate.",
+                },
+              },
+              {
+                behavioural_competency: {
+                  id: 42,
+                  name: 'Leadership',
+                  description:
+                    "implies a desire to lead others, including diverse teams. Leadership is generally, but not always, demonstrated from a position of formal authority. The 'team' here should be understood broadly as any group with which the person interacts regularly.",
+                },
+              },
+            ],
+            knowledge_skills_abilities: [],
+            professional_registration_requirements: [],
+          },
+          orgchart_json: {
+            edges: [
+              { id: '00054345-00008599', type: 'smoothstep', source: '00054345', target: '00008599' },
+              { id: '00008599-00081675', type: 'smoothstep', source: '00008599', target: '00081675' },
+              { id: '00008599-00038563', type: 'smoothstep', source: '00008599', target: '00038563' },
+              { id: '00008599-00042391', type: 'smoothstep', source: '00008599', target: '00042391' },
+              { id: '00008599-00093866', type: 'smoothstep', source: '00008599', target: '00093866' },
+              { id: '00008599-00030150', type: 'smoothstep', source: '00008599', target: '00030150' },
+              { id: '00008599-00079380', type: 'smoothstep', source: '00008599', target: '00079380' },
+              { id: '00126684-00057755', type: 'smoothstep', source: '00126684', target: '00057755' },
+              { id: '00008599-00067309 ', type: 'smoothstep', source: '00008599', target: '00067309 ' },
+              { id: '00008599-00030112', type: 'smoothstep', source: '00008599', target: '00030112' },
+              { id: '00008599-00092685', type: 'smoothstep', source: '00008599', target: '00092685' },
+              { id: '00008599-00023206', type: 'smoothstep', source: '00008599', target: '00023206' },
+            ],
+            nodes: [
+              {
+                id: '00008599',
+                data: {
+                  id: '00008599',
+                  title: 'Exec Dir & Chief Fin Officer',
+                  employees: [{ id: '000324', name: 'Alice Johnson', status: 'Active' }],
+                  department: { id: '026-4240', name: 'CFO', organization_id: 'BC026' },
+                  classification: { id: '185005', code: 'Band 4', name: 'Band 4' },
+                },
+                type: 'org-chart-card',
+                position: { x: 59325, y: 50 },
+                sourcePosition: 'bottom',
+                targetPosition: 'top',
+              },
+              {
+                id: '00081675',
+                data: {
+                  id: '00081675',
+                  title: 'Senior Project Manager',
+                  employees: [{ id: '001456', name: 'Bob Smith', status: 'Active' }],
+                  department: { id: '026-4240', name: 'CFO', organization_id: 'BC026' },
+                  classification: { id: '363104', code: 'CLK ST 12R', name: 'Clerk Stenographer R12' },
+                },
+                type: 'org-chart-card',
+                position: { x: 57400, y: 300 },
+                sourcePosition: 'bottom',
+                targetPosition: 'top',
+              },
+              {
+                id: '00038563',
+                data: {
+                  id: '00038563',
+                  title: 'Lead Software Engineer',
+                  employees: [],
+                  department: { id: '026-4240', name: 'CFO', organization_id: 'BC026' },
+                  classification: { id: '181004', code: 'MGMT LV 04', name: 'Management Level 04' },
+                },
+                type: 'org-chart-card',
+                position: { x: 57750, y: 300 },
+                sourcePosition: 'bottom',
+                targetPosition: 'top',
+              },
+              {
+                id: '00042391',
+                data: {
+                  id: '00042391',
+                  title: 'HR Manager',
+                  employees: [],
+                  department: { id: '026-4240', name: 'CFO', organization_id: 'BC026' },
+                  classification: { id: '181004', code: 'MGMT LV 04', name: 'Management Level 04' },
+                },
+                type: 'org-chart-card',
+                position: { x: 58100, y: 300 },
+                sourcePosition: 'bottom',
+                targetPosition: 'top',
+              },
+              {
+                id: '00093866',
+                data: {
+                  id: '00093866',
+                  title: 'Coor.Transition Planning',
+                  employees: [],
+                  department: { id: '026-4240', name: 'CFO', organization_id: 'BC026' },
+                  classification: { id: '181003', code: 'MGMT LV 03', name: 'Management Level 03' },
+                },
+                type: 'org-chart-card',
+                position: { x: 58450, y: 300 },
+                sourcePosition: 'bottom',
+                targetPosition: 'top',
+              },
+              {
+                id: '00030150',
+                data: {
+                  id: '00030150',
+                  title: 'Clerk Stenographer R9',
+                  employees: [],
+                  department: { id: '026-4240', name: 'CFO', organization_id: 'BC026' },
+                  classification: { id: '363103', code: 'CLK ST 09R', name: 'Clerk Stenographer R9' },
+                },
+                type: 'org-chart-card',
+                position: { x: 58800, y: 300 },
+                sourcePosition: 'bottom',
+                targetPosition: 'top',
+              },
+              {
+                id: '00079380',
+                data: {
+                  id: '00079380',
+                  title: 'Manager, Capital Finance',
+                  employees: [],
+                  department: { id: '026-4240', name: 'CFO', organization_id: 'BC026' },
+                  classification: { id: '181005', code: 'MGMT LV 05', name: 'Management Level 05' },
+                },
+                type: 'org-chart-card',
+                position: { x: 59150, y: 300 },
+                sourcePosition: 'bottom',
+                targetPosition: 'top',
+              },
+              {
+                id: '00057755',
+                data: {
+                  id: '00057755',
+                  title: 'Financial Analyst',
+                  employees: [],
+                  department: { id: '026-4240', name: 'CFO', organization_id: 'BC026' },
+                  classification: { id: '551402', code: 'FO 18R', name: 'Financial Officer R18' },
+                },
+                type: 'org-chart-card',
+                position: { x: 59675, y: 50 },
+                sourcePosition: 'bottom',
+                targetPosition: 'top',
+              },
+              {
+                id: '00067309 ',
+                data: {
+                  id: '00067309 ',
+                  title: 'Sr. Project Management Analyst',
+                  employees: [],
+                  department: { id: '026-4240', name: 'CFO', organization_id: 'BC026' },
+                  classification: { id: '551505', code: 'ADMN O 24R', name: 'Administrative Officer R24' },
+                },
+                type: 'org-chart-card',
+                position: { x: 59500, y: 300 },
+                sourcePosition: 'bottom',
+                targetPosition: 'top',
+              },
+              {
+                id: '00030112',
+                data: {
+                  id: '00030112',
+                  title: 'Sr Dir, Financial Operations',
+                  employees: [],
+                  department: { id: '026-4240', name: 'CFO', organization_id: 'BC026' },
+                  classification: { id: '185004', code: 'Band 4', name: 'Band 4' },
+                },
+                type: 'org-chart-card',
+                position: { x: 59850, y: 300 },
+                sourcePosition: 'bottom',
+                targetPosition: 'top',
+              },
+              {
+                id: '00092685',
+                data: {
+                  id: '00092685',
+                  title: 'Level 1 Co-op',
+                  employees: [],
+                  department: { id: '026-4240', name: 'CFO', organization_id: 'BC026' },
+                  classification: { id: '361301', code: 'COOP LVL 1', name: 'Coop Education Train Prgm Lv1' },
+                },
+                type: 'org-chart-card',
+                position: { x: 60200, y: 300 },
+                sourcePosition: 'bottom',
+                targetPosition: 'top',
+              },
+              {
+                id: '00023206',
+                data: {
+                  id: '00023206',
+                  title: 'Fun CEO',
+                  employees: [],
+                  department: { id: '026-4240', name: 'CFO', organization_id: 'BC026' },
+                  classification: { id: '551104', code: 'CLK 12R', name: 'Clerk R12' },
+                },
+                type: 'org-chart-card',
+                position: { x: 60550, y: 300 },
+                sourcePosition: 'bottom',
+                targetPosition: 'top',
+              },
+            ],
+          },
+          user_id: TEST_USER_ID,
+          title: 'Data Scientist',
+          position_number: 30003,
+          classification_id: '752203',
+          submission_id: 'SUB003',
+          submitted_at: new Date(),
+          approved_at: new Date(),
+          status: 'COMPLETED',
+          updated_at: new Date(),
+          classification_employee_group_id: 'GEU',
+          classification_peoplesoft_id: 'BCSET',
+          additional_info: {
+            branch: 'branch4',
+            division: 'division4',
+            department_id: '039-3961',
+            work_location_id: 'V5G3H302',
+            work_location_name: '100 -3705 Willingdon Avenue',
+            excluded_mgr_position_number: '00125168',
+            excluded_mgr_name: 'Jane Doe',
+          },
         },
-        user_id: TEST_USER_ID,
-        title: 'Data Scientist',
-        position_number: 30003,
-        classification_id: '752203',
-        submission_id: 'SUB003',
-        submitted_at: new Date(),
-        approved_at: new Date(),
-        status: 'COMPLETED',
-        updated_at: new Date(),
-        classification_employee_group_id: 'GEU',
-        classification_peoplesoft_id: 'BCSET',
-        additional_info: {
-          branch: 'branch4',
-          division: 'division4',
-          department_id: '039-3961',
-          work_location_id: 'V5G3H302',
-          work_location_name: '100 -3705 Willingdon Avenue',
-          excluded_mgr_position_number: '00125168',
-        },
-      },
-    ],
-  });
+      ],
+    });
+  } catch (e) {
+    console.log('ERROR: failed to create positionRequest');
+  }
 }
 
 // seed()

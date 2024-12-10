@@ -1,3 +1,7 @@
+describe('JobProfile Component Tests', () => {
+  it('empty test', () => {});
+});
+
 // import { fireEvent, render, screen, waitFor } from '@testing-library/react';
 // import { axe } from 'jest-axe';
 // import { MemoryRouter } from 'react-router-dom';

@@ -3,6 +3,7 @@
     { "id": "00132136", "name": "Testing User", "status": "Active" },
     { "id": "00132137", "name": "George D'Cruz", "status": "Active" },
     { "id": "00132138", "name": "Alex Struk", "status": "Active" },
+    { "id": "00132139", "name": "Hannah Morgan", "status": "Active" },
     { "id": "00123456", "name": "Alice Johnson", "status": "Active" },
     { "id": "00765432", "name": "Bob Smith", "status": "Active" },
     { "id": "00234567", "name": "Charlie Brown", "status": "Active" },
@@ -14,7 +15,8 @@
     { "id": "00456789", "name": "Ivy Scott", "status": "Active" },
     { "id": "00234589", "name": "Jack Wilson", "status": "Active" },
     { "id": "00543218", "name": "Jane Doe", "status": "Active" },
-    { "id": "00812345", "name": "Sam Carter", "status": "Active" },
+    { "id": "00812345", "name": "Sam Carter", "status": "Active", "positionId": "00812345" },
+    { "id": "00812346", "name": "Bob Doe", "status": "Active", "positionId": "00812345" },
     { "id": "00678901", "name": "Laura Wright", "status": "Active" },
     { "id": "00329871", "name": "Nick Anderson", "status": "Active" },
     { "id": "00432178", "name": "Olivia Brown", "status": "Active" },
@@ -58,7 +60,14 @@
     {
       "id": "00116494",
       "name": "George Martinez",
-      "status": "Active"
+      "status": "Active",
+      "positionId": "00116494"
+    },
+    {
+      "id": "00116495",
+      "name": "Jane Doe",
+      "status": "Active",
+      "positionId": "00116494"
     },
     {
       "id": "00116618",
@@ -235,157 +244,452 @@
     {
       "idir": "AJOHNSON",
       "name": "Alice Johnson",
-      "email": "ajohnson@gov.bc.ca"
+      "email": "ajohnson@gov.bc.ca",
+      "employee_id": "00123456"
     },
     {
       "idir": "BSMITH",
       "name": "Bob Smith",
-      "email": "bsmith@gov.bc.ca"
+      "email": "bsmith@gov.bc.ca",
+      "employee_id": "00765432"
     },
     {
       "idir": "CBROWN",
       "name": "Charlie Brown",
-      "email": "cbrown@gov.bc.ca"
+      "email": "cbrown@gov.bc.ca",
+      "employee_id": "00234567"
     },
     {
       "idir": "DWHITE",
       "name": "Dana White",
-      "email": "dwhite@gov.bc.ca"
+      "email": "dwhite@gov.bc.ca",
+      "employee_id": "00876543"
     },
     {
       "idir": "EBLACK",
       "name": "Eve Black",
-      "email": "eblack@gov.bc.ca"
+      "email": "eblack@gov.bc.ca",
+      "employee_id": "00567891"
     },
     {
       "idir": "FGREEN",
       "name": "Frank Green",
-      "email": "fgreen@gov.bc.ca"
+      "email": "fgreen@gov.bc.ca",
+      "employee_id": "00345678"
     },
     {
       "idir": "GLEE",
       "name": "Grace Lee",
-      "email": "glee@gov.bc.ca"
+      "email": "glee@gov.bc.ca",
+      "employee_id": "00987654"
     },
     {
       "idir": "HMILLER",
       "name": "Hank Miller",
-      "email": "hmiller@gov.bc.ca"
+      "email": "hmiller@gov.bc.ca",
+      "employee_id": "00654321"
     },
     {
       "idir": "ISCOTT",
       "name": "Ivy Scott",
-      "email": "iscott@gov.bc.ca"
+      "email": "iscott@gov.bc.ca",
+      "employee_id": "00456789"
     },
     {
       "idir": "JWILSON",
       "name": "Jack Wilson",
-      "email": "jwilson@gov.bc.ca"
+      "email": "jwilson@gov.bc.ca",
+      "employee_id": "00234589"
     },
     {
       "idir": "JDOE",
       "name": "Jane Doe",
-      "email": "jdoe@gov.bc.ca"
+      "email": "jdoe@gov.bc.ca",
+      "employee_id": "00543218"
     },
     {
       "idir": "SCARTER",
       "name": "Sam Carter",
-      "email": "scarter@gov.bc.ca"
+      "email": "scarter@gov.bc.ca",
+      "employee_id": "00812345"
     },
     {
       "idir": "LWRIGHT",
       "name": "Laura Wright",
-      "email": "lwright@gov.bc.ca"
+      "email": "lwright@gov.bc.ca",
+      "employee_id": "00678901"
     },
     {
       "idir": "NANDERSON",
       "name": "Nick Anderson",
-      "email": "nanderson@gov.bc.ca"
+      "email": "nanderson@gov.bc.ca",
+      "employee_id": "00329871"
     },
     {
       "idir": "OBROWN",
       "name": "Olivia Brown",
-      "email": "obrown@gov.bc.ca"
+      "email": "obrown@gov.bc.ca",
+      "employee_id": "00432178"
     },
     {
       "idir": "MJOHNSON",
       "name": "Mark Johnson",
-      "email": "mjohnson@gov.bc.ca"
+      "email": "mjohnson@gov.bc.ca",
+      "employee_id": "00219876"
     },
     {
       "idir": "EDAVIS",
       "name": "Emily Davis",
-      "email": "edavis@gov.bc.ca"
+      "email": "edavis@gov.bc.ca",
+      "employee_id": "00912345"
     },
     {
       "idir": "PMARTIN",
       "name": "Paul Martin",
-      "email": "pmartin@gov.bc.ca"
+      "email": "pmartin@gov.bc.ca",
+      "employee_id": "00367812"
     },
     {
       "idir": "RTAYLOR",
       "name": "Ruby Taylor",
-      "email": "rtaylor@gov.bc.ca"
+      "email": "rtaylor@gov.bc.ca",
+      "employee_id": "00789102"
     },
     {
       "idir": "SMILLER",
       "name": "Scott Miller",
-      "email": "smiller@gov.bc.ca"
+      "email": "smiller@gov.bc.ca",
+      "employee_id": "00634528"
     },
     {
       "idir": "SEVANS",
       "name": "Sarah Evans",
-      "email": "sevans@gov.bc.ca"
+      "email": "sevans@gov.bc.ca",
+      "employee_id": "00256789"
     },
     {
       "idir": "LADAMS",
       "name": "Liam Adams",
-      "email": "ladams@gov.bc.ca"
+      "email": "ladams@gov.bc.ca",
+      "employee_id": "00823456"
     },
     {
       "idir": "NWALLACE",
       "name": "Nina Wallace",
-      "email": "nwallace@gov.bc.ca"
+      "email": "nwallace@gov.bc.ca",
+      "employee_id": "00712389"
     },
     {
       "idir": "OROBERTS",
       "name": "Owen Roberts",
-      "email": "oroberts@gov.bc.ca"
+      "email": "oroberts@gov.bc.ca",
+      "employee_id": "00967823"
     },
     {
       "idir": "GTHOMPSON",
       "name": "Grace Thompson",
-      "email": "gthompson@gov.bc.ca"
+      "email": "gthompson@gov.bc.ca",
+      "employee_id": "00543278"
     },
     {
       "idir": "MHARRIS",
       "name": "Mia Harris",
-      "email": "mharris@gov.bc.ca"
+      "email": "mharris@gov.bc.ca",
+      "employee_id": "00987623"
     },
     {
       "idir": "ECOOPER",
       "name": "Ethan Cooper",
-      "email": "ecooper@gov.bc.ca"
+      "email": "ecooper@gov.bc.ca",
+      "employee_id": "00654982"
     },
     {
       "idir": "ZLEWIS",
       "name": "Zara Lewis",
-      "email": "zlewis@gov.bc.ca"
+      "email": "zlewis@gov.bc.ca",
+      "employee_id": "00561234"
     },
     {
       "idir": "CPRICE",
       "name": "Connor Price",
-      "email": "cprice@gov.bc.ca"
+      "email": "cprice@gov.bc.ca",
+      "employee_id": "00345612"
     },
     {
       "idir": "CBROOKS",
       "name": "Chloe Brooks",
-      "email": "cbrooks@gov.bc.ca"
+      "email": "cbrooks@gov.bc.ca",
+      "employee_id": "00732109"
     },
     {
       "idir": "IPHILLIPS",
       "name": "Isaac Phillips",
-      "email": "iphillips@gov.bc.ca"
+      "email": "iphillips@gov.bc.ca",
+      "employee_id": "00210987"
+    },
+    {
+      "idir": "TESTINGUSER",
+      "name": "Testing User",
+      "email": "tuser@gov.bc.ca",
+      "employee_id": "00132136"
+    },
+    {
+      "idir": "GEORGED'CRUZ",
+      "name": "George D'Cruz",
+      "email": "gd'cruz@gov.bc.ca",
+      "employee_id": "00132137"
+    },
+    {
+      "idir": "ALEXSTRUK",
+      "name": "Alex Struk",
+      "email": "astruk@gov.bc.ca",
+      "employee_id": "00132138"
+    },
+    {
+      "idir": "HANNAHMORGAN",
+      "name": "Hannah Morgan",
+      "email": "hmorgan@gov.bc.ca",
+      "employee_id": "00132139"
+    },
+    {
+      "idir": "BOBDOE",
+      "name": "Bob Doe",
+      "email": "bdoe@gov.bc.ca",
+      "employee_id": "00812346"
+    },
+    {
+      "idir": "WILLIAMANDERSON",
+      "name": "William Anderson",
+      "email": "wanderson@gov.bc.ca",
+      "employee_id": "00054971"
+    },
+    {
+      "idir": "JAMESWHITE",
+      "name": "James White",
+      "email": "jwhite@gov.bc.ca",
+      "employee_id": "00100306"
+    },
+    {
+      "idir": "SAMUELTHOMPSON",
+      "name": "Samuel Thompson",
+      "email": "sthompson@gov.bc.ca",
+      "employee_id": "00104430"
+    },
+    {
+      "idir": "JOHNRICHARDSON",
+      "name": "John Richardson",
+      "email": "jrichardson@gov.bc.ca",
+      "employee_id": "00115138"
+    },
+    {
+      "idir": "GEORGEMARTINEZ",
+      "name": "George Martinez",
+      "email": "gmartinez@gov.bc.ca",
+      "employee_id": "00116494"
+    },
+    {
+      "idir": "DAVIDWILSON",
+      "name": "David Wilson",
+      "email": "dwilson@gov.bc.ca",
+      "employee_id": "00116618"
+    },
+    {
+      "idir": "CARLJOHNSON",
+      "name": "Carl Johnson",
+      "email": "cjohnson@gov.bc.ca",
+      "employee_id": "00119947"
+    },
+    {
+      "idir": "HENRYSMITH",
+      "name": "Henry Smith",
+      "email": "hsmith@gov.bc.ca",
+      "employee_id": "00120952"
+    },
+    {
+      "idir": "WALTERBROWN",
+      "name": "Walter Brown",
+      "email": "wbrown@gov.bc.ca",
+      "employee_id": "00122345"
+    },
+    {
+      "idir": "FREDERICKDAVIS",
+      "name": "Frederick Davis",
+      "email": "fdavis@gov.bc.ca",
+      "employee_id": "00124700"
+    },
+    {
+      "idir": "ANDREWMILLER",
+      "name": "Andrew Miller",
+      "email": "amiller@gov.bc.ca",
+      "employee_id": "00125122"
+    },
+    {
+      "idir": "ERNESTTAYLOR",
+      "name": "Ernest Taylor",
+      "email": "etaylor@gov.bc.ca",
+      "employee_id": "00125636"
+    },
+    {
+      "idir": "LOUISCOOPER",
+      "name": "Louis Cooper",
+      "email": "lcooper@gov.bc.ca",
+      "employee_id": "00129547"
+    },
+    {
+      "idir": "RICHARDMOORE",
+      "name": "Richard Moore",
+      "email": "rmoore@gov.bc.ca",
+      "employee_id": "00129909"
+    },
+    {
+      "idir": "ALBERTPHILLIPS",
+      "name": "Albert Phillips",
+      "email": "aphillips@gov.bc.ca",
+      "employee_id": "00130980"
+    },
+    {
+      "idir": "MARIAGARCIA",
+      "name": "Maria Garcia",
+      "email": "mgarcia@gov.bc.ca",
+      "employee_id": "00132135"
+    },
+    {
+      "idir": "ANARODRIGUEZ",
+      "name": "Ana Rodriguez",
+      "email": "arodriguez@gov.bc.ca",
+      "employee_id": "00132136"
+    },
+    {
+      "idir": "LAURAMITCHELL",
+      "name": "Laura Mitchell",
+      "email": "lmitchell@gov.bc.ca",
+      "employee_id": "00132396"
+    },
+    {
+      "idir": "ISABELTHOMPSON",
+      "name": "Isabel Thompson",
+      "email": "ithompson@gov.bc.ca",
+      "employee_id": "00132967"
+    },
+    {
+      "idir": "CARMENSANTOS",
+      "name": "Carmen Santos",
+      "email": "csantos@gov.bc.ca",
+      "employee_id": "00133231"
+    },
+    {
+      "idir": "ZOEWILLIAMS",
+      "name": "Zoe Williams",
+      "email": "zwilliams@gov.bc.ca",
+      "employee_id": "00133448"
+    },
+    {
+      "idir": "NIKKIANDERSON",
+      "name": "Nikki Anderson",
+      "email": "nanderson@gov.bc.ca",
+      "employee_id": "00135006"
+    },
+    {
+      "idir": "SARAHWILSON",
+      "name": "Sarah Wilson",
+      "email": "swilson@gov.bc.ca",
+      "employee_id": "00135142"
+    },
+    {
+      "idir": "EMMADAVIS",
+      "name": "Emma Davis",
+      "email": "edavis@gov.bc.ca",
+      "employee_id": "00135179"
+    },
+    {
+      "idir": "CLAIREJOHNSON",
+      "name": "Claire Johnson",
+      "email": "cjohnson@gov.bc.ca",
+      "employee_id": "00135180"
+    },
+    {
+      "idir": "ALEXANDERTHOMPSON",
+      "name": "Alexander Thompson",
+      "email": "athompson@gov.bc.ca",
+      "employee_id": "00135414"
+    },
+    {
+      "idir": "VICTORIAMARTINEZ",
+      "name": "Victoria Martinez",
+      "email": "vmartinez@gov.bc.ca",
+      "employee_id": "00135444"
+    },
+    {
+      "idir": "MARCUSWILSON",
+      "name": "Marcus Wilson",
+      "email": "mwilson@gov.bc.ca",
+      "employee_id": "00135450"
+    },
+    {
+      "idir": "ELEANORPHILLIPS",
+      "name": "Eleanor Phillips",
+      "email": "ephillips@gov.bc.ca",
+      "employee_id": "00136236"
+    },
+    {
+      "idir": "SEBASTIANRODRIGUEZ",
+      "name": "Sebastian Rodriguez",
+      "email": "srodriguez@gov.bc.ca",
+      "employee_id": "00136494"
+    },
+    {
+      "idir": "OLIVIAANDERSON",
+      "name": "Olivia Anderson",
+      "email": "oanderson@gov.bc.ca",
+      "employee_id": "00136786"
+    },
+    {
+      "idir": "DANIELSANTOS",
+      "name": "Daniel Santos",
+      "email": "dsantos@gov.bc.ca",
+      "employee_id": "00136843"
+    },
+    {
+      "idir": "SOFIAGARCIA",
+      "name": "Sofia Garcia",
+      "email": "sgarcia@gov.bc.ca",
+      "employee_id": "00137734"
+    },
+    {
+      "idir": "LUCASBROWN",
+      "name": "Lucas Brown",
+      "email": "lbrown@gov.bc.ca",
+      "employee_id": "00138748"
+    },
+    {
+      "idir": "ISABELLAWHITE",
+      "name": "Isabella White",
+      "email": "iwhite@gov.bc.ca",
+      "employee_id": "00138826"
+    },
+    {
+      "idir": "BENJAMINMOORE",
+      "name": "Benjamin Moore",
+      "email": "bmoore@gov.bc.ca",
+      "employee_id": "00141323"
+    },
+    {
+      "idir": "CHARLOTTEDAVIS",
+      "name": "Charlotte Davis",
+      "email": "cdavis@gov.bc.ca",
+      "employee_id": "00141324"
+    },
+    {
+      "idir": "GABRIELMITCHELL",
+      "name": "Gabriel Mitchell",
+      "email": "gmitchell@gov.bc.ca",
+      "employee_id": "00141325"
+    },
+    {
+      "idir": "KATHERINESMITH",
+      "name": "Katherine Smith",
+      "email": "ksmith@gov.bc.ca",
+      "employee_id": "00141812"
     }
   ],
   "positions": [
@@ -2594,6 +2898,26 @@
       "A.SAL_ADMIN_PLAN": "MGT",
       "A.TGB_E_CLASS": "E26271",
       "A.LOCATION": "V8X4S800",
+      "A.UPDATE_INCUMBENTS": "N"
+    },
+
+    {
+      "attr:rownumber": 116,
+      "A.POSITION_NBR": "00132139",
+      "A.EFFDT": "2024-07-20",
+      "A.EFF_STATUS": "Active",
+      "A.DESCR": "Director, Content Design",
+      "A.DESCRSHORT": "Band 3",
+      "A.BUSINESS_UNIT": "BC112",
+      "A.DEPTID": "123-4567",
+      "B.DESCR": "DPD CSI Lab",
+      "A.JOBCODE": "185003",
+      "A.POSN_STATUS": "Approved",
+      "A.STATUS_DT": "2023-06-12",
+      "A.REPORTS_TO": "00125122",
+      "A.SAL_ADMIN_PLAN": "MGT",
+      "A.TGB_E_CLASS": "P246",
+      "A.LOCATION": "V8W2C300",
       "A.UPDATE_INCUMBENTS": "N"
     }
   ]
