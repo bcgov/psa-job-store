@@ -607,7 +607,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
   };
 
   const compareCompetencies = (original: BehaviouralCompetency[], modified: BehaviouralCompetency[]): JSX.Element[] => {
-    const allNames = new Set([...original.map((item) => item.name), ...modified.map((item) => item.name)]);
+    const allNames = new Set([...modified.map((item) => item.name), ...original.map((item) => item.name)]);
     const comparisonResult: JSX.Element[] = [];
 
     allNames.forEach((name) => {

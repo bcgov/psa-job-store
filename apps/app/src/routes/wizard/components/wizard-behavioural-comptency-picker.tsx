@@ -1,14 +1,21 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { DeleteOutlined } from '@ant-design/icons';
-import { Button, Col, Input, List, Row, Tag, Typography } from 'antd';
+import { InfoCircleFilled, MinusCircleOutlined } from '@ant-design/icons';
+import { Alert, Button, Col, Input, List, Row, Tag, Typography } from 'antd';
 import TextArea from 'antd/es/input/TextArea';
 import React, { useEffect, useState } from 'react';
-import { FieldArrayWithId, UseFieldArrayAppend, UseFieldArrayRemove, UseFormReturn } from 'react-hook-form';
+import {
+  FieldArrayWithId,
+  UseFieldArrayAppend,
+  UseFieldArrayMove,
+  UseFieldArrayRemove,
+  UseFormReturn,
+} from 'react-hook-form';
 import LoadingSpinnerWithMessage from '../../../components/app/common/components/loading.component';
 import { useGetBehaviouralCompetenciesQuery } from '../../../redux/services/graphql-api/behavioural-comptency.api';
 import { BehaviouralCompetency } from '../../../redux/services/graphql-api/job-profile-types';
 import { FormItem } from '../../../utils/FormItem';
 import { JobProfileValidationModel } from '../../job-profiles/components/job-profile.component';
+import ReorderButtons from '../../total-comp-create-profile/components/reorder-buttons';
 import { IsIndigenousCompetency } from './is-indigenous-competency.component';
 import './wizard-behavioural-comptency-picker.css';
 import EditFormOptionsPicker, { OptionsPickerOption, SelectableOption } from './wizard-edit-profile-options-picker';
@@ -24,6 +31,7 @@ interface BehaviouralComptencyPickerProps {
   behavioural_competencies_fields: FieldArrayWithId<JobProfileValidationModel, 'behavioural_competencies', 'id'>[];
   addAction: UseFieldArrayAppend<JobProfileValidationModel, 'behavioural_competencies'>;
   removeAction: UseFieldArrayRemove;
+  moveAction: UseFieldArrayMove;
   validateFunction: () => void;
   useFormReturn: UseFormReturn<JobProfileValidationModel, any, undefined>;
   formErrors: any;
@@ -41,6 +49,7 @@ const BehaviouralComptencyPicker: React.FC<BehaviouralComptencyPickerProps> = ({
   behavioural_competencies_fields,
   addAction,
   removeAction,
+  moveAction,
   validateFunction,
   useFormReturn,
   formErrors,
@@ -51,7 +60,13 @@ const BehaviouralComptencyPicker: React.FC<BehaviouralComptencyPickerProps> = ({
   const [options, setOptions] = useState<OptionsPickerOption[]>([]);
   const [selectableOptions, setSelectableOptions] = useState<SelectableOption[]>([]);
   const [selectedOptions, setSelectedOptions] = useState<string[]>([]);
-
+  const handleOptionalRequirementsMove = (index: number, direction: 'up' | 'down') => {
+    if (direction === 'up') {
+      moveAction(index, index - 1);
+    } else {
+      moveAction(index, index + 1);
+    }
+  };
   useEffect(() => {
     setSelectedOptions(
       behavioural_competencies_fields.map((field) => {
@@ -136,6 +151,21 @@ const BehaviouralComptencyPicker: React.FC<BehaviouralComptencyPickerProps> = ({
   return (
     <Row justify="start">
       <Col xs={24} sm={24} md={24} lg={18} xl={16}>
+        <Alert
+          type="info"
+          role="note"
+          style={{ marginBottom: '24px' }}
+          description={
+            <ul style={{ margin: 0 }}>
+              <li>Adding behavioural competencies will not trigger a classification review.</li>
+              <li>
+                It is highly recommended that there be at least one Indigenous Behavioural Competency in a job profile.
+              </li>
+            </ul>
+          }
+          showIcon
+          icon={<InfoCircleFilled style={{ alignSelf: 'normal' }} />}
+        />
         <>
           {behavioural_competencies_fields.length > 0 && (
             <List
@@ -153,8 +183,14 @@ const BehaviouralComptencyPicker: React.FC<BehaviouralComptencyPickerProps> = ({
                   }}
                   key={field.id} // Ensure this is a unique value
                 >
+                  <ReorderButtons
+                    index={index}
+                    moveItem={handleOptionalRequirementsMove}
+                    upperDisabled={index === 0}
+                    lowerDisabled={index === behavioural_competencies_fields.length - 1}
+                  />
                   {/* Display behavioural competency name and description */}
-                  <p style={{ flex: 1, marginRight: '10px', marginBottom: 0 }}>
+                  <p style={{ flex: 1, marginRight: '10px', marginLeft: '10px', marginBottom: 0 }}>
                     <strong>
                       {field.behavioural_competency.name}
                       <IsIndigenousCompetency competency={field.behavioural_competency} />
@@ -168,7 +204,7 @@ const BehaviouralComptencyPicker: React.FC<BehaviouralComptencyPickerProps> = ({
                       data-testid={`remove-behavioral-competency-${index}`}
                       type="text" // No button styling, just the icon
                       aria-label={`Remove ${field.behavioural_competency.name} behavioural competency`}
-                      icon={<DeleteOutlined aria-hidden />}
+                      icon={<MinusCircleOutlined aria-hidden />}
                       onClick={() => {
                         removeAction(index);
                       }}
