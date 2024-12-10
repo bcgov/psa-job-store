@@ -122,9 +122,9 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
   });
 
   await prisma.user.upsert({
-    where: { id: '1e6ccd64-9c17-4df7-a7e6-c120e125f05e' },
+    where: { id: '691c22b1-6c96-4d1a-8209-596b1811ca45' },
     create: {
-      id: '1e6ccd64-9c17-4df7-a7e6-c120e125f05e',
+      id: '691c22b1-6c96-4d1a-8209-596b1811ca45',
       name: 'Morgan, Hannah CITZ:EX',
       roles: ['hiring-manager'],
       metadata: {
