@@ -123,7 +123,7 @@ export class AuthService {
         }
 
         if (
-          Object.keys(metadataUpdates).every((key) => !['orgnization_id', 'position_id'].includes(key)) &&
+          Object.keys(metadataUpdates).every((key) => !['organization_id', 'position_id'].includes(key)) &&
           Object.keys(metadataUpdates).includes('department_id')
         ) {
           sessionUser.metadata.org_chart.department_ids = Array.from(
