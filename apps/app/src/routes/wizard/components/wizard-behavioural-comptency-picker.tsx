@@ -70,7 +70,7 @@ const BehaviouralComptencyPicker: React.FC<BehaviouralComptencyPickerProps> = ({
   useEffect(() => {
     setSelectedOptions(
       behavioural_competencies_fields.map((field) => {
-        return field.behavioural_competency.id.toString();
+        return field.id;
       }),
     );
   }, [behavioural_competencies_fields]);
@@ -142,7 +142,7 @@ const BehaviouralComptencyPicker: React.FC<BehaviouralComptencyPickerProps> = ({
 
     // Add the new items
     selectedBehaviouralCompetencies.forEach((item) => {
-      addAction(item);
+      addAction(item.behavioural_competency);
     });
 
     validateFunction();
@@ -192,10 +192,10 @@ const BehaviouralComptencyPicker: React.FC<BehaviouralComptencyPickerProps> = ({
                   {/* Display behavioural competency name and description */}
                   <p style={{ flex: 1, marginRight: '10px', marginLeft: '10px', marginBottom: 0 }}>
                     <strong>
-                      {field.behavioural_competency.name}
-                      <IsIndigenousCompetency competency={field.behavioural_competency} />
+                      {field.name}
+                      <IsIndigenousCompetency competency={field} />
                     </strong>
-                    : {field.behavioural_competency.description}
+                    : {field.description}
                   </p>
 
                   {/* Trash icon/button for deletion */}
@@ -203,7 +203,7 @@ const BehaviouralComptencyPicker: React.FC<BehaviouralComptencyPickerProps> = ({
                     <Button
                       data-testid={`remove-behavioral-competency-${index}`}
                       type="text" // No button styling, just the icon
-                      aria-label={`Remove ${field.behavioural_competency.name} behavioural competency`}
+                      aria-label={`Remove ${field.name} behavioural competency`}
                       icon={<MinusCircleOutlined aria-hidden />}
                       onClick={() => {
                         removeAction(index);
@@ -217,16 +217,12 @@ const BehaviouralComptencyPicker: React.FC<BehaviouralComptencyPickerProps> = ({
                   )}
 
                   {/* Hidden fields to submit actual data */}
-                  <FormItem
-                    name={`behavioural_competencies.${index}.behavioural_competency.id`}
-                    control={useFormReturn.control}
-                    hidden
-                  >
+                  <FormItem name={`behavioural_competencies.${index}.id`} control={useFormReturn.control} hidden>
                     <Input />
                   </FormItem>
                   <FormItem
                     hidden
-                    name={`behavioural_competencies.${index}.behavioural_competency.name`}
+                    name={`behavioural_competencies.${index}.name`}
                     control={useFormReturn.control}
                     style={{ flex: 1, marginRight: '10px' }}
                   >
@@ -234,7 +230,7 @@ const BehaviouralComptencyPicker: React.FC<BehaviouralComptencyPickerProps> = ({
                   </FormItem>
                   <FormItem
                     hidden
-                    name={`behavioural_competencies.${index}.behavioural_competency.description`}
+                    name={`behavioural_competencies.${index}.description`}
                     control={useFormReturn.control}
                     style={{ flex: 2, marginRight: '10px' }}
                   >
