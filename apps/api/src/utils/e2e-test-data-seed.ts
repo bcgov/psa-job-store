@@ -2260,7 +2260,7 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
 
   let other_profiles: any[] = [] as any[];
   try {
-    const path = process.env.NODE_ENV == 'development' ? '../../other-profiles.js' : '../../tmp/log/other-profiles.js';
+    const path = process.env.NODE_ENV == 'development' ? '../../other-profiles.js' : '/tmp/log/other-profiles.js';
     other_profiles = (await import(path)).otherProfiles as unknown as any[];
     // Use the imported data
   } catch (error) {
@@ -2331,9 +2331,7 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
   try {
     console.log('importing other classifications1');
     const path =
-      process.env.NODE_ENV == 'development'
-        ? '../../other-classifications.js'
-        : '../../tmp/log/other-classifications.js';
+      process.env.NODE_ENV == 'development' ? '../../other-classifications.js' : '/tmp/log/other-classifications.js';
 
     other_classifications = (await import(path)).otherClassifications1 as unknown as any[];
     // await prisma.classification.createMany({
@@ -2555,7 +2553,7 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
     const path =
       process.env.NODE_ENV == 'development'
         ? '../../other-job-profile-classifications.js'
-        : '../../tmp/log/other-job-profile-classifications.js';
+        : '/tmp/log/other-job-profile-classifications.js';
     jobProfileClassifications = (await import(path)).otherProfileClassifications as unknown as any[];
     // Use the imported data
   } catch (error) {
@@ -2581,7 +2579,7 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
     const path =
       process.env.NODE_ENV == 'development'
         ? '../../other-job-profile-family-link.js'
-        : '../../tmp/log/other-job-profile-family-link.js';
+        : '/tmp/log/other-job-profile-family-link.js';
     const otherJobProfileFamilyLink = (await import(path)).otherJobProfileFamilyLink as unknown as any[];
     for (const familyLink of otherJobProfileFamilyLink) {
       try {
@@ -2618,7 +2616,7 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
     const path =
       process.env.NODE_ENV == 'development'
         ? '../../other-job-profile-stream-link.js'
-        : '../../tmp/log/other-job-profile-stream-link.js';
+        : '/tmp/log/other-job-profile-stream-link.js';
     const otherJobProfileStreamLink = (await import(path)).otherJobProfileStreamLink as unknown as any[];
     for (const streamLink of otherJobProfileStreamLink) {
       try {
@@ -2652,7 +2650,7 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
 
   try {
     const path =
-      process.env.NODE_ENV == 'development' ? '../../other-job-profile-bh.js' : '../../tmp/log/other-job-profile-bh.js';
+      process.env.NODE_ENV == 'development' ? '../../other-job-profile-bh.js' : '/tmp/log/other-job-profile-bh.js';
     const otherJobProfileBh = (await import(path)).otherJobProfileBh as unknown as any[];
     for (const competency of otherJobProfileBh) {
       try {
@@ -3151,9 +3149,7 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
 
   try {
     const path =
-      process.env.NODE_ENV == 'development'
-        ? '../../job-profile-reports-to.js'
-        : '../../tmp/log/job-profile-reports-to.js';
+      process.env.NODE_ENV == 'development' ? '../../job-profile-reports-to.js' : '/tmp/log/job-profile-reports-to.js';
     const otherJobProfileReportsTo = (await import(path)).otherJobProfileReportsTo as unknown as any[];
     for (const reportsTo of otherJobProfileReportsTo) {
       try {
@@ -3273,7 +3269,7 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
   ];
 
   try {
-    const path = process.env.NODE_ENV == 'development' ? '../../organization.js' : '../../tmp/log/organization.js';
+    const path = process.env.NODE_ENV == 'development' ? '../../organization.js' : '/tmp/log/organization.js';
     const organization = (await import(path)).organization as unknown as any[];
     for (const org of organization) {
       try {
@@ -3314,7 +3310,7 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
     const path =
       process.env.NODE_ENV == 'development'
         ? '../../job_profile_organization.js'
-        : '../../tmp/log/job_profile_organization.js';
+        : '/tmp/log/job_profile_organization.js';
     const job_profile_organization = (await import(path)).job_profile_organization as unknown as any[];
     for (const job_profile_org of job_profile_organization) {
       try {
