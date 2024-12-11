@@ -294,20 +294,6 @@ export interface OrganizationConnectInput {
   };
 }
 
-interface BehaviouralCompetencyConnectInput {
-  connect: {
-    id: number;
-  };
-}
-
-interface BehaviouralCompetencyCreateInput {
-  behavioural_competency: BehaviouralCompetencyConnectInput;
-}
-
-interface BehaviouralCompetenciesInput {
-  create: BehaviouralCompetencyCreateInput[];
-}
-
 interface JobFamilyConnectInput {
   connect: {
     id: number;
