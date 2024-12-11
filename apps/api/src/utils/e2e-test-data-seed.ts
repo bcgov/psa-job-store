@@ -138,7 +138,7 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
         peoplesoft: {
           employee_id: '188149',
           position_id: '00132139',
-          department_id: '112-0074',
+          department_id: '123-4567',
           organization_id: 'BC112',
         },
       },
