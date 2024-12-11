@@ -28,6 +28,7 @@
     "reactflow": "^11.11.4"
   },
   "devDependencies": {
+    "@types/jest": "^29.5.14",
     "@types/node": "^22.10.1",
     "eslint-config-custom": "*",
     "tsconfig": "*",

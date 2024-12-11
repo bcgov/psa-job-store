@@ -1,4 +1,4 @@
-import { Col, Empty, Form, Row, Select, Space, Typography } from 'antd';
+import { Col, Empty, Form, Row, Select, Space } from 'antd';
 import { debounce } from 'lodash';
 import { useCallback, useMemo, useState } from 'react';
 import { Control, Controller } from 'react-hook-form';
@@ -236,11 +236,11 @@ export const ExcludedManagerPicker: React.FC<ExcludedManagerPickerProps> = ({
                   optionRender={(option) => (
                     <Space direction="vertical" size={0}>
                       <div>{option.data.label}</div>
-                      {option.data.description && (
+                      {/* {option.data.description && (
                         <Typography.Text type="secondary" style={{ fontSize: '12px' }}>
                           {option.data.description}
                         </Typography.Text>
-                      )}
+                      )} */}
                     </Space>
                   )}
                   onDropdownVisibleChange={(open) => {
