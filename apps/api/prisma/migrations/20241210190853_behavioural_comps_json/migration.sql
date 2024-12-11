@@ -37,3 +37,15 @@ INNER JOIN (
 ) AS current_table
 ON jp.id = current_table.id
 AND jp.version = current_table.max_version;
+
+
+UPDATE position_request
+SET profile_json = jsonb_set(
+  profile_json,
+  '{behavioural_competencies}',
+  (
+    SELECT jsonb_agg(elem->'behavioural_competency')
+    FROM jsonb_array_elements(profile_json->'behavioural_competencies') AS elem
+  ),
+  false
+);
