@@ -1146,6 +1146,10 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
         id: 4,
         name: 'Expert',
       },
+      {
+        id: 5,
+        name: 'Management',
+      },
     ],
   });
 
