@@ -6,6 +6,13 @@ module.exports = {
   testEnvironment: 'node',
   testRegex: '.*\\.spec\\.ts$',
   transform: {
-    '^.+\\.(t|j)s$': ['ts-jest'],
+    '^.+\\.(t|j)sx?$': '@swc/jest',
+    // '^.+\\.(t|j)s$': [
+    //   'ts-jest',
+    //   {
+    //     // speeds up tests:
+    //     isolatedModules: true, // skip type checking, disables some typescript features, like `const enum`
+    //   },
+    // ],
   },
 };

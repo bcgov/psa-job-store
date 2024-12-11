@@ -1,17 +1,15 @@
 import { HttpModule } from '@nestjs/axios';
+import { CacheModule } from '@nestjs/cache-manager';
 import { Logger, Module, OnApplicationBootstrap } from '@nestjs/common';
 import { ExternalModule } from '../external/external.module';
-import { PeoplesoftV2Service } from '../external/peoplesoft-v2.service';
 import { KeycloakModule } from '../keycloak/keycloak.module';
-import { KeycloakService } from '../keycloak/keycloak.service';
 import { PrismaModule } from '../prisma/prisma.module';
 import { UserModule } from '../user/user.module';
-import { UserService } from '../user/user.service';
 import { ScheduledTaskService } from './scheduled-task.service';
 
 @Module({
-  imports: [ExternalModule, HttpModule, KeycloakModule, PrismaModule, UserModule],
-  providers: [KeycloakService, PeoplesoftV2Service, ScheduledTaskService, UserService],
+  imports: [ExternalModule, HttpModule, KeycloakModule, PrismaModule, UserModule, CacheModule.register()],
+  providers: [ScheduledTaskService],
 })
 export class ScheduledTaskModule implements OnApplicationBootstrap {
   private readonly logger: Logger = new Logger(ScheduledTaskModule.name);
@@ -24,4 +22,3 @@ export class ScheduledTaskModule implements OnApplicationBootstrap {
     await this.scheduledTaskService.syncUsers();
   }
 }
-//

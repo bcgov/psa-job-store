@@ -28,7 +28,7 @@ export class ScheduledTaskService {
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
-  private async isMetadataOutdated(task: ScheduledTask) {
+  private async isMetadataOutdated(task: ScheduledTask): Promise<boolean> {
     const metadata = await this.prisma.scheduledTaskMetadata.findUnique({
       where: { task },
     });

@@ -14,7 +14,8 @@ import { HomeRoute } from '../routes/home';
 import { HomePage } from '../routes/home/components/home-page.component';
 import { JobProfilesRoute } from '../routes/job-profiles';
 import { JobProfilesPage } from '../routes/job-profiles/job-profiles.page';
-import { SavedJobProfilesPage } from '../routes/job-profiles/saved-job-profiles.page';
+import { MocksRoute } from '../routes/mocks';
+import MocksPage from '../routes/mocks/mocks.page';
 import { MyPositionsRoute } from '../routes/my-position-requests';
 import { MyPositionsPage } from '../routes/my-position-requests/my-position-requests.page';
 import NotFoundComponent from '../routes/not-found/404';
@@ -121,26 +122,26 @@ export const router = createBrowserRouter([
                       icon: <FileTextOutlined />,
                     },
                   },
-                  {
-                    path: 'saved',
-                    element: <JobProfilesRoute />,
-                    handle: {
-                      icon: <FileTextOutlined />,
-                    },
-                    children: [
-                      {
-                        index: true,
-                        element: <SavedJobProfilesPage />,
-                      },
-                      {
-                        path: ':number',
-                        element: <SavedJobProfilesPage />,
-                        handle: {
-                          icon: <FileTextOutlined />,
-                        },
-                      },
-                    ],
-                  },
+                  // {
+                  //   path: 'saved',
+                  //   element: <JobProfilesRoute />,
+                  //   handle: {
+                  //     icon: <FileTextOutlined />,
+                  //   },
+                  //   children: [
+                  //     {
+                  //       index: true,
+                  //       element: <SavedJobProfilesPage />,
+                  //     },
+                  //     {
+                  //       path: ':number',
+                  //       element: <SavedJobProfilesPage />,
+                  //       handle: {
+                  //         icon: <FileTextOutlined />,
+                  //       },
+                  //     },
+                  //   ],
+                  // },
                   {
                     path: 'manage',
                     children: [
@@ -381,6 +382,16 @@ export const router = createBrowserRouter([
                   {
                     index: true,
                     element: <UnauthorizedPage />,
+                  },
+                ],
+              },
+              {
+                path: '/mocks/:id',
+                element: <MocksRoute />,
+                children: [
+                  {
+                    index: true,
+                    element: <MocksPage />,
                   },
                 ],
               },

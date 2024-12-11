@@ -93,7 +93,11 @@ const RelatedExperience: React.FC<RelatedExperienceProps> = ({
       )}
       <WizardValidationError formErrors={formErrors} fieldName="job_experience" />
 
-      <WizardEditAddButton testId="add-job-experience-button" onClick={() => handleAddModal(handleAddNew)}>
+      <WizardEditAddButton
+        testId="add-job-experience-button"
+        isSignificant
+        onClick={() => handleAddModal(handleAddNew)}
+      >
         Add a related experience
       </WizardEditAddButton>
     </>

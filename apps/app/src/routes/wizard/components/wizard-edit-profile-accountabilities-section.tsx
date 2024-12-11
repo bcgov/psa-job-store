@@ -118,7 +118,11 @@ const AccountabilitiesSection: React.FC<AccountabilitiesSectionProps> = ({
                   />
                 </Col>
                 <Col>
-                  <WizardEditAddButton testId="add-accountability-button" onClick={() => handleAddModal(handleAddNew)}>
+                  <WizardEditAddButton
+                    testId="add-accountability-button"
+                    isSignificant
+                    onClick={() => handleAddModal(handleAddNew)}
+                  >
                     Add a custom accountability
                   </WizardEditAddButton>
                 </Col>

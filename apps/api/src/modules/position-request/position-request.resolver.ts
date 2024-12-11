@@ -87,6 +87,54 @@ registerEnumType(RequestingFeature, {
   name: 'RequestingFeature',
 });
 
+@ObjectType()
+export class SuggestedManagerClassification {
+  @Field(() => String)
+  id: string;
+
+  @Field(() => String)
+  code: string;
+
+  @Field(() => String)
+  name: string;
+}
+
+@ObjectType()
+export class SuggestedManagerDepartment {
+  @Field(() => String)
+  id: string;
+
+  @Field(() => String)
+  name: string;
+
+  @Field(() => String)
+  organization_id: string;
+}
+
+@ObjectType()
+export class SuggestedManager {
+  @Field(() => String)
+  id: string;
+
+  @Field(() => String)
+  name: string;
+
+  @Field(() => String)
+  status: string;
+
+  @Field(() => String)
+  positionNumber: string;
+
+  @Field(() => String)
+  positionTitle: string;
+
+  @Field(() => SuggestedManagerClassification)
+  classification: SuggestedManagerClassification;
+
+  @Field(() => SuggestedManagerDepartment)
+  department: SuggestedManagerDepartment;
+}
+
 @Resolver()
 export class PositionRequestApiResolver {
   constructor(private positionRequestService: PositionRequestApiService) {}
@@ -231,5 +279,14 @@ export class PositionRequestApiResolver {
 
     await this.positionRequestService.updatePositionRequestStatus(crmId, status);
     return true;
+  }
+
+  @Query(() => [SuggestedManager], { name: 'suggestedManagers' })
+  async suggestedManagers(
+    @Args('positionNumber') positionNumber: string,
+    @Args('positionRequestId') positionRequestId: number, // Fixed parameter name
+    @CurrentUser() user: Express.User,
+  ) {
+    return await this.positionRequestService.getSuggestedManagers(positionNumber, positionRequestId);
   }
 }

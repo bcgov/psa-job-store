@@ -20,6 +20,7 @@ const WizardBehaviouralCompetencies: React.FC<WizardBehaviouralCompetenciesProps
     append: behavioural_competencies_append,
     remove: behavioural_competencies_remove,
     replace: behavioural_competencies_replace,
+    move: behavioural_competencies_move,
   } = useFieldArray({
     control: useFormReturn.control,
     name: 'behavioural_competencies',
@@ -53,6 +54,7 @@ const WizardBehaviouralCompetencies: React.FC<WizardBehaviouralCompetenciesProps
           behavioural_competencies_fields={behavioural_competencies_fields}
           addAction={behavioural_competencies_append}
           removeAction={behavioural_competencies_remove}
+          moveAction={behavioural_competencies_move}
           validateFunction={useFormReturn.trigger}
           useFormReturn={useFormReturn}
           formErrors={formErrors}

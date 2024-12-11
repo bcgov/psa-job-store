@@ -98,6 +98,7 @@ const Preferences: React.FC<PreferencesProps> = ({
           <Col>
             <WizardEditAddButton
               testId="add-preference-button"
+              isSignificant={false}
               onClick={() => {
                 handleAddNew();
               }}

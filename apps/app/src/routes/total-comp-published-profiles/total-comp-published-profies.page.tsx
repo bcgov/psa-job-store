@@ -5,6 +5,7 @@ import '../../components/app/common/css/filtered-table.page.css';
 import { PageHeader } from '../../components/app/page-header.component';
 import ContentWrapper from '../../components/content-wrapper.component';
 import { JobProfileSearch } from '../job-profiles/components/job-profile-search.component';
+import { JobProfilesProvider } from '../job-profiles/components/job-profiles.context';
 import TotalCompProfilesTable from '../total-comp-draft-profiles/components/total-comp-draft-profiles-table.component';
 
 export const TotalCompPublishedProfilesPage = () => {
@@ -26,13 +27,15 @@ export const TotalCompPublishedProfilesPage = () => {
 
       <ContentWrapper>
         {hasData && (
-          <JobProfileSearch
-            searchPlaceHolderText={'Search by job title or job store number'}
-            // additionalFilters={true}
-            fullWidth={true}
-            // ministriesData={ministriesData}
-            // careerGroupData={careerGroupData}
-          />
+          <JobProfilesProvider>
+            <JobProfileSearch
+              searchPlaceHolderText={'Search by job title or job store number'}
+              // additionalFilters={true}
+              fullWidth={true}
+              // ministriesData={ministriesData}
+              // careerGroupData={careerGroupData}
+            />
+          </JobProfilesProvider>
         )}
 
         <TotalCompProfilesTable

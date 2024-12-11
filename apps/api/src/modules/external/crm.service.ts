@@ -5,6 +5,7 @@ import { AxiosHeaders } from 'axios';
 import { catchError, firstValueFrom, map, retry } from 'rxjs';
 import { AppConfigDto } from '../../dtos/app-config.dto';
 import { PrismaService } from '../prisma/prisma.service';
+import { MockIncident } from './crm.mock.resolver';
 import { IncidentCreateUpdateInput } from './models/incident-create.input';
 
 enum Endpoint {
@@ -166,6 +167,10 @@ export class CrmService {
   async updateMockIncident(id: number, data: IncidentCreateUpdateInput) {}
 
   async resetMockData() {}
+
+  async getAllIncidents(): Promise<MockIncident[]> {
+    return [] as MockIncident[];
+  }
 
   async getIncident(id: number) {
     const response = await firstValueFrom(

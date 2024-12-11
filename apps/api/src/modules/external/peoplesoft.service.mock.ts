@@ -53,13 +53,15 @@ export class MockPeoplesoftService {
   async getEmployeesForPositions(positions: string[]): Promise<Map<string, Employee[]>> {
     console.log('Mock getEmployeesForPositions called with positions:', positions);
     const employeeMap: Map<string, Employee[]> = new Map();
+
     positions.forEach((position) => {
-      const mockEmployee = this.mockData.employees.find((emp) => {
-        return emp.id == position;
+      const matchingEmployees = this.mockData.employees.filter((emp) => {
+        if (emp.positionId) return emp.positionId === position;
+        else return emp.id === position;
       });
-      if (!mockEmployee) employeeMap.set(position, []);
-      else employeeMap.set(position, [mockEmployee]);
+      employeeMap.set(position, matchingEmployees);
     });
+
     return employeeMap;
   }
 
@@ -121,6 +123,8 @@ export class MockPeoplesoftService {
               EMPLID: employee.id,
               NAME_DISPLAY: employee.name,
               EMPL_STATUS: employee.status,
+              // if employee has a positionId, use it, otherwise use employee.id as position number
+              POSITION_NBR: employee.positionId ?? employee.id,
             },
           ],
         },
@@ -130,18 +134,26 @@ export class MockPeoplesoftService {
 
   async getProfile(idir: string) {
     console.log('Mock getProfile called with idir:', idir);
-    const profile = this.mockData.profiles.find((prof) => prof.idir === idir) || {
-      idir,
-      name: 'Unknown User',
-      role: 'Guest',
-    };
+    const profile = this.mockData.profiles.find((prof) => prof.idir === idir) || undefined;
+
+    if (!profile)
+      return {
+        data: {
+          query: {
+            rows: [undefined],
+          },
+        },
+      };
     return {
       data: {
         query: {
           rows: [
             {
-              USERID: profile.idir,
-              NAME: profile.name,
+              OPRID: profile.idir,
+              OPRDEFNDESC: profile.name,
+              EMPLID: profile.employee_id,
+              EMAILID: profile.email,
+              GUID: '123456',
             },
           ],
         },
@@ -149,9 +161,23 @@ export class MockPeoplesoftService {
     };
   }
 
+  async getProfileV2(idir?: string, emplid?: string) {
+    console.log('Mock getProfile called with idir:', idir);
+    const profile = this.mockData.profiles.find((prof) => prof.idir === idir) || undefined;
+
+    if (!profile) return undefined;
+    return {
+      OPRID: profile.idir,
+      OPRDEFNDESC: profile.name,
+      EMPLID: profile.employee_id,
+      EMAILID: profile.email,
+      GUID: '123456',
+    };
+  }
+
   async getPositionsForDepartment(department_id: string) {
     console.log('Mock getPositionsForDepartment called with department_id:', department_id);
-    const positions = this.mockData.positions.filter(() => '112-0074' === department_id);
+    const positions = this.mockData.positions.filter((d) => d['A.DEPTID'] === department_id);
     const retObj = {
       data: {
         query: {

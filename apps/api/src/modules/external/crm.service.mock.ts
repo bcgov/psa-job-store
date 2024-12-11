@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { readFileSync } from 'fs';
 import { join } from 'path';
 import { AppConfigDto } from '../../dtos/app-config.dto';
+import { MockIncident } from './crm.mock.resolver';
 import { IncidentCreateUpdateInput } from './models/incident-create.input';
 
 @Injectable()
@@ -69,7 +70,7 @@ export class MockCrmService {
   }
 
   async createIncident(data: IncidentCreateUpdateInput) {
-    console.log('Creating mock incident with data:', data);
+    console.log('Creating mock incident');
 
     let lookupName: string;
     let isUnique = false;
@@ -104,12 +105,13 @@ export class MockCrmService {
       throw new Error('Generated ID already exists. Please try again.');
     }
 
-    console.log('pushing new incident:', JSON.stringify(newIncident, null, 2));
+    console.log('pushing new incident');
     this.mockData.incidents.push(newIncident);
     return newIncident;
   }
 
   async updateIncident(id: number, data: IncidentCreateUpdateInput) {
+    console.log('Updating mock incident with id:', id);
     const incidentIndex = this.mockData.incidents.findIndex((inc) => inc.id === String(id));
 
     if (incidentIndex === -1) {
@@ -141,7 +143,7 @@ export class MockCrmService {
         },
       },
       category: {
-        lookupName: data.category || this.mockData.incidents[incidentIndex].category?.lookupName,
+        lookupName: this.mockData.incidents[incidentIndex].category?.lookupName, // || data.category  - this is in format like this: "{ id: 1930 }"
       },
     };
 
@@ -197,7 +199,7 @@ export class MockCrmService {
       throw new Error(`Incident with id ${id} not found`);
     }
 
-    console.log('parsing incident:', incident);
+    // console.log('parsing incident:', incident);
     const parsed = {
       crm_id: parseInt(incident.id),
       crm_lookup_name: incident.lookupName,
@@ -205,11 +207,13 @@ export class MockCrmService {
       crm_category: incident.category?.lookupName || 'Unknown',
     };
 
-    console.log('parsed: ', parsed);
+    // console.log('parsed: ', parsed);
     return parsed;
   }
 
   async updateIncidentStatus(incidentId: number, newStatus: number) {
+    console.log('Updating mock incident status with id:', incidentId, newStatus);
+
     const incidentIndex = this.mockData.incidents.findIndex((inc) => inc.id === String(incidentId));
 
     if (incidentIndex === -1) {
@@ -226,5 +230,9 @@ export class MockCrmService {
       crm_lookup_name: incident.lookupName,
       crm_category: incident.category?.lookupName || 'Unknown',
     };
+  }
+
+  async getAllIncidents(): Promise<MockIncident[]> {
+    return this.mockData.incidents;
   }
 }

@@ -101,7 +101,7 @@ export class PeoplesoftV2Service {
     return response;
   }
 
-  async getProfile(
+  async getProfileV2(
     idir?: string,
     emplid?: string,
   ): Promise<

@@ -138,7 +138,11 @@ const SecurityScreenings: React.FC<SecurityScreeningsProps> = ({
             />
           </Col>
           <Col>
-            <WizardEditAddButton testId="add-security-screening-button" onClick={() => handleAddModal(handleAddNew)}>
+            <WizardEditAddButton
+              testId="add-security-screening-button"
+              isSignificant
+              onClick={() => handleAddModal(handleAddNew)}
+            >
               Add a custom requirement
             </WizardEditAddButton>
           </Col>

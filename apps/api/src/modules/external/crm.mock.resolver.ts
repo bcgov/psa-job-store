@@ -1,7 +1,7 @@
 // this resolver is a mock resolver for the CRM service,
 // used to simulate the CRM service in a local environment
 // for example simualtes changing the status of an incident in the CRM
-import { Args, Field, ID, InputType, Int, Mutation, ObjectType, Resolver } from '@nestjs/graphql';
+import { Args, Field, ID, InputType, Int, Mutation, ObjectType, Query, Resolver } from '@nestjs/graphql';
 import { PrismaService } from '../prisma/prisma.service';
 import { CrmService } from './crm.service';
 import { IncidentCreateUpdateInput } from './models/incident-create.input';
@@ -210,6 +210,15 @@ export class MockIncidentResolver {
     const pr = await this.prisma.positionRequest.findUnique({ where: { id: parseInt(id) } });
     console.log('updateMockIncident called with id:', id, 'data:', data);
     return this.mockIncidentService.updateMockIncident(pr.crm_id, data as IncidentCreateUpdateInput);
+  }
+
+  // @Query(() => [ExtendedLocation], { name: 'locations' })
+  // getLocations(@Args() args?: FindManyLocationArgs) {
+
+  @Query(() => [MockIncident], { name: 'getMockIncidents' })
+  async getMockIncidents() {
+    const res = await this.mockIncidentService.getAllIncidents();
+    return res;
   }
 
   @Mutation(() => Boolean)

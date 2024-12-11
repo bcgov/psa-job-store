@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { CopyOutlined, ExportOutlined } from '@ant-design/icons';
-import { Card, Col, Descriptions, message, Row, Typography } from 'antd';
+import { Card, Col, Descriptions, Row, Typography, message } from 'antd';
 import { Link } from 'react-router-dom';
 import PositionProfile from '../../../components/app/common/components/positionProfile';
 import { useGetJobProfileMetaQuery } from '../../../redux/services/graphql-api/job-profile.api';
@@ -165,7 +165,7 @@ export const ServiceRequestDetails: React.FC<ServiceRequestDetailsProps> = ({ po
     },
     {
       key: 'firstLevelExcludedManager',
-      label: 'First level excluded manager for this position',
+      label: 'Excluded manager who approved the profile',
       children: (
         <PositionProfile
           positionNumber={null}

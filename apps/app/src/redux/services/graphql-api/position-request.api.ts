@@ -4,6 +4,31 @@ import { graphqlApi } from '.';
 import { IdVersion } from './job-profile-types';
 import { PositionProfileModel } from './position.api';
 
+export interface GetSuggestedManagersArgs {
+  positionNumber?: string;
+  positionRequestId?: number;
+}
+
+export interface SuggestedManagersResponse {
+  suggestedManagers: {
+    id: string;
+    name: string;
+    status: string;
+    positionNumber: string;
+    positionTitle: string;
+    classification: {
+      id: string;
+      code: string;
+      name: string;
+    };
+    department: {
+      id: string;
+      name: string;
+      organization_id: string;
+    };
+  }[];
+}
+
 export interface UserConnect {
   id: string;
 }
@@ -66,6 +91,7 @@ export interface GetPositionRequestResponseContent {
   approved_at?: string;
   updated_at?: string;
   submitted_at?: string;
+  resubmitted_at?: string;
   shareUUID?: string;
   parent_job_profile?: {
     number: number;
@@ -85,6 +111,7 @@ export interface AdditionalInfo {
   comments?: string;
   branch?: string;
   division?: string;
+  excluded_mgr_name?: string;
 }
 
 export interface GetPositionRequestResponse {
@@ -259,6 +286,7 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
                 submission_id
                 status
                 updated_at
+                resubmitted_at
                 submitted_at
                 time_to_approve
                 approval_type
@@ -323,6 +351,7 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
                   submission_id
                   status
                   updated_at
+                  resubmitted_at
                   submitted_at
                   department_id
                   approved_at
@@ -372,6 +401,7 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
                   submission_id
                   status
                   updated_at
+                  resubmitted_at
                   submitted_at
                   department_id
                   approved_at
@@ -435,6 +465,7 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
                 submission_id
                 status
                 updated_at
+                resubmitted_at
                 submitted_at
                 department_id
                 approved_at
@@ -490,6 +521,7 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
                 position_number
                 status
                 updated_at
+                resubmitted_at
                 submitted_at
                 department_id
                 approved_at
@@ -636,6 +668,37 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
         };
       },
     }),
+    getSuggestedManagers: build.query<SuggestedManagersResponse, GetSuggestedManagersArgs>({
+      query: (args: GetSuggestedManagersArgs) => {
+        return {
+          document: gql`
+            query SuggestedManagers($positionNumber: String!, $positionRequestId: Float!) {
+              suggestedManagers(positionNumber: $positionNumber, positionRequestId: $positionRequestId) {
+                id
+                name
+                status
+                positionNumber
+                positionTitle
+                classification {
+                  id
+                  code
+                  name
+                }
+                department {
+                  id
+                  name
+                  organization_id
+                }
+              }
+            }
+          `,
+          variables: {
+            positionNumber: args.positionNumber,
+            positionRequestId: args.positionRequestId,
+          },
+        };
+      },
+    }),
   }),
 });
 
@@ -659,4 +722,5 @@ export const {
   useLazyPositionNeedsRivewQuery,
   useGetSharedPositionRequestQuery,
   useLazyGetSharedPositionRequestQuery,
+  useGetSuggestedManagersQuery,
 } = positionRequestApi;

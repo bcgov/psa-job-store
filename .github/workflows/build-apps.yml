@@ -100,7 +100,7 @@ jobs:
             KEYCLOAK_ISSUER=${{ secrets.KEYCLOAK_ISSUER }}
 
   trigger_migration:
-    needs: [metadata, build-apps]  # Add metadata to needs
+    needs: [metadata, build-apps] # Add metadata to needs
     runs-on: ubuntu-latest
     steps:
       - name: Trigger Migration Workflow
@@ -118,3 +118,28 @@ jobs:
                 changed_apps: '${{ needs.metadata.outputs.changed-apps }}'
               }
             });
+
+  # trigger-unit-tests:
+  #   name: Trigger Unit Tests
+  #   runs-on: ubuntu-20.04
+  #   if: |
+  #     always() &&
+  #     (github.ref_name == 'develop')
+  #   steps:
+  #     - name: Trigger Unit Tests
+  #       uses: actions/github-script@v6
+  #       with:
+  #         script: |
+  #           try {
+  #             console.log('Attempting to trigger unit tests');
+  #             await github.rest.actions.createWorkflowDispatch({
+  #               owner: context.repo.owner,
+  #               repo: context.repo.repo,
+  #               workflow_id: 'react-unit-tests.yml',
+  #               ref: 'develop',
+  #             });
+  #             console.log('Unit tests triggered successfully');
+  #           } catch (error) {
+  #             console.log('Error triggering unit tests:', error);
+  #             throw error;
+  #           }

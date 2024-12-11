@@ -1,5 +1,19 @@
 # api
 
+## 0.14.0
+
+### Minor Changes
+
+- [#1135](https://github.com/bcgov/psa-job-store/pull/1135) [`309d026`](https://github.com/bcgov/psa-job-store/commit/309d02616f633bf175b71cf533aff18cf9258dbd) Thanks [@alex-struk](https://github.com/alex-struk)! - AX-208 Dev - Excluded manager (Auth ID) update
+
+## 0.13.0
+
+### Minor Changes
+
+- [#1043](https://github.com/bcgov/psa-job-store/pull/1043) [`bd3fd3f`](https://github.com/bcgov/psa-job-store/commit/bd3fd3f90183f48253c8db4605fb3753f598a0e9) Thanks [@alex-struk](https://github.com/alex-struk)! - AL-838 Saved profiles functionality
+
+- [#1043](https://github.com/bcgov/psa-job-store/pull/1043) [`475b3c0`](https://github.com/bcgov/psa-job-store/commit/475b3c0cf6d62987daf0fd4a37f4bca23990036f) Thanks [@alex-struk](https://github.com/alex-struk)! - AL-977 Improve submitted date when user submits for verification
+
 ## 0.12.1
 
 ### Patch Changes

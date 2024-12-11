@@ -53,7 +53,7 @@ export const PageHeader = ({
   const [selectedVersion, setSelectedVersion] = useState<IdVersion | undefined>({ id: 0, version: 0 });
 
   const currentVersion =
-    versions?.versions?.length ?? 0 > 0
+    (versions?.versions?.length ?? 0 > 0)
       ? versions?.versions
           ?.map((jp: { version: any }) => jp.version)
           .reduce(function (p: number, v: number) {
