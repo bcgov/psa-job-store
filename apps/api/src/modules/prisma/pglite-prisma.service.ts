@@ -92,6 +92,7 @@ export class PGLitePrismaService extends ExtendedPrismaClient implements OnModul
         jp.version,
         jp.created_at,
         jp.published_at,
+        jp.behavioural_competencies,
         jp.views,
         jp.context
        FROM job_profile jp
@@ -117,6 +118,7 @@ export class PGLitePrismaService extends ExtendedPrismaClient implements OnModul
     // Execute each command in a transaction
     await this.$transaction(async (tx) => {
       for (const command of commands) {
+        // console.log('executing: ', command);
         await tx.$executeRawUnsafe(command);
       }
     });
