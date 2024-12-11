@@ -115,8 +115,10 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
     const prevActiveTabRef = useRef(activeTab);
     useEffect(() => {
       if (prevActiveTabRef.current == activeTab) {
+        prevActiveTabRef.current = activeTab;
         return;
       }
+      prevActiveTabRef.current = activeTab;
 
       if (activeTab === '1') {
         setLoadProfileIds(null);
@@ -241,124 +243,6 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
     // const prevSetClearingFilters = useRef(setClearingFilters);
 
     useEffect(() => {
-      // if (clearingFilters !== prevClearingFilters.current) {
-      //   console.log('clearingFilters changed:', {
-      //     from: prevClearingFilters.current,
-      //     to: clearingFilters,
-      //   });
-      // }
-      // if (shouldFetch !== prevShouldFetch.current) {
-      //   console.log('shouldFetch changed:', {
-      //     from: prevShouldFetch.current,
-      //     to: shouldFetch,
-      //   });
-      // }
-      // if (searchParams !== prevSearchParams.current) {
-      //   console.log('searchParams changed:', {
-      //     from: prevSearchParams.current,
-      //     to: searchParams,
-      //   });
-      // }
-      // if (trigger !== prevTrigger.current) {
-      //   console.log('trigger changed:', {
-      //     from: prevTrigger.current,
-      //     to: trigger,
-      //   });
-      // }
-      // if (currentPage !== prevCurrentPage.current) {
-      //   console.log('currentPage changed:', {
-      //     from: prevCurrentPage.current,
-      //     to: currentPage,
-      //   });
-      // }
-      // if (pageSize !== prevPageSize.current) {
-      //   console.log('pageSize changed:', {
-      //     from: prevPageSize.current,
-      //     to: pageSize,
-      //   });
-      // }
-      // if (classificationIdFilter !== prevClassificationIdFilter.current) {
-      //   console.log('classificationIdFilter changed:', {
-      //     from: prevClassificationIdFilter.current,
-      //     to: classificationIdFilter,
-      //   });
-      // }
-      // if (positionFilteringProcessActive !== prevPositionFilteringProcessActive.current) {
-      //   console.log('positionFilteringProcessActive changed:', {
-      //     from: prevPositionFilteringProcessActive.current,
-      //     to: positionFilteringProcessActive,
-      //   });
-      // }
-      // if (initialFetchDone !== prevInitialFetchDone.current) {
-      //   console.log('initialFetchDone changed:', {
-      //     from: prevInitialFetchDone.current,
-      //     to: initialFetchDone,
-      //   });
-      // }
-      // if (selectProfileNumber !== prevSelectProfileNumber.current) {
-      //   console.log('selectProfileNumber changed:', {
-      //     from: prevSelectProfileNumber.current,
-      //     to: selectProfileNumber,
-      //   });
-      // }
-      // if (organizationFilterExtra !== prevOrganizationFilterExtra.current) {
-      //   console.log('organizationFilterExtra changed:', {
-      //     from: prevOrganizationFilterExtra.current,
-      //     to: organizationFilterExtra,
-      //   });
-      // }
-      // if (loadProfileIds !== prevLoadProfileIds.current) {
-      //   console.log('loadProfileIds changed:', {
-      //     from: prevLoadProfileIds.current,
-      //     to: loadProfileIds,
-      //   });
-      // }
-      // if (number !== prevNumber.current) {
-      //   console.log('number changed:', {
-      //     from: prevNumber.current,
-      //     to: number,
-      //   });
-      // }
-      // if (prData?.department_id !== prevDepartmentId.current) {
-      //   console.log('department_id changed:', {
-      //     from: prevDepartmentId.current,
-      //     to: prData?.department_id,
-      //   });
-      // }
-      // if (positionRequestId !== prevPositionRequestId.current) {
-      //   console.log('positionRequestId changed:', {
-      //     from: prevPositionRequestId.current,
-      //     to: positionRequestId,
-      //   });
-      // }
-      // if (setShouldFetch !== prevSetShouldFetch.current) {
-      //   console.log('setShouldFetch changed:', {
-      //     from: prevSetShouldFetch.current,
-      //     to: setShouldFetch,
-      //   });
-      // }
-
-      // if (getBasePath !== prevGetBasePath.current) {
-      //   console.log('getBasePath changed:', {
-      //     from: prevGetBasePath.current,
-      //     to: getBasePath,
-      //   });
-      // }
-
-      // if (navigate !== prevNavigate.current) {
-      //   console.log('navigate changed:', {
-      //     from: prevNavigate.current,
-      //     to: navigate,
-      //   });
-      // }
-
-      // if (setClearingFilters !== prevSetClearingFilters.current) {
-      //   console.log('setClearingFilters changed:', {
-      //     from: prevSetClearingFilters.current,
-      //     to: setClearingFilters,
-      //   });
-      // }
-
       // console.log('fetch hook');
       // Use the following for the `search` property.
       // Search terms need to be joined with specific syntax, <-> in this case
@@ -381,6 +265,7 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
       // console.log('current page: ', currentPage);
 
       if (positionFilteringProcessActive) {
+        // console.log('returning A');
         return;
       }
 
@@ -391,6 +276,7 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
       if ((searchParams.get('selectedProfile') || number != null) && initialFetchDone && !shouldFetch) {
         // if we're clearing filters, then we need to fetch again
         if (!clearingFilters) {
+          // console.log('returning B');
           return;
         }
       }
@@ -436,6 +322,7 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
             },
             { replace: true },
           );
+          // console.log('returning C');
           return;
         }
       }
@@ -464,7 +351,7 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
 
       selectProfileForPageNumber.current = toSelectProfileNumber ?? '';
 
-      // console.log('TRIGGER, search: ', search);
+      console.log('TRIGGER, search: ', search);
       trigger({
         ...(search != null && { search }),
         where: {
@@ -831,7 +718,7 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
                     <Empty data-testid="empty-state" style={{ margin: '1rem' }} description="No profiles found" />
                   ) : (
                     <>
-                      {positionRequestId ? (
+                      {/* {positionRequestId ? (
                         <Alert
                           style={{ borderRadius: '0', marginBottom: '0' }}
                           message={'The items in this list might have been filtered out by the system'}
@@ -841,7 +728,7 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
                         />
                       ) : (
                         ''
-                      )}
+                      )} */}
                       {renderProfileList(onSelectProfileF, data?.jobProfiles ?? [])}
                     </>
                   ),
@@ -855,7 +742,7 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
 
     const renderProfileList = (onSelectProfileF: any, profiles: any[]) => (
       <>
-        {isSearchingOrFiltering && !isLoading && (
+        {!isLoading && positionRequestId && (
           <Alert
             role="info"
             data-testid="verification-warning-message"

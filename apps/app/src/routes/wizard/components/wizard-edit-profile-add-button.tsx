@@ -12,10 +12,10 @@ interface AddButtonProps {
 }
 
 const WizardEditAddButton: React.FC<AddButtonProps> = ({ testId, onClick, isSignificant, children }) => {
-  const icon = isSignificant ? <img src={SignificantAdd} alt="Error" /> : <PlusOutlined aria-hidden />;
+  const icon = isSignificant ? <img aria-hidden src={SignificantAdd} alt="Error" /> : <PlusOutlined aria-hidden />;
   return (
     <Button data-testid={testId} type="link" icon={icon} className="addButton" onClick={onClick}>
-      {children}
+      <span style={{ paddingLeft: '7px' }}>{children}</span>
     </Button>
   );
 };
