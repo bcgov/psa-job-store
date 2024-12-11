@@ -1473,6 +1473,7 @@ export class PositionRequestApiService {
         additionalInfo.excluded_mgr_position_number.toString(),
       );
 
+      console.log('generating profile..');
       const jobProfileDocument =
         positionRequest.profile_json != null
           ? generateJobProfile({
