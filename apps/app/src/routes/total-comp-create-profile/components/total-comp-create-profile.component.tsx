@@ -1864,9 +1864,9 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
         },
         behavioural_competencies: formData.behavioural_competencies
           .map((a: any) => ({
-            id: a.behavioural_competency.id,
-            name: a.behavioural_competency.name,
-            description: a.behavioural_competency.description,
+            id: a.id,
+            name: a.name,
+            description: a.description,
           }))
           .filter((acc: any) => acc.text?.trim() !== ''),
 

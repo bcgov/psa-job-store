@@ -8,7 +8,7 @@ export const HelpButton = () => {
         items: [
           {
             key: '1',
-            icon: <MailOutlined />,
+            icon: <MailOutlined aria-hidden />,
             label: (
               <a
                 onClick={() => {
@@ -17,20 +17,20 @@ export const HelpButton = () => {
                 }}
               >
                 <>Jobstore@gov.bc.ca </>
-                <CopyOutlined style={{ cursor: 'pointer' }} />
+                <CopyOutlined style={{ cursor: 'pointer' }} aria-hidden />
               </a>
             ),
           },
           {
             key: '2',
-            icon: <TeamOutlined />,
+            icon: <TeamOutlined aria-hidden />,
             label: (
               <a
                 target="_blank"
                 rel="noopener noreferrer"
                 href="https://teams.microsoft.com/l/team/19%3ASWgLLYIHsUHnY2qVQsU6MS3coD7pfkE0oL4S7cFyfSM1%40thread.tacv2/conversations?groupId=30d29524-d012-4340-a28e-ce8fe4aaea43&tenantId=6fdb5200-3d0d-4a8a-b036-d3685e359adc"
               >
-                Help desk <ExportOutlined style={{ cursor: 'pointer', float: 'right' }} />
+                Help desk <ExportOutlined aria-hidden style={{ cursor: 'pointer', float: 'right' }} />
               </a>
             ),
           },
@@ -38,7 +38,7 @@ export const HelpButton = () => {
       }}
       trigger={['click']}
     >
-      <Button type="link" icon={<QuestionCircleOutlined />} style={{ color: 'white' }} />
+      <Button type="link" icon={<QuestionCircleOutlined aria-hidden />} style={{ color: 'white' }} />
     </Dropdown>
   );
 };

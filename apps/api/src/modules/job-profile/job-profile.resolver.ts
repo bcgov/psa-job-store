@@ -217,11 +217,6 @@ export class JobProfileResolver {
     return this.jobProfileService.getJobProfilesDraftsClassifications();
   }
 
-  // @ResolveField(() => JobProfileBehaviouralCompetency)
-  // async behavioural_competencies(@Parent() { id, version }: JobProfile) {
-  //   return this.jobProfileService.getBehaviouralCompetencies(id, version);
-  // }
-
   @Mutation(() => Int)
   @Roles('total-compensation')
   async createOrUpdateJobProfile(

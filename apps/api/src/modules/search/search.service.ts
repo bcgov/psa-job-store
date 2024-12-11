@@ -367,21 +367,27 @@ export class SearchService {
         accountabilities: (profile.accountabilities as Prisma.JsonObject[]).map(
           (accountability) => accountability.text,
         ),
-        behavioural_competencies: (
-          await this.prisma.jobProfileBehaviouralCompetency.findMany({
-            where: {
-              job_profile_id: profile.id,
-            },
-            select: {
-              behavioural_competency: {
-                select: {
-                  name: true,
-                  description: true,
-                },
-              },
-            },
-          })
-        ).map(({ behavioural_competency: { name, description } }) => `${name} ${description}`),
+        behavioural_competencies: profile.behavioural_competencies
+          ? (profile.behavioural_competencies as Prisma.JsonObject[]).map(
+              (competency) => `${competency.name} ${competency.description}`,
+            )
+          : [],
+
+        // (
+        //   await this.prisma.jobProfileBehaviouralCompetency.findMany({
+        //     where: {
+        //       job_profile_id: profile.id,
+        //     },
+        //     select: {
+        //       behavioural_competency: {
+        //         select: {
+        //           name: true,
+        //           description: true,
+        //         },
+        //       },
+        //     },
+        //   })
+        // ).map(({ behavioural_competency: { name, description } }) => `${name} ${description}`),
         professional_registration_requirements: (
           profile.professional_registration_requirements as Prisma.JsonObject[]
         )?.map((pr) => pr.text),

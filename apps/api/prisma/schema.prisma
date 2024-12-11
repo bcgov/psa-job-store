@@ -141,12 +141,12 @@ enum BehaviouralCompetencyCategory {
 }
 
 model BehaviouralCompetency {
-  id           Int                               @id @default(autoincrement())
-  type         BehaviouralCompetencyType
-  category     BehaviouralCompetencyCategory
-  name         String
-  description  String
-  job_profiles JobProfileBehaviouralCompetency[]
+  id          Int                           @id @default(autoincrement())
+  type        BehaviouralCompetencyType
+  category    BehaviouralCompetencyCategory
+  name        String
+  description String
+  // job_profiles JobProfileBehaviouralCompetency[]
 
   @@map("behavioural_competency")
 }
@@ -216,8 +216,8 @@ model JobProfile {
   valid_from  DateTime? @default(now())
   valid_to    DateTime?
 
-  views                           Int?                              @default(0)
-  JobProfileBehaviouralCompetency JobProfileBehaviouralCompetency[]
+  views Int? @default(0)
+  // JobProfileBehaviouralCompetency JobProfileBehaviouralCompetency[]
 
   @@id(name: "id_version", [id, version])
   // @@id([id, version])
@@ -325,16 +325,16 @@ model JobProfileStreamLink {
   @@map("job_profile_stream_link")
 }
 
-model JobProfileBehaviouralCompetency {
-  behavioural_competency    BehaviouralCompetency @relation(fields: [behavioural_competency_id], references: [id])
-  behavioural_competency_id Int
-  job_profile               JobProfile            @relation(fields: [job_profile_id, job_profile_version], references: [id, version])
-  job_profile_id            Int
-  job_profile_version       Int
+// model JobProfileBehaviouralCompetency {
+//   behavioural_competency    BehaviouralCompetency @relation(fields: [behavioural_competency_id], references: [id])
+//   behavioural_competency_id Int
+//   job_profile               JobProfile            @relation(fields: [job_profile_id, job_profile_version], references: [id, version])
+//   job_profile_id            Int
+//   job_profile_version       Int
 
-  @@id([behavioural_competency_id, job_profile_id, job_profile_version])
-  @@map("job_profile_behavioural_competency")
-}
+//   @@id([behavioural_competency_id, job_profile_id, job_profile_version])
+//   @@map("job_profile_behavioural_competency")
+// }
 
 model JobProfileClassification {
   job_profile                      JobProfile     @relation(fields: [job_profile_id, job_profile_version], references: [id, version])

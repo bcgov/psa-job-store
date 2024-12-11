@@ -217,7 +217,6 @@ export interface BehaviouralCompetencies {
 }
 
 export interface BehaviouralCompetency {
-  idd: string;
   id: number;
   name: string;
   description: string;

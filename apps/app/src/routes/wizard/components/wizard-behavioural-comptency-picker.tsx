@@ -68,9 +68,10 @@ const BehaviouralComptencyPicker: React.FC<BehaviouralComptencyPickerProps> = ({
     }
   };
   useEffect(() => {
-    // console.log('setting selected options: ', behavioural_competencies_fields);
-    setSelectedOptions([...behavioural_competencies_fields.map((field) => field.idd.toString())]);
-  }, [behavioural_competencies_fields]);
+    const actualValues = useFormReturn.getValues('behavioural_competencies');
+    // console.log('setting selected options: ', actualValues);
+    setSelectedOptions([...actualValues.map((field) => field.id.toString())]);
+  }, [useFormReturn]);
 
   useEffect(() => {
     if (data) {
@@ -141,8 +142,7 @@ const BehaviouralComptencyPicker: React.FC<BehaviouralComptencyPickerProps> = ({
     // Add the new items
     selectedBehaviouralCompetencies.forEach((item) => {
       // console.log('adding: ', item);
-      const { id, ...rest } = item.behavioural_competency;
-      addAction({ ...rest, idd: id.toString() } as BehaviouralCompetency);
+      addAction(item.behavioural_competency);
     });
 
     validateFunction();
