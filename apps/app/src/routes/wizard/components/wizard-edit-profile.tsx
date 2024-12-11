@@ -602,7 +602,11 @@ const WizardEditProfile = forwardRef(
           job_experience: getInitialFieldValue(effectiveData.job_experience),
           security_screenings: security_screenings,
           optional_security_screenings: getInitialFieldValue(effectiveData.security_screenings, false),
-          behavioural_competencies: effectiveData?.behavioural_competencies || [],
+          behavioural_competencies:
+            effectiveData?.behavioural_competencies?.map(({ id, idd, ...rest }) => ({
+              ...rest,
+              idd: id?.toString() ?? idd,
+            })) || [],
           professional_registration_requirements: getInitialFieldValue(
             effectiveData.professional_registration_requirements,
             true,
