@@ -177,7 +177,7 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
         const { id, employee_group_id, peoplesoft_id, name } = classification;
 
         return {
-          label: name,
+          label: `${name} (${employee_group_id})`,
           value: `${id}.${employee_group_id}.${peoplesoft_id}`,
         };
       });
