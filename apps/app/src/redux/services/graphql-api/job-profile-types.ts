@@ -268,21 +268,6 @@ export class TrackedFieldArrayItem {
   // total comp
   nonEditable?: boolean;
 }
-
-interface BehaviouralCompetencyConnect {
-  id: number;
-}
-
-interface BehaviouralCompetencyItem {
-  behavioural_competency: {
-    connect: BehaviouralCompetencyConnect;
-  };
-}
-
-interface BehaviouralCompetenciesInput {
-  create: BehaviouralCompetencyItem[];
-}
-
 interface NumberConnectInput {
   connect: {
     id: number;
