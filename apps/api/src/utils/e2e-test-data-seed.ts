@@ -138,7 +138,7 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
         peoplesoft: {
           employee_id: '188149',
           position_id: '00132139',
-          department_id: '112-0074',
+          department_id: '123-4567',
           organization_id: 'BC112',
         },
       },
@@ -1146,6 +1146,10 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
         id: 4,
         name: 'Expert',
       },
+      {
+        id: 5,
+        name: 'Management',
+      },
     ],
   });
 
@@ -1276,9 +1280,28 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
   }
 
   // Job Profiles, Behavioural Competencies and Reporting Relationships
+  const bcProfile194 = [45, 22, 36];
+  const bcProfile200 = [45, 41, 22];
+  const bcProfile208 = [45, 41, 22];
+  const bcProfile189 = [45, 35, 36];
+  const bcProfile210 = [17, 21, 23, 22];
+  const bcProfile212 = [17, 21, 23, 22];
+  const bcProfile247 = [17, 21, 23, 22, 42];
 
+  // fetch competencies and return them in a JSON structure
+  async function getCompetencies(ids) {
+    const competencies = await prisma.behaviouralCompetency.findMany({ where: { id: { in: ids } } });
+    return competencies.map((bc) => ({
+      id: bc.id,
+      name: bc.name,
+      description: bc.description,
+      category: bc.category,
+      type: bc.type,
+    }));
+  }
   const profile189: JobProfile = {
     id: 4,
+    behavioural_competencies: await getCompetencies(bcProfile189),
     optional_requirements: [],
     review_required: false,
     program_overview: '',
@@ -1386,6 +1409,7 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
 
   const profile194: JobProfile = {
     id: 1,
+    behavioural_competencies: await getCompetencies(bcProfile194),
     optional_requirements: [],
     review_required: false,
     program_overview: '',
@@ -1498,6 +1522,7 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
 
   const profile200: JobProfile = {
     id: 2,
+    behavioural_competencies: await getCompetencies(bcProfile200),
     optional_requirements: [],
     review_required: false,
     program_overview: '',
@@ -1640,6 +1665,7 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
 
   const profile208: JobProfile = {
     id: 3,
+    behavioural_competencies: await getCompetencies(bcProfile208),
     optional_requirements: [],
     review_required: false,
     program_overview: '',
@@ -1767,6 +1793,7 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
 
   const profile210: JobProfile = {
     id: 5,
+    behavioural_competencies: await getCompetencies(bcProfile210),
     optional_requirements: [],
     review_required: false,
     program_overview: '',
@@ -1909,6 +1936,7 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
 
   const profile212: JobProfile = {
     id: 6,
+    behavioural_competencies: await getCompetencies(bcProfile212),
     optional_requirements: [],
     review_required: false,
     program_overview: '',
@@ -2055,6 +2083,7 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
 
   const profile247: JobProfile = {
     id: 7,
+    behavioural_competencies: await getCompetencies(bcProfile247),
     review_required: false,
     program_overview: '',
     total_comp_create_form_misc: { employeeGroup: 'GEU' },
@@ -2616,162 +2645,6 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
       });
     } catch (e) {
       console.log('ERROR: failed to create jobProfileStreamLink');
-    }
-  }
-
-  try {
-    const path =
-      process.env.NODE_ENV == 'development' ? '../../other-job-profile-bh.js' : '/tmp/log/other-job-profile-bh.js';
-    const otherJobProfileBh = (await import(path)).otherJobProfileBh as unknown as any[];
-    for (const competency of otherJobProfileBh) {
-      try {
-        await prisma.jobProfileBehaviouralCompetency.create({
-          data: competency,
-        });
-      } catch (error) {
-        console.error(`Failed to create behavioural competency for:`, competency, error);
-      }
-    }
-    // Use the imported data
-  } catch (error) {
-    // console.error('Error importing other otherJobProfileBh: ', error);
-
-    try {
-      await prisma.jobProfileBehaviouralCompetency.createMany({
-        data: [
-          {
-            behavioural_competency_id: 45,
-            job_profile_id: profile194.id,
-            job_profile_version: profile194.version,
-          },
-          {
-            behavioural_competency_id: 22,
-            job_profile_id: profile194.id,
-            job_profile_version: profile194.version,
-          },
-          {
-            behavioural_competency_id: 36,
-            job_profile_id: profile194.id,
-            job_profile_version: profile194.version,
-          },
-          {
-            behavioural_competency_id: 45,
-            job_profile_id: profile200.id,
-            job_profile_version: profile200.version,
-          },
-          {
-            behavioural_competency_id: 41,
-            job_profile_id: profile200.id,
-            job_profile_version: profile200.version,
-          },
-          {
-            behavioural_competency_id: 22,
-            job_profile_id: profile200.id,
-            job_profile_version: profile200.version,
-          },
-          {
-            behavioural_competency_id: 45,
-            job_profile_id: profile208.id,
-            job_profile_version: profile208.version,
-          },
-          {
-            behavioural_competency_id: 41,
-            job_profile_id: profile208.id,
-            job_profile_version: profile208.version,
-          },
-          {
-            behavioural_competency_id: 22,
-            job_profile_id: profile208.id,
-            job_profile_version: profile208.version,
-          },
-          {
-            behavioural_competency_id: 45,
-            job_profile_id: profile189.id,
-            job_profile_version: profile189.version,
-          },
-          {
-            behavioural_competency_id: 35,
-            job_profile_id: profile189.id,
-            job_profile_version: profile189.version,
-          },
-          {
-            behavioural_competency_id: 36,
-            job_profile_id: profile189.id,
-            job_profile_version: profile189.version,
-          },
-          {
-            behavioural_competency_id: 17,
-            job_profile_id: profile210.id,
-            job_profile_version: profile210.version,
-          },
-          {
-            behavioural_competency_id: 21,
-            job_profile_id: profile210.id,
-            job_profile_version: profile210.version,
-          },
-          {
-            behavioural_competency_id: 23,
-            job_profile_id: profile210.id,
-            job_profile_version: profile210.version,
-          },
-          {
-            behavioural_competency_id: 22,
-            job_profile_id: profile210.id,
-            job_profile_version: profile210.version,
-          },
-          // {
-          //   behavioural_competency_id: 22,
-          //   job_profile_id: profile212.id,
-          // },
-          {
-            behavioural_competency_id: 17,
-            job_profile_id: profile212.id,
-            job_profile_version: profile212.version,
-          },
-          {
-            behavioural_competency_id: 21,
-            job_profile_id: profile212.id,
-            job_profile_version: profile212.version,
-          },
-          {
-            behavioural_competency_id: 23,
-            job_profile_id: profile212.id,
-            job_profile_version: profile212.version,
-          },
-          {
-            behavioural_competency_id: 22,
-            job_profile_id: profile212.id,
-            job_profile_version: profile212.version,
-          },
-          {
-            behavioural_competency_id: 17,
-            job_profile_id: profile247.id,
-            job_profile_version: profile247.version,
-          },
-          {
-            behavioural_competency_id: 21,
-            job_profile_id: profile247.id,
-            job_profile_version: profile247.version,
-          },
-          {
-            behavioural_competency_id: 23,
-            job_profile_id: profile247.id,
-            job_profile_version: profile247.version,
-          },
-          {
-            behavioural_competency_id: 22,
-            job_profile_id: profile247.id,
-            job_profile_version: profile247.version,
-          },
-          {
-            behavioural_competency_id: 42,
-            job_profile_id: profile247.id,
-            job_profile_version: profile247.version,
-          },
-        ],
-      });
-    } catch (e) {
-      console.log('ERROR: failed to create jobProfileBehaviouralCompetency');
     }
   }
 

@@ -89,7 +89,11 @@ const Education: React.FC<EducationProps> = ({
       )}
       <WizardValidationError formErrors={formErrors} fieldName="education" />
 
-      <WizardEditAddButton testId="add-education-button" onClick={() => handleAddModal(handleAddNew)}>
+      <WizardEditAddButton
+        isSignificant={false}
+        testId="add-education-button"
+        onClick={() => handleAddModal(handleAddNew)}
+      >
         Add an education or work requirement
       </WizardEditAddButton>
     </>

@@ -911,8 +911,10 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
             tc_is_readonly: s.tc_is_readonly,
           }) as SecurityScreeningItem,
       ),
-      behavioural_competencies: jobProfileData?.jobProfile.behavioural_competencies.map((bc) => ({
-        behavioural_competency: bc.behavioural_competency,
+      behavioural_competencies: jobProfileData?.jobProfile.behavioural_competencies?.map((r: any) => ({
+        id: r.id,
+        name: r.name,
+        description: r.description,
       })),
       markAllNonEditable: false,
       markAllSignificant: false,
@@ -1616,6 +1618,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
     fields: behavioural_competencies_fields,
     append: behavioural_competencies_append,
     remove: behavioural_competencies_remove,
+    move: behavioural_competencies_move,
   } = useFieldArray({
     control: profileControl,
     name: 'behavioural_competencies',
@@ -1859,11 +1862,13 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
 
           markAllNonEditableSec: formData.markAllNonEditableSec,
         },
-        behavioural_competencies: {
-          create: formData.behavioural_competencies.map((bc: any) => ({
-            behavioural_competency: { connect: { id: bc.behavioural_competency.id } },
-          })),
-        },
+        behavioural_competencies: formData.behavioural_competencies
+          .map((a: any) => ({
+            id: a.id,
+            name: a.name,
+            description: a.description,
+          }))
+          .filter((acc: any) => acc.text?.trim() !== ''),
 
         ...(formData.employeeClassificationGroups &&
           formData.employeeClassificationGroups.length > 0 &&
@@ -4997,6 +5002,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                     behavioural_competencies_fields={behavioural_competencies_fields}
                     addAction={behavioural_competencies_append}
                     removeAction={behavioural_competencies_remove}
+                    moveAction={behavioural_competencies_move}
                     validateFunction={triggerProfileValidation}
                     formErrors={profileFormErrors}
                     useFormReturn={jobProfileUseFormReturn}
