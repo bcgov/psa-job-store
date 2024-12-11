@@ -68,11 +68,8 @@ const BehaviouralComptencyPicker: React.FC<BehaviouralComptencyPickerProps> = ({
     }
   };
   useEffect(() => {
-    setSelectedOptions(
-      behavioural_competencies_fields.map((field) => {
-        return field.id;
-      }),
-    );
+    // console.log('setting selected options: ', behavioural_competencies_fields);
+    setSelectedOptions([...behavioural_competencies_fields.map((field) => field.idd.toString())]);
   }, [behavioural_competencies_fields]);
 
   useEffect(() => {
@@ -120,6 +117,7 @@ const BehaviouralComptencyPicker: React.FC<BehaviouralComptencyPickerProps> = ({
   };
 
   const onAdd = (selectedItems: string[]) => {
+    // console.log('onAdd: ', selectedItems);
     const selectedBehaviouralCompetencies = selectedItems
       .map((id) => {
         const selectedOption = selectableOptions.find((option) => option.value === id);
@@ -142,11 +140,15 @@ const BehaviouralComptencyPicker: React.FC<BehaviouralComptencyPickerProps> = ({
 
     // Add the new items
     selectedBehaviouralCompetencies.forEach((item) => {
-      addAction(item.behavioural_competency);
+      // console.log('adding: ', item);
+      const { id, ...rest } = item.behavioural_competency;
+      addAction({ ...rest, idd: id.toString() } as BehaviouralCompetency);
     });
 
     validateFunction();
   };
+
+  // console.log('selecedOptions/options/selectableOptions: ', selectedOptions, options, selectableOptions);
 
   return (
     <Row justify="start">

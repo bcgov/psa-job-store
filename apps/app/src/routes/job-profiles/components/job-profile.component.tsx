@@ -54,6 +54,9 @@ interface JobProfileProps {
 
 class BehaviouralCompetency {
   @IsNotEmpty()
+  idd: string;
+
+  @IsNotEmpty()
   id: number;
 
   @IsNotEmpty()
