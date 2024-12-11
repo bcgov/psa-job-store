@@ -836,15 +836,6 @@ export class JobProfileService {
     return uniqueOrganizations;
   }
 
-  async getBehaviouralCompetencies(job_profile_id: number, job_profile_version: number) {
-    return this.prisma.jobProfileBehaviouralCompetency.findMany({
-      where: { job_profile_id, job_profile_version },
-      include: {
-        behavioural_competency: true,
-      },
-    });
-  }
-
   async createOrUpdateJobProfile(data: ExtendedJobProfileCreateInput, userId: string) {
     // todo: catch the "number" constraint failure and process the error on the client appropriately
     const jobProfileState = data.state ? data.state : JobProfileState.DRAFT;
@@ -1404,9 +1395,6 @@ export class JobProfileService {
       if (!anyPositionRequests) {
         // If the job profile does not have links to PositionRequests, delete it along with related entities
         await this.prisma.$transaction([
-          this.prisma.jobProfileBehaviouralCompetency.deleteMany({
-            where: { job_profile_id: jobProfileId },
-          }),
           this.prisma.jobProfileClassification.deleteMany({
             where: { job_profile_id: jobProfileId },
           }),
