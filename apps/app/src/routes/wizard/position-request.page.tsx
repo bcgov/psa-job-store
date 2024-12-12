@@ -693,7 +693,7 @@ export const PositionRequestPage = () => {
 
   if (classificationsDataLoading || !classificationsFetched) return <LoadingSpinnerWithMessage />;
 
-  return !(wizardContextPositionRequestData || positionRequestData) && !isLoading && !isFetching ? (
+  return !(wizardContextPositionRequestData || positionRequestData) && !isLoading ? (
     <NotFoundComponent entity="Position request" />
   ) : (
     <>
