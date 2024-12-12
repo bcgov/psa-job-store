@@ -128,16 +128,17 @@ export const HomePage = () => {
             loading={profileDataIsFetching}
             className="orgChartCard"
             style={{
-              height: '500px',
+              minHeight: '500px',
               overflow: 'hidden',
               background: 'none',
               border: '1px solid #D9D9D9',
               marginTop: '1rem',
               marginBottom: '2rem',
+              flexGrow: 1,
             }}
             bodyStyle={{
               padding: 0,
-              height: '444px', // card height - header height
+              height: '100%', // card height - header height
 
               display: 'flex',
               flexDirection: 'column',
@@ -145,7 +146,7 @@ export const HomePage = () => {
             title={
               <Row align="bottom">
                 <Col>
-                  <h2 style={{ marginBottom: 0 }}>My organization</h2>{' '}
+                  <h2 style={{ marginBottom: 0 }}>My department</h2>{' '}
                 </Col>
                 {/* <Col style={{ paddingLeft: '20px', paddingBottom: '4px' }}>
                   <ViewToggle
@@ -184,6 +185,7 @@ export const HomePage = () => {
                 setDepartmentId={setDepartmentId}
                 departmentId={departmentId}
                 departmentIdIsLoading={profileDataIsFetching}
+                showDepartmentFilter={false}
                 targetId={profileData?.profile.position_id}
                 wrapProvider={false}
               />

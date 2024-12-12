@@ -742,7 +742,7 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
 
     const renderProfileList = (onSelectProfileF: any, profiles: any[]) => (
       <>
-        {!isLoading && positionRequestId && (
+        {isSearchingOrFiltering && !isLoading && (
           <Alert
             role="info"
             data-testid="verification-warning-message"
