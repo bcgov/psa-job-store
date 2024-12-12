@@ -382,7 +382,7 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
       // filters did not change, but some other parameters did
       // Only update search params if there's a change
       if (searchParams.toString() !== newSearchParams.toString()) {
-        // console.log('navigating.. A', getBasePath(location.pathname));
+        // console.log('navigating.. A', getBasePath(location.pathname), newSearchParams.toString());
         // console.log('search params were: ', searchParams.toString());
         // console.log('search params now: ', newSearchParams.toString());
 
@@ -432,6 +432,7 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
       basePath = `/${pathSegments[0]}`;
     }
 
+    // console.log('handle search navigate: ', basePath, searchParams.toString());
     navigate(
       {
         pathname: basePath,
@@ -444,11 +445,13 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
   useEffect(() => {
     // if searchparams has clear filters flag, do that
     if (clearingFilters) {
+      // console.log('CLEARING FILTERS: ', clearingFilters);
       setAllSelections([]);
       setClearingFilters(false);
-      setSearchParams(searchParams);
+      // console.log('setSearchParams A: ', searchParams);
+      // setSearchParams(searchParams);
     }
-  }, [searchParams, setAllSelections, setSearchParams, clearingFilters, setClearingFilters]);
+  }, [setAllSelections, clearingFilters, setClearingFilters]); // searchParams, setSearchParams,
 
   useEffect(() => {
     if (clearingSearch) {
@@ -459,6 +462,7 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
   }, [clearingSearch, setClearingSearch, setSearchText, handleSearch]);
 
   const clearFilters = () => {
+    // console.log('clearFilters');
     // setAllSelections([]);
 
     // Update the URL parameters
@@ -471,6 +475,7 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
     const searchFromUrl = searchParams.get('search');
     if (searchFromUrl) newSearchParams.set('search', searchFromUrl);
 
+    // console.log('setting clearing filters 1');
     setClearingFilters(true);
     // newSearchParams.set('clearFilters', 'true');
     // setSearchParams(newSearchParams);
@@ -523,6 +528,7 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
     // console.log('navigateToPath: ', navigateToPath);
     // console.log('newSearchParams: ', newSearchParams.toString());
 
+    // console.log('clearing filters navigate: ', navigateToPath, newSearchParams.toString());
     navigate(
       {
         pathname: navigateToPath,

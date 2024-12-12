@@ -421,7 +421,8 @@ export const JobProfile: React.FC<JobProfileProps> = ({
   const screens = useBreakpoint();
 
   // If neither resolvedId nor profileData is present, throw an error
-  if (!jobNumber && !profileData) throw new Error('No ID');
+  // console.log('jobNumber: ', jobNumber);
+  // if (!jobNumber && !profileData) throw new Error('No ID');
 
   const [originalData, setOriginalData] = useState<JobProfileModel | null>(null); // for diff
 
