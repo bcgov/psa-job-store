@@ -33,8 +33,8 @@ Then('they proceed to the additional information step', () => {
 });
 
 When('the user fills out the required additional information', () => {
-  cy.get('[data-testid="loading-spinner"]').should('be.visible');
-  cy.get('[data-testid="loading-spinner"]', { timeout: 15000 }).should('not.exist');
+  cy.get('[data-testid="excluded-select"] .ant-select-selection-search-input').type('00121521');
+  cy.contains('00121521 Testing Manager').click();
 
   cy.get('[data-testid="branch-input"]').type('test branch');
   cy.get('[data-testid="division-input"]').type('test division');
@@ -54,7 +54,7 @@ Then('they are taken to the job profile selection step', () => {
 });
 
 When('the user applies filters', () => {
-  const classification = 'Information Systems R27';
+  const classification = 'Information Systems R27 (GEU)';
 
   // Click the dropdown to open it
   cy.get('[data-cy="Classification-filter"]').find('.react-select__input-container').click();
@@ -77,7 +77,7 @@ When('the user applies filters', () => {
       }
     });
 
-  const classification2 = 'Supervisor R15';
+  const classification2 = 'Supervisor R15 (GEU)';
 
   // Click the dropdown to open it
   cy.get('[data-cy="Classification-filter"]').find('.react-select__input-container').click();
@@ -101,7 +101,13 @@ When('the user applies filters', () => {
     });
 });
 
+When('the results have loaded', () => {
+  cy.get('[data-testid="skeleton-loading"]').should('exist');
+  cy.get('[data-testid="skeleton-loading"]').should('not.exist');
+});
+
 When('the user applies search', () => {
+  cy.wait(2000);
   cy.get('[aria-label="Search by job title or keyword"]').type('scientist');
   cy.contains('button', 'Find job profiles').click();
 });

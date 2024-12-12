@@ -338,7 +338,7 @@ export class JobProfileValidationModel {
   optional_security_screenings: (TrackedFieldArrayItem | ValueString | AccountabilitiesModel)[];
 
   @BehaviouralCompetencyValidator({ message: 'The profile should have between 3 and 10 behavioural competencies' })
-  behavioural_competencies: { behavioural_competency: BehaviouralCompetency }[];
+  behavioural_competencies: BehaviouralCompetency[];
 
   // @CustomItemCountValidator(1, 10, 'professional registration and certification requirements', {
   //   message: 'There should be between $constraint1 and $constraint2 $constraint3.',
@@ -421,7 +421,8 @@ export const JobProfile: React.FC<JobProfileProps> = ({
   const screens = useBreakpoint();
 
   // If neither resolvedId nor profileData is present, throw an error
-  if (!jobNumber && !profileData) throw new Error('No ID');
+  // console.log('jobNumber: ', jobNumber);
+  // if (!jobNumber && !profileData) throw new Error('No ID');
 
   const [originalData, setOriginalData] = useState<JobProfileModel | null>(null); // for diff
 
@@ -607,7 +608,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
   };
 
   const compareCompetencies = (original: BehaviouralCompetency[], modified: BehaviouralCompetency[]): JSX.Element[] => {
-    const allNames = new Set([...original.map((item) => item.name), ...modified.map((item) => item.name)]);
+    const allNames = new Set([...modified.map((item) => item.name), ...original.map((item) => item.name)]);
     const comparisonResult: JSX.Element[] = [];
 
     allNames.forEach((name) => {
@@ -1254,18 +1255,16 @@ export const JobProfile: React.FC<JobProfileProps> = ({
           <ul data-testid="behavioural-competencies">
             {showDiff && originalData
               ? compareCompetencies(
-                  originalData.behavioural_competencies.map((item) => item.behavioural_competency),
-                  effectiveData?.behavioural_competencies.map((item) => item.behavioural_competency) ?? [],
+                  originalData.behavioural_competencies,
+                  effectiveData?.behavioural_competencies ?? [],
                 )
-              : (effectiveData?.behavioural_competencies ?? []).map(
-                  ({ behavioural_competency: { name, description } }, index) => {
-                    return (
-                      <li key={index}>
-                        <Text strong>{name}</Text> {description}
-                      </li>
-                    );
-                  },
-                )}
+              : (effectiveData?.behavioural_competencies ?? []).map(({ name, description }, index) => {
+                  return (
+                    <li key={index}>
+                      <Text strong>{name}</Text> {description}
+                    </li>
+                  );
+                })}
           </ul>
         </span>
       ),

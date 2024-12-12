@@ -45,6 +45,7 @@ Feature: Search and Filter Job Profiles
 
     Scenario: Combine search and filters, then clear filters while maintaining the search query
         When the user selects "Communications Officer R30" from the classification filter dropdown
+        And the results have loaded
         And the user enters "multiple programs" into the search field
         And the user clicks the "Search" button
         Then only job profiles containing "multiple programs" and matching the selected filters should be displayed
@@ -78,6 +79,7 @@ Feature: Search and Filter Job Profiles
         Given there are multiple pages of job profiles
         # And the user sets the page size to 2
         When the user navigates to a specific page
+        And the results have loaded
         And the user enters a keyword into the search field
         And the user clicks the "Search" button
         Then the job profiles for the first page should be displayed

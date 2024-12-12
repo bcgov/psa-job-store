@@ -386,6 +386,8 @@ export class PeoplesoftService {
     return response;
   }
 
+  async getProfileV2(idir?: string, emplid?: string) {}
+
   async getProfile(idir: string) {
     const response = await firstValueFrom(
       this.request({

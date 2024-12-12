@@ -137,7 +137,7 @@ export const PositionRequestPage = () => {
   // This could be a piece of state that determines which query to run, for example
   // const queryHook = isSharedRoute ? useLazyGetSharedPositionRequestQuery : useLazyGetPositionRequestQuery;
 
-  const [getPositionRequest, { data: positionRequestData }] = isSharedRoute
+  const [getPositionRequest, { data: positionRequestData, isLoading }] = isSharedRoute
     ? // eslint-disable-next-line react-hooks/rules-of-hooks
       useLazyGetSharedPositionRequestQuery()
     : // eslint-disable-next-line react-hooks/rules-of-hooks
@@ -419,7 +419,7 @@ export const PositionRequestPage = () => {
                       })}
                       title="Sent for verification"
                       subTitle={`The profile was submitted for review on: ${dayjs(
-                        wizardContextPositionRequestData?.updated_at,
+                        wizardContextPositionRequestData?.resubmitted_at,
                       ).format('MMM D, YYYY')}`}
                     />
 
@@ -693,7 +693,7 @@ export const PositionRequestPage = () => {
 
   if (classificationsDataLoading || !classificationsFetched) return <LoadingSpinnerWithMessage />;
 
-  return !wizardContextPositionRequestData ? (
+  return !(wizardContextPositionRequestData || positionRequestData) && !isLoading ? (
     <NotFoundComponent entity="Position request" />
   ) : (
     <>

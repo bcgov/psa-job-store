@@ -53,10 +53,10 @@ import {
 import copy from 'copy-to-clipboard';
 import DOMPurify from 'dompurify';
 import debounce from 'lodash.debounce';
+import Quill from 'quill';
 import 'quill/dist/quill.snow.css';
 import { CSSProperties, useCallback, useEffect, useMemo, useRef, useState } from 'react';
-import { Controller, useFieldArray, useForm } from 'react-hook-form';
-import ReactQuill, { Quill } from 'react-quill';
+import { Controller, useFieldArray, useForm, useWatch } from 'react-hook-form';
 import { Link, useNavigate, useParams } from 'react-router-dom';
 import StickyBox from 'react-sticky-box';
 import LoadingSpinnerWithMessage from '../../../components/app/common/components/loading.component';
@@ -116,24 +116,13 @@ import WizardValidationError from '../../wizard/components/wizard-edit-profile-v
 import WizardPicker from '../../wizard/components/wizard-picker';
 import WizardProfessionalRegistrationPicker from '../../wizard/components/wizard-professional-registration-picker';
 import JobStreamDiscipline from './jobstream-discipline.component';
+import QuillEditor from './quill-editor';
 import ReorderButtons from './reorder-buttons';
 
 const { Option } = Select;
 const { Text } = Typography;
 
 const employeeGroupIds: string[] = ['MGT', 'GEU', 'OEX', 'NUR', 'PEA', 'LGL'];
-
-// Define a custom clipboard to handle paste events
-class PlainTextClipboard extends Quill.import('modules/clipboard') {
-  onPaste(event: any) {
-    event.preventDefault();
-    const text = event.clipboardData.getData('text/plain');
-    this.quill.clipboard.dangerouslyPasteHTML(this.quill.getSelection().index, text);
-  }
-}
-
-// Register the custom clipboard module
-Quill.register('modules/clipboard', PlainTextClipboard, true);
 
 export interface AccountabilityItem {
   text: string;
@@ -222,6 +211,7 @@ export class BasicDetailsValidationModel {
   @Type(() => TitleField)
   title: TitleField | string;
 
+  @JobStoreNumberValidator()
   jobStoreNumber: string;
 
   @EmployeeClassificationGroupValidator()
@@ -258,6 +248,38 @@ export class BasicDetailsValidationModel {
   program_overview: ProgramOverviewField | string;
 }
 
+export function JobStoreNumberValidator(validationOptions?: ValidationOptions) {
+  return function (object: object, propertyName: string) {
+    registerDecorator({
+      name: 'jobStoreNumberValidator',
+      target: object.constructor,
+      propertyName: propertyName,
+      options: validationOptions,
+      validator: {
+        validate(value: any, args: ValidationArguments) {
+          // Access the validation status through a custom context
+          const context = args.object as any;
+          const isValidStatus = context._validationStatus === 'valid';
+          const hasValue = value && value.length > 0;
+
+          console.log('validating job store number: ', value, context._validationStatus);
+
+          return hasValue && isValidStatus;
+        },
+        defaultMessage(args: ValidationArguments): string {
+          const context = args.object as any;
+          if (!args.value || args.value.length === 0) {
+            return 'Job Store Number is required.';
+          }
+          return context._validationStatus === 'invalid'
+            ? 'Please choose a unique number.'
+            : 'Invalid Job Store Number.';
+        },
+      },
+    });
+  };
+}
+
 export function EmployeeClassificationGroupValidator(validationOptions?: ValidationOptions) {
   return function (object: object, propertyName: string) {
     registerDecorator({
@@ -291,6 +313,8 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
   const [triggerGetJobProfile, { data: lazyJobProfile }] = useLazyGetJobProfileQuery();
   const [triggerGetJobProfileMeta, { data: jobProfileMeta }] = useLazyGetJobProfileMetaQuery();
   const [triggerGetPositionRequestsCount, { data: positionRequestsCount }] = useLazyGetPositionRequestsCountQuery();
+  const [validationStatus, setValidationStatus] = useState<string | null>(null);
+
   let link: string;
   const [selectedKeys, setSelectedKeys] = useState([]);
 
@@ -303,6 +327,8 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
   } else {
     link = '/job-profiles/manage/published/';
   }
+
+  const quillRef = useRef<Quill>(null);
 
   const isTestUser = useTestUser();
 
@@ -464,8 +490,17 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
   }));
   const prevProfessionsData = useRef(professionsData);
 
+  // console.log('declaring basicUseFormReturn, validationStatus: ', validationStatus);
   const basicUseFormReturn = useForm<BasicDetailsValidationModel>({
-    resolver: classValidatorResolver(BasicDetailsValidationModel),
+    resolver: async (values, context, options) => {
+      // Inject validation status into the validation context
+      const valuesWithStatus = {
+        ...values,
+        _validationStatus: validationStatus,
+      };
+
+      return classValidatorResolver(BasicDetailsValidationModel)(valuesWithStatus, context, options);
+    },
     defaultValues: {
       title: { text: '' } as TitleField,
       jobStoreNumber: '',
@@ -504,8 +539,16 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
   const title = watch('title.text');
 
   // job store number validation
-  const jobStoreNumber = watch('jobStoreNumber');
-  const [validationStatus, setValidationStatus] = useState<string | null>(null);
+  // const jobStoreNumber = watch('jobStoreNumber');
+  const jobStoreNumber = useWatch({
+    control,
+    name: 'jobStoreNumber',
+  });
+
+  const originalJobStoreNumber = useWatch({
+    control,
+    name: 'originalJobStoreNumber',
+  });
 
   const [fetchingNextNumber, setFetchingNextNumber] = useState(false);
   const [checkNumberAvailability] = useLazyIsJobProfileNumberAvailableQuery();
@@ -521,17 +564,23 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
   // Set the fetched number as the default value
   useEffect(() => {
     if (nextNumberData?.nextAvailableJobProfileNumber !== undefined) {
+      // console.log('setting next number: ', nextNumberData.nextAvailableJobProfileNumber);
       setValue('jobStoreNumber', nextNumberData.nextAvailableJobProfileNumber.toString());
     }
   }, [nextNumberData, setValue]);
 
   // Function to fetch the next available number
   const fetchNextNumber = useCallback(async () => {
-    // Trigger the query to get the next available number
-    const originalNumberValue = parseInt(getBasicDetailsValues('originalJobStoreNumber'), 10);
+    // console.log('fetchNextNumber hook');
 
-    if (originalNumberValue) {
-      setValue('jobStoreNumber', originalNumberValue.toString());
+    // Trigger the query to get the next available number
+
+    if (originalJobStoreNumber) {
+      // console.log(
+      //   'have original number, not featching, setting jobStoreNumber to originalJobStoreNumber: ',
+      //   originalJobStoreNumber,
+      // );
+      setValue('jobStoreNumber', originalJobStoreNumber);
       return;
     }
 
@@ -550,29 +599,42 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
       .finally(() => {
         setFetchingNextNumber(false);
       });
-  }, [getNextAvailableNumber, setValue, setFetchingNextNumber, getBasicDetailsValues]);
+  }, [getNextAvailableNumber, setValue, setFetchingNextNumber, originalJobStoreNumber]);
 
   useEffect(() => {
-    // console.log('useEffect jobStoreNumber: ', jobStoreNumber);
     const numberValue = parseInt(jobStoreNumber, 10);
-    const originalNumberValue = parseInt(getBasicDetailsValues('originalJobStoreNumber'), 10);
+    const originalNumberValue = parseInt(originalJobStoreNumber, 10);
+
     if (numberValue === originalNumberValue) {
+      // console.log('set valid and tgrigger validation');
       setValidationStatus('valid');
+      setTimeout(() => {
+        triggerBasicDetailsValidation();
+      }, 100);
       return;
     }
 
     if (isNaN(numberValue)) {
       setValidationStatus('invalid');
+      setTimeout(() => {
+        triggerBasicDetailsValidation();
+      }, 100);
     } else {
       checkNumberAvailability(numberValue)
         .then(({ data }) => {
           setValidationStatus(data?.isJobProfileNumberAvailable ? 'valid' : 'invalid');
+          setTimeout(() => {
+            triggerBasicDetailsValidation();
+          }, 100);
         })
         .catch(() => {
           setValidationStatus('invalid'); // handle error case
+          setTimeout(() => {
+            triggerBasicDetailsValidation();
+          }, 100);
         });
     }
-  }, [jobStoreNumber, nextNumberData, checkNumberAvailability, getBasicDetailsValues]);
+  }, [jobStoreNumber, nextNumberData, checkNumberAvailability, originalJobStoreNumber, triggerBasicDetailsValidation]);
 
   // professions field array config
   const {
@@ -747,33 +809,6 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
   //   [jobStreams],
   // );
 
-  // const handlePaste = (event, editor, next) => {
-  //   // Prevent the default paste behavior
-  //   event.preventDefault();
-
-  //   // Get the plain text from the clipboard
-  //   const text = event.clipboardData.getData('text/plain');
-
-  //   // Insert the plain text at the current cursor position
-  //   editor.clipboard.dangerouslyPasteHTML(editor.getSelection().index, text);
-  // };
-
-  //quill modules for rich text editing
-  const quill_modules = {
-    toolbar: [
-      [{ list: 'ordered' }, { list: 'bullet' }],
-      ['bold', 'italic'],
-      ['link'],
-      [{ indent: '+1' }, { indent: '-1' }],
-    ],
-    clipboard: true,
-    // clipboard: {
-    //   // Use the custom paste handler
-    //   matchVisual: false,
-    //   matchers: [['', handlePaste]],
-    // },
-  };
-
   // END BASIC DETAILS FORM
 
   const allOrganizations = watch('all_organizations');
@@ -876,8 +911,10 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
             tc_is_readonly: s.tc_is_readonly,
           }) as SecurityScreeningItem,
       ),
-      behavioural_competencies: jobProfileData?.jobProfile.behavioural_competencies.map((bc) => ({
-        behavioural_competency: bc.behavioural_competency,
+      behavioural_competencies: jobProfileData?.jobProfile.behavioural_competencies?.map((r: any) => ({
+        id: r.id,
+        name: r.name,
+        description: r.description,
       })),
       markAllNonEditable: false,
       markAllSignificant: false,
@@ -1122,8 +1159,8 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
   useEffect(() => {
     // console.log('jobProfileData: ', jobProfileData);
     if (jobProfileData) {
-      // console.log('setting values..');
       // Basic Details Form
+      // console.log('setting values..');
       setValue('title.text', jobProfileData.jobProfile.title as string);
       setValue('jobStoreNumber', jobProfileData.jobProfile.number.toString());
       setValue('originalJobStoreNumber', jobProfileData.jobProfile.number.toString());
@@ -1581,6 +1618,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
     fields: behavioural_competencies_fields,
     append: behavioural_competencies_append,
     remove: behavioural_competencies_remove,
+    move: behavioural_competencies_move,
   } = useFieldArray({
     control: profileControl,
     name: 'behavioural_competencies',
@@ -1740,7 +1778,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
   const [createJobProfile] = useCreateOrUpdateJobProfileMutation();
 
   function transformFormDataToApiSchema(formData: any): CreateJobProfileInput {
-    // console.log('transformFormDataToApiSchema formData: ', formData, ', jobProfileData: ', jobProfileData);
+    // console.log('transformFormDataToApiSchema formData: ', formData);
     return {
       data: {
         state: formData.state,
@@ -1824,11 +1862,13 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
 
           markAllNonEditableSec: formData.markAllNonEditableSec,
         },
-        behavioural_competencies: {
-          create: formData.behavioural_competencies.map((bc: any) => ({
-            behavioural_competency: { connect: { id: bc.behavioural_competency.id } },
-          })),
-        },
+        behavioural_competencies: formData.behavioural_competencies
+          .map((a: any) => ({
+            id: a.id,
+            name: a.name,
+            description: a.description,
+          }))
+          .filter((acc: any) => acc.text?.trim() !== ''),
 
         ...(formData.employeeClassificationGroups &&
           formData.employeeClassificationGroups.length > 0 &&
@@ -1977,6 +2017,8 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
     // console.log('save, isPublishing: ', isPublishing);
     const basicDetails = getBasicDetailsValues();
     const profileDetails = getProfileValues();
+
+    // console.log('basicDetails: ', basicDetails);
 
     if (isUnpublishing) isPublishing = false;
     const newState = isPublishing ? 'PUBLISHED' : isUnpublishing ? 'DRAFT' : state;
@@ -2463,38 +2505,40 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                   <Row justify="start">
                     <Col xs={24} sm={24} md={24} lg={18} xl={16}>
                       {isCurrentVersion ? (
-                        <FormItem control={control} name="jobStoreNumber">
-                          <label style={srOnlyStyle} htmlFor="jobStoreNumber">
-                            JobStore Number
-                          </label>
-                          <Input
-                            placeholder="Ex.: 1001"
-                            aria-label="JobStore Number"
-                            addonBefore={
-                              <Tooltip title="Fetch Next Available Number">
-                                {fetchingNextNumber ? (
-                                  <LoadingOutlined />
-                                ) : (
-                                  <ReloadOutlined onClick={fetchNextNumber} />
-                                )}
-                              </Tooltip>
-                            }
-                            addonAfter={
-                              <>
-                                {validationStatus === 'valid' && (
-                                  <Tooltip title="Number is Valid">
-                                    <CheckCircleOutlined style={{ color: 'green' }} />
-                                  </Tooltip>
-                                )}
-                                {validationStatus === 'invalid' && (
-                                  <Tooltip title="Number is Invalid">
-                                    <CloseCircleOutlined style={{ color: 'red' }} />
-                                  </Tooltip>
-                                )}
-                              </>
-                            }
-                          />
-                        </FormItem>
+                        <>
+                          <FormItem control={control} name="jobStoreNumber">
+                            <label style={srOnlyStyle} htmlFor="jobStoreNumber">
+                              JobStore Number
+                            </label>
+                            <Input
+                              placeholder="Ex.: 1001"
+                              aria-label="JobStore Number"
+                              addonBefore={
+                                <Tooltip title="Fetch Next Available Number">
+                                  {fetchingNextNumber ? (
+                                    <LoadingOutlined />
+                                  ) : (
+                                    <ReloadOutlined onClick={fetchNextNumber} />
+                                  )}
+                                </Tooltip>
+                              }
+                              addonAfter={
+                                <>
+                                  {validationStatus === 'valid' && (
+                                    <Tooltip title="Number is Valid">
+                                      <CheckCircleOutlined style={{ color: 'green' }} />
+                                    </Tooltip>
+                                  )}
+                                  {validationStatus === 'invalid' && (
+                                    <Tooltip title="Number is Invalid">
+                                      <CloseCircleOutlined style={{ color: 'red' }} />
+                                    </Tooltip>
+                                  )}
+                                </>
+                              }
+                            />
+                          </FormItem>
+                        </>
                       ) : (
                         <span>{jobStoreNumber}</span>
                       )}
@@ -3203,19 +3247,21 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                           <Controller
                             control={control}
                             name="jobContext"
-                            render={({ field: { onChange, onBlur, value } }) => (
-                              <ReactQuill
-                                modules={quill_modules}
-                                theme="snow"
-                                placeholder="Add job context"
-                                value={value}
-                                onBlur={onBlur}
-                                onChange={(v: any) => {
-                                  onChange(v);
-                                  triggerBasicDetailsValidation();
-                                }}
-                              />
-                            )}
+                            render={({ field: { onChange, onBlur, value } }) => {
+                              return (
+                                <QuillEditor
+                                  ref={quillRef}
+                                  value={value}
+                                  onTextChange={() => {
+                                    const content = quillRef?.current?.root.innerHTML;
+                                    onChange(content);
+                                    triggerBasicDetailsValidation();
+                                  }}
+                                  onBlur={onBlur}
+                                  readOnly={false}
+                                />
+                              );
+                            }}
                           />
                           <WizardValidationError formErrors={basicFormErrors} fieldName="jobContext" />
                         </>
@@ -4956,6 +5002,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
                     behavioural_competencies_fields={behavioural_competencies_fields}
                     addAction={behavioural_competencies_append}
                     removeAction={behavioural_competencies_remove}
+                    moveAction={behavioural_competencies_move}
                     validateFunction={triggerProfileValidation}
                     formErrors={profileFormErrors}
                     useFormReturn={jobProfileUseFormReturn}

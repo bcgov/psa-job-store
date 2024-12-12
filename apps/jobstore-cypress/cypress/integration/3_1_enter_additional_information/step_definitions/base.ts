@@ -16,10 +16,10 @@ Given('the user is on the additional info form page', () => {
 //   cy.get('[data-testid="confirmation-switch"]').click();
 // });
 
-Then('all form fields are disabled', () => {
-  cy.get('[data-testid="department-select"]').should('have.class', 'ant-select-disabled');
-  cy.get('[data-testid="reporting-manager-input"]').should('be.disabled');
-});
+// Then('all form fields are disabled', () => {
+//   cy.get('[data-testid="department-select"]').should('have.class', 'ant-select-disabled');
+//   cy.get('[data-testid="reporting-manager-input"]').should('be.disabled');
+// });
 
 When('the user attempts to proceed to next step', () => {
   cy.get('[data-testid="next-button"]').click();
@@ -34,10 +34,10 @@ When('the user dismisses the error message', () => {
   cy.wait(200);
 });
 
-Then('all form fields become enabled', () => {
-  cy.get('[data-testid="department-select"]').should('not.have.class', 'ant-select-disabled');
-  cy.get('[data-testid="reporting-manager-input"]').should('not.be.disabled');
-});
+// Then('all form fields become enabled', () => {
+//   cy.get('[data-testid="department-select"]').should('not.have.class', 'ant-select-disabled');
+//   cy.get('[data-testid="reporting-manager-input"]').should('not.be.disabled');
+// });
 
 Then('a default department is already selected in the dropdown', () => {
   cy.get('[data-testid="department-select"] .ant-select-selection-item').should(
@@ -49,15 +49,15 @@ Then('a default department is already selected in the dropdown', () => {
 When('the user changes the department dropdown value', () => {
   cy.get('[data-testid="department-select"]').click();
 
-  cy.get('.ant-select-selection-search-input').type('human resources');
+  cy.get('[data-testid="department-select"] .ant-select-selection-search-input').type('human resources');
 
-  cy.get('span[title="Human Resources (DEPT02)"]').click();
+  cy.get('span[title="Human Resources (123-4567)"]').click();
 });
 
 Then('the selected department changes accordingly', () => {
   cy.get('[data-testid="department-select"] .ant-select-selection-item').should(
     'contain.text',
-    'Human Resources (DEPT02)',
+    'Human Resources (123-4567)',
   );
 });
 
@@ -69,16 +69,16 @@ Then('an error message prompts the user to enter the value', () => {
   cy.contains('First level excluded manager position number is required').should('be.visible');
 });
 
-When('the user enters excluded manager position number', () => {
+When('the user enters and selects excluded manager position number', () => {
   // Type in the reporting manager
-  cy.get('[data-testid="reporting-manager-input"]').type('00121521');
+  cy.get('[data-testid="excluded-select"] .ant-select-selection-search-input').type('00121521');
+  cy.contains('00121521 Testing Manager').click();
+  // // Wait for the loading spinner to appear and then disappear
+  // cy.get('[data-testid="loading-spinner"]').should('be.visible');
 
-  // Wait for the loading spinner to appear and then disappear
-  cy.get('[data-testid="loading-spinner"]').should('be.visible');
+  // cy.get('[data-testid="next-button"]').should('be.disabled');
 
-  cy.get('[data-testid="next-button"]').should('be.disabled');
-
-  cy.get('[data-testid="loading-spinner"]', { timeout: 15000 }).should('not.exist');
+  // cy.get('[data-testid="loading-spinner"]', { timeout: 15000 }).should('not.exist');
 });
 
 When('the user enters branch and division information', () => {
@@ -115,15 +115,18 @@ When('the user returns to the additional info form page', () => {
   cy.visit('/requests/positions/2');
 });
 
+When('the user is on the home page', () => {
+  cy.url().should('match', /\/$/);
+});
+
 Then('the previously entered data is displayed on the form', () => {
   // cy.get('[data-testid="confirmation-switch"]').should('have.class', 'ant-switch-checked');
-  cy.get('[data-testid="department-select"] .ant-select-selection-item').should(
-    'contain.text',
-    'Human Resources (DEPT02)',
-  );
+  cy.get('[data-testid="department-select"] .ant-select-selection-item')
+    .should('exist')
+    .should('contain.text', 'Human Resources (123-4567)');
 
   cy.get('[data-testid="branch-input"]').should('have.value', 'test branch');
   cy.get('[data-testid="division-input"]').should('have.value', 'test division');
-
-  cy.get('[data-testid="loading-spinner"]', { timeout: 15000 }).should('not.exist');
+  cy.contains('00121521 Testing Manager').should('exist');
+  // cy.get('[data-testid="loading-spinner"]', { timeout: 15000 }).should('not.exist');
 });

@@ -1,6 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { configureStore } from '@reduxjs/toolkit';
 import { render } from '@testing-library/react';
+// import { debug } from 'jest-preview';
 import { Provider } from 'react-redux';
 import { RouterProvider, createMemoryRouter } from 'react-router-dom';
 import { JobProfilesPage } from './job-profiles.page';
@@ -17,6 +18,29 @@ const store = configureStore({
   middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(mockMiddleware),
 });
 
+// Mock the store
+jest.mock('../../redux/redux.store', () => ({
+  useAppDispatch: () => jest.fn(),
+  store: configureStore({
+    reducer: {
+      api: (state = {}) => state,
+    },
+    middleware: (getDefaultMiddleware) => getDefaultMiddleware(),
+  }),
+}));
+
+jest.mock('react-oidc-context', () => ({
+  useAuth: () => ({
+    isAuthenticated: false,
+    user: {
+      profile: {
+        idir_username: 'Bob',
+      },
+    },
+    isLoading: false,
+  }),
+}));
+
 describe('JobProfilesPage', () => {
   it('renders the page header and job profiles', () => {
     const router = createMemoryRouter([{ path: '/', element: <JobProfilesPage /> }]);
@@ -26,8 +50,11 @@ describe('JobProfilesPage', () => {
       </Provider>,
     );
 
-    expect(getByText('Job Profiles')).toBeInTheDocument();
-    expect(getByText('Find a Job Profile which suits your needs')).toBeInTheDocument();
-    expect(getByText('Showing 1-2 of 7 results')).toBeInTheDocument();
+    // debug();
+    // screen.debug();
+
+    expect(getByText('Job profiles')).toBeInTheDocument();
+    expect(getByText('Explore job profiles')).toBeInTheDocument();
+    expect(getByText('Showing 1-7 of 7 results')).toBeInTheDocument();
   });
 });

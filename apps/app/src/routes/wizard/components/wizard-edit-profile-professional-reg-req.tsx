@@ -141,7 +141,11 @@ const ProfessionalRegistrationRequirements: React.FC<ProfessionalRegistrationReq
             />
           </Col>
           <Col>
-            <WizardEditAddButton testId="add-prof-reg-button" onClick={() => handleAddModal(handleAddNew)}>
+            <WizardEditAddButton
+              testId="add-prof-reg-button"
+              isSignificant
+              onClick={() => handleAddModal(handleAddNew)}
+            >
               Add a custom requirement
             </WizardEditAddButton>
           </Col>

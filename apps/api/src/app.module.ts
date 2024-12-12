@@ -55,6 +55,7 @@ import { validateAppConfig } from './utils/validate-app-config.util';
         pinoHttp: loggerOptions,
       }),
     }),
+    // EventModule,
     HealthCheckModule,
     ScheduleModule.forRoot(),
     AuthModule,

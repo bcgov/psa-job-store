@@ -21,6 +21,7 @@ interface BaseDynamicOrgChartProps {
   setDepartmentId: React.Dispatch<React.SetStateAction<string | null | undefined>>;
   departmentId: string | null | undefined;
   departmentIdIsLoading?: boolean;
+  showDepartmentFilter?: boolean;
   targetId?: string | undefined;
   wrapProvider?: boolean;
   // wizardNextHandler?: ({ switchStep }?: { switchStep?: boolean }) => Promise<string | undefined>;
@@ -43,6 +44,7 @@ export const DynamicOrgChart = ({
   setDepartmentId,
   departmentId,
   departmentIdIsLoading,
+  showDepartmentFilter = true,
   targetId,
   // wizardNextHandler,
   ...props
@@ -434,12 +436,14 @@ export const DynamicOrgChart = ({
       <Row gutter={[8, 8]} justify="space-between" style={{ margin: '0.5rem 1rem' }}>
         <Col xs={24} md={{ offset: 12, span: 12 }}>
           <Space direction="vertical" style={{ width: '100%' }}>
-            <DepartmentFilter
-              setDepartmentId={setDepartmentId}
-              departmentId={departmentId}
-              loading={departmentIdIsLoading}
-              // focusable={false}
-            />
+            {showDepartmentFilter && (
+              <DepartmentFilter
+                setDepartmentId={setDepartmentId}
+                departmentId={departmentId}
+                loading={departmentIdIsLoading}
+                // focusable={false}
+              />
+            )}
             <PositionSearch
               // setSearchTerm={setSearchTerm}
               onSearch={onSearch}

@@ -1,4 +1,6 @@
 import { render } from '@testing-library/react';
+// import { debug } from 'jest-preview';
+import { MemoryRouter } from 'react-router-dom';
 import { PageHeader } from './page-header.component';
 
 jest.mock('react-router-dom', () => ({
@@ -11,14 +13,23 @@ jest.mock('react-router-dom', () => ({
 
 describe('PageHeader', () => {
   it('renders the page header with correct properties', () => {
-    const { getByText } = render(<PageHeader title="Test Title" subTitle="Test Subtitle" />);
+    const { getByText } = render(
+      <MemoryRouter initialEntries={['/initial/path']}>
+        <PageHeader title="Test Title" subTitle="Test Subtitle" />
+      </MemoryRouter>,
+    );
 
+    // debug();
     expect(getByText('Test Title')).toBeInTheDocument();
     expect(getByText('Test Subtitle')).toBeInTheDocument();
   });
 
   it('displays breadcrumbs based on route matches', () => {
-    const { getByText } = render(<PageHeader title="Test Title" />);
+    const { getByText } = render(
+      <MemoryRouter initialEntries={['/initial/path']}>
+        <PageHeader title="Test Title" subTitle="Test Subtitle" />
+      </MemoryRouter>,
+    );
 
     expect(getByText('Home')).toBeInTheDocument();
     expect(getByText('Jobs')).toBeInTheDocument();

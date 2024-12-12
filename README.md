@@ -92,7 +92,7 @@ Run `npx -w jobstore-cypress cypress open`
 
 To run in same environment as GitHub actions: `npx cypress run --browser edge --headless`
 
-## Running component tests
+## Running React component tests
 
 Run `npx -w app jest`
 
@@ -101,6 +101,10 @@ _Note:_ If you receive a `EBUSY: resource busy or locked, open..` error, run wit
 To genereate coverage report, run with `--coverage` flag
 
 Project is also configured to generate reports with `jest-html-reporter`, which outputs test results to `app/test-report.html`
+
+## Running NestJS unit tests
+
+`npx -w api jest --no-cache`
 
 ## Updating seed file secret
 
@@ -199,6 +203,8 @@ Import production data:
 If on local:
 
 `psql -U postgres -d api -f /home/backup.sql -h localhost -p 5432 -U admin`
+
+`npx -w api prisma migrate deploy`
 
 Clear position requests:
 

@@ -137,7 +137,7 @@ export const TotalCompApprovedRequestPage = () => {
     },
     {
       key: 'firstLevelExcludedManager',
-      label: 'First level excluded manager for this position',
+      label: 'Excluded manager who approved the profile',
       children: (
         <PositionProfile
           positionNumber={null}
