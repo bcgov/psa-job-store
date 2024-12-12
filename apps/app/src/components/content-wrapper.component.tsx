@@ -14,6 +14,7 @@ const ContentWrapper: React.FC<ContentWrapperProps> = ({ children, padTop = true
         backgroundColor: '#f5f5f5',
         display: 'flex', // Set the display to flex
         flexDirection: 'column', // Stack children vertically
+        flexGrow: 1,
       }}
     >
       {children}

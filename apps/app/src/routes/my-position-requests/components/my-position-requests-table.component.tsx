@@ -56,7 +56,7 @@ type ColumnTypes = {
   render?: (text: any, record: any) => React.ReactNode;
   align?: 'left' | 'center' | 'right'; // AlignType is typically one of these string literals
   fixed?: boolean | 'right' | 'left';
-  requestingFeature?: 'classificationTasks' | 'myPositions' | 'totalCompApprovedRequests';
+  requestingFeature?: 'classificationTasks' | 'myPositions' | 'myRecentPositions' | 'totalCompApprovedRequests';
 };
 
 // Declare the MyPositionsTable component with TypeScript
@@ -853,7 +853,8 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
               pagination={{
                 current: currentPage,
                 pageSize: pageSize,
-                total: totalResults,
+                total: showPagination ? totalResults : 5,
+                hideOnSinglePage: true,
                 pageSizeOptions: ['10', '20', '50'],
                 showSizeChanger: showPagination,
                 itemRender: (_current, type, originalElement) => {
