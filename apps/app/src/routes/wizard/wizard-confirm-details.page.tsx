@@ -289,7 +289,7 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
 
       setSelectedDepartmentId(setDeptIdVal);
       setSetupDone(true);
-      console.log('setup done');
+      // console.log('setup done');
     }
   }, [positionRequestData, setValue, positionRequest]); // debouncedFetchPositionProfile
 
@@ -364,7 +364,7 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
     }
   };
 
-  console.log('positionRequest: ', positionRequest);
+  // console.log('positionRequest: ', positionRequest);
   return (
     <WizardPageWrapper
       title={

@@ -351,7 +351,7 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
 
       selectProfileForPageNumber.current = toSelectProfileNumber ?? '';
 
-      console.log('TRIGGER, search: ', search);
+      // console.log('TRIGGER, search: ', search);
       trigger({
         ...(search != null && { search }),
         where: {

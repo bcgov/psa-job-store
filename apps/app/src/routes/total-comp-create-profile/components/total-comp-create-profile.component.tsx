@@ -490,7 +490,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
   }));
   const prevProfessionsData = useRef(professionsData);
 
-  console.log('declaring basicUseFormReturn, validationStatus: ', validationStatus);
+  // console.log('declaring basicUseFormReturn, validationStatus: ', validationStatus);
   const basicUseFormReturn = useForm<BasicDetailsValidationModel>({
     resolver: async (values, context, options) => {
       // Inject validation status into the validation context
@@ -606,7 +606,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
     const originalNumberValue = parseInt(originalJobStoreNumber, 10);
 
     if (numberValue === originalNumberValue) {
-      console.log('set valid and tgrigger validation');
+      // console.log('set valid and tgrigger validation');
       setValidationStatus('valid');
       setTimeout(() => {
         triggerBasicDetailsValidation();
