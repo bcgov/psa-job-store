@@ -9,7 +9,7 @@ Given('the user navigates to the job search page', () => {
 });
 
 When('the user selects a classification from the classification filter dropdown', () => {
-  const classification = 'Information Systems R30';
+  const classification = 'Information Systems R30 (GEU)';
 
   // Click the dropdown to open it
   cy.get('[data-cy="Classification-filter"]').find('.react-select__input-container').click();

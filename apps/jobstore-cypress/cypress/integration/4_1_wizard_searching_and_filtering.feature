@@ -17,7 +17,9 @@ Feature: Coming back from edit page to search page selects previously selected j
         Then they are taken to the job profile selection step
 
         When the user applies filters
+        And the results have loaded
         And the user applies search
+        And the results have loaded
         And the user selects a job profile
 
         When the user reloads the page

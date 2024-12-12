@@ -1,7 +1,7 @@
 import { ArrowLeftOutlined, EllipsisOutlined } from '@ant-design/icons';
 import { Button, Menu, Modal, Typography } from 'antd';
 import { useEffect, useRef, useState } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
+import { Link, useSearchParams } from 'react-router-dom';
 import AccessiblePopoverMenu from '../../components/app/common/components/accessible-popover-menu';
 import LoadingComponent from '../../components/app/common/components/loading.component';
 import PositionProfile from '../../components/app/common/components/positionProfile';
@@ -74,7 +74,6 @@ export const WizardPage: React.FC<WizardPageProps> = ({
     setWizardData,
   } = useWizardContext();
   const [searchParams, setSearchParams] = useSearchParams();
-  const navigate = useNavigate();
 
   // get organization for the department in which the position is being created in
   // this will be used to filter the profiles to ones that belong to this organization only
@@ -93,17 +92,6 @@ export const WizardPage: React.FC<WizardPageProps> = ({
     }
   }, [positionRequestData, setSearchParams, searchParams]);
 
-  const getBasePath = (path: string) => {
-    if (positionRequestId) return `/requests/positions/${positionRequestId}`;
-
-    const pathParts = path.split('/');
-    // Check if the last part is a number (ID), if so, remove it
-    if (!isNaN(Number(pathParts[pathParts.length - 1]))) {
-      pathParts.pop(); // Remove the last part (job profile ID)
-    }
-    return pathParts.join('/');
-  };
-
   const [isSwitchStepLoading, setIsSwitchStepLoading] = useState(false);
 
   const onSubmit = async (
@@ -112,7 +100,7 @@ export const WizardPage: React.FC<WizardPageProps> = ({
     alertNoProfile = true,
     step = -1,
   ): Promise<string> => {
-    console.log('onSubmit: ', action, switchToNextStep, alertNoProfile, step);
+    // console.log('onSubmit: ', action, switchToNextStep, alertNoProfile, step);
     if (
       positionRequestData?.parent_job_profile?.number &&
       positionRequestData?.parent_job_profile?.number !== parseInt(selectedProfileNumber ?? '')
@@ -154,25 +142,32 @@ export const WizardPage: React.FC<WizardPageProps> = ({
           },
           onCancel: () => {
             // re-select profile on the correct page
+            // console.log('previousSearchState.current: ', previousSearchState.current);
+            // console.log('jobProfileSearchResultsRef.current: ', jobProfileSearchResultsRef.current);
+
             if (previousSearchState.current && jobProfileSearchResultsRef.current) {
-              const basePath = getBasePath(location.pathname);
+              // const basePath = getBasePath(location.pathname);
 
               const searchParams = new URLSearchParams(previousSearchState.current);
               if (searchParams.get('search')) searchParams.delete('search');
 
               setShouldFetch(true);
+              // console.log('setting clearing filters 5');
               setClearingFilters(true);
               // searchParams.set('clearFilters', 'true');
               const page = parseInt(searchParams.get('page') || '1', 10);
               jobProfileSearchResultsRef.current.handlePageChange(page);
 
-              navigate(
-                {
-                  pathname: basePath,
-                  search: searchParams.toString(),
-                },
-                { replace: true },
-              );
+              // console.log('navigating to: ', basePath, searchParams.toString());
+
+              setSearchParams(searchParams, { replace: true });
+              // navigate(
+              //   {
+              //     pathname: basePath,
+              //     search: searchParams.toString(),
+              //   },
+              //   { replace: true },
+              // );
             }
             resolve('CANCELLED');
           },
@@ -186,7 +181,7 @@ export const WizardPage: React.FC<WizardPageProps> = ({
   };
 
   const handleNext = async (action = 'next', switchToNextStep = true, alertNoProfile = true, step = -1, state = '') => {
-    console.log('handleNext: ', action, switchToNextStep, alertNoProfile, step, state);
+    // console.log('handleNext: ', action, switchToNextStep, alertNoProfile, step, state);
 
     // we are on the second step of the process (user already selected a position on org chart and is no selecting a profile)
     setIsLoading(true);
@@ -244,9 +239,10 @@ export const WizardPage: React.FC<WizardPageProps> = ({
 
         if (action === 'next') {
           if (onNext && switchToNextStep) {
-            console.log('onNext callback');
+            // console.log('onNext callback');
             onNext();
           }
+          // console.log('setSearchParams to blank 1');
           setSearchParams({}, { replace: true });
         }
       } else {
@@ -260,6 +256,7 @@ export const WizardPage: React.FC<WizardPageProps> = ({
 
   useEffect(() => {
     const selectedProfile = searchParams.get('selectedProfile');
+    // console.log('seletedProfile hook: ', selectedProfile);
     if (selectedProfile) {
       setSelectedProfileNumber(selectedProfile);
     } else {
@@ -283,11 +280,13 @@ export const WizardPage: React.FC<WizardPageProps> = ({
         id: positionRequestId,
         step: 0,
       }).unwrap();
+    // console.log('setSearchParams to blank 2');
     setSearchParams({}, { replace: true });
     if (onBack) onBack();
   };
 
   const onSelectProfile = (profile: JobProfileModel) => {
+    // console.log('onSelectProfile: ', profile);
     // if there is a profile already associated with the position request, show a warning
     setSelectedProfileName(profile.title.toString());
     setSelectedProfileId(profile.id.toString());
