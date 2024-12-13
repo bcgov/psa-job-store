@@ -1,5 +1,11 @@
 # app
 
+## 0.16.1
+
+### Patch Changes
+
+- [#1171](https://github.com/bcgov/psa-job-store/pull/1171) [`2b92560`](https://github.com/bcgov/psa-job-store/commit/2b92560d468cbf2e6197419a4c4b1727737453fb) Thanks [@alex-struk](https://github.com/alex-struk)! - AL-1050 Add 'Share' feature to other pages
+
 ## 0.16.0
 
 ### Minor Changes
