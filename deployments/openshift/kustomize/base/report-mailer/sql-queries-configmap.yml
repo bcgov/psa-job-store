@@ -1,0 +1,79 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: sql-queries-config
+data:
+  position_requests.sql: |
+    -- requires_parameters: true
+
+    SELECT
+        pr.title,
+        pr.position_number,
+        c.name AS classification,
+        pr.submitted_at,
+        pr.approved_at,
+        COALESCE(
+            ROUND(pr.time_to_approve / 86400),
+            ROUND(EXTRACT(EPOCH FROM (pr.approved_at - pr.submitted_at)) / 86400)
+        ) AS time_to_approve_days,
+        u.name AS user_name,
+        d.name AS department_name,
+        o.name AS organization_name
+    FROM
+        position_request pr
+    LEFT JOIN classification c ON
+        pr.classification_id = c.id AND
+        pr.classification_employee_group_id = c.employee_group_id AND
+        pr.classification_peoplesoft_id = c.peoplesoft_id
+    LEFT JOIN "user" u ON
+        pr.user_id = u.id
+    LEFT JOIN department d ON
+        pr.department_id = d.id
+    LEFT JOIN organization o ON
+        d.organization_id = o.id
+    WHERE
+        pr.status = 'COMPLETED' AND
+        pr.submitted_at >= $1 AND
+        pr.submitted_at < $2;
+  position_request_counts.sql: |
+    -- requires_parameters: false
+
+    SELECT
+        COUNT(*) FILTER (WHERE status = 'VERIFICATION') AS "In Verification",
+        COUNT(*) FILTER (WHERE status = 'ACTION_REQUIRED') AS "Action Required",
+        COUNT(*) FILTER (WHERE status = 'REVIEW') AS "In Classifcation Review",
+        COUNT(*) FILTER (WHERE status = 'CANCELLED') AS "Cancelled",
+        COUNT(*) FILTER (WHERE status = 'COMPLETED') AS "Completed",
+        COUNT(*) FILTER (WHERE approval_type = 'AUTOMATIC') AS "Automatically Approved",
+        COUNT(*) FILTER (
+            WHERE approval_type = 'VERIFIED' AND status = 'COMPLETED'
+        ) AS "Verified and Completed",
+        COUNT(*) FILTER (
+            WHERE approval_type = 'VERIFIED' AND status IS DISTINCT FROM 'COMPLETED'
+        ) AS "Verified but Not Completed"
+    FROM
+        position_request;
+
+  new_users.sql: |
+    -- requires_parameters: true
+
+    SELECT
+        u.name,
+        u.roles,
+        (
+            SELECT COUNT(*)
+            FROM current_job_profiles cjp
+            WHERE cjp.published_by_id = u.id AND cjp.state = 'PUBLISHED'
+        ) AS job_profiles_published,
+        (
+            SELECT COUNT(*)
+            FROM position_request pr
+            WHERE pr.user_id = u.id
+            AND pr.status = 'COMPLETED'
+        ) AS position_requests_completed
+    FROM
+        "user" u
+    WHERE
+        array_length(u.roles, 1) > 0 AND
+        u.created_at >= $1 AND
+        u.created_at < $2;
