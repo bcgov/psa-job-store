@@ -16,6 +16,7 @@ import {
   PositionRequestStatus,
   PositionRequestUpdateInput,
   PositionRequestWhereInput,
+  User,
   UuidFilter,
 } from '../../@generated/prisma-nestjs-graphql';
 import { AlexandriaError, AlexandriaErrorClass } from '../../utils/alexandria-error';
@@ -39,6 +40,7 @@ import { PositionService } from '../external/position.service';
 import { JobProfileService } from '../job-profile/job-profile.service';
 import { DepartmentService } from '../organization/department/department.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { UserService } from '../user/user.service';
 import { ExtendedFindManyPositionRequestWithSearch } from './args/find-many-position-request-with-search.args';
 import {
   PositionRequestCreateInputWithoutUser,
@@ -123,6 +125,7 @@ export class PositionRequestApiService {
     private readonly prisma: PrismaService,
     private readonly positionService: PositionService,
     private readonly jobProfileService: JobProfileService,
+    private readonly userService: UserService,
   ) {}
 
   async generateUniqueShortId(length: number, retries: number = 5): Promise<string> {
@@ -610,6 +613,85 @@ export class PositionRequestApiService {
     return positionRequest;
   }
 
+  async getPositionRequestByNumber(positionNumber: number, userId: string, userRoles: string[] = []) {
+    PositionRequestStatus.COMPLETED;
+    const positionRequest = await this.prisma.positionRequest.findMany({
+      where: {
+        position_number: { equals: positionNumber },
+        status: {
+          in: [PositionRequestStatus.COMPLETED, PositionRequestStatus.VERIFICATION, PositionRequestStatus.REVIEW],
+        },
+      },
+    });
+    return positionRequest.length ? positionRequest[0].id : null;
+  }
+
+  async getPositionRequestForDept(id: number, userId: string) {
+    let whereCondition: {
+      id: number;
+      user_id?: UuidFilter;
+      OR?: Array<PositionRequestWhereInput>;
+      NOT?: Array<PositionRequestWhereInput>;
+    } = { id };
+    const user: User = await this.userService.getUser({ where: { id: userId } });
+    console.log(user.metadata.org_chart.department_ids);
+
+    whereCondition = {
+      ...whereCondition,
+
+      OR: [
+        { user_id: { equals: userId } },
+        {
+          AND: [
+            { department_id: { in: user.metadata.org_chart.department_ids } },
+            {
+              status: {
+                in: [PositionRequestStatus.COMPLETED, PositionRequestStatus.VERIFICATION, PositionRequestStatus.REVIEW],
+              },
+            },
+          ],
+        },
+      ],
+
+      //user_id: { equals: userId },
+      ///   dept_id: ]// SAME DEPT AND status: {
+      //   in: [PositionRequestStatus.COMPLETED, PositionRequestStatus.VERIFICATION, PositionRequestStatus.REVIEW],
+      // }
+    };
+
+    const positionRequest = await this.prisma.positionRequest.findUnique({
+      where: whereCondition,
+      include: {
+        parent_job_profile: true,
+        classification: {
+          select: {
+            id: true,
+            code: true,
+            employee_group_id: true,
+            peoplesoft_id: true,
+          },
+        },
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+      },
+    });
+
+    if (!positionRequest) {
+      return null;
+    }
+
+    return {
+      ...positionRequest,
+      classification_employee_group_id: positionRequest.classification?.employee_group_id,
+      classification_peoplesoft_id: positionRequest.classification?.peoplesoft_id,
+    };
+  }
+
   async getPositionRequest(id: number, userId: string, userRoles: string[] = []) {
     let whereCondition: { id: number; user_id?: UuidFilter; NOT?: Array<PositionRequestWhereInput> } = { id };
 
@@ -618,7 +700,9 @@ export class PositionRequestApiService {
     } else {
       whereCondition = {
         ...whereCondition,
-        user_id: { equals: userId },
+        user_id: { equals: userId }, //OR SAME DEPT AND status: {
+        //   in: [PositionRequestStatus.COMPLETED, PositionRequestStatus.VERIFICATION, PositionRequestStatus.REVIEW],
+        // }
       };
     }
 

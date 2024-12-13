@@ -21,6 +21,8 @@ import { MyPositionsPage } from '../routes/my-position-requests/my-position-requ
 import NotFoundComponent from '../routes/not-found/404';
 import { OrgChartRoute } from '../routes/org-chart';
 import { OrgChartPage } from '../routes/org-chart/org-chart.page';
+import { PositionRoute } from '../routes/position';
+import { ViewPositionPage } from '../routes/position/view-position.page';
 import { SettingsRoute } from '../routes/settings';
 import { DepartmentDetailPage } from '../routes/settings/department/department-detail.page';
 import { DepartmentListPage } from '../routes/settings/department/department-list.page';
@@ -88,6 +90,7 @@ export const router = createBrowserRouter([
                 },
                 element: <HomePage />,
               },
+
               // Org Chart
               {
                 path: 'my-departments',
@@ -100,6 +103,16 @@ export const router = createBrowserRouter([
                   {
                     index: true,
                     element: <OrgChartPage />,
+                  },
+                  {
+                    path: 'position',
+                    element: <PositionRoute />,
+                    children: [
+                      {
+                        path: ':positionRequestId',
+                        element: <ViewPositionPage />,
+                      },
+                    ],
                   },
                 ],
               },
