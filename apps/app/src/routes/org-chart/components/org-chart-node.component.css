@@ -1,3 +1,9 @@
 .ant-card .ant-card-actions > li {
     margin: 4px 0;
+    width: 100%  !important; 
+}
+
+.ant-card .ant-card-actions {
+    display: flex;
+    flex-direction: column;
 }
