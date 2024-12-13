@@ -1,15 +1,13 @@
-import { ArrowLeftOutlined, EllipsisOutlined } from '@ant-design/icons';
-import { Button, Menu, Modal, Typography } from 'antd';
+import { ArrowLeftOutlined } from '@ant-design/icons';
+import { Button, Modal } from 'antd';
 import { useEffect, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import AccessiblePopoverMenu from '../../components/app/common/components/accessible-popover-menu';
 import LoadingComponent from '../../components/app/common/components/loading.component';
 import PositionProfile from '../../components/app/common/components/positionProfile';
 import { useGetDepartmentQuery } from '../../redux/services/graphql-api/department.api';
 import { JobProfileModel } from '../../redux/services/graphql-api/job-profile-types';
 import {
   GetPositionRequestResponseContent,
-  useDeletePositionRequestMutation,
   useUpdatePositionRequestMutation,
 } from '../../redux/services/graphql-api/position-request.api';
 import { useTestUser } from '../../utils/useTestUser';
@@ -19,6 +17,7 @@ import WizardContentWrapper from './components/wizard-content-wrapper';
 import { WizardPageWrapper } from './components/wizard-page-wrapper.component';
 import { WizardSteps } from './components/wizard-steps.component';
 import { useWizardContext } from './components/wizard.provider';
+import { WizardContextMenu } from './wizard-context-menu';
 
 interface WizardPageProps {
   onBack?: () => void;
@@ -100,10 +99,22 @@ export const WizardPage: React.FC<WizardPageProps> = ({
     alertNoProfile = true,
     step = -1,
   ): Promise<string> => {
-    // console.log('onSubmit: ', action, switchToNextStep, alertNoProfile, step);
+    // console.log(
+    //   'onSubmit: ',
+    //   action,
+    //   switchToNextStep,
+    //   alertNoProfile,
+    //   step,
+    //   positionRequestData?.parent_job_profile?.number,
+    //   parseInt(selectedProfileNumber ?? ''),
+    // );
+
+    // if user is changing the profile, show a warning
+    // must be on step 3 or higher to show a warning (indicates there may have been edits done on existing profile)
     if (
       positionRequestData?.parent_job_profile?.number &&
-      positionRequestData?.parent_job_profile?.number !== parseInt(selectedProfileNumber ?? '')
+      positionRequestData?.parent_job_profile?.number !== parseInt(selectedProfileNumber ?? '') &&
+      (positionRequestData?.max_step_completed ?? 0) >= 3
     ) {
       return new Promise((resolve) => {
         Modal.confirm({
@@ -203,16 +214,19 @@ export const WizardPage: React.FC<WizardPageProps> = ({
               step: step == -1 ? (action === 'next' ? 3 : 2) : step,
 
               // increment max step only if it's not incremented
+              // and the user is proceeding to the next step
               ...(action === 'next' && (positionRequest?.max_step_completed ?? 0) < 3 && step == -1
                 ? { max_step_completed: 3 }
                 : {}),
-              // if user selected same profile as before, do not clear profile_json
-              // also do not update title to default
-              ...(positionRequestData?.parent_job_profile?.number !== parseInt(selectedProfileNumber ?? '') && {
-                profile_json: null,
-                title: selectedProfileName ?? undefined,
-                max_step_completed: 3,
-              }),
+              // if user selected a different profile than the one already associated with the position request
+              // clear profile_json, set title to the selected profile name, and set max_step_completed to 3
+              ...(positionRequestData?.parent_job_profile?.number &&
+                positionRequestData?.parent_job_profile?.number !== parseInt(selectedProfileNumber ?? '') && {
+                  profile_json: null,
+                  title: selectedProfileName ?? undefined,
+                  // set this only if max step is greater than 3
+                  ...((positionRequestData?.max_step_completed ?? 0 > 3) ? { max_step_completed: 3 } : {}),
+                }),
               parent_job_profile: {
                 connect: { id_version: { id: parseInt(selectedProfileId), version: parseInt(selectedProfileVersion) } },
               },
@@ -310,51 +324,51 @@ export const WizardPage: React.FC<WizardPageProps> = ({
     }
   };
 
-  const [deletePositionRequest] = useDeletePositionRequestMutation();
-  const deleteRequest = async () => {
-    if (!positionRequestId) return;
-    Modal.confirm({
-      title: 'Delete Position Request',
-      content: 'Do you want to delete the position request?',
-      okText: 'Yes',
-      cancelText: 'No',
-      onOk: async () => {
-        await deletePositionRequest({ id: positionRequestId });
-        disableBlockingAndNavigateHome();
-      },
-    });
-  };
+  // const [deletePositionRequest] = useDeletePositionRequestMutation();
+  // const deleteRequest = async () => {
+  //   if (!positionRequestId) return;
+  //   Modal.confirm({
+  //     title: 'Delete Position Request',
+  //     content: 'Do you want to delete the position request?',
+  //     okText: 'Yes',
+  //     cancelText: 'No',
+  //     onOk: async () => {
+  //       await deletePositionRequest({ id: positionRequestId });
+  //       disableBlockingAndNavigateHome();
+  //     },
+  //   });
+  // };
 
   const saveAndQuit = async () => {
     const res = await onSubmit('quit');
     if (res !== 'CANCELLED') disableBlockingAndNavigateHome();
   };
 
-  const getMenuContent = () => {
-    return (
-      <Menu className="wizard-menu">
-        <Menu.Item key="save" onClick={saveAndQuit}>
-          <div style={{ padding: '5px 0' }}>
-            Save and quit
-            <Typography.Text type="secondary" style={{ marginTop: '5px', display: 'block' }}>
-              Saves your progress. You can access this position request from the 'My Position Requests' page.
-            </Typography.Text>
-          </div>
-        </Menu.Item>
-        <Menu.Divider />
-        <Menu.ItemGroup key="others" title={<b>Others</b>}>
-          <Menu.Item key="delete" onClick={deleteRequest}>
-            <div style={{ padding: '5px 0' }}>
-              Delete
-              <Typography.Text type="secondary" style={{ marginTop: '5px', display: 'block' }}>
-                Removes this position request from 'My Position Requests'. This action is irreversible.
-              </Typography.Text>
-            </div>
-          </Menu.Item>
-        </Menu.ItemGroup>
-      </Menu>
-    );
-  };
+  // const getMenuContent = () => {
+  //   return (
+  //     <Menu className="wizard-menu">
+  //       <Menu.Item key="save" onClick={saveAndQuit}>
+  //         <div style={{ padding: '5px 0' }}>
+  //           Save and quit
+  //           <Typography.Text type="secondary" style={{ marginTop: '5px', display: 'block' }}>
+  //             Saves your progress. You can access this position request from the 'My Position Requests' page.
+  //           </Typography.Text>
+  //         </div>
+  //       </Menu.Item>
+  //       <Menu.Divider />
+  //       <Menu.ItemGroup key="others" title={<b>Others</b>}>
+  //         <Menu.Item key="delete" onClick={deleteRequest}>
+  //           <div style={{ padding: '5px 0' }}>
+  //             Delete
+  //             <Typography.Text type="secondary" style={{ marginTop: '5px', display: 'block' }}>
+  //               Removes this position request from 'My Position Requests'. This action is irreversible.
+  //             </Typography.Text>
+  //           </div>
+  //         </Menu.Item>
+  //       </Menu.ItemGroup>
+  //     </Menu>
+  //   );
+  // };
 
   const updatePositionRequestAndSetStep = async (step: number) => {
     if (positionRequestId) {
@@ -406,12 +420,13 @@ export const WizardPage: React.FC<WizardPageProps> = ({
       hpad={false}
       grayBg={false}
       pageHeaderExtra={[
-        <AccessiblePopoverMenu
-          triggerButton={<Button data-testid="ellipsis-menu" tabIndex={-1} icon={<EllipsisOutlined />}></Button>}
-          content={getMenuContent()}
-          ariaLabel="Open position request menu"
-          key="menu"
-        ></AccessiblePopoverMenu>,
+        <WizardContextMenu
+          positionRequestId={positionRequestId}
+          onSaveAndQuit={saveAndQuit}
+          onNavigateHome={disableBlockingAndNavigateHome}
+          shareableLink={positionRequest?.shareUUID}
+          positionRequestStatus={positionRequest?.status}
+        />,
         <Button onClick={back} key="back" data-testid="back-button">
           Back
         </Button>,

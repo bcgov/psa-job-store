@@ -1,5 +1,5 @@
 import { LogoutOutlined } from '@ant-design/icons';
-import { Button, Col, Layout, Menu, Row, Typography } from 'antd';
+import { Alert, Button, Col, Layout, Menu, Row, Typography } from 'antd';
 import { useAuth } from 'react-oidc-context';
 import { Link } from 'react-router-dom';
 import { useLazyLogoutQuery } from '../../redux/services/graphql-api/profile.api';
@@ -54,28 +54,27 @@ export const AppHeader = () => {
   return (
     <>
       {import.meta.env.VITE_ENV != 'production' && (
-        // <Alert
-        //   banner
-        //   message={
-        //     <span
-        //       style={{
-        //         fontWeight: 'bold',
-        //         fontSize: '16px',
-        //         textTransform: 'uppercase',
-        //         letterSpacing: '1px',
-        //       }}
-        //     >
-        //       Warning: {import.meta.env.VITE_ENV ? `${import.meta.env.VITE_ENV}` : 'Unknown'} Environment
-        //     </span>
-        //   }
-        //   role="alert"
-        //   type="warning"
-        //   className={styles.stripedAlert}
-        //   style={{
-        //     width: '100%',
-        //   }}
-        // />
-        <></>
+        <Alert
+          banner
+          message={
+            <span
+              style={{
+                fontWeight: 'bold',
+                fontSize: '16px',
+                textTransform: 'uppercase',
+                letterSpacing: '1px',
+              }}
+            >
+              Warning: {import.meta.env.VITE_ENV ? `${import.meta.env.VITE_ENV}` : 'Unknown'} Environment
+            </span>
+          }
+          role="alert"
+          type="warning"
+          className={styles.stripedAlert}
+          style={{
+            width: '100%',
+          }}
+        />
       )}
       <Header className={styles.appHeader}>
         <Row align="middle" justify="space-between" style={{ width: '100%' }} role="navigation">

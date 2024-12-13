@@ -1045,6 +1045,10 @@ export class PositionRequestApiService {
             (node) => node.id === additionalInfo.excluded_mgr_position_number,
           );
 
+          // excluded manager may not be in additional info, for example if user is using "Save and quit feature"
+          // without filling that field
+          const excludedManagerPresent = additionalInfo.excluded_mgr_position_number;
+
           // console.log('isExcludedManagerInOrgChart: ', isExcludedManagerInOrgChart);
 
           // excluded manager is not in the org chart, add it
@@ -1052,7 +1056,7 @@ export class PositionRequestApiService {
             edges: any[];
             nodes: any[];
           } = { edges: [], nodes: [] };
-          if (!isExcludedManagerInOrgChart) {
+          if (!isExcludedManagerInOrgChart && excludedManagerPresent) {
             // console.log('isExcludedManagerInOrgChart false');
 
             const employeeInfo = await this.positionService.getPositionProfile(
@@ -1106,7 +1110,7 @@ export class PositionRequestApiService {
                 },
               ],
             };
-          } else {
+          } else if (excludedManagerPresent) {
             // excluded manager is in the org chart
             // we may still need to update the org chart in case user changed excluded manager from
             // excluded manager that was outside of the department to one being inside the department
@@ -1119,28 +1123,41 @@ export class PositionRequestApiService {
             };
           }
 
-          // find the excluded manager node and mark it as excluded manager
-          // unmark any other node that was previously marked as excluded manager
-          updatedNodes = updatedOrgChart.nodes.map((node) => {
-            if (node.id === additionalInfo.excluded_mgr_position_number) {
-              // console.log('found excluded manager, marking..');
-              return {
-                ...node,
-                data: {
-                  ...node.data,
-                  isExcludedManager: true,
-                },
-              };
-            } else {
-              return {
-                ...node,
-                data: {
-                  ...node.data,
-                  isExcludedManager: false,
-                },
-              };
-            }
-          });
+          if (excludedManagerPresent) {
+            // find the excluded manager node and mark it as excluded manager
+            // unmark any other node that was previously marked as excluded manager
+            updatedNodes = updatedOrgChart.nodes.map((node) => {
+              if (node.id === additionalInfo.excluded_mgr_position_number) {
+                // console.log('found excluded manager, marking..');
+                return {
+                  ...node,
+                  data: {
+                    ...node.data,
+                    isExcludedManager: true,
+                  },
+                };
+              } else {
+                return {
+                  ...node,
+                  data: {
+                    ...node.data,
+                    isExcludedManager: false,
+                  },
+                };
+              }
+            });
+
+            updatedOrgChart = {
+              ...orgChart,
+              nodes: [...updatedNodes],
+              edges: [...updatedOrgChart.edges],
+            };
+
+            updatePayload.orgchart_json = autolayout(updatedOrgChart) as {
+              edges: any[];
+              nodes: any[];
+            };
+          }
 
           // if updatePayload.additional_info.department_id is provided, update department_id on the node with isNewPosition == true
           // this way new position node will have correct department id when viewed in shared mode
@@ -1163,17 +1180,6 @@ export class PositionRequestApiService {
               }
             });
           }
-
-          updatedOrgChart = {
-            ...orgChart,
-            nodes: [...updatedNodes],
-            edges: [...updatedOrgChart.edges],
-          };
-
-          updatePayload.orgchart_json = autolayout(updatedOrgChart) as {
-            edges: any[];
-            nodes: any[];
-          };
         }
       }
     } else if (additionalInfo === null) {
