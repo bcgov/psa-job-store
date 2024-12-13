@@ -9,7 +9,6 @@ import LoadingSpinnerWithMessage from '../../components/app/common/components/lo
 import PositionProfile from '../../components/app/common/components/positionProfile';
 import '../../components/app/common/css/filtered-table.component.css';
 import { PageHeader } from '../../components/app/page-header.component';
-import { statusIconColorMap } from '../../components/app/utils/statusIconColorMap.utils';
 import { DownloadJobProfileComponent } from '../../components/shared/download-job-profile/download-job-profile.component';
 import { useGetPositionRequestForDeptQuery } from '../../redux/services/graphql-api/position-request.api';
 import { useTestUser } from '../../utils/useTestUser';
@@ -62,8 +61,8 @@ export const ViewPositionPage = () => {
     return <StatusIndicator status={status} />;
   };
 
-  const currentStatus = data?.positionRequest?.status;
-  const statusDetails = statusIconColorMap[currentStatus as keyof typeof statusIconColorMap];
+  // const currentStatus = data?.positionRequest?.status;
+  // const statusDetails = statusIconColorMap[currentStatus as keyof typeof statusIconColorMap];
 
   if (!data) {
     return <LoadingSpinnerWithMessage />;
