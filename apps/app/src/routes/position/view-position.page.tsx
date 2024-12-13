@@ -61,9 +61,6 @@ export const ViewPositionPage = () => {
     return <StatusIndicator status={status} />;
   };
 
-  // const currentStatus = data?.positionRequest?.status;
-  // const statusDetails = statusIconColorMap[currentStatus as keyof typeof statusIconColorMap];
-
   if (!data) {
     return <LoadingSpinnerWithMessage />;
   }
