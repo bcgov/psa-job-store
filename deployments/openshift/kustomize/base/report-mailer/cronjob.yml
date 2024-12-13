@@ -1,0 +1,40 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: report-mailer-cronjob
+spec:
+  schedule: "0 12 1 * *" # runs every 1st of the month at 4am (plus 8 hours for UTC)
+  jobTemplate:
+    spec:
+      template:
+        metadata:
+          labels:
+            app: report-mailer
+        spec:
+          containers:
+            - name: report-mailer
+              image: artifacts.developer.gov.bc.ca/af3c-gen-docker-local/report-mailer:latest 
+              imagePullPolicy: Always
+              envFrom:
+                - configMapRef:
+                    name: report-mailer-config
+                - secretRef:
+                    name: secrets
+              env:
+                - name: QUERIES_DIR
+                  value: /src/queries
+                - name: RECIPIENTS_DIR
+                  value: /src/recipients
+              volumeMounts:
+                - name: sql-queries-volume
+                  mountPath: /src/queries
+                - name: recipients-config-volume
+                  mountPath: /src/recipients
+          volumes:
+            - name: sql-queries-volume
+              configMap:
+                name: sql-queries-config
+            - name: recipients-config-volume
+              configMap:
+                name: recipients-configmap
+          restartPolicy: OnFailure
