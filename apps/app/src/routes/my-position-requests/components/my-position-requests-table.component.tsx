@@ -452,9 +452,10 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
             key: 'approval_type',
             // display only if in COMPLETED status
             render: (text: string, record: any) => {
+              console.log('rendering record: ', record);
               if (record.status !== 'COMPLETED') return '-';
 
-              const camelCaseText = text.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase());
+              const camelCaseText = text?.toLowerCase().replace(/\b\w/g, (c) => c.toUpperCase()) ?? '';
               let color = '';
               switch (camelCaseText) {
                 case 'AutoApproved':
