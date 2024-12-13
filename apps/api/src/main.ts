@@ -25,7 +25,7 @@ async function bootstrap() {
     session({
       cookie: {
         httpOnly: true,
-        maxAge: 30 * 60 * 1000, // 30 mins,
+        maxAge: configService.get('E2E_TESTING') === 'true' ? 24 * 60 * 60 * 1000 : 30 * 60 * 1000, // 24 hours/30 mins,
       },
       resave: false,
       rolling: true,
