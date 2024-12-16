@@ -8,7 +8,7 @@ import { PeoplesoftV2Service } from '../../external/peoplesoft-v2.service';
 import { KeycloakService } from '../../keycloak/keycloak.service';
 import { PrismaService } from '../../prisma/prisma.service';
 import { UserService } from '../../user/user.service';
-import { KeycloakUserinfoResponse } from '../strategies/oidc.strategy';
+import { IDIRUserinfoResponse } from '../strategies/idir.strategy';
 
 @Injectable()
 export class AuthService {
@@ -60,7 +60,7 @@ export class AuthService {
    * @param userinfo - Keycloak user information response containing IDIR details
    * @returns Promise resolving to Express.User object with complete user profile
    */
-  private async validateIDIRUserinfo(userinfo: KeycloakUserinfoResponse): Promise<Express.User> {
+  private async validateIDIRUserinfo(userinfo: IDIRUserinfoResponse): Promise<Express.User> {
     const id = guidToUuid(userinfo.idir_user_guid);
     const existingUser = await this.userService.getUser({ where: { id } });
 
@@ -223,7 +223,7 @@ export class AuthService {
     return updatedDiff(existingPeoplesoftMetadata, peoplesoftMetadata);
   }
 
-  async validateUserinfo(userinfo: KeycloakUserinfoResponse) {
+  async validateUserinfo(userinfo: IDIRUserinfoResponse) {
     if (userinfo.identity_provider === 'idir') {
       return this.validateIDIRUserinfo(userinfo);
     } else {

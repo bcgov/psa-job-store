@@ -5,7 +5,7 @@ import { ConfigService } from '@nestjs/config';
 import { Request, Response } from 'express';
 import { AppConfigDto } from '../../../dtos/app-config.dto';
 import { PublicRoute } from '../decorators/public-route.decorator';
-import { LoginGuard } from '../guards/login.guard';
+import { IDIRLoginGuard } from '../guards/idir-login.guard';
 
 @Controller('auth')
 export class AuthController {
@@ -22,10 +22,10 @@ export class AuthController {
   }
 
   @PublicRoute()
-  @UseGuards(LoginGuard)
+  @UseGuards(IDIRLoginGuard)
   @Get('login')
   login() {
-    // Logic implemented in LoginGuard
+    // Logic implemented in IDIRLoginGuard
   }
 
   @Get('user')
@@ -34,7 +34,7 @@ export class AuthController {
   }
 
   @PublicRoute()
-  @UseGuards(LoginGuard)
+  @UseGuards(IDIRLoginGuard)
   @Get('callback')
   callback(@Res() res: Response) {
     res.redirect(this.configService.get('KEYCLOAK_LOGOUT_REDIRECT_URL'));

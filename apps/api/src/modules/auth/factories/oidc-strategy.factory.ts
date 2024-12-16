@@ -3,7 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { Issuer } from 'openid-client';
 import { AppConfigDto } from '../../../dtos/app-config.dto';
 import { AuthService } from '../services/auth.service';
-import { OIDCStrategy } from '../strategies/oidc.strategy';
+import { IDIRStrategy } from '../strategies/idir.strategy';
 
 const buildOIDCClient = async (configService: ConfigService<AppConfigDto, true>) => {
   const TrustIssuer = await Issuer.discover(
@@ -15,11 +15,11 @@ const buildOIDCClient = async (configService: ConfigService<AppConfigDto, true>)
   });
 };
 
-export const OIDCStrategyFactory: FactoryProvider = {
-  provide: OIDCStrategy.name,
+export const IDIRStrategyFactory: FactoryProvider = {
+  provide: IDIRStrategy.name,
   useFactory: async (authService: AuthService, configService: ConfigService<AppConfigDto, true>) => {
     const oidcClient = await buildOIDCClient(configService);
-    return new OIDCStrategy(authService, configService, oidcClient);
+    return new IDIRStrategy(authService, configService, oidcClient);
   },
   inject: [AuthService, ConfigService],
 };

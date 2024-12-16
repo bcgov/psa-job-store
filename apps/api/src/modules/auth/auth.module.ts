@@ -5,7 +5,7 @@ import { KeycloakModule } from '../keycloak/keycloak.module';
 import { PrismaModule } from '../prisma/prisma.module';
 import { UserModule } from '../user/user.module';
 import { AuthController } from './controllers/auth.controller';
-import { OIDCStrategyFactory } from './factories/oidc-strategy.factory';
+import { IDIRStrategyFactory } from './factories/oidc-strategy.factory';
 import { PublicRouteBypassGuard } from './guards/public-route-bypass.guard';
 import { SessionAuthGuard } from './guards/session-auth.guard';
 import { SessionSerializer } from './serializers/session.serializer';
@@ -14,7 +14,6 @@ import { AuthService } from './services/auth.service';
 @Module({
   imports: [
     PassportModule.register({
-      defaultStrategy: 'oidc',
       // keepSessionInfo: true,
       session: true,
     }),
@@ -23,7 +22,7 @@ import { AuthService } from './services/auth.service';
     PrismaModule,
     UserModule,
   ],
-  providers: [AuthService, OIDCStrategyFactory, PublicRouteBypassGuard, SessionAuthGuard, SessionSerializer],
+  providers: [AuthService, IDIRStrategyFactory, PublicRouteBypassGuard, SessionAuthGuard, SessionSerializer],
   controllers: [AuthController],
 })
 export class AuthModule {}

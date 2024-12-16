@@ -6,7 +6,7 @@ import { ConfigService } from '@nestjs/config';
 import { AppConfigDto } from '../../../dtos/app-config.dto';
 import { AuthService } from '../services/auth.service';
 
-export type KeycloakUserinfoResponse = UserinfoResponse<{
+export type IDIRUserinfoResponse = UserinfoResponse<{
   client_roles?: string[];
   display_name?: string;
   family_name?: string;
@@ -16,7 +16,7 @@ export type KeycloakUserinfoResponse = UserinfoResponse<{
   idir_username?: string;
 }>;
 
-export class OIDCStrategy extends PassportStrategy(Strategy, 'oidc') {
+export class IDIRStrategy extends PassportStrategy(Strategy, 'idir') {
   constructor(
     private readonly authService: AuthService,
     private readonly configService: ConfigService<AppConfigDto, true>,
@@ -31,7 +31,7 @@ export class OIDCStrategy extends PassportStrategy(Strategy, 'oidc') {
   }
 
   async validate(tokenSet: TokenSet) {
-    const userinfo: KeycloakUserinfoResponse = await this.oidcClient.userinfo(tokenSet);
+    const userinfo: IDIRUserinfoResponse = await this.oidcClient.userinfo(tokenSet);
     const sessionUser = await this.authService.validateUserinfo(userinfo);
 
     try {
