@@ -8,6 +8,7 @@ import { PeoplesoftV2Service } from '../../external/peoplesoft-v2.service';
 import { KeycloakService } from '../../keycloak/keycloak.service';
 import { PrismaService } from '../../prisma/prisma.service';
 import { UserService } from '../../user/user.service';
+import { BCeIDUserinfoResponse } from '../strategies/bceid.strategy';
 import { IDIRUserinfoResponse } from '../strategies/idir.strategy';
 
 @Injectable()
@@ -37,6 +38,24 @@ export class AuthService {
     const subordinates = (await this.peoplesoftService.getSubordinates(position_id)) ?? [];
 
     return subordinates.length > 0;
+  }
+
+  private async validateBCeIDUserinfo(userinfo: BCeIDUserinfoResponse) {
+    const id = guidToUuid(userinfo.bceid_user_guid);
+    const existingUser = await this.userService.getUser({ where: { id } });
+
+    const sessionUser: Express.User = {
+      id: id,
+      name: userinfo.display_name as string,
+      given_name: userinfo.given_name as string,
+      family_name: userinfo.family_name as string,
+      email: userinfo.email,
+      username: userinfo.bceid_username as string,
+      roles: (userinfo.client_roles ?? []) as string[],
+      metadata: (existingUser?.metadata ?? {}) as Record<string, unknown>,
+    };
+
+    return existingUser ? sessionUser : undefined;
   }
 
   /**
@@ -94,7 +113,6 @@ export class AuthService {
         // If user has subordinates, and doesn't currently have the `hiring-manager` role, assign it
         const hasSubordinates = this.userPositionHasSubordinates(peoplesoftMetadata.position_id);
         if (hasSubordinates && !(userinfo.client_roles ?? []).includes('hiring-manager')) {
-          console.log('>>>> ASSIGNING ROLE');
           const { data } = (await this.keycloakService.assignUserRoles(id, ['hiring-manager'])) ?? { data: [] };
           // Update `sessionUser` to contain newly assigned roles
           sessionUser.roles = data.map((role) => role.name);
@@ -223,10 +241,14 @@ export class AuthService {
     return updatedDiff(existingPeoplesoftMetadata, peoplesoftMetadata);
   }
 
-  async validateUserinfo(userinfo: IDIRUserinfoResponse) {
-    if (userinfo.identity_provider === 'idir') {
-      return this.validateIDIRUserinfo(userinfo);
+  async validateUserinfo(userinfo: BCeIDUserinfoResponse | IDIRUserinfoResponse) {
+    if (userinfo.identity_provider === 'bceidboth') {
+      return this.validateBCeIDUserinfo(userinfo as BCeIDUserinfoResponse);
+    } else if (userinfo.identity_provider === 'idir') {
+      return this.validateIDIRUserinfo(userinfo as IDIRUserinfoResponse);
     } else {
+      console.log('~~~~~~ ASDF: ', userinfo);
+
       throw new UnauthorizedException();
     }
   }

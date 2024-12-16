@@ -1,7 +1,7 @@
-import { OIDCStrategy } from './oidc.strategy';
+import { IDIRStrategy } from './idir.strategy';
 
-describe('OIDCStrategy', () => {
+describe('IDIRStrategy', () => {
   it('should be defined', () => {
-    expect(new OIDCStrategy()).toBeDefined();
+    expect(new IDIRStrategy()).toBeDefined();
   });
 });

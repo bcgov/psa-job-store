@@ -1,5 +1,5 @@
 import { useEffect } from 'react';
-import { Outlet, useNavigate } from 'react-router-dom';
+import { Outlet, useLocation, useNavigate } from 'react-router-dom';
 import { useTypedSelector } from '../../redux/redux.hooks';
 import { useAppDispatch } from '../../redux/redux.store';
 import { setUser } from '../../routes/auth/store/auth.slice';
@@ -7,7 +7,10 @@ import { setUser } from '../../routes/auth/store/auth.slice';
 export const NextRouteGuard = () => {
   const auth = useTypedSelector((state) => state.authReducer);
   const dispatch = useAppDispatch();
+  const location = useLocation();
   const navigate = useNavigate();
+
+  console.log('location: ', location);
 
   useEffect(() => {
     if (!auth.isAuthenticated) {

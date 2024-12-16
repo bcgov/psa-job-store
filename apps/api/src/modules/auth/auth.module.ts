@@ -5,7 +5,7 @@ import { KeycloakModule } from '../keycloak/keycloak.module';
 import { PrismaModule } from '../prisma/prisma.module';
 import { UserModule } from '../user/user.module';
 import { AuthController } from './controllers/auth.controller';
-import { IDIRStrategyFactory } from './factories/oidc-strategy.factory';
+import { BCeIDStrategyFactory, IDIRStrategyFactory } from './factories/oidc-strategy.factory';
 import { PublicRouteBypassGuard } from './guards/public-route-bypass.guard';
 import { SessionAuthGuard } from './guards/session-auth.guard';
 import { SessionSerializer } from './serializers/session.serializer';
@@ -22,7 +22,14 @@ import { AuthService } from './services/auth.service';
     PrismaModule,
     UserModule,
   ],
-  providers: [AuthService, IDIRStrategyFactory, PublicRouteBypassGuard, SessionAuthGuard, SessionSerializer],
+  providers: [
+    AuthService,
+    BCeIDStrategyFactory,
+    IDIRStrategyFactory,
+    PublicRouteBypassGuard,
+    SessionAuthGuard,
+    SessionSerializer,
+  ],
   controllers: [AuthController],
 })
 export class AuthModule {}

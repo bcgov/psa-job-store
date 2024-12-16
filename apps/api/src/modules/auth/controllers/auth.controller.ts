@@ -5,6 +5,7 @@ import { ConfigService } from '@nestjs/config';
 import { Request, Response } from 'express';
 import { AppConfigDto } from '../../../dtos/app-config.dto';
 import { PublicRoute } from '../decorators/public-route.decorator';
+import { BCeIDLoginGuard } from '../guards/bceid-login.guard';
 import { IDIRLoginGuard } from '../guards/idir-login.guard';
 
 @Controller('auth')
@@ -22,9 +23,16 @@ export class AuthController {
   }
 
   @PublicRoute()
+  @UseGuards(BCeIDLoginGuard)
+  @Get('login/bceid')
+  loginBCeID() {
+    // Logic implemented in IDIRLoginGuard
+  }
+
+  @PublicRoute()
   @UseGuards(IDIRLoginGuard)
-  @Get('login')
-  login() {
+  @Get('login/idir')
+  loginIDIR() {
     // Logic implemented in IDIRLoginGuard
   }
 
@@ -34,9 +42,16 @@ export class AuthController {
   }
 
   @PublicRoute()
+  @UseGuards(BCeIDLoginGuard)
+  @Get('callback/bceid')
+  callbackBCeID(@Req() req: Request, @Res() res: Response) {
+    res.redirect(this.configService.get('KEYCLOAK_LOGOUT_REDIRECT_URL'));
+  }
+
+  @PublicRoute()
   @UseGuards(IDIRLoginGuard)
-  @Get('callback')
-  callback(@Res() res: Response) {
+  @Get('callback/idir')
+  callbackIDIR(@Res() res: Response) {
     res.redirect(this.configService.get('KEYCLOAK_LOGOUT_REDIRECT_URL'));
   }
 

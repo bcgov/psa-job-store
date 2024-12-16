@@ -1,7 +1,7 @@
-import { LoginGuard } from './login.guard';
+import { IDIRLoginGuard } from './idir-login.guard';
 
-describe('LoginGuard', () => {
+describe('IDIRLoginGuard', () => {
   it('should be defined', () => {
-    expect(new LoginGuard()).toBeDefined();
+    expect(new IDIRLoginGuard()).toBeDefined();
   });
 });

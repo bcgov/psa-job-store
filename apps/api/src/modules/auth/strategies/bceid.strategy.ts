@@ -6,17 +6,21 @@ import { ConfigService } from '@nestjs/config';
 import { AppConfigDto } from '../../../dtos/app-config.dto';
 import { AuthService } from '../services/auth.service';
 
-export type IDIRUserinfoResponse = UserinfoResponse<{
+export type BCeIDUserinfoResponse = UserinfoResponse<{
   client_roles?: string[];
-  idir_user_guid: string;
+  bceid_user_guid: string;
   identity_provider?: string;
+  email?: string;
   display_name?: string;
-  family_name?: string;
   given_name?: string;
-  idir_username?: string;
+  name?: string;
+  bceid_username?: string;
+  preferred_username?: string;
+  bceid_business_guid?: string;
+  bceid_business_name?: string;
 }>;
 
-export class IDIRStrategy extends PassportStrategy(Strategy, 'idir') {
+export class BCeIDStrategy extends PassportStrategy(Strategy, 'bceid') {
   constructor(
     private readonly authService: AuthService,
     private readonly configService: ConfigService<AppConfigDto, true>,
@@ -25,18 +29,18 @@ export class IDIRStrategy extends PassportStrategy(Strategy, 'idir') {
     super({
       client: oidcClient,
       params: {
-        redirect_uri: `${configService.get('KEYCLOAK_CALLBACK_URL')}/idir`,
-        kc_idp_hint: 'idir',
+        redirect_uri: `${configService.get('KEYCLOAK_CALLBACK_URL')}/bceid`,
+        kc_idp_hint: 'bceidboth',
       },
     });
   }
 
   async validate(tokenSet: TokenSet) {
-    const userinfo: IDIRUserinfoResponse = await this.oidcClient.userinfo(tokenSet);
-    const sessionUser = await this.authService.validateUserinfo(userinfo);
+    const userinfo: BCeIDUserinfoResponse = await this.oidcClient.userinfo(tokenSet);
 
     try {
-      return sessionUser;
+      const sessionUser = await this.authService.validateUserinfo(userinfo);
+      return sessionUser ?? false;
     } catch (error) {
       throw new UnauthorizedException();
     }

@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { Issuer } from 'openid-client';
 import { AppConfigDto } from '../../../dtos/app-config.dto';
 import { AuthService } from '../services/auth.service';
+import { BCeIDStrategy } from '../strategies/bceid.strategy';
 import { IDIRStrategy } from '../strategies/idir.strategy';
 
 const buildOIDCClient = async (configService: ConfigService<AppConfigDto, true>) => {
@@ -15,6 +16,15 @@ const buildOIDCClient = async (configService: ConfigService<AppConfigDto, true>)
   });
 };
 
+export const BCeIDStrategyFactory: FactoryProvider = {
+  provide: BCeIDStrategy.name,
+  useFactory: async (authService: AuthService, configService: ConfigService<AppConfigDto, true>) => {
+    const oidcClient = await buildOIDCClient(configService);
+    return new BCeIDStrategy(authService, configService, oidcClient);
+  },
+  inject: [AuthService, ConfigService],
+};
+
 export const IDIRStrategyFactory: FactoryProvider = {
   provide: IDIRStrategy.name,
   useFactory: async (authService: AuthService, configService: ConfigService<AppConfigDto, true>) => {
@@ -23,4 +33,3 @@ export const IDIRStrategyFactory: FactoryProvider = {
   },
   inject: [AuthService, ConfigService],
 };
-//

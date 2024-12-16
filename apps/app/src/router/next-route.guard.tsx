@@ -19,7 +19,9 @@ export const NextRouteGuard = () => {
           const response = await fetch(`${import.meta.env.VITE_BACKEND_URL}/auth/user`, { credentials: 'include' });
           if (!response.ok) {
             setIsLoading(false);
-            navigate('/auth/login');
+            if (location.pathname !== '/auth/login') {
+              navigate('/auth/login');
+            }
           } else {
             const json = await response.json();
             dispatch(setUser(json));

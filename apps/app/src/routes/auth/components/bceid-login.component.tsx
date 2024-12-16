@@ -4,24 +4,30 @@ import { useState } from 'react';
 
 const { Text, Title } = Typography;
 
-export const IDIRLogin = () => {
+export const BCeIDLogin = () => {
   const [isLoading, setIsLoading] = useState<boolean>(false);
 
   return (
     <Space direction="vertical" style={{ width: '100%' }}>
-      <Title level={5}>Public Sector Employee</Title>
-      <Text>Use your IDIR to sign in to the Job Store.</Text>
+      <Title level={5}>Others</Title>
+      <Text>
+        Use your{' '}
+        <a href="https://www.bceid.ca/" referrerPolicy="no-referrer" target="_blank">
+          BCeID
+        </a>{' '}
+        to sign in to the Job Store.
+      </Text>
       <Button
         onClick={() => {
           setIsLoading(true);
-          window.location.href = 'http://localhost:4000/auth/login/idir';
+          window.location.href = 'http://localhost:4000/auth/login/bceid';
         }}
         icon={<LoginOutlined />}
         loading={isLoading}
         style={{ marginTop: '0.5rem' }}
-        type="primary"
+        type="default"
       >
-        Log In Using IDIR
+        Log In Using BCeID
       </Button>
     </Space>
   );
