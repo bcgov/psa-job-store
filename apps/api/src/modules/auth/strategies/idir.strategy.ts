@@ -26,6 +26,7 @@ export class IDIRStrategy extends PassportStrategy(Strategy, 'idir') {
       client: oidcClient,
       params: {
         redirect_uri: configService.get('KEYCLOAK_CALLBACK_URL'),
+        kc_idp_hint: 'idir',
       },
     });
   }
