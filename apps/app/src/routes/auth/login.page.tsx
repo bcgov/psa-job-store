@@ -1,45 +1,21 @@
-import { LoginOutlined } from '@ant-design/icons';
-import { Button, Card, Col, Divider, Row, Space, Typography } from 'antd';
-import { useState } from 'react';
-import { useMatch } from 'react-router-dom';
+import { Card, Col, Divider, Row, Space, Typography } from 'antd';
+import { IDIRLogin } from './components/idir-login.component';
 
 export const LoginPage = () => {
   const { Title, Text, Link } = Typography;
-  const [isLoading, setIsLoading] = useState<boolean>(false);
-  // const [searchParams] = useSearchParams();
-  // const isLogoutPage = searchParams.get('logout') != null ? true : false;
-
-  const isLoginPage = useMatch('/auth/login') != null;
 
   return (
     <Row justify="center" align="middle" style={{ height: '100%', justifyContent: 'center', background: '#f5f5f5' }}>
       <Col span={12}>
         <Space direction="vertical" style={{ width: '100%' }}>
           <div>
-            <Title style={{ fontSize: '2rem' }}>{isLoginPage ? 'Welcome to the Job Store' : 'Logged out'}</Title>
+            <Title style={{ fontSize: '2rem' }}>Welcome to the Job Store</Title>
             <Text style={{ fontSize: '18px', lineHeight: '26px' }} type="secondary">
-              {isLoginPage
-                ? 'Please log in to access your Job Store account.'
-                : 'You have successfully logged out of the Job Store.'}
+              Please log in to access your Job Store account.
             </Text>
           </div>
           <Card size="default" style={{ backgroundColor: '#FFF' }}>
-            <Space direction="vertical" style={{ width: '100%' }}>
-              <Title level={5}>{isLoginPage ? 'Public Sector Employee' : 'A bit more to do?'}</Title>
-              <Text>Use your IDIR to sign in to the Job Store.</Text>
-              <Button
-                onClick={() => {
-                  setIsLoading(true);
-                  window.location.href = 'http://localhost:4000/auth/login';
-                }}
-                icon={<LoginOutlined />}
-                loading={isLoading}
-                style={{ marginTop: '0.5rem' }}
-                type="primary"
-              >
-                Log In Using IDIR
-              </Button>
-            </Space>
+            <IDIRLogin />
             <Divider />
             <Space direction="vertical" style={{ width: '100%' }}>
               <Title level={5}>Need Help?</Title>
