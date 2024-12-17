@@ -9,7 +9,7 @@ export const BCeIDLogin = () => {
 
   return (
     <Space direction="vertical" style={{ width: '100%' }}>
-      <Title level={5}>Others</Title>
+      <Title level={5}>Agencies, Boards & Commissions</Title>
       <Text>
         Use your{' '}
         <a href="https://www.bceid.ca/" referrerPolicy="no-referrer" target="_blank">
