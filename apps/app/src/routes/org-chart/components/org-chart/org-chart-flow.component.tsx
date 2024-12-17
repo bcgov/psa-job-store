@@ -3,6 +3,7 @@ import React, { RefObject, useCallback, useEffect, useMemo, useRef, useState } f
 import ReactFlow, { Background, Edge, MiniMap, Node, NodeTypes, useReactFlow, useStoreApi } from 'reactflow';
 import { PositionProvider } from '../../../../components/app/common/contexts/position.context';
 import { Controls } from '../controls';
+import { OrgChartKeyboardShortcutsModal } from '../org-chart-keyboard-shortcuts.modal';
 import { convertData } from './org-chart-tree-view.component';
 
 interface OrgChartFlowProps {
@@ -39,6 +40,17 @@ const OrgChartFlow: React.FC<OrgChartFlowProps> = ({
   const store = useStoreApi();
   const { addSelectedNodes } = store.getState();
   const [isButtonFocused, setIsButtonFocused] = useState(false);
+
+  const [isModalVisible, setIsModalVisible] = useState(false);
+
+  const showModal = () => {
+    setIsModalVisible(true);
+  };
+
+  const handleClose = () => {
+    setIsModalVisible(false);
+  };
+
   // console.log('component render, isButtonFocused: ', isButtonFocused);
 
   useEffect(() => {
@@ -103,6 +115,8 @@ const OrgChartFlow: React.FC<OrgChartFlowProps> = ({
   // console.log('treeData: ', treeData);
 
   const getCurrentNodeIndex = () => {
+    // console.log('getCurrentNodeIndex, selectedNodeId: ', selectedNodeId);
+    // console.log('orderedNodes: ', orderedNodes);
     return selectedNodeId ? orderedNodes.indexOf(selectedNodeId) : -1;
   };
 
@@ -113,18 +127,22 @@ const OrgChartFlow: React.FC<OrgChartFlowProps> = ({
 
   const hasPreviousNode = () => {
     const currentIndex = getCurrentNodeIndex();
-    console.log('hasPreviousNode, currentIndex: ', currentIndex);
+    // console.log('hasPreviousNode, currentIndex: ', currentIndex);
     return currentIndex > 0;
   };
 
   const navigateNext = () => {
+    // console.log('== navigateNext');
     const currentIndex = getCurrentNodeIndex();
+    // console.log('currentIndex: ', currentIndex);
     if (currentIndex === -1) {
+      // console.log('setting selected node to first node');
       updateSelectedNode(orderedNodes[0]);
     } else if (currentIndex < orderedNodes.length - 1) {
+      // console.log('setting selected node to next node: ', currentIndex, orderedNodes[currentIndex + 1]);
       updateSelectedNode(orderedNodes[currentIndex + 1]);
     }
-    console.log('navigateNext, setting button focus to false');
+    // console.log('navigateNext, setting button focus to false');
     setIsButtonFocused(false);
   };
 
@@ -135,7 +153,7 @@ const OrgChartFlow: React.FC<OrgChartFlowProps> = ({
     } else if (currentIndex > 0) {
       updateSelectedNode(orderedNodes[currentIndex - 1]);
     }
-    console.log('navigatePrevious, setting button focus to false');
+    // console.log('navigatePrevious, setting button focus to false');
     setIsButtonFocused(false);
   };
 
@@ -152,7 +170,7 @@ const OrgChartFlow: React.FC<OrgChartFlowProps> = ({
 
   // Update the selected node and focus on it - called from all arrow keys, etc
   const updateSelectedNode = (selectedNodeId = '', focusButton = false) => {
-    console.log('updateSelectedNode, nodeId/focusButton: ', selectedNodeId, focusButton);
+    // console.log('updateSelectedNode, nodeId/focusButton: ', selectedNodeId, focusButton);
     isKeyboardNav.current = true;
     addSelectedNodes([selectedNodeId]);
     setSelectedNodeIds([selectedNodeId]);
@@ -164,11 +182,11 @@ const OrgChartFlow: React.FC<OrgChartFlowProps> = ({
     // Focus on the selected node or its button
     setTimeout(() => {
       const nodeElement = document.getElementById(`node-${selectedNodeId}`);
-      console.log('nodeElement: ', nodeElement);
+      // console.log('nodeElement: ', nodeElement);
       if (nodeElement) {
         if (focusButton) {
           const buttonElement = nodeElement.querySelector('button');
-          console.log('button element: ', buttonElement);
+          // console.log('button element: ', buttonElement);
           if (buttonElement) {
             buttonElement.focus();
           } else {
@@ -178,7 +196,7 @@ const OrgChartFlow: React.FC<OrgChartFlowProps> = ({
           nodeElement.focus();
         }
       }
-    }, 0);
+    }, 50);
   };
 
   const navigateUp = () => {
@@ -191,33 +209,39 @@ const OrgChartFlow: React.FC<OrgChartFlowProps> = ({
   };
 
   const navigateDown = () => {
-    console.log('navigateDown, selectedNodeId: ', selectedNodeId);
+    // console.log('navigateDown, selectedNodeId: ', selectedNodeId);
     if (!selectedNodeId) return;
-    console.log('selectedNodeId: ', selectedNodeId);
+    // console.log('selectedNodeId: ', selectedNodeId);
     const node = findNodeById(selectedNodeId);
-    console.log('node: ', node);
+    // console.log('node: ', node);
     if (node && node.children.length > 0) {
-      console.log('setting selectedNodeId: ', node.children[0]);
+      // console.log('setting selectedNodeId: ', node.children[0]);
       updateSelectedNode(node.children[0]);
     }
     setIsButtonFocused(false);
   };
 
   const navigateLeft = () => {
+    // console.log('== navigateLeft, selectedNodeId: ', selectedNodeId);
     if (!selectedNodeId) return;
     const siblings = findSiblings(selectedNodeId);
+    // console.log('siblings: ', siblings);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const currentIndex = siblings.findIndex((node: any) => node.id === selectedNodeId);
+    // console.log('currentIndex: ', currentIndex);
     if (currentIndex > 0) {
       updateSelectedNode(siblings[currentIndex - 1].id);
     }
   };
 
   const navigateRight = () => {
+    // console.log('== navigateRight, selectedNodeId: ', selectedNodeId);
     if (!selectedNodeId) return;
     const siblings = findSiblings(selectedNodeId);
+    // console.log('siblings: ', siblings);
     // eslint-disable-next-line @typescript-eslint/no-explicit-any
     const currentIndex = siblings.findIndex((node: any) => node.id === selectedNodeId);
+    // console.log('currentIndex: ', currentIndex);
     if (currentIndex < siblings.length - 1) {
       updateSelectedNode(siblings[currentIndex + 1].id);
     }
@@ -236,8 +260,8 @@ const OrgChartFlow: React.FC<OrgChartFlowProps> = ({
   // Update the handleKeyDown function
   const handleKeyDown = useCallback(
     (event: KeyboardEvent) => {
-      console.log('handleKeyDown: ', event.key);
-      console.log('isFlowFocused: ', isFlowFocused);
+      // console.log('handleKeyDown: ', event.key);
+      // console.log('isFlowFocused: ', isFlowFocused);
 
       if (!isFlowFocused) return;
 
@@ -267,6 +291,7 @@ const OrgChartFlow: React.FC<OrgChartFlowProps> = ({
           setIsButtonFocused(false);
           break;
         case 'ArrowLeft':
+          // console.log('arrow left, selectedNodeId: ', selectedNodeId);
           event.preventDefault();
           if (selectedNodeId === null) {
             selectFirstRootNode();
@@ -276,6 +301,7 @@ const OrgChartFlow: React.FC<OrgChartFlowProps> = ({
           setIsButtonFocused(false);
           break;
         case 'ArrowRight':
+          // console.log('arrow right, selectedNodeId: ', selectedNodeId);
           event.preventDefault();
           if (selectedNodeId === null) {
             selectFirstRootNode();
@@ -284,31 +310,37 @@ const OrgChartFlow: React.FC<OrgChartFlowProps> = ({
           }
           setIsButtonFocused(false);
           break;
+        case '?': {
+          // show the keyboard help modal
+          event.preventDefault();
+          showModal();
+          break;
+        }
         case 'Tab': {
-          console.log('TAB, isButtonFocused: ', isButtonFocused, 'selectedNodeId: ', selectedNodeId);
+          // console.log('TAB, isButtonFocused: ', isButtonFocused, 'selectedNodeId: ', selectedNodeId);
           if (!selectedNodeId) {
-            console.log('no selected node');
+            // console.log('no selected node');
             event.preventDefault();
             navigateNext();
             return;
           }
 
           const nodeElement = document.getElementById(`node-${selectedNodeId}`);
-          console.log('node element: ', nodeElement);
+          // console.log('node element: ', nodeElement);
           const buttonElement = nodeElement ? nodeElement.querySelector('button') : null;
-          console.log('button element: ', buttonElement);
+          // console.log('button element: ', buttonElement);
           const isButtonDisabled = buttonElement ? buttonElement.disabled : true;
 
           if (shiftKey) {
-            console.log('shift key');
+            // console.log('shift key');
             // Shift+Tab (backward navigation)
             if (isButtonFocused) {
-              console.log('button focused');
+              // console.log('button focused');
               // If button is focused, move focus to the node
               setIsButtonFocused(false);
               updateSelectedNode(selectedNodeId, false);
             } else if (hasPreviousNode()) {
-              console.log('has previous node!');
+              // console.log('has previous node!');
               event.preventDefault();
               // If node is focused, move to the previous node and focus on the button
               navigatePrevious();
@@ -323,42 +355,42 @@ const OrgChartFlow: React.FC<OrgChartFlowProps> = ({
 
               // Check if the previous node has an enabled button
               const prevNodeId = orderedNodes[prevIndex];
-              console.log('prevNodeId: ', prevNodeId);
+              // console.log('prevNodeId: ', prevNodeId);
               const prevNode = findNodeById(prevNodeId);
-              console.log('prevNode: ', prevNode);
+              // console.log('prevNode: ', prevNode);
               if (prevNode && prevNode.employees.length != 0) {
                 setTimeout(() => {
-                  console.log('TIMEOUT');
+                  // console.log('TIMEOUT');
                   const prevNodeElement = document.getElementById(`node-${prevNodeId}`);
                   const prevButtonElement = prevNodeElement ? prevNodeElement.querySelector('button') : null;
-                  console.log('prevButtonElement: ', prevButtonElement);
+                  // console.log('prevButtonElement: ', prevButtonElement);
                   if (prevButtonElement) {
                     setIsButtonFocused(true);
                     prevButtonElement.focus();
                   }
-                }, 0);
+                }, 50);
               }
               // const prevNodeElement = document.getElementById(`node-${prevNodeId}`);
               // const prevButtonElement = prevNodeElement ? prevNodeElement.querySelector('button') : null;
               // const isPrevButtonDisabled = prevButtonElement ? prevButtonElement.disabled : true;
               // setIsButtonFocused(!isPrevButtonDisabled);
             } else {
-              console.log('no previous node!');
+              // console.log('no previous node!');
               document.getElementById('download-orgchart-button')?.focus();
               event.preventDefault();
             }
           } else {
-            console.log('no shift key, isButtonDisabled: ', isButtonDisabled, 'isButtonFocused: ', isButtonFocused);
+            // console.log('no shift key, isButtonDisabled: ', isButtonDisabled, 'isButtonFocused: ', isButtonFocused);
             // Tab (forward navigation)
             if (isButtonFocused || isButtonDisabled) {
               // If button is focused or disabled, move to the next node
               if (hasNextNode()) {
-                console.log('has next node');
+                // console.log('has next node');
                 event.preventDefault();
                 navigateNext();
                 setIsButtonFocused(false);
               } else {
-                console.log('no next node!');
+                // console.log('no next node!');
                 setSelectedNodeIds([]);
               }
             } else {
@@ -381,6 +413,7 @@ const OrgChartFlow: React.FC<OrgChartFlowProps> = ({
     if (currentFlowRef) {
       currentFlowRef.addEventListener('keydown', handleKeyDown);
       return () => {
+        // console.log('removing keydown event listener');
         currentFlowRef.removeEventListener('keydown', handleKeyDown);
       };
     }
@@ -432,6 +465,7 @@ const OrgChartFlow: React.FC<OrgChartFlowProps> = ({
             />
           </ReactFlow>
         </div>
+        <OrgChartKeyboardShortcutsModal isVisible={isModalVisible} onClose={handleClose} />
       </PositionProvider>
     </>
   );
