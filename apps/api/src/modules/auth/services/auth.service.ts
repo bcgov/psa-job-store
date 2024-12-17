@@ -247,8 +247,6 @@ export class AuthService {
     } else if (userinfo.identity_provider === 'idir') {
       return this.validateIDIRUserinfo(userinfo as IDIRUserinfoResponse);
     } else {
-      console.log('~~~~~~ ASDF: ', userinfo);
-
       throw new UnauthorizedException();
     }
   }
