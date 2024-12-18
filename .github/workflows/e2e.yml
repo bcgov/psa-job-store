@@ -229,16 +229,16 @@ jobs:
       #     API_POD=$(oc get pod -l name=api -o jsonpath="{.items[0].metadata.name}" || echo "No pods found")
       #     echo "Found API pod: $API_POD"
       #     oc exec $API_POD -- /bin/sh -c "export SEED_FILE=prisma/run-e2e-seed.ts && npx prisma migrate reset  --force --skip-generate"
-      - name: Reset elastic search index
-        run: |
-          response=$(curl -s "${{ secrets.CYPRESS_VITE_BACKEND_URL }}/health/resetIndex")
-          if [ "$(echo $response | jq -r '.status')" != "ok" ]; then
-            echo "Failed to reset elastic search index. Response: $response"
-            exit 1
-          fi
-        shell: bash
+      # - name: Reset elastic search index
+      #   run: |
+      #     response=$(curl -s "${{ secrets.CYPRESS_VITE_BACKEND_URL }}/health/resetIndex")
+      #     if [ "$(echo $response | jq -r '.status')" != "ok" ]; then
+      #       echo "Failed to reset elastic search index. Response: $response"
+      #       exit 1
+      #     fi
+      #   shell: bash
 
-        # Cache restore steps
+      # Cache restore steps
 
       - name: Restore Node Modules Cache
         id: cache-node-modules-restore
