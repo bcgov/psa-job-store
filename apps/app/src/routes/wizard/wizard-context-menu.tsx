@@ -60,7 +60,7 @@ export const WizardContextMenu: React.FC<WizardMenuProps> = ({
 
   const MenuContent = () => (
     <Menu className="wizard-menu">
-      <Menu.Item key="save" onClick={saveAndQuit} disabled={saveAndQuitLoading}>
+      <Menu.Item key="save" onClick={saveAndQuit} disabled={saveAndQuitLoading} data-testid="save-and-quit">
         <div style={{ position: 'relative' }}>
           {saveAndQuitLoading && (
             <div
