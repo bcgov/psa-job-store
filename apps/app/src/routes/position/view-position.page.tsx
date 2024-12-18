@@ -66,7 +66,8 @@ export const ViewPositionPage = () => {
   }
 
   // console.log('positionRequest data: ', data);
-  if (!data.positionRequest && !isLoading) return <NotFoundComponent entity="Position request" />;
+  if (!data.positionRequest && !isLoading)
+    return <NotFoundComponent entity="Position request" redirect="/my-departments" />;
   // END ACTIONS TAB DATA
   const snapshotCopy = JSON.parse(JSON.stringify(data?.positionRequest?.orgchart_json));
   const tabItems = [

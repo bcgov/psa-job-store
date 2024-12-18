@@ -380,8 +380,8 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
       query: (args: GetPositionRequestArgs) => {
         return {
           document: gql`
-            query PositionRequestForDept {
-              positionRequest(id: ${args.id}) {
+            query positionRequestForDept {
+              positionRequest: positionRequestForDept(id: ${args.id}) {
                   id
                   step
                   max_step_completed
