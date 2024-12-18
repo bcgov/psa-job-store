@@ -3,7 +3,6 @@ import { Injectable } from '@nestjs/common';
 import { ElasticsearchService } from '@nestjs/elasticsearch';
 import { JobProfileState, Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
-import { EventsService } from '../utils/event.service';
 
 export enum SearchIndex {
   JobProfile = 'job-profile',
@@ -15,14 +14,14 @@ export class SearchService {
   constructor(
     private readonly elasticService: ElasticsearchService,
     private readonly prisma: PrismaService,
-    private readonly eventsService: EventsService,
+    // private readonly eventsService: EventsService,
   ) {
     // console.log('searchServcie constructor');
-    this.eventsService.on('search:resetIndex', async (data) => {
-      console.log('received search:resetIndex event');
-      await this.resetIndex();
-      console.log('done resetting index');
-    });
+    // this.eventsService.on('search:resetIndex', async (data) => {
+    //   console.log('received search:resetIndex event');
+    //   await this.resetIndex();
+    //   console.log('done resetting index');
+    // });
   }
 
   async onModuleInit() {}
@@ -93,9 +92,9 @@ export class SearchService {
 
   async searchJobProfiles(value: string) {
     // console.log('searchProfiles: ', value);
-
     const results = await this.elasticService.search({
       index: SearchIndex.JobProfile,
+      size: 20,
       query: {
         bool: {
           should: [
@@ -111,6 +110,11 @@ export class SearchService {
                   fuzziness: 1,
                   operator: 'and',
                 },
+              },
+            },
+            !isNaN(parseInt(value)) && {
+              term: {
+                number: { value: parseInt(value), boost: 5 },
               },
             },
             {
@@ -363,21 +367,27 @@ export class SearchService {
         accountabilities: (profile.accountabilities as Prisma.JsonObject[]).map(
           (accountability) => accountability.text,
         ),
-        behavioural_competencies: (
-          await this.prisma.jobProfileBehaviouralCompetency.findMany({
-            where: {
-              job_profile_id: profile.id,
-            },
-            select: {
-              behavioural_competency: {
-                select: {
-                  name: true,
-                  description: true,
-                },
-              },
-            },
-          })
-        ).map(({ behavioural_competency: { name, description } }) => `${name} ${description}`),
+        behavioural_competencies: profile.behavioural_competencies
+          ? (profile.behavioural_competencies as Prisma.JsonObject[]).map(
+              (competency) => `${competency.name} ${competency.description}`,
+            )
+          : [],
+
+        // (
+        //   await this.prisma.jobProfileBehaviouralCompetency.findMany({
+        //     where: {
+        //       job_profile_id: profile.id,
+        //     },
+        //     select: {
+        //       behavioural_competency: {
+        //         select: {
+        //           name: true,
+        //           description: true,
+        //         },
+        //       },
+        //     },
+        //   })
+        // ).map(({ behavioural_competency: { name, description } }) => `${name} ${description}`),
         professional_registration_requirements: (
           profile.professional_registration_requirements as Prisma.JsonObject[]
         )?.map((pr) => pr.text),

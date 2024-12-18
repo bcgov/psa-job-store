@@ -92,7 +92,6 @@ export class JobProfileService {
         owner: true,
         published_by: true,
         updated_by: true,
-        behavioural_competencies: true,
         classifications: {
           include: {
             classification: true,
@@ -579,12 +578,6 @@ export class JobProfileService {
             stream: true,
           },
         },
-
-        behavioural_competencies: {
-          include: {
-            behavioural_competency: true,
-          },
-        },
       },
     });
     // : await this.prisma.currentJobProfile.findUnique({
@@ -669,12 +662,6 @@ export class JobProfileService {
         streams: {
           include: {
             stream: true,
-          },
-        },
-
-        behavioural_competencies: {
-          include: {
-            behavioural_competency: true,
           },
         },
       },
@@ -849,15 +836,6 @@ export class JobProfileService {
     return uniqueOrganizations;
   }
 
-  async getBehaviouralCompetencies(job_profile_id: number, job_profile_version: number) {
-    return this.prisma.jobProfileBehaviouralCompetency.findMany({
-      where: { job_profile_id, job_profile_version },
-      include: {
-        behavioural_competency: true,
-      },
-    });
-  }
-
   async createOrUpdateJobProfile(data: ExtendedJobProfileCreateInput, userId: string) {
     // todo: catch the "number" constraint failure and process the error on the client appropriately
     const jobProfileState = data.state ? data.state : JobProfileState.DRAFT;
@@ -977,13 +955,7 @@ export class JobProfileService {
       create: {
         id: id,
         version: version,
-        behavioural_competencies: {
-          create: data.behavioural_competencies.create.map((item) => ({
-            behavioural_competency: {
-              connect: { id: item.behavioural_competency.connect.id },
-            },
-          })),
-        },
+        behavioural_competencies: data.behavioural_competencies,
         ...(data.classifications && {
           classifications: {
             create: data.classifications.create.map((item) => ({
@@ -1085,12 +1057,7 @@ export class JobProfileService {
 
         ...(data.state && { state: jobProfileState }),
 
-        behavioural_competencies: {
-          deleteMany: {}, // Deletes all existing competencies for this job profile
-          create: data.behavioural_competencies.create.map((item) => ({
-            behavioural_competency: { connect: { id: item.behavioural_competency.connect.id } },
-          })),
-        },
+        behavioural_competencies: data.behavioural_competencies,
 
         classifications: data.classifications
           ? {
@@ -1231,11 +1198,6 @@ export class JobProfileService {
     const jobProfileToDuplicate = await this.prisma.jobProfile.findUnique({
       where: { id_version: { id: jobProfileId, version: jobProfileVersion } },
       include: {
-        behavioural_competencies: {
-          include: {
-            behavioural_competency: true,
-          },
-        },
         classifications: {
           include: {
             classification: true,
@@ -1315,12 +1277,6 @@ export class JobProfileService {
       // Generate a new unique number
       number: await this.getNextAvailableNumber(),
 
-      // Map each relation
-      behavioural_competencies: {
-        create: jobProfileToDuplicate.behavioural_competencies.map((bc) => ({
-          behavioural_competency: { connect: { id: bc.behavioural_competency_id } },
-        })),
-      },
       classifications: {
         create: jobProfileToDuplicate.classifications.map((cl) => ({
           classification: {
@@ -1439,9 +1395,6 @@ export class JobProfileService {
       if (!anyPositionRequests) {
         // If the job profile does not have links to PositionRequests, delete it along with related entities
         await this.prisma.$transaction([
-          this.prisma.jobProfileBehaviouralCompetency.deleteMany({
-            where: { job_profile_id: jobProfileId },
-          }),
           this.prisma.jobProfileClassification.deleteMany({
             where: { job_profile_id: jobProfileId },
           }),

@@ -2932,3 +2932,89 @@ jest.mock('./src/redux/services/graphql-api/job-profile-stream', () => ({
     isLoading: false,
   }),
 }));
+
+jest.mock('./src/redux/services/graphql-api/position-request.api', () => ({
+  useGetSuggestedManagersQuery: jest.fn().mockReturnValue({
+    data: {
+      suggestedManagers: [
+        {
+          id: '00812345',
+          name: 'Sam Carter',
+          status: 'Active',
+          positionNumber: '00812345',
+          positionTitle: 'Director, Digital Delivery',
+          classification: {
+            id: '185004',
+            code: 'Band 4',
+            name: 'Band 4',
+          },
+          department: {
+            id: '112-0074',
+            name: 'Informational Resource Management',
+            organization_id: 'BC000',
+          },
+        },
+        {
+          id: '00812346',
+          name: 'Bob Doe',
+          status: 'Active',
+          positionNumber: '00812345',
+          positionTitle: 'Director, Digital Delivery',
+          classification: {
+            id: '185004',
+            code: 'Band 4',
+            name: 'Band 4',
+          },
+          department: {
+            id: '112-0074',
+            name: 'Informational Resource Management',
+            organization_id: 'BC000',
+          },
+        },
+        {
+          id: '00543278',
+          name: 'Grace Thompson',
+          status: 'Active',
+          positionNumber: '00543278',
+          positionTitle: 'Exec Dir, Digital Capacity',
+          classification: {
+            id: '185005',
+            code: 'Band 5',
+            name: 'Band 5',
+          },
+          department: {
+            id: '112-0074',
+            name: 'Informational Resource Management',
+            organization_id: 'BC000',
+          },
+        },
+      ],
+    },
+    isLoading: false,
+    isFetching: false,
+  }),
+}));
+
+// jest.mock('./src/redux/services/graphql-api/user.api', () => ({
+//   useLazySearchUsersQuery: jest.fn().mockReturnValue([
+//     jest.fn(), // mock trigger function
+//     {
+//       data: {
+//         searchUsers: {
+//           numberOfResults: 2,
+//           results: [
+//             {
+//               position_number: '00987654',
+//               name: 'Grace Lee',
+//             },
+//             {
+//               position_number: '00543278',
+//               name: 'Grace Thompson',
+//             },
+//           ],
+//         },
+//       },
+//       isLoading: false,
+//     }, // mock response object
+//   ]),
+// }));

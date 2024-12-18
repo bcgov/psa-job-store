@@ -1,4 +1,4 @@
-import { Col, Layout, Row } from 'antd';
+import { Button, Col, Layout, Row, Tooltip } from 'antd';
 import { useEffect, useState } from 'react';
 import { PageHeader } from '../../components/app/page-header.component';
 import { useTypedSelector } from '../../redux/redux.hooks';
@@ -36,7 +36,24 @@ export const OrgChartPage = () => {
         <PageHeader
           title="My departments"
           subTitle="You are viewing the current organization structure for your base work area. To begin, click the supervisor of the new position you would like to create."
-          extra={<OrgChartHelpButton />}
+          extra={
+            <>
+              <Tooltip
+                trigger={['hover', 'click']}
+                title="The position might be in a different department ID. Please check Peoplesoft for the latest org structure."
+              >
+                <Button
+                  id="changes"
+                  role="note"
+                  type="link"
+                  aria-label="Why can't I make changes? Because information shown here is dependent on the values that you selected in the previous steps."
+                >
+                  Why can't I make changes?
+                </Button>
+              </Tooltip>
+              <OrgChartHelpButton />
+            </>
+          }
           // subHeader={
           //   <Row gutter={16} align="middle" justify="space-between" style={{ paddingBottom: '10px' }}>
           //     <Col>

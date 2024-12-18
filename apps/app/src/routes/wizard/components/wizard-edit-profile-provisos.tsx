@@ -94,6 +94,7 @@ const Provisos: React.FC<ProvisosProps> = ({
           <Col>
             <WizardEditAddButton
               testId="add-proviso-button"
+              isSignificant={false}
               onClick={() => {
                 handleAddNew();
               }}

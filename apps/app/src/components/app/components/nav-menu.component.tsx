@@ -13,7 +13,7 @@ import {
 } from '@ant-design/icons';
 import { Flex, Menu } from 'antd';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useLocation } from 'react-router-dom';
+import { useLocation, useParams } from 'react-router-dom';
 import { useTypedSelector } from '../../../redux/redux.hooks';
 import { FileSettingOutlined } from '../../icons/file-setting-outlined';
 import { PartitionSettingOutlined } from '../../icons/partition-setting-outlined';
@@ -362,7 +362,7 @@ export const NavMenu = ({ collapsed }: NavMenuProps) => {
       setOpenKeys(expandedOpenKeys);
     }
   }, [setOpenKeys, expandedOpenKeys, collapsed]);
-
+  const params = useParams<Record<string, string>>();
   return (
     <Flex
       vertical
@@ -381,7 +381,7 @@ export const NavMenu = ({ collapsed }: NavMenuProps) => {
         selectedKeys={
           location.pathname == '/requests/positions/create' || location.pathname == '/job-profiles/manage/create'
             ? []
-            : [location.pathname]
+            : [Object.values(params).reduce((path, param) => path?.replace('/' + param, ''), location.pathname) ?? '/']
         }
         theme="light"
         items={menuItems}

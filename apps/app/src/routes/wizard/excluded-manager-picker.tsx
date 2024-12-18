@@ -1,4 +1,4 @@
-import { Col, Empty, Form, Row, Select, Space, Typography } from 'antd';
+import { Col, Empty, Form, Row, Select, Space } from 'antd';
 import { debounce } from 'lodash';
 import { useCallback, useMemo, useState } from 'react';
 import { Control, Controller } from 'react-hook-form';
@@ -53,10 +53,13 @@ export const ExcludedManagerPicker: React.FC<ExcludedManagerPickerProps> = ({
     { skip: !positionNumber || !positionRequestId },
   );
 
+  // console.log('suggestedManagers: ', suggestedManagers, suggestedIsLoading, suggestedIsFetching);
+
   const [searchUsers] = useLazySearchUsersQuery();
 
   const handleSearch = useCallback(
     debounce(async (searchText: string) => {
+      console.log('debounce search text: ', searchText);
       setSearchText(searchText);
 
       if (!searchText) {
@@ -68,7 +71,9 @@ export const ExcludedManagerPicker: React.FC<ExcludedManagerPickerProps> = ({
       if (searchText.length < 2) return;
       setIsLoading(true);
       try {
+        console.log('searching users..');
         const response = await searchUsers(searchText).unwrap();
+        console.log('searchUsers response: ', response);
 
         if (response?.searchUsers.results.length > 0) {
           const activePositions = response.searchUsers.results.map((result) => ({
@@ -95,6 +100,7 @@ export const ExcludedManagerPicker: React.FC<ExcludedManagerPickerProps> = ({
 
   // Transform suggestions into grouped format
   const options = useMemo(() => {
+    // console.log('constructing options, suggestedManagers: ', suggestedManagers);
     const groups = [];
 
     // Create a suggestions group that includes both suggested managers and the selected option
@@ -113,6 +119,8 @@ export const ExcludedManagerPicker: React.FC<ExcludedManagerPickerProps> = ({
         ? [selectedOption]
         : []),
     ];
+
+    // console.log('suggestedOptions: ', suggestedOptions);
 
     const totalOptions = suggestedOptions.length + searchResults.length;
     let currentPosition = 1;
@@ -158,9 +166,16 @@ export const ExcludedManagerPicker: React.FC<ExcludedManagerPickerProps> = ({
       });
     }
 
+    // console.log('groups: ', groups);
     return groups;
   }, [searchResults, suggestedManagers, selectedOption, isLoading]);
 
+  // console.log(
+  //   'isLoading || suggestedIsLoading || suggestedIsFetching: ',
+  //   isLoading,
+  //   suggestedIsLoading,
+  //   suggestedIsFetching,
+  // );
   return (
     <Row justify="start">
       <Col xs={24} sm={24} md={24} lg={18} xl={12}>
@@ -182,71 +197,73 @@ export const ExcludedManagerPicker: React.FC<ExcludedManagerPickerProps> = ({
           <Controller
             name="excludedManagerPositionNumberAndName"
             control={control}
-            render={({ field: { value, onChange, onBlur } }) => (
-              <Select
-                aria-label="Select the excluded manager who approved the use of the job profile."
-                showSearch
-                value={value}
-                onBlur={onBlur}
-                onChange={(newValue, option) => {
-                  // Store the selected option
-                  // console.log('on change option: ', option);
-                  setSelectedOption(option as unknown as ManagerOption);
-                  setSearchResults([]);
-                  setSearchText('');
-                  onChange(newValue);
-                  setTotalResults(0);
-                }}
-                onSearch={handleSearch}
-                loading={isLoading}
-                filterOption={false}
-                options={options}
-                placeholder="Select an excluded manager"
-                style={{ width: '100%' }}
-                notFoundContent={
-                  isLoading || suggestedIsLoading || suggestedIsFetching ? (
-                    <span style={{ margin: '8px 13px 0 13px' }} aria-live="polite">
-                      Loading...
-                    </span>
-                  ) : (
-                    <Empty
-                      style={{ margin: '10px' }}
-                      image={Empty.PRESENTED_IMAGE_SIMPLE}
-                      description="No suggestions"
-                    />
-                  )
-                }
-                defaultActiveFirstOption={false}
-                optionRender={(option) => (
-                  <Space direction="vertical" size={0}>
-                    <div>{option.data.label}</div>
-                    {option.data.description && (
-                      <Typography.Text type="secondary" style={{ fontSize: '12px' }}>
-                        {option.data.description}
-                      </Typography.Text>
-                    )}
-                  </Space>
-                )}
-                onDropdownVisibleChange={(open) => {
-                  if (!open) {
+            render={({ field: { value, onChange, onBlur } }) => {
+              return (
+                <Select
+                  aria-label="Select the excluded manager who approved the use of the job profile."
+                  showSearch
+                  value={value}
+                  onBlur={onBlur}
+                  onChange={(newValue, option) => {
+                    // Store the selected option
+                    console.log('on change option: ', option);
+                    setSelectedOption(option as unknown as ManagerOption);
                     setSearchResults([]);
                     setSearchText('');
+                    onChange(newValue);
                     setTotalResults(0);
+                  }}
+                  onSearch={handleSearch}
+                  loading={isLoading}
+                  filterOption={false}
+                  options={options}
+                  placeholder="Select an excluded manager"
+                  style={{ width: '100%' }}
+                  notFoundContent={
+                    isLoading || suggestedIsLoading || suggestedIsFetching ? (
+                      <span style={{ margin: '8px 13px 0 13px' }} aria-live="polite">
+                        Loading...
+                      </span>
+                    ) : (
+                      <Empty
+                        style={{ margin: '10px' }}
+                        image={Empty.PRESENTED_IMAGE_SIMPLE}
+                        description="No suggestions"
+                      />
+                    )
                   }
-                }}
-                dropdownRender={(menu) => (
-                  <div>
-                    {menu}
-                    <hr
-                      style={{ margin: '8px 13px 0 13px', color: '#ccc', border: '0', borderTop: '1px solid #ccc' }}
-                    ></hr>
-                    <div style={{ padding: '8px 12px', color: '#666', fontStyle: 'italic' }}>
-                      For more options, search by name or position number.
+                  defaultActiveFirstOption={false}
+                  optionRender={(option) => (
+                    <Space direction="vertical" size={0}>
+                      <div>{option.data.label}</div>
+                      {/* {option.data.description && (
+                        <Typography.Text type="secondary" style={{ fontSize: '12px' }}>
+                          {option.data.description}
+                        </Typography.Text>
+                      )} */}
+                    </Space>
+                  )}
+                  onDropdownVisibleChange={(open) => {
+                    if (!open) {
+                      setSearchResults([]);
+                      setSearchText('');
+                      setTotalResults(0);
+                    }
+                  }}
+                  dropdownRender={(menu) => (
+                    <div>
+                      {menu}
+                      <hr
+                        style={{ margin: '8px 13px 0 13px', color: '#ccc', border: '0', borderTop: '1px solid #ccc' }}
+                      ></hr>
+                      <div style={{ padding: '8px 12px', color: '#666', fontStyle: 'italic' }}>
+                        For more options, search by name or position number.
+                      </div>
                     </div>
-                  </div>
-                )}
-              />
-            )}
+                  )}
+                />
+              );
+            }}
           />
         </Form.Item>
       </Col>

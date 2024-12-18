@@ -125,7 +125,7 @@ export interface ScopeItem {
 export interface JobProfileModel {
   id: number;
   accountabilities: AccountabilitiesModel[];
-  behavioural_competencies: BehaviouralCompetencies[];
+  behavioural_competencies: BehaviouralCompetency[];
   classifications?: ClassificationModelWrapped[] | null;
   education: AccountabilitiesModel[];
   job_experience: AccountabilitiesModel[];
@@ -268,21 +268,6 @@ export class TrackedFieldArrayItem {
   // total comp
   nonEditable?: boolean;
 }
-
-interface BehaviouralCompetencyConnect {
-  id: number;
-}
-
-interface BehaviouralCompetencyItem {
-  behavioural_competency: {
-    connect: BehaviouralCompetencyConnect;
-  };
-}
-
-interface BehaviouralCompetenciesInput {
-  create: BehaviouralCompetencyItem[];
-}
-
 interface NumberConnectInput {
   connect: {
     id: number;
@@ -307,20 +292,6 @@ export interface OrganizationConnectInput {
       id: string;
     };
   };
-}
-
-interface BehaviouralCompetencyConnectInput {
-  connect: {
-    id: number;
-  };
-}
-
-interface BehaviouralCompetencyCreateInput {
-  behavioural_competency: BehaviouralCompetencyConnectInput;
-}
-
-interface BehaviouralCompetenciesInput {
-  create: BehaviouralCompetencyCreateInput[];
 }
 
 interface JobFamilyConnectInput {
@@ -371,7 +342,7 @@ export interface CreateJobProfileInput {
     willingness_statements: string[];
     security_screenings: string[];
     total_comp_create_form_misc: any;
-    behavioural_competencies: BehaviouralCompetenciesInput;
+    behavioural_competencies: BehaviouralCompetency[];
     classifications: {
       create: ClassificationConnectInput[];
     };

@@ -1,5 +1,11 @@
 # app
 
+## 0.16.0
+
+### Minor Changes
+
+- [#1135](https://github.com/bcgov/psa-job-store/pull/1135) [`309d026`](https://github.com/bcgov/psa-job-store/commit/309d02616f633bf175b71cf533aff18cf9258dbd) Thanks [@alex-struk](https://github.com/alex-struk)! - AX-208 Dev - Excluded manager (Auth ID) update
+
 ## 0.15.0
 
 ### Minor Changes
