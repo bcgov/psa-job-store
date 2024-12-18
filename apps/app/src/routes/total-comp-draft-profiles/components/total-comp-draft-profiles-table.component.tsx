@@ -700,6 +700,15 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
 
       {!isLoading && hasPositionRequests && !error && (
         <Table
+          // Need to lower the z-index of the header and body cells so it doesn't go above the classifications filter dropdown
+          components={{
+            header: {
+              cell: (props: any) => <th {...props} style={{ ...props.style, zIndex: 0 }} />,
+            },
+            body: {
+              cell: (props: any) => <td {...props} style={{ ...props.style, zIndex: 0 }} />,
+            },
+          }}
           scroll={{ x: 'max-content' }}
           className="tableWithHeader"
           columns={columns}
