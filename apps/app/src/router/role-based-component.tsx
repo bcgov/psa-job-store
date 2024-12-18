@@ -1,5 +1,5 @@
-import { useAuth } from 'react-oidc-context';
 import LoadingSpinnerWithMessage from '../components/app/common/components/loading.component';
+import { useTypedSelector } from '../redux/redux.hooks';
 import { getUserRoles } from '../utils/get-user-roles.util';
 
 // Define a type for the role to component mapping
@@ -9,7 +9,7 @@ type RoleComponentMapping = {
 
 // RoleBasedRouting component now accepts a roleComponentMapping prop
 export const RoleBasedRouting = ({ roleComponentMapping }: { roleComponentMapping: RoleComponentMapping }) => {
-  const auth = useAuth();
+  const auth = useTypedSelector((state) => state.authReducer);
 
   if (auth.isLoading) {
     return <LoadingSpinnerWithMessage />;

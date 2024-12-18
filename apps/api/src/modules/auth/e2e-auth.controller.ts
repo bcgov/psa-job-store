@@ -1,44 +1,78 @@
-import { Controller, Post, UseGuards } from '@nestjs/common';
-import { JwtService } from '@nestjs/jwt';
+import { Controller, Get, Query, UseGuards } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
+import * as crypto from 'crypto';
+import { AppConfigDto } from '../../dtos/app-config.dto';
+import { PublicRoute } from './decorators/public-route.decorator';
 import { E2EAuthGuard } from './guards/e2e-auth.guard';
 import { TestEnvironmentGuard } from './guards/test-environment.guard';
 
 @Controller('e2e-auth')
 export class E2EAuthController {
-  constructor(private jwtService: JwtService) {}
+  constructor(private readonly configService: ConfigService<AppConfigDto, true>) {}
 
-  @Post('token')
+  /**
+   * Generates a session cookie for E2E testing purposes.
+   *
+   * This endpoint creates a signed session cookie that mimics the format used by
+   * Express.js session middleware. It's specifically designed for end-to-end testing
+   * to simulate authenticated sessions without going through the normal authentication flow.
+   *
+   * The function:
+   * 1. Takes a sessionId as a query parameter
+   * 2. Signs it using HMAC-SHA256 with the SESSION_SECRET
+   * 3. Returns both raw and formatted versions of the cookie
+   *
+   * Security measures:
+   * - Protected by TestEnvironmentGuard to ensure it's only available when E2E_TESTING is set
+   * - Protected by E2EAuthGuard to verify E2E test authentication using x-e2e-key secret header
+   * - Requires a valid SESSION_SECRET from configuration
+   *
+   * @param sessionId - The session identifier to be signed
+   * @returns {Object} An object containing:
+   *   - status: 'ok' or 'error'
+   *   - sessionId: The provided session ID
+   *   - cookie: {
+   *       raw: The signed cookie value (s%3A[sessionId].[signature])
+   *       formatted: Complete cookie string (connect.sid=[raw])
+   *     }
+   *
+   * Example Response:
+   * {
+   *   status: "ok",
+   *   sessionId: "abc123",
+   *   cookie: {
+   *     raw: "s%3Aabc123.signature",
+   *     formatted: "connect.sid=s%3Aabc123.signature"
+   *   }
+   * }
+   */
+  @PublicRoute()
+  @Get('generateSessionCookie')
   @UseGuards(TestEnvironmentGuard, E2EAuthGuard)
-  // to access this endpoint, the request must have the correct E2E_AUTH_KEY key in the header and the environment must be set to E2E_TESTING
+  generateSessionCookie(@Query('sessionId') sessionId: string) {
+    const secret = this.configService.get('SESSION_SECRET');
+    if (!sessionId || !secret) {
+      return {
+        status: 'error',
+        message: 'Both sessionId and secret are required',
+      };
+    }
 
-  // TestEnvironmentGuard is used to check if the environment is set to E2E_TESTING
-  // E2EAuthGuard is used to check if the request has the correct E2E_AUTH_KEY key in the header
-  async generateE2EToken() {
-    const payload = {
-      jti: 'xxxx', // Unique identifier for the token
-      sub: 'xxxx', // Subject
-      typ: 'Bearer', // Type of token
-      azp: 'xxx', // Authorized party
-      session_state: 'xxx', // Session state
-      scope: 'xxx', // Scopes
-      sid: 'xxxx', // Session ID
-      idir_user_guid: '88bd8bb6c4494c138204d91539f548d4', // User GUID
-      client_roles: ['hiring-manager'],
-      identity_provider: 'xxx', // Identity provider
-      idir_username: 'test', // Username
-      email_verified: false, // Email verification flag
-      name: 'xxxx', // Name
-      preferred_username: 'xxxx', // Preferred username
-      display_name: 'Test, User CITZ:EX', // Display name
-      given_name: 'Test', // Given name
-      family_name: 'User', // Family name
-      email: 'test.user@gov.bc.ca', // Email
-    };
+    // Generate HMAC-SHA256 signature
+    const hmac = crypto.createHmac('sha256', secret);
+    hmac.update(sessionId);
+    const signature = hmac.digest('base64url');
 
-    const ret = {
-      access_token: this.jwtService.sign(payload),
+    // Generate cookie string
+    const cookieValue = `s%3A${sessionId}.${signature}`;
+
+    return {
+      status: 'ok',
+      sessionId,
+      cookie: {
+        raw: cookieValue,
+        formatted: `connect.sid=${cookieValue}`,
+      },
     };
-    // console.log('returning token: ', ret);
-    return ret;
   }
 }

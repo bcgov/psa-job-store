@@ -73,7 +73,7 @@
 //     } else if (roles && (roles as string[]).includes('hiring-manager')) {
 //       setRole('hiring-manager');
 //     } else {
-//       setRole('user');
+//       setRole('idir');
 //     }
 //   }, [auth]);
 
@@ -120,7 +120,7 @@
 //     ]),
 //   ];
 
-//   if (role === 'user') {
+//   if (role === 'idir') {
 //     return (
 //       <Layout style={{ height: '100vh' }}>
 //         <AppHeader></AppHeader>

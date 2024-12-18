@@ -1,8 +1,7 @@
 import { LogoutOutlined } from '@ant-design/icons';
 import { Button, Col, Layout, Menu, Row, Typography } from 'antd';
-import { useAuth } from 'react-oidc-context';
 import { Link } from 'react-router-dom';
-import { useLazyLogoutQuery } from '../../redux/services/graphql-api/profile.api';
+import { useTypedSelector } from '../../redux/redux.hooks';
 import { InitialsAvatar } from '../../routes/home-old/components/initials-avatar.component';
 import AccessiblePopoverMenu from './common/components/accessible-popover-menu';
 import styles from './header.module.css';
@@ -12,38 +11,13 @@ const { Header } = Layout;
 const { Text } = Typography;
 
 export const AppHeader = () => {
-  const auth = useAuth();
-  const [triggerLogout] = useLazyLogoutQuery();
+  const auth = useTypedSelector((state) => state.authReducer);
 
   const handleLogout = async () => {
-    try {
-      // Sign out from the API
-      try {
-        await triggerLogout().unwrap();
-      } catch (e) {
-        // may fail because user is already logged out, just reload the page then
-        // console.log(e);
-      }
-      const origin = window.location.origin;
-      // const loginUrl = import.meta.env.VITE_KEYCLOAK_REDIRECT_URL;
-
-      // Also, sign out from OIDC if necessary
-      auth.signoutRedirect({
-        post_logout_redirect_uri: origin + '/auth/logout',
-        redirectMethod: 'replace',
-      }); // can also do signoutPopup to show popup. signoutRedirect() is inconvinient as it stays on "you have been logged out" page
-    } catch (error) {
-      console.error('Logout failed', error);
-    }
+    window.location.href = `${import.meta.env.VITE_BACKEND_URL}/auth/logout`;
   };
 
   const content = (
-    // <div>
-    //   <Button type="text" icon={<LogoutOutlined />} onClick={handleLogout}>
-    //     Logout
-    //   </Button>
-    // </div>
-
     <Menu selectedKeys={[]}>
       <Menu.Item key="edit" icon={<LogoutOutlined aria-hidden />} data-testid="menu-option-edit" onClick={handleLogout}>
         Logout
@@ -102,17 +76,20 @@ export const AppHeader = () => {
                       tabIndex={-1}
                       style={{ background: 'none', border: 'none', fontWeight: '600' }}
                       icon={
-                        <InitialsAvatar
-                          name={auth.user?.profile.given_name + ' ' + auth.user?.profile.family_name}
-                          size={30}
-                          fontSize="1rem"
-                          lineHeight="1.8rem"
-                        />
-
+                        (auth.user?.roles ?? []).includes('bceid') ? (
+                          <InitialsAvatar name={auth.user?.name} size={30} fontSize="1rem" lineHeight="1.8rem" />
+                        ) : (
+                          <InitialsAvatar
+                            name={auth.user?.given_name + ' ' + auth.user?.family_name}
+                            size={30}
+                            fontSize="1rem"
+                            lineHeight="1.8rem"
+                          />
+                        )
                         // <UserOutlined style={{ color: 'white' }} aria-hidden />
                       }
                     >
-                      <Text style={{ color: 'white' }}>{auth.user?.profile.name}</Text>
+                      <Text style={{ color: 'white' }}>{auth.user ? (auth.user.name as string) : ''}</Text>
                     </Button>
                   }
                   content={content}
