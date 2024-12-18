@@ -151,8 +151,15 @@ export class JobProfileService {
     //   ret.map((profile) => profile.id),
     // );
 
+    const sliced = skip && take ? ret.slice(skip, skip + take) : ret;
+
+    // console.log('slice params skip/take: ', skip, take);
+    // console.log(
+    //   'sliced profile ids: ',
+    //   sliced.map((profile) => profile.id),
+    // );
     // Apply pagination AFTER all filtering and sorting
-    return ret.slice(skip, skip + take);
+    return sliced;
   }
 
   private getDraftSearchConditions(search: string) {
@@ -288,8 +295,6 @@ export class JobProfileService {
 
     if (selectProfile) {
       // Fetch all job profiles based on the search and where conditions
-
-      // Fetch all job profiles based on the search and where conditions
       const allJobProfiles = await this.getJobProfilesWithSearch(
         search,
         this.transformWhereForAllOrgs(where),
@@ -396,6 +401,7 @@ export class JobProfileService {
           })
         : undefined;
     if (selectProfile) {
+      // console.log('getJobProfiles, selectProfile, args: ', args);
       // Fetch all job profiles based on the search and where conditions
       const allJobProfiles = await this.getJobProfilesWithSearch(
         search,
@@ -435,6 +441,7 @@ export class JobProfileService {
         // Calculate the new skip value based on the page number and take value
         const newSkip = (pageNumber - 1) * args.take;
 
+        // console.log('getJobProfiles2, selectProfile, args: ', args);
         // Fetch the job profiles for the calculated page
         jobProfiles = await this.getJobProfilesWithSearch(
           search,
