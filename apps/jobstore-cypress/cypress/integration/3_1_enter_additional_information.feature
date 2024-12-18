@@ -21,9 +21,10 @@ Feature: Form Editability Based on Approval Toggle
         When the user dismisses the error message
         Then an error message prompts the user to enter the value
 
-        When the user enters excluded manager position number
+        When the user enters and selects excluded manager position number
         And the user enters branch and division information
 
         When the user presses save and quit
+        And the user is on the home page
         And the user returns to the additional info form page
         Then the previously entered data is displayed on the form

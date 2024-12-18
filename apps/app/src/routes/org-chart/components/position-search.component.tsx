@@ -82,7 +82,10 @@ export const PositionSearch = ({
         <AutoComplete
           ref={autoCompleteRef}
           style={{ width: searchResultsCount != null ? 'calc(100% - 100px)' : '100%' }}
-          options={searchResults.map((result) => ({ value: result.id, label: result.title }))}
+          options={searchResults.map((result) => {
+            // console.log('making option: ', result);
+            return { value: result.id, label: result.title, key: `${result.id}-${result.title}` };
+          })}
           onSelect={handleSelect}
           onSearch={(value) => setSearchTerm(value)}
           value={searchTerm}
@@ -96,14 +99,6 @@ export const PositionSearch = ({
             disabled={disabled}
             loading={disabled}
             addonBefore="Search"
-            // enterButton={
-            //   <Button
-            //     id="org-chart-search-button"
-            //     icon={<SearchOutlined aria-hidden />}
-            //     aria-label="Search"
-            //     onClick={handleButtonClick}
-            //   ></Button>
-            // }
             allowClear
             onKeyDown={handleKeyDown}
             onFocus={() => {

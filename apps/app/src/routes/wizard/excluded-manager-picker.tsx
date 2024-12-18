@@ -184,6 +184,7 @@ export const ExcludedManagerPicker: React.FC<ExcludedManagerPickerProps> = ({
           name="firstLevelExcludedManagerAndName"
           validateStatus={errors.excludedManagerPositionNumberAndName ? 'error' : ''}
           help={errors.excludedManagerPositionNumberAndName?.message}
+          data-testid="excluded-select"
         >
           <div aria-live="polite" style={{ height: '0' }}>
             {isLoading
