@@ -319,7 +319,7 @@ export const router = createBrowserRouter([
                         ],
                       },
                       {
-                        path: 'share/:positionRequestId([A-Za-z0-9-]+)',
+                        path: 'share/:positionRequestId',
                         element: <WizardRoute />,
                         children: [
                           {
