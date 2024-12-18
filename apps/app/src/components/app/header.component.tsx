@@ -75,13 +75,16 @@ export const AppHeader = () => {
                       tabIndex={-1}
                       style={{ background: 'none', border: 'none', fontWeight: '600' }}
                       icon={
-                        <InitialsAvatar
-                          name={auth.user?.given_name + ' ' + auth.user?.family_name}
-                          size={30}
-                          fontSize="1rem"
-                          lineHeight="1.8rem"
-                        />
-
+                        (auth.user?.roles ?? []).includes('bceid') ? (
+                          <InitialsAvatar name={auth.user?.name} size={30} fontSize="1rem" lineHeight="1.8rem" />
+                        ) : (
+                          <InitialsAvatar
+                            name={auth.user?.given_name + ' ' + auth.user?.family_name}
+                            size={30}
+                            fontSize="1rem"
+                            lineHeight="1.8rem"
+                          />
+                        )
                         // <UserOutlined style={{ color: 'white' }} aria-hidden />
                       }
                     >

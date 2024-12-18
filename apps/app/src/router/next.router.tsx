@@ -10,7 +10,7 @@ import { ClassificationTasksRoute } from '../routes/classification-tasks';
 import { ClassificationTaskPage } from '../routes/classification-tasks/classification-task.page';
 import { ClassificationTasksPage } from '../routes/classification-tasks/classification-tasks.page';
 import { HomeRoute } from '../routes/home';
-import { HomePage } from '../routes/home-old/home.page';
+import { HomePage } from '../routes/home/components/home-page.component';
 import { JobProfilesRoute } from '../routes/job-profiles';
 import { JobProfilesPage } from '../routes/job-profiles/job-profiles.page';
 import { MyPositionsRoute } from '../routes/my-position-requests';

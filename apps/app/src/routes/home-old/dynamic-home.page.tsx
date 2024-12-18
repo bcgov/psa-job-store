@@ -16,7 +16,7 @@ export const DynamicHomePage = () => {
     return <ClassificationTasksPage />;
   } else if (roles.includes('hiring-manager')) {
     return <HomePage />;
-  } else if (roles.includes('user')) {
+  } else if (roles.includes('idir')) {
     return <HomePage />;
   }
 };

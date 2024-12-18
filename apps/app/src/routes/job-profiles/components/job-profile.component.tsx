@@ -20,6 +20,7 @@ import { Link, useParams, useSearchParams } from 'react-router-dom';
 import LoadingSpinnerWithMessage from '../../../components/app/common/components/loading.component';
 import '../../../components/app/common/css/custom-descriptions.css';
 import { VersionSelect } from '../../../components/app/version-select.component';
+import { DownloadJobProfileComponent } from '../../../components/shared/download-job-profile/download-job-profile.component';
 import { useTypedSelector } from '../../../redux/redux.hooks';
 import {
   AccountabilitiesModel,
@@ -411,7 +412,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
   showVersions = false,
 }) => {
   const auth = useTypedSelector((state) => state.authReducer);
-  const roles = auth.user?.roles;
+  const roles = auth.user?.roles ?? [];
   const [searchParams] = useSearchParams();
   const params = useParams();
   const jobNumber = params.number ?? searchParams.get('selectedProfile'); // Using prop ID or param ID
@@ -1350,10 +1351,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
                 <h2 style={{ margin: '0' }}>Job profile</h2>
               </Col>{' '}
               <Col>
-                {showVersions &&
-                roles &&
-                ((roles as string[]).includes('total-compensation') ||
-                  (roles as string[]).includes('classification')) ? (
+                {showVersions && (roles.includes('total-compensation') || roles.includes('classification')) ? (
                   <VersionSelect
                     id={id ?? effectiveData?.id.toString() ?? '-1'}
                     version={version}
@@ -1361,6 +1359,13 @@ export const JobProfile: React.FC<JobProfileProps> = ({
                       triggerGetJobProfileById({ id: selectedVersion.id, version: selectedVersion.version });
                     }}
                   />
+                ) : (
+                  <></>
+                )}
+              </Col>
+              <Col>
+                {['bceid', 'total-compensation'].some((role) => roles.includes(role)) ? (
+                  <DownloadJobProfileComponent jobProfile={effectiveData} />
                 ) : (
                   <></>
                 )}

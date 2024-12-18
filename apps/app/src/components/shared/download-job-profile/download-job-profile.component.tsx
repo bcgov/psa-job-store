@@ -102,6 +102,8 @@ export const DownloadJobProfileComponent = ({
   const fetchData = useCallback(async () => {
     console.log('fetchData');
 
+    console.log('jobProfile: ', jobProfile);
+
     //we're requesting from from a table, and we need to fetch the data
     if (positionRequestId && !positionRequest) {
       console.log('fetchData prTrigger, positionRequestId: ', positionRequestId);

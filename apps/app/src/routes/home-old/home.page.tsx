@@ -47,7 +47,11 @@ export const HomePage = () => {
             <Col>
               <Space direction="vertical">
                 <Space align="center">
-                  <InitialsAvatar name={auth.user?.given_name + ' ' + auth.user?.family_name} />
+                  {(auth.user?.roles ?? []).includes('bceid') ? (
+                    <InitialsAvatar name={auth.user?.name} />
+                  ) : (
+                    <InitialsAvatar name={auth.user?.given_name + ' ' + auth.user?.family_name} />
+                  )}
                   {/* <Avatar size={64} icon={<UserOutlined />} /> */}
                   <div>
                     <Text
@@ -61,15 +65,17 @@ export const HomePage = () => {
                     >
                       {auth.user?.name}
                     </Text>
-                    <div style={{ height: '19px' }}>
-                      <PositionProfile
-                        positionNumber={auth.user?.metadata.peoplesoft.position_id}
-                        // positionNumber={'00121521'}
-                        mode="compact2"
-                        unOccupiedText=""
-                        loadingStyle={'skeleton'}
-                      />
-                    </div>
+                    {!(auth.user?.roles ?? []).includes('bceid') && (
+                      <div style={{ height: '19px' }}>
+                        <PositionProfile
+                          positionNumber={auth.user?.metadata.peoplesoft.position_id}
+                          // positionNumber={'00121521'}
+                          mode="compact2"
+                          unOccupiedText=""
+                          loadingStyle={'skeleton'}
+                        />
+                      </div>
+                    )}
                     {/* <Text type="secondary">HR Manager · Digital Talent & Capacity</Text> */}
                   </div>
                 </Space>
