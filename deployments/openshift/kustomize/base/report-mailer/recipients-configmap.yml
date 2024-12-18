@@ -1,0 +1,7 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: recipients-configmap
+data:
+# data keys should be a users email prefix, and value an array of sql file names corresponding to keys in sql-queries-configmap
+

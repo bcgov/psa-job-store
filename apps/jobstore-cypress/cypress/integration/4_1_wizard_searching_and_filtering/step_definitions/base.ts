@@ -54,7 +54,7 @@ Then('they are taken to the job profile selection step', () => {
 });
 
 When('the user applies filters', () => {
-  const classification = 'Information Systems R27 (GEU)';
+  const classification = 'Information Systems R27';
 
   // Click the dropdown to open it
   cy.get('[data-cy="Classification-filter"]').find('.react-select__input-container').click();
@@ -62,22 +62,13 @@ When('the user applies filters', () => {
   // Type the extracted classification into the search field within the dropdown
   cy.get('[data-cy="Classification-filter"]').find('input').type(classification);
 
-  // Wait for the search results to appear, gather all the matching elements and then click on the last one
+  // Use contains with the exact text match
   cy.get('[data-cy="Classification-filter"]')
-    .find('.react-select__menu div')
-    .filter(`:contains("${classification}")`)
-    .filter((_index, element) => {
-      // Filter elements to match the text exactly with the extracted classification
-      return element.textContent?.trim() === classification;
-    })
-    .then((searchResults) => {
-      if (searchResults.length > 0) {
-        // Click on the last element of the filtered results
-        cy.wrap(searchResults).last().click();
-      }
-    });
+    .find('.react-select__menu-list div')
+    .contains(`${classification} (GEU)`)
+    .click();
 
-  const classification2 = 'Supervisor R15 (GEU)';
+  const classification2 = 'Supervisor R15';
 
   // Click the dropdown to open it
   cy.get('[data-cy="Classification-filter"]').find('.react-select__input-container').click();
@@ -85,20 +76,11 @@ When('the user applies filters', () => {
   // Type the extracted classification into the search field within the dropdown
   cy.get('[data-cy="Classification-filter"]').find('input').type(classification2);
 
-  // Wait for the search results to appear, gather all the matching elements and then click on the last one
+  // Use contains with the exact text match
   cy.get('[data-cy="Classification-filter"]')
-    .find('.react-select__menu div')
-    .filter(`:contains("${classification2}")`)
-    .filter((_index, element) => {
-      // Filter elements to match the text exactly with the extracted classification
-      return element.textContent?.trim() === classification2;
-    })
-    .then((searchResults) => {
-      if (searchResults.length > 0) {
-        // Click on the last element of the filtered results
-        cy.wrap(searchResults).last().click();
-      }
-    });
+    .find('.react-select__menu-list div')
+    .contains(`${classification2} (GEU)`)
+    .click();
 });
 
 When('the results have loaded', () => {

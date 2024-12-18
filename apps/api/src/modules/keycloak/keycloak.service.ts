@@ -83,6 +83,9 @@ export class KeycloakService {
 
     for await (const role of roles) {
       const users = await this.getAllUsersForRole(role);
+      console.log('got users for roles: ', role);
+      // for each user, log id, all in in a single statement:
+      console.log('users: ', users.map((user) => user.email).join(', '));
       usersByRole.set(role, users);
     }
 
@@ -98,6 +101,7 @@ export class KeycloakService {
 
   async getUsers(): Promise<User[]> {
     const roles = await this.getRoles();
+    console.log('roles: ', roles);
     const users = await this.getUsersForRoles(roles);
 
     return users;

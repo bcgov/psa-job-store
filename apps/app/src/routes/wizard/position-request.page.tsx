@@ -50,6 +50,7 @@ export const PositionRequestPage = () => {
   const [mode, setMode] = useState('editable');
   const [readonlyMode, setReadonlyMode] = useState('');
   const [readOnlySelectedTab, setReadOnlySelectedTab] = useState('1');
+  const navigate = useNavigate();
 
   const {
     positionRequestId: wizardPositionRequestId,
@@ -117,6 +118,13 @@ export const PositionRequestPage = () => {
   const location = useLocation();
   // Determine if the current path is a shared URL
   const isSharedRoute = location.pathname.includes('/requests/positions/share/');
+
+  useEffect(() => {
+    const uuidRegex = /^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}$/;
+    if (positionRequestId && !uuidRegex.test(positionRequestId) && isSharedRoute) {
+      navigate('/not-found');
+    }
+  }, [positionRequestId, navigate]);
 
   // position request id changed from what's being stored in the context,
   // clear context
@@ -252,9 +260,6 @@ export const PositionRequestPage = () => {
   const switchParentReadonlyMode = (mode: string) => {
     setReadonlyMode(mode);
   };
-
-  // get navigate
-  const navigate = useNavigate();
 
   // nav block
   const isBlocking = useRef(true);

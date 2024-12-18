@@ -16,9 +16,14 @@ const { Top, Right, Bottom, Left } = Position;
 const { Vertical } = AutolayoutDirection;
 
 const nodeWidth = 300;
-const nodeHeight = 200;
+const defaultNodeHeight = 200;
 
-export const autolayout = (elements: Elements, direction: AutolayoutDirection = AutolayoutDirection.Vertical) => {
+export const autolayout = (
+  elements: Elements,
+  direction: AutolayoutDirection = AutolayoutDirection.Vertical,
+  height?: number,
+) => {
+  const nodeHeight = height || defaultNodeHeight;
   const graph = new dagre.graphlib.Graph();
   graph.setDefaultEdgeLabel(() => ({}));
 

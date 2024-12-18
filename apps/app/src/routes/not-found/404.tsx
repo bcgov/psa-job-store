@@ -11,6 +11,7 @@ type entity = 'Page' | 'Profile' | 'Position request' | 'Department' | 'User';
 
 interface NotFoundComponentProps {
   entity?: entity;
+  redirect?: string;
 }
 
 // const entites: Array<[{entity: entity, redirect: string}]> = [
@@ -22,7 +23,7 @@ const entites = [
   { entity: 'User', redirect: '/users', icon: ErrorUser },
 ];
 
-export const NotFoundComponent: React.FC<NotFoundComponentProps> = ({ entity }) => {
+export const NotFoundComponent: React.FC<NotFoundComponentProps> = ({ entity, redirect }) => {
   const navigate = useNavigate();
   const { pathname } = useLocation();
   const parent = pathname.split('/').slice(0, -1).join('/') || '/';
@@ -43,7 +44,7 @@ export const NotFoundComponent: React.FC<NotFoundComponentProps> = ({ entity }) 
         >
           <Col span={12}>
             <NeedHelpComponent />
-            <Button type="primary" onClick={() => navigate(parent)}>
+            <Button type="primary" onClick={() => navigate(redirect ?? parent)}>
               Back
             </Button>
           </Col>
