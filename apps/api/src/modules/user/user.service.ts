@@ -220,6 +220,7 @@ export class UserService {
       console.log('[syncUser] Keycloak user data:', {
         id: user.id,
         username: user.username,
+        roles: user.roles,
         // Log other relevant user fields but exclude sensitive data
       });
 
