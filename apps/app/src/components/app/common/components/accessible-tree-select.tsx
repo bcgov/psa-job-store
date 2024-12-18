@@ -7,8 +7,8 @@ import { IFlatMetadata } from 'react-accessible-treeview/dist/TreeView/utils';
 import { filterTree } from '../utils/treeSearchUtils';
 import './accessible-tree-select.css';
 
-const ArrowIcon = ({ isOpen }: { isOpen: boolean }) => {
-  if (isOpen) return <CaretDownFilled style={{ fontSize: '0.6rem' }} aria-hidden />;
+const ArrowIcon = ({ isOpen, className }: { isOpen: boolean; className?: string }) => {
+  if (isOpen) return <CaretDownFilled style={{ fontSize: '0.6rem' }} aria-hidden className={className} />;
   else return <CaretRightFilled style={{ fontSize: '0.6rem' }} aria-hidden />;
 };
 
@@ -166,22 +166,24 @@ const TreeViewDropdown = ({
                       <ArrowIcon isOpen={isExpanded} />
                     </div>
                   )}
-                  <CheckBoxIcon
-                    tabIndex={0}
-                    className="checkbox-icon"
-                    // eslint-disable-next-line @typescript-eslint/no-explicit-any
+                  <label
                     onClick={(e: any) => {
                       handleSelect(e);
                       e.stopPropagation();
                     }}
-                    variant={isHalfSelected ? 'some' : isSelected ? 'all' : 'none'}
-                  />
-                  {/* {isSelected ? 'selected' : 'N'} */}
-                  {!element.metadata?.isPartOfSearch ? (
-                    <span className="antd-text-copy">{element.name}</span>
-                  ) : (
-                    <b className="antd-text-copy">{element.name}</b>
-                  )}
+                    style={{ display: 'inline-flex', alignItems: 'center' }}
+                  >
+                    <CheckBoxIcon
+                      tabIndex={0}
+                      className="checkbox-icon"
+                      variant={isHalfSelected ? 'some' : isSelected ? 'all' : 'none'}
+                    />
+                    {!element.metadata?.isPartOfSearch ? (
+                      <span className="antd-text-copy">{element.name}</span>
+                    ) : (
+                      <b className="antd-text-copy">{element.name}</b>
+                    )}
+                  </label>
                 </div>
               );
             }
@@ -340,130 +342,6 @@ const AccessibleTreeSelect = ({
   }, [flattenedData]);
 
   const filter = (searchText: string) => {
-    // // console.log('=== filtering for value: ', searchText, flattenedData);
-
-    // const filtered = [] as INode<IFlatMetadata>[];
-    // const matchedIds = new Set<NodeId>();
-
-    // const includeChildren = (id: NodeId) => {
-    //   // console.log('= includeChildren: ', id);
-    //   flattenedData.forEach((item) => {
-    //     if (item.parent === id) {
-    //       let searchProp = item.name;
-    //       if (treeNodeFilterProp) {
-    //         if (item.metadata) searchProp = item.metadata[treeNodeFilterProp]?.toString() ?? '';
-    //       }
-    //       const itemMatches = searchProp.toUpperCase().includes(searchText.toUpperCase());
-    //       if (itemMatches) {
-    //         const newItem = {
-    //           ...item,
-    //           metadata: {
-    //             ...item.metadata,
-    //             isPartOfSearch: itemMatches,
-    //           },
-    //         };
-    //         if (!filtered.find((x) => x.id === item.id)) {
-    //           // console.log('pushing child item: ', newItem);
-    //           filtered.push(newItem);
-    //           if (itemMatches) {
-    //             matchedIds.add(item.id);
-    //           }
-    //         }
-    //         if (item.children.length) {
-    //           includeChildren(item.id);
-    //         }
-    //       }
-    //     }
-    //   });
-    // };
-
-    // flattenedData.forEach((item) => {
-    //   if (item.id === 0) {
-    //     return;
-    //   }
-    //   let searchProp = item.name;
-    //   if (treeNodeFilterProp) {
-    //     if (item.metadata) searchProp = item.metadata[treeNodeFilterProp]?.toString() ?? '';
-    //   }
-
-    //   // console.log('searchProp:', searchProp, item.id);
-    //   const itemMatches = searchProp.toUpperCase().includes(searchText.toUpperCase());
-    //   if (itemMatches) {
-    //     // console.log('itemMatches: ', item);
-    //     matchedIds.add(item.id);
-    //     const newItem = {
-    //       ...item,
-    //       metadata: {
-    //         ...item.metadata,
-    //         isPartOfSearch: true,
-    //       },
-    //     };
-    //     if (!filtered.find((x) => x.id === item.id)) {
-    //       // console.log('pushing item: ', newItem);
-    //       filtered.push(newItem);
-    //     }
-
-    //     if (item.children.length) {
-    //       // console.log('item has children');
-    //       includeChildren(item.id);
-    //     }
-    //   }
-    // });
-
-    // // Include parents of matched items
-
-    // flattenedData.forEach((item) => {
-    //   if (!filtered.find((x) => x.id === item.id) && item.children.some((childId) => matchedIds.has(childId))) {
-    //     if (!filtered.find((x) => x.id === item.id)) {
-    //       // ensure that the only children of this parent are ones that are actually part of the search results
-    //       const filteredChildren = item.children.filter((childId) => matchedIds.has(childId));
-    //       filtered.push({
-    //         ...item,
-    //         children: filteredChildren,
-    //         metadata: {
-    //           ...item.metadata,
-    //           isPartOfSearch: false,
-    //         },
-    //       });
-    //     }
-    //   }
-    // });
-
-    // // const duplicateIds = filtered.map((item) => item.id).filter((id, index, array) => array.indexOf(id) !== index);
-
-    // // if (duplicateIds.length > 0) {
-    // //   console.warn('Duplicate IDs found:', duplicateIds);
-    // // } else {
-    // //   console.log('No duplicate IDs found');
-    // // }
-
-    // // remove root node that may have been added
-    // const rootIndex = filtered.findIndex((item) => item.id === 0);
-    // if (rootIndex > -1) {
-    //   filtered.splice(rootIndex, 1);
-    // }
-
-    // // add root node
-    // const rootChildren = flattenedData[0].children.filter((id) => filtered.find((fitem) => fitem.id === id));
-    // filtered.unshift(
-    //   Object.assign({
-    //     ...flattenedData[0],
-    //     children: rootChildren,
-    //     metadata: {
-    //       ...flattenedData[0].metadata,
-    //       isPartOfSearch: false, // Root is never part of the search
-    //     },
-    //   }),
-    // );
-
-    // // Remove duplicates
-    // const uniqueFiltered = Array.from(new Map(filtered.map((item) => [item.id, item])).values());
-
-    // // remove any items in children that are not in the filtered list
-    // uniqueFiltered.forEach((item) => {
-    //   item.children = item.children.filter((childId) => uniqueFiltered.find((fitem) => fitem.id === childId));
-    // });
-
     const uniqueFiltered = filterTree(flattenedData, searchText, treeNodeFilterProp);
     // console.log('uniqueFiltered:', filtered);
     setDropdownKey((prevKey) => prevKey + 1);

@@ -151,7 +151,7 @@ export class JobProfileService {
     //   ret.map((profile) => profile.id),
     // );
 
-    const sliced = skip && take ? ret.slice(skip, skip + take) : ret;
+    const sliced = typeof skip === 'number' && typeof take === 'number' ? ret.slice(skip, skip + take) : ret;
 
     // console.log('slice params skip/take: ', skip, take);
     // console.log(
@@ -1554,7 +1554,11 @@ export class JobProfileService {
     // Flatten the array of organizations and deduplicate
     const allOrganizations = jobProfiles.flatMap((profile) => profile.organizations.map((o) => o.organization));
     // console.log('allOrganizations: ', allOrganizations);
-    const uniqueOrganizations = Array.from(new Map(allOrganizations.map((org) => [org['id'], org])).values());
+
+    // Deduplicate and sort by name
+    const uniqueOrganizations = Array.from(new Map(allOrganizations.map((org) => [org['id'], org])).values()).sort(
+      (a, b) => a.name.localeCompare(b.name),
+    );
 
     return uniqueOrganizations;
   }
@@ -1583,7 +1587,7 @@ export class JobProfileService {
           return [`${id}.${employee_group_id}.${peoplesoft_id}`, classification];
         }),
       ).values(),
-    );
+    ).sort((a, b) => a.name.localeCompare(b.name));
 
     return uniqueClassifications;
   }
