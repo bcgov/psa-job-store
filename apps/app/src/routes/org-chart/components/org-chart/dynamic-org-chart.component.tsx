@@ -114,8 +114,10 @@ export const DynamicOrgChart = ({
   // render data when it changes (e.g. department change)
   useEffect(() => {
     if (orgChartData?.orgChart != null) {
-      console.log('== data changed');
-      const elements = autolayout(orgChartData?.orgChart);
+      // console.log('== data changed', orgChartData?.orgChart);
+
+      // add extra vertical space for nodes to accomodate "View position details" button
+      const elements = autolayout(orgChartData?.orgChart, undefined, 260);
 
       // if (targetId != null) {
       //   const targetIndex = elements.nodes.findIndex((node: Node) => node.id === targetId);
