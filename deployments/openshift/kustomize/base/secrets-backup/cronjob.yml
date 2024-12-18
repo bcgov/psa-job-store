@@ -1,0 +1,28 @@
+apiVersion: batch/v1
+kind: CronJob
+metadata:
+  name: secrets-backup
+spec:
+  schedule: "0 0 * * *"   # Every day at midnight
+  jobTemplate:
+    spec:
+      template:
+        spec:
+          serviceAccountName: secret-backup
+          restartPolicy: OnFailure
+          containers:
+            - name: backup
+              image: bitnami/kubectl:latest
+              command: ["/bin/sh"]
+              args:
+                - "-c"
+                - >
+                  kubectl get secret secrets -o yaml > /backup/secrets-$(date +%F).yaml &&
+                  find /backup -type f -name "secrets-*.yaml" -mtime +60 -exec rm -f {} \;
+              volumeMounts:
+                - name: backup-storage
+                  mountPath: /backup
+          volumes:
+            - name: backup-storage
+              persistentVolumeClaim:
+                claimName: secret-backup-pvc
