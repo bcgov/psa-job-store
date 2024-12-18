@@ -114,6 +114,7 @@ export const OrgChartNode = ({
     <>
       <Handle type="target" position={targetPosition} isConnectable={isConnectable} />
       <div
+        className="org-chart-node"
         data-testid={`org-chart-node-${data.id}`}
         tabIndex={0}
         aria-label={`

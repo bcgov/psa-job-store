@@ -1,9 +1,21 @@
 import { SettingOutlined } from '@ant-design/icons';
 import { Button, Menu } from 'antd';
+import { useState } from 'react';
 import AccessiblePopoverMenu from '../../../components/app/common/components/accessible-popover-menu';
 import './org-chart-help-button.component.css';
+import { OrgChartKeyboardShortcutsModal } from './org-chart-keyboard-shortcuts.modal';
 
 export const OrgChartHelpButton = () => {
+  const [isModalVisible, setIsModalVisible] = useState(false);
+
+  const showModal = () => {
+    setIsModalVisible(true);
+  };
+
+  const handleClose = () => {
+    setIsModalVisible(false);
+  };
+
   return (
     <>
       <AccessiblePopoverMenu
@@ -22,10 +34,17 @@ export const OrgChartHelpButton = () => {
                 </a>
               </Menu.Item>
             </Menu.ItemGroup>
+            <Menu.ItemGroup title="Org chart help">
+              <Menu.Item key="shortcuts" onClick={showModal}>
+                Keyboard Shortcuts
+              </Menu.Item>
+            </Menu.ItemGroup>
           </Menu>
         }
         ariaLabel="Org chart need updating?"
-      ></AccessiblePopoverMenu>
+      />
+
+      <OrgChartKeyboardShortcutsModal isVisible={isModalVisible} onClose={handleClose} />
     </>
   );
 };

@@ -1,5 +1,5 @@
 import { CaretDownFilled, CaretRightFilled } from '@ant-design/icons';
-import { Select } from 'antd';
+import { Select, Tooltip } from 'antd';
 import { BaseSelectRef } from 'rc-select';
 import { useEffect, useRef, useState } from 'react';
 import TreeView, { INode, NodeId, flattenTree } from 'react-accessible-treeview';
@@ -262,6 +262,7 @@ const AccessibleTreeSelect = ({
   disabled,
   tabIndex,
   treeNodeFilterProp,
+  disabledText,
 }: {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   treeData: any;
@@ -276,6 +277,7 @@ const AccessibleTreeSelect = ({
   disabled?: boolean;
   tabIndex?: number;
   treeNodeFilterProp?: string;
+  disabledText?: string;
 }) => {
   // console.log('treeData: ', treeData);
   // console.log('value: ', value);
@@ -286,6 +288,8 @@ const AccessibleTreeSelect = ({
   const [initialSet, setInitialSet] = useState(false);
   const [dropdownKey, setDropdownKey] = useState(0);
   const [selectedNode, setSelectedNode] = useState<INode<IFlatMetadata> | null>(null);
+  const [hasNoResults, setHasNoResults] = useState(false);
+
   const selectRef = useRef<BaseSelectRef>(null);
   const selectContentsRef = useRef<HTMLDivElement>(null);
 
@@ -499,44 +503,64 @@ const AccessibleTreeSelect = ({
   if (treeData.length === 0) return <></>;
 
   return (
-    <Select
-      className="accessible-tree-select"
-      onKeyDown={handleKeyDown}
-      style={{ width: width ?? 250, height: '38px' }}
-      placeholder={placeholderText}
-      open={open}
-      onDropdownVisibleChange={handleDropdownVisibleChange}
-      showSearch
-      onSearch={handleSearch}
-      aria-label={placeholderText}
-      allowClear={allowClear}
-      onClear={onClear}
-      disabled={disabled}
-      tabIndex={tabIndex}
-      value={(() => {
-        // console.log('rendering value node: ', selectedNode);
-        if (!selectedNode) return;
+    <>
+      <div aria-live="polite" className="sr-only" role="status">
+        {hasNoResults ? 'No results found' : ''}
+      </div>
 
-        return { value: '', label: renderNode?.(selectedNode) };
-      })()}
-      dropdownRender={() => {
-        // console.log('value: ', value);
-        return (
-          <div ref={selectContentsRef} key={dropdownKey}>
-            <TreeViewDropdown
-              value={value}
-              onChange={onChange}
-              onClose={handleClose}
-              data={finalTreeData}
-              onSelect={onSelect ? onSelectInternal : undefined}
-              renderNode={renderNode}
-              isSearching={filterText.length > 0}
-            />
-          </div>
-        );
-      }}
-      ref={selectRef}
-    ></Select>
+      <Tooltip title={disabled && disabledText ? disabledText : null}>
+        <Select
+          className="accessible-tree-select"
+          onKeyDown={handleKeyDown}
+          style={{ width: width ?? 250, height: '38px' }}
+          placeholder={placeholderText}
+          open={open}
+          onDropdownVisibleChange={handleDropdownVisibleChange}
+          showSearch
+          onSearch={handleSearch}
+          aria-label={placeholderText}
+          allowClear={allowClear}
+          onClear={onClear}
+          disabled={disabled}
+          tabIndex={tabIndex}
+          value={(() => {
+            // console.log('rendering value node: ', selectedNode);
+            if (!selectedNode) return;
+
+            return { value: '', label: renderNode?.(selectedNode) };
+          })()}
+          dropdownRender={() => {
+            // console.log('finalTreeData: ', finalTreeData);
+
+            const noResults = finalTreeData.length === 1 && finalTreeData[0].id === 0 && finalTreeData[0].name === '';
+
+            // Update the state to trigger announcement
+            useEffect(() => {
+              setHasNoResults(noResults);
+            }, [finalTreeData]);
+
+            if (noResults) {
+              return <div style={{ padding: '8px 12px', textAlign: 'center' }}>No results found</div>;
+            }
+
+            return (
+              <div ref={selectContentsRef} key={dropdownKey}>
+                <TreeViewDropdown
+                  value={value}
+                  onChange={onChange}
+                  onClose={handleClose}
+                  data={finalTreeData}
+                  onSelect={onSelect ? onSelectInternal : undefined}
+                  renderNode={renderNode}
+                  isSearching={filterText.length > 0}
+                />
+              </div>
+            );
+          }}
+          ref={selectRef}
+        ></Select>
+      </Tooltip>
+    </>
   );
 };
 

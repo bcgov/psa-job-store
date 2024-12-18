@@ -79,7 +79,7 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
           contact_id: 231166,
         },
         org_chart: {
-          department_ids: ['112-0074', '123-4567', 'DEPT03'],
+          department_ids: ['112-0074', '123-4567', '123-4568'],
         },
         peoplesoft: {
           employee_id: '188147',
@@ -106,7 +106,7 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
           contact_id: 231166,
         },
         org_chart: {
-          department_ids: ['112-0074', '123-4567', 'DEPT03'],
+          department_ids: ['112-0074', '123-4567', '123-4568'],
         },
         peoplesoft: {
           employee_id: '188148',
@@ -133,7 +133,7 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
           contact_id: 231166,
         },
         org_chart: {
-          department_ids: ['112-0074', '123-4567', 'DEPT03'],
+          department_ids: ['112-0074', '123-4567', '123-4568'],
         },
         peoplesoft: {
           employee_id: '188149',
@@ -3244,7 +3244,7 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
         effective_date: new Date('2022-01-01'),
       },
       {
-        id: 'DEPT03',
+        id: '123-4568',
         location_id: 'LOC03',
         organization_id: 'BC112',
         peoplesoft_id: 'PSFT03',
@@ -3271,7 +3271,7 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
         is_statutorily_excluded: false,
       },
       {
-        department_id: 'DEPT03',
+        department_id: '123-4568',
         is_statutorily_excluded: false,
       },
     ],
@@ -4323,7 +4323,7 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
           crm_assigned_to_account_id: 12345,
           step: 4,
           reports_to_position_id: 'POS789',
-          department_id: 'DEPT03',
+          department_id: '123-4568',
           parent_job_profile_id: profile208.id,
           parent_job_profile_version: 1,
           crm_json: null,

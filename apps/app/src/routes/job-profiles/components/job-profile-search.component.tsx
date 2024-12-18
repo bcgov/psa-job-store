@@ -611,7 +611,12 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
                   {ministriesFilterData.length > 1 && (
                     <Col data-testid="Ministry-filter" data-cy="Ministry-filter">
                       {/* dragon naturally speaking doesn't pick up on aria-label alone */}
-                      <Form.Item label="Ministries" name="ministries" className="sr-only-label">
+                      <Form.Item
+                        label="Ministries"
+                        name="ministries"
+                        className="sr-only-label"
+                        style={{ marginBottom: '0' }}
+                      >
                         <Select
                           closeMenuOnSelect={false}
                           isClearable={false}
@@ -780,7 +785,12 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
                   </Col>
                   <Col data-testid="Classification-filter" data-cy="Classification-filter">
                     {/* dragon naturally speaking doesn't pick up on aria-label alone */}
-                    <Form.Item label="Classification" name="classification" className="sr-only-label">
+                    <Form.Item
+                      label="Classification"
+                      name="classification"
+                      className="sr-only-label"
+                      style={{ marginBottom: '0' }}
+                    >
                       <Select
                         closeMenuOnSelect={false}
                         isClearable={false}
@@ -821,7 +831,7 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
 
                   <Col data-testid="Job role type-filter" data-cy="Job role type-filter">
                     {/* dragon naturally speaking doesn't pick up on aria-label alone */}
-                    <Form.Item label="Role" name="role" className="sr-only-label">
+                    <Form.Item label="Role" name="role" className="sr-only-label" style={{ marginBottom: '0' }}>
                       <Select
                         closeMenuOnSelect={false}
                         isClearable={false}

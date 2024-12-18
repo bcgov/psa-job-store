@@ -22,8 +22,17 @@ export const DepartmentFilter = ({
 }: DepartmentFilterProps) => {
   const { data: filterData, isFetching: filterDataIsFetching } = useGetOrgChartDepartmentFilterQuery();
   const [treeData, setTreeData] = useState<React.ComponentProps<typeof TreeSelect>['treeData']>([]);
+  const [hasOnlyOneDepartment, setHasOnlyOneDepartment] = useState<boolean>(false);
 
   useEffect(() => {
+    // console.log('filterData: ', filterData);
+    if (
+      filterData &&
+      filterData.getOrgChartDepartmentFilter.length == 1 &&
+      filterData.getOrgChartDepartmentFilter[0].children.length == 1
+    )
+      setHasOnlyOneDepartment(true);
+
     const items = Array.isArray(filterData?.getOrgChartDepartmentFilter) ? filterData?.getOrgChartDepartmentFilter : [];
 
     const treeData = items?.map((ministry) => ({
@@ -61,6 +70,7 @@ export const DepartmentFilter = ({
       },
     }));
 
+    // console.log('treeData: ', treeData);
     setTreeData(treeData);
 
     // Call onSelect with the initially selected value
@@ -107,6 +117,7 @@ export const DepartmentFilter = ({
       /> */}
 
       <AccessibleTreeSelect
+        disabledText={hasOnlyOneDepartment ? 'You only have access to one department' : ''}
         placeholderText={'Select a Department'}
         treeData={JSON.parse(JSON.stringify(treeData))}
         value={departmentId ?? ''}
@@ -132,7 +143,7 @@ export const DepartmentFilter = ({
               </span>
             );
         }}
-        disabled={loading || filterDataIsFetching}
+        disabled={loading || filterDataIsFetching || hasOnlyOneDepartment}
         // tabIndex={focusable ? 0 : -1}
         treeNodeFilterProp="filterString"
       />

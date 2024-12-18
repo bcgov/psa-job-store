@@ -32,11 +32,13 @@ export class JobProfileService {
     // console.log('searchConditions: ', searchConditions, search);
     if (!searchConditions) searchResultIds = search != null ? await this.searchService.searchJobProfiles(search) : null;
 
+    // console.log('searchResultIds: ', searchResultIds);
     const currentJobProfiles =
       state == 'PUBLISHED'
         ? await this.prisma.currentJobProfile.findMany({
             select: { id: true, version: true },
             where: { ...(searchResultIds != null && { id: { in: searchResultIds } }) },
+            orderBy: [{ title: 'asc' }, { id: 'asc' }],
           })
         : undefined;
 
@@ -52,17 +54,26 @@ export class JobProfileService {
     // console.log('where arg: ', where);
     // console.log('args: ', args);
 
-    return this.prisma.jobProfile.findMany({
+    // Create ordered list of profiles that exist in both searchResultIds and currentJobProfiles
+    const orderedProfiles = searchResultIds
+      ? searchResultIds.map((id) => currentJobProfiles?.find((p) => p.id === id)).filter(Boolean)
+      : currentJobProfiles;
+
+    // console.log(
+    //   'orderdProfiles ids: ',
+    //   orderedProfiles?.map((profile) => profile.id),
+    // );
+
+    const { take, skip, ...restArgs } = args;
+    const ret = await this.prisma.jobProfile.findMany({
       where: {
         is_archived: include_archived,
-        // ...(searchResultIds != null && { id: { in: searchResultIds } }),
-        ...(currentJobProfiles && {
-          OR: currentJobProfiles.map((record) => ({
-            id: record.id,
-            version: record.version,
+        ...(orderedProfiles && {
+          OR: orderedProfiles.map((profile) => ({
+            id: profile.id,
+            version: profile.version,
           })),
         }),
-        // ...(owner_id != null && { owner_id }),
         ...(searchConditions != null && searchConditions),
         state,
         ...where,
@@ -83,11 +94,12 @@ export class JobProfileService {
               }
             : undefined,
       },
-      ...args,
+      ...restArgs,
+      // ...(searchResultIds ? restArgs : args),
       // profiles may have same titles, so we need to sort by title and id
       // otherwise, the order of profiles may change between requests
       // when paginating
-      orderBy: [...(args.orderBy || []), { title: 'asc' }, { id: 'asc' }],
+      orderBy: [...(args.orderBy || [])],
       include: {
         owner: true,
         published_by: true,
@@ -122,6 +134,32 @@ export class JobProfileService {
         role_type: true,
       },
     });
+
+    // console.log(
+    //   'ret profile ids: ',
+    //   ret.map((profile) => profile.id),
+    // );
+
+    // Sort according to search order
+    if (orderedProfiles) {
+      const searchOrder = new Map(orderedProfiles.map((profile, index) => [profile.id, index]));
+      ret.sort((a, b) => (searchOrder.get(a.id) as unknown as any) - (searchOrder.get(b.id) as unknown as any));
+    }
+
+    // console.log(
+    //   'ret profile ids sorted: ',
+    //   ret.map((profile) => profile.id),
+    // );
+
+    const sliced = skip && take ? ret.slice(skip, skip + take) : ret;
+
+    // console.log('slice params skip/take: ', skip, take);
+    // console.log(
+    //   'sliced profile ids: ',
+    //   sliced.map((profile) => profile.id),
+    // );
+    // Apply pagination AFTER all filtering and sorting
+    return sliced;
   }
 
   private getDraftSearchConditions(search: string) {
@@ -257,8 +295,6 @@ export class JobProfileService {
 
     if (selectProfile) {
       // Fetch all job profiles based on the search and where conditions
-
-      // Fetch all job profiles based on the search and where conditions
       const allJobProfiles = await this.getJobProfilesWithSearch(
         search,
         this.transformWhereForAllOrgs(where),
@@ -365,6 +401,7 @@ export class JobProfileService {
           })
         : undefined;
     if (selectProfile) {
+      // console.log('getJobProfiles, selectProfile, args: ', args);
       // Fetch all job profiles based on the search and where conditions
       const allJobProfiles = await this.getJobProfilesWithSearch(
         search,
@@ -404,6 +441,7 @@ export class JobProfileService {
         // Calculate the new skip value based on the page number and take value
         const newSkip = (pageNumber - 1) * args.take;
 
+        // console.log('getJobProfiles2, selectProfile, args: ', args);
         // Fetch the job profiles for the calculated page
         jobProfiles = await this.getJobProfilesWithSearch(
           search,
