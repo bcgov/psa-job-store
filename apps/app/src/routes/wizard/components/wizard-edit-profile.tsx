@@ -816,6 +816,7 @@ const WizardEditProfile = forwardRef(
                         role="button"
                         aria-describedby="tooltip-info"
                         aria-label="Why can't I make changes?"
+                        style={{ textDecoration: 'underline' }}
                       >
                         Why can't I make changes?
                         <QuestionCircleOutlined aria-hidden style={{ marginLeft: 4 }} />

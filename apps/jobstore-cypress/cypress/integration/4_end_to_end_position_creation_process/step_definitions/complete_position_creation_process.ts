@@ -73,8 +73,8 @@ Then('they proceed to the additional information step', () => {
 });
 
 When('the user fills out the required additional information', () => {
-  cy.get('[data-testid="loading-spinner"]').should('be.visible');
-  cy.get('[data-testid="loading-spinner"]', { timeout: 15000 }).should('not.exist');
+  cy.get('[data-testid="excluded-select"] .ant-select-selection-search-input').type('00121521');
+  cy.contains('00121521 Testing Manager').click();
 
   cy.get('[data-testid="branch-input"]').type('test branch');
   cy.get('[data-testid="division-input"]').type('test division');

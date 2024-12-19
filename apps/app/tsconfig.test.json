@@ -1,0 +1,12 @@
+{
+  "compilerOptions": {
+    "baseUrl": ".",
+    "paths": {
+      "common-kit": ["../../node_modules/common-kit"]
+    },
+    "typeRoots": ["../../node_modules/@types", "node_modules/@types", "src/@types"],
+    "esModuleInterop": true
+  },
+  "include": ["src", "envConfig.ts", "jest.setup.ts", "jest.config.ts"],
+  "exclude": ["vite.config.ts"]
+}

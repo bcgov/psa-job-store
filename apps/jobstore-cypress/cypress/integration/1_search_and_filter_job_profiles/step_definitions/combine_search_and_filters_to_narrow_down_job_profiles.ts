@@ -21,6 +21,11 @@ When('the user selects "Communications Officer R30" from the classification filt
     });
 });
 
+When('the results have loaded', () => {
+  cy.get('[data-testid="skeleton-loading"]').should('exist');
+  cy.get('[data-testid="skeleton-loading"]').should('not.exist');
+});
+
 When('the user enters "multiple programs" into the search field', () => {
   cy.get('[aria-label="Search by job title or keyword"]').type('multiple programs');
 });

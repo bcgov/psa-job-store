@@ -6,10 +6,9 @@
       "common-kit": ["../../node_modules/common-kit"]
     },
     "typeRoots": ["../../node_modules/@types", "node_modules/@types", "src/@types"],
-    "esModuleInterop": true,
-    "skipLibCheck": true
+    "esModuleInterop": true
   },
-  "include": ["src", "envConfig.ts", "jest.setup.ts", "jest.config.ts"],
+  "include": ["src", "envConfig.ts", "jest.setup.ts", "jest.config.js"],
   "exclude": ["vite.config.ts"],
   "references": [{ "path": "./tsconfig.node.json" }]
 }
