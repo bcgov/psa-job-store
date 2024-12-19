@@ -50,7 +50,7 @@ jest.mock('react-router-dom', () => ({
     const [params, setParams] = useState(new URLSearchParams(mockSearchParam));
     return [
       params,
-      (newParams) => {
+      (newParams: any) => {
         mockSearchParam = newParams;
         setParams(new URLSearchParams(newParams));
       },

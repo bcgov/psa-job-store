@@ -62,7 +62,7 @@ jobs:
         if: always()
         run: npx -w api jest
 
-      - name: Run commonJS tests
+      - name: Run common-kit tests
         if: always()
         run: npx -w common-kit jest
 
