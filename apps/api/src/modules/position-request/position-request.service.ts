@@ -16,6 +16,7 @@ import {
   PositionRequestStatus,
   PositionRequestUpdateInput,
   PositionRequestWhereInput,
+  User,
   UuidFilter,
 } from '../../@generated/prisma-nestjs-graphql';
 import { AlexandriaError, AlexandriaErrorClass } from '../../utils/alexandria-error';
@@ -39,6 +40,7 @@ import { PositionService } from '../external/position.service';
 import { JobProfileService } from '../job-profile/job-profile.service';
 import { DepartmentService } from '../organization/department/department.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { UserService } from '../user/user.service';
 import { ExtendedFindManyPositionRequestWithSearch } from './args/find-many-position-request-with-search.args';
 import {
   PositionRequestCreateInputWithoutUser,
@@ -123,6 +125,7 @@ export class PositionRequestApiService {
     private readonly prisma: PrismaService,
     private readonly positionService: PositionService,
     private readonly jobProfileService: JobProfileService,
+    private readonly userService: UserService,
   ) {}
 
   async generateUniqueShortId(length: number, retries: number = 5): Promise<string> {
@@ -610,6 +613,85 @@ export class PositionRequestApiService {
     return positionRequest;
   }
 
+  async getPositionRequestByNumber(positionNumber: number, userId: string, userRoles: string[] = []) {
+    PositionRequestStatus.COMPLETED;
+    const positionRequest = await this.prisma.positionRequest.findMany({
+      where: {
+        position_number: { equals: positionNumber },
+        status: {
+          in: [PositionRequestStatus.COMPLETED, PositionRequestStatus.VERIFICATION, PositionRequestStatus.REVIEW],
+        },
+      },
+    });
+    return positionRequest.length ? positionRequest[0].id : null;
+  }
+
+  async getPositionRequestForDept(id: number, userId: string) {
+    let whereCondition: {
+      id: number;
+      user_id?: UuidFilter;
+      OR?: Array<PositionRequestWhereInput>;
+      NOT?: Array<PositionRequestWhereInput>;
+    } = { id };
+    const user: User = await this.userService.getUser({ where: { id: userId } });
+    console.log(user.metadata.org_chart.department_ids);
+
+    whereCondition = {
+      ...whereCondition,
+
+      OR: [
+        { user_id: { equals: userId } },
+        {
+          AND: [
+            { department_id: { in: user.metadata.org_chart.department_ids } },
+            {
+              status: {
+                in: [PositionRequestStatus.COMPLETED, PositionRequestStatus.VERIFICATION, PositionRequestStatus.REVIEW],
+              },
+            },
+          ],
+        },
+      ],
+
+      //user_id: { equals: userId },
+      ///   dept_id: ]// SAME DEPT AND status: {
+      //   in: [PositionRequestStatus.COMPLETED, PositionRequestStatus.VERIFICATION, PositionRequestStatus.REVIEW],
+      // }
+    };
+
+    const positionRequest = await this.prisma.positionRequest.findUnique({
+      where: whereCondition,
+      include: {
+        parent_job_profile: true,
+        classification: {
+          select: {
+            id: true,
+            code: true,
+            employee_group_id: true,
+            peoplesoft_id: true,
+          },
+        },
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+      },
+    });
+
+    if (!positionRequest) {
+      return null;
+    }
+
+    return {
+      ...positionRequest,
+      classification_employee_group_id: positionRequest.classification?.employee_group_id,
+      classification_peoplesoft_id: positionRequest.classification?.peoplesoft_id,
+    };
+  }
+
   async getPositionRequest(id: number, userId: string, userRoles: string[] = []) {
     let whereCondition: { id: number; user_id?: UuidFilter; NOT?: Array<PositionRequestWhereInput> } = { id };
 
@@ -618,7 +700,9 @@ export class PositionRequestApiService {
     } else {
       whereCondition = {
         ...whereCondition,
-        user_id: { equals: userId },
+        user_id: { equals: userId }, //OR SAME DEPT AND status: {
+        //   in: [PositionRequestStatus.COMPLETED, PositionRequestStatus.VERIFICATION, PositionRequestStatus.REVIEW],
+        // }
       };
     }
 
@@ -1045,6 +1129,10 @@ export class PositionRequestApiService {
             (node) => node.id === additionalInfo.excluded_mgr_position_number,
           );
 
+          // excluded manager may not be in additional info, for example if user is using "Save and quit feature"
+          // without filling that field
+          const excludedManagerPresent = additionalInfo.excluded_mgr_position_number;
+
           // console.log('isExcludedManagerInOrgChart: ', isExcludedManagerInOrgChart);
 
           // excluded manager is not in the org chart, add it
@@ -1052,7 +1140,7 @@ export class PositionRequestApiService {
             edges: any[];
             nodes: any[];
           } = { edges: [], nodes: [] };
-          if (!isExcludedManagerInOrgChart) {
+          if (!isExcludedManagerInOrgChart && excludedManagerPresent) {
             // console.log('isExcludedManagerInOrgChart false');
 
             const employeeInfo = await this.positionService.getPositionProfile(
@@ -1106,7 +1194,7 @@ export class PositionRequestApiService {
                 },
               ],
             };
-          } else {
+          } else if (excludedManagerPresent) {
             // excluded manager is in the org chart
             // we may still need to update the org chart in case user changed excluded manager from
             // excluded manager that was outside of the department to one being inside the department
@@ -1119,28 +1207,41 @@ export class PositionRequestApiService {
             };
           }
 
-          // find the excluded manager node and mark it as excluded manager
-          // unmark any other node that was previously marked as excluded manager
-          updatedNodes = updatedOrgChart.nodes.map((node) => {
-            if (node.id === additionalInfo.excluded_mgr_position_number) {
-              // console.log('found excluded manager, marking..');
-              return {
-                ...node,
-                data: {
-                  ...node.data,
-                  isExcludedManager: true,
-                },
-              };
-            } else {
-              return {
-                ...node,
-                data: {
-                  ...node.data,
-                  isExcludedManager: false,
-                },
-              };
-            }
-          });
+          if (excludedManagerPresent) {
+            // find the excluded manager node and mark it as excluded manager
+            // unmark any other node that was previously marked as excluded manager
+            updatedNodes = updatedOrgChart.nodes.map((node) => {
+              if (node.id === additionalInfo.excluded_mgr_position_number) {
+                // console.log('found excluded manager, marking..');
+                return {
+                  ...node,
+                  data: {
+                    ...node.data,
+                    isExcludedManager: true,
+                  },
+                };
+              } else {
+                return {
+                  ...node,
+                  data: {
+                    ...node.data,
+                    isExcludedManager: false,
+                  },
+                };
+              }
+            });
+
+            updatedOrgChart = {
+              ...orgChart,
+              nodes: [...updatedNodes],
+              edges: [...updatedOrgChart.edges],
+            };
+
+            updatePayload.orgchart_json = autolayout(updatedOrgChart) as {
+              edges: any[];
+              nodes: any[];
+            };
+          }
 
           // if updatePayload.additional_info.department_id is provided, update department_id on the node with isNewPosition == true
           // this way new position node will have correct department id when viewed in shared mode
@@ -1163,17 +1264,6 @@ export class PositionRequestApiService {
               }
             });
           }
-
-          updatedOrgChart = {
-            ...orgChart,
-            nodes: [...updatedNodes],
-            edges: [...updatedOrgChart.edges],
-          };
-
-          updatePayload.orgchart_json = autolayout(updatedOrgChart) as {
-            edges: any[];
-            nodes: any[];
-          };
         }
       }
     } else if (additionalInfo === null) {

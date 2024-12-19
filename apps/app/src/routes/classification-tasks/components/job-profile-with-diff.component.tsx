@@ -27,7 +27,7 @@ export const JobProfileWithDiff = ({
   };
 
   return (
-    <Row {...rowProps}>
+    <Row {...rowProps} data-testid="job-profile-with-diff-component">
       <Col {...colProps}>
         <Card bodyStyle={{ padding: '0' }}>
           <WizardEditControlBar

@@ -175,6 +175,7 @@ describe('ScheduledTaskService', () => {
     });
 
     it('should call sync methods if data is outdated', async () => {
+      process.env.E2E_TESTING = 'false';
       const spy = jest.spyOn(
         scheduledTaskService as unknown as { isMetadataOutdated: () => Promise<boolean> },
         'isMetadataOutdated',
