@@ -2,26 +2,23 @@
 import {
   ArrowLeftOutlined,
   CheckCircleOutlined,
-  EllipsisOutlined,
   ExclamationCircleFilled,
   ExclamationCircleOutlined,
   MailOutlined,
   WarningFilled,
 } from '@ant-design/icons';
-import { Alert, Button, Card, Col, Form, Input, Menu, Modal, Result, Row, Typography, notification } from 'antd';
+import { Alert, Button, Card, Col, Form, Input, Modal, Result, Row, Typography, message, notification } from 'antd';
 import Paragraph from 'antd/es/typography/Paragraph';
 import Title from 'antd/es/typography/Title';
 import { Divider } from 'antd/lib';
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useReactFlow } from 'reactflow';
-import AccessiblePopoverMenu from '../../components/app/common/components/accessible-popover-menu';
 import LoadingSpinnerWithMessage from '../../components/app/common/components/loading.component';
 import ContentWrapper from '../../components/content-wrapper.component';
 import { useLazyGetJobProfileQuery } from '../../redux/services/graphql-api/job-profile.api';
 import {
   GetPositionRequestResponseContent,
-  useDeletePositionRequestMutation,
   usePositionNeedsRivewQuery,
   useSubmitPositionRequestMutation,
   useUpdatePositionRequestMutation,
@@ -37,6 +34,7 @@ import WizardContentWrapper from './components/wizard-content-wrapper';
 import { WizardPageWrapper } from './components/wizard-page-wrapper.component';
 import StatusIndicator from './components/wizard-position-request-status-indicator';
 import { useWizardContext } from './components/wizard.provider';
+import { WizardContextMenu } from './wizard-context-menu';
 
 interface WizardResultPageProps {
   onBack?: () => void;
@@ -327,50 +325,6 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
     setCurrentSection(reason);
   };
 
-  const [deletePositionRequest] = useDeletePositionRequestMutation();
-  const deleteRequest = async () => {
-    if (!positionRequestId) return;
-    Modal.confirm({
-      title: 'Delete Position Request',
-      content: 'Do you want to delete the position request?',
-      okText: 'Yes',
-      cancelText: 'No',
-      onOk: async () => {
-        await deletePositionRequest({ id: positionRequestId });
-        disableBlockingAndNavigateHome();
-      },
-    });
-  };
-  const getMenuContent = () => {
-    return (
-      <Menu className="wizard-menu">
-        <Menu.Item key="save" onClick={disableBlockingAndNavigateHome}>
-          <div style={{ padding: '5px 0' }}>
-            Save and quit
-            <Typography.Text type="secondary" style={{ marginTop: '5px', display: 'block' }}>
-              Saves your progress. You can access this position request from the 'My Position Requests' page.
-            </Typography.Text>
-          </div>
-        </Menu.Item>
-        {positionRequest?.status === 'DRAFT' && (
-          <>
-            <Menu.Divider />
-            <Menu.ItemGroup key="others" title={<b>Others</b>}>
-              <Menu.Item key="delete" onClick={deleteRequest}>
-                <div style={{ padding: '5px 0' }}>
-                  Delete
-                  <Typography.Text type="secondary" style={{ marginTop: '5px', display: 'block' }}>
-                    Removes this position request from 'My Position Requests'. This action is irreversible.
-                  </Typography.Text>
-                </div>
-              </Menu.Item>
-            </Menu.ItemGroup>
-          </>
-        )}
-      </Menu>
-    );
-  };
-
   const [comment, setComment] = useState('');
   const [updatePositionRequest] = useUpdatePositionRequestMutation();
 
@@ -401,6 +355,13 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
   // - update supervisor and excluded manager nodes
   // - add node for new position
 
+  const handleCopyLink = async () => {
+    await navigator.clipboard.writeText(
+      `${window.location.origin}/requests/positions/share/${positionRequest?.shareUUID}`,
+    );
+    message.success('Link copied to clipboard');
+  };
+
   if (positionNeedsRivewLoading || isFetchingPositionNeedsRivew || !orgChartDataForPng || originalJobProfileFetching)
     return <LoadingSpinnerWithMessage />;
 
@@ -430,12 +391,13 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
             <div style={{ marginRight: '1rem' }} key="statusIndicator">
               <StatusIndicator status={positionRequest?.status ?? ''} />
             </div>,
-            <AccessiblePopoverMenu
-              key="menu"
-              triggerButton={<Button data-testid="ellipsis-menu" tabIndex={-1} icon={<EllipsisOutlined />}></Button>}
-              content={getMenuContent()}
-              ariaLabel="Open position request menu"
-            ></AccessiblePopoverMenu>,
+            <WizardContextMenu
+              positionRequestId={positionRequestId}
+              onSaveAndQuit={disableBlockingAndNavigateHome}
+              onNavigateHome={disableBlockingAndNavigateHome}
+              shareableLink={positionRequest?.shareUUID}
+              positionRequestStatus={positionRequest?.status}
+            />,
             <Button onClick={back} key="back" data-testid="back-button">
               Back
             </Button>,
@@ -538,6 +500,14 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
               <Button onClick={handleCopyURL}>Copy URL</Button>
 
               <Divider /> */}
+
+                      <Title level={4}>Copy link</Title>
+                      <Paragraph>Users can access a read-only version of the request through this link.</Paragraph>
+                      <Button type="default" onClick={handleCopyLink}>
+                        Copy URL
+                      </Button>
+
+                      <Divider />
 
                       <Title level={4}>View all Positions</Title>
                       <Paragraph>View all positions that you have created.</Paragraph>
@@ -711,6 +681,13 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
 
                 <Divider /> */}
 
+                      <Title level={4}>Copy link</Title>
+                      <Paragraph>Users can access a read-only version of the request through this link.</Paragraph>
+                      <Button type="default" onClick={handleCopyLink}>
+                        Copy URL
+                      </Button>
+
+                      <Divider />
                       <Title level={4}>View all Positions</Title>
                       <Paragraph>View all positions that you have created.</Paragraph>
                       <Button type="default" onClick={() => navigate('/')}>
@@ -804,6 +781,13 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
 
                 <Divider /> */}
 
+                      <Title level={4}>Copy link</Title>
+                      <Paragraph>Users can access a read-only version of the request through this link.</Paragraph>
+                      <Button type="default" onClick={handleCopyLink}>
+                        Copy URL
+                      </Button>
+
+                      <Divider />
                       <Title level={4}>View all Positions</Title>
                       <Paragraph>View all positions that you have created.</Paragraph>
                       <Button type="default" onClick={() => navigate('/')}>
@@ -868,6 +852,13 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
 
                 <Divider /> */}
 
+                      <Title level={4}>Copy link</Title>
+                      <Paragraph>Users can access a read-only version of the request through this link.</Paragraph>
+                      <Button type="default" onClick={handleCopyLink}>
+                        Copy URL
+                      </Button>
+
+                      <Divider />
                       <Title level={4}>View all Positions</Title>
                       <Paragraph>View all positions that you have created.</Paragraph>
                       <Button type="default" onClick={() => navigate('/')}>

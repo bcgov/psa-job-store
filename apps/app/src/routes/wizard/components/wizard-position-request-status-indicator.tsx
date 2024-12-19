@@ -28,6 +28,8 @@ const StatusIndicator: React.FC<StatusIndicatorProps> = ({ status, colorText = t
 
   const statusDetails = statusIconColorMap[status];
 
+  if (!statusDetails) return null;
+
   return (
     <Space>
       <span className="status-dot" style={{ backgroundColor: statusDetails.color }} />

@@ -54,6 +54,15 @@ interface Selection {
 interface ClassificationOption {
   value: string;
   label: string;
+  data: {
+    name: string;
+    code: string;
+  };
+}
+
+interface SelectOption {
+  value: string;
+  label: string;
 }
 
 interface MinistriesOption {
@@ -147,9 +156,9 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
 
   const [allSelections, setAllSelections] = useState<Selection[]>([]); // holds tags from all filters
   const [classificationFilterData, setClassificationOptions] = useState<ClassificationOption[]>([]); // holds options for classification filter
-  const [jobFamilyFilterData, setJobFamilyOptions] = useState<ClassificationOption[]>([]); // holds options for job family filter
-  const [jobStreamFilterData, setJobStreamOptions] = useState<ClassificationOption[]>([]); // holds options for job family filter
-  const [jobRoleTypeFilterData, setjobRoleTypeOptions] = useState<ClassificationOption[]>([]);
+  const [jobFamilyFilterData, setJobFamilyOptions] = useState<SelectOption[]>([]); // holds options for job family filter
+  const [jobStreamFilterData, setJobStreamOptions] = useState<SelectOption[]>([]); // holds options for job family filter
+  const [jobRoleTypeFilterData, setjobRoleTypeOptions] = useState<SelectOption[]>([]);
   // const [professionAndDisciplineFilterData, setProfessionAndDisciplineOptions] = useState<ClassificationOption[]>([]);
   const [ministriesFilterData, setMinistriesOptions] = useState<MinistriesOption[]>([]);
 
@@ -174,11 +183,16 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
   useEffect(() => {
     if (classificationData) {
       const newOptions = classificationData.map((classification) => {
-        const { id, employee_group_id, peoplesoft_id, name } = classification;
+        const { id, employee_group_id, code, peoplesoft_id, name } = classification;
 
         return {
           label: `${name} (${employee_group_id})`,
           value: `${id}.${employee_group_id}.${peoplesoft_id}`,
+          // Add searchable data
+          data: {
+            name: name,
+            code: code,
+          },
         };
       });
       setClassificationOptions(newOptions);
@@ -611,7 +625,7 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
                   {ministriesFilterData.length > 1 && (
                     <Col data-testid="Ministry-filter" data-cy="Ministry-filter">
                       {/* dragon naturally speaking doesn't pick up on aria-label alone */}
-                      <Form.Item label="Ministries" name="ministries" className="sr-only-label">
+                      <Form.Item label="Ministries" className="sr-only-label" style={{ marginBottom: '0' }}>
                         <Select
                           closeMenuOnSelect={false}
                           isClearable={false}
@@ -705,123 +719,10 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
                         setAllSelections([...cleanedSelections, ...newSelections]);
                       }}
                     />
-
-                    {/* <TreeSelect
-                    className={`jobFamilyStreamFilter ${searchValue ? 'search-active' : 'no-search'}`}
-                    value={treeSelectValues}
-                    onSearch={(value) => {
-                      setSearchValue(value);
-                    }}
-                    onChange={(selectedItems) => {
-                      console.log('ONCHANGE');
-                      console.log('selectedItems: ', selectedItems);
-
-                      // separate selectedItems into jobFamily and jobStream
-                      const selectedJobFamilies: any[] = [];
-                      const selectedJobStreams: any[] = [];
-
-                      selectedItems.forEach((item: any) => {
-                        if (item.startsWith('job_family-')) {
-                          // Extract the job family ID and store it
-                          selectedJobFamilies.push(item.replace('job_family-', ''));
-                        } else if (item.startsWith('stream-')) {
-                          // Extract the job stream ID and store it
-                          selectedJobStreams.push(item.replace('stream-', ''));
-                        }
-                      });
-
-                      // console.log('tree on change: ', selectedJobFamilies, selectedJobStreams);
-
-                      const selections: { value: any; type: string }[] = [];
-                      const newValues = selectedJobFamilies;
-                      if (newValues != null) {
-                        newValues.forEach((val: any) => {
-                          selections.push({ value: val, type: 'jobFamily' });
-                        });
-                      }
-
-                      // console.log('selectedJobStream: ', selectedJobStream);
-                      const newValues2 = selectedJobStreams;
-                      if (newValues2 != null) {
-                        newValues2.forEach((val: any) => {
-                          selections.push({ value: val, type: 'jobStream' });
-                        });
-                      }
-
-                      // console.log('selections: ', selections);
-
-                      // remove previous settings and set new ones
-                      // get all the unique types from the selections, removing duplicates
-                      const types = ['jobStream', 'jobFamily'];
-
-                      // remove these types from the current selections
-                      const cleanedSelections = allSelections.filter((selection) => !types.includes(selection.type));
-
-                      // selections has value and type
-                      const newSelections = selections.map((item: any) => ({ value: item.value, type: item.type }));
-
-                      // console.log('cleaned, new: ', cleanedSelections, newSelections);
-                      setAllSelections([...cleanedSelections, ...newSelections]);
-                    }}
-                    style={{ width: '200px' }}
-                    treeData={treeData}
-                    treeNodeLabelProp="title"
-                    treeNodeFilterProp="title"
-                    treeCheckable={true}
-                    showCheckedStrategy={SHOW_CHILD}
-                    placeholder="Profession and Discipline"
-                    aria-label="Profession and Discipline"
-                    maxTagCount={0}
-                    maxTagPlaceholder="Profession and Discipline"
-                    tagRender={() => {
-                      return <></>;
-                    }}
-                  /> */}
                   </Col>
-                  <Col data-testid="Classification-filter" data-cy="Classification-filter">
-                    {/* dragon naturally speaking doesn't pick up on aria-label alone */}
-                    <Form.Item label="Classification" name="classification" className="sr-only-label">
-                      <Select
-                        closeMenuOnSelect={false}
-                        isClearable={false}
-                        backspaceRemovesValue={false}
-                        hideSelectedOptions={false}
-                        value={classificationFilterData.filter((jf) =>
-                          allSelections
-                            .filter((selection) => selection.type === 'classification')
-                            .map((selection) => selection.value)
-                            .includes(jf.value),
-                        )}
-                        styles={{
-                          container: (css) => ({ ...css, width: '200px' }),
-                          menu: (styles) => ({ ...styles, width: 'max-content', minWidth: '100%' }),
-                        }}
-                        components={{
-                          ValueContainer: CustomValueContainer,
-                        }}
-                        classNamePrefix="react-select"
-                        isMulti
-                        placeholder="Classification"
-                        aria-label="Classification"
-                        options={classificationFilterData}
-                        onChange={(selectedItems) => {
-                          const newValues = selectedItems.map((item) => item.value);
-                          if (newValues == null) return;
-
-                          newValues.forEach((val: any) => {
-                            if (!selectedClassification.includes(val)) addSelection(val, 'classification');
-                          });
-                          selectedClassification.forEach((val) => {
-                            if (!newValues.includes(val)) removeSelection(val, 'classification');
-                          });
-                        }}
-                      ></Select>
-                    </Form.Item>
-                  </Col>
-
                   <Col data-testid="Job role type-filter" data-cy="Job role type-filter">
                     {/* dragon naturally speaking doesn't pick up on aria-label alone */}
-                    <Form.Item label="Role" name="role" className="sr-only-label">
+                    <Form.Item label="Role" className="sr-only-label" style={{ marginBottom: '0' }}>
                       <Select
                         closeMenuOnSelect={false}
                         isClearable={false}
@@ -855,6 +756,73 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
                           selectedJobRoleType.forEach((val) => {
                             if (!newValues.includes(val)) removeSelection(val, 'jobRoleType');
                           });
+                        }}
+                      ></Select>
+                    </Form.Item>
+                  </Col>
+                  <Col data-testid="Classification-filter" data-cy="Classification-filter">
+                    {/* dragon naturally speaking doesn't pick up on aria-label alone */}
+                    <Form.Item label="Classification" className="sr-only-label" style={{ marginBottom: '0' }}>
+                      <Select
+                        closeMenuOnSelect={false}
+                        isClearable={false}
+                        backspaceRemovesValue={false}
+                        hideSelectedOptions={false}
+                        value={classificationFilterData.filter((jf) =>
+                          allSelections
+                            .filter((selection) => selection.type === 'classification')
+                            .map((selection) => selection.value)
+                            .includes(jf.value),
+                        )}
+                        styles={{
+                          container: (css) => ({ ...css, width: '200px' }),
+                          menu: (base) => ({
+                            ...base,
+                            width: 'max-content',
+                            minWidth: '100%',
+                            right: 0, // since it's near the edge of the screen, this prevents it from showing horizontal scroll
+                          }),
+                        }}
+                        components={{
+                          ValueContainer: CustomValueContainer,
+                        }}
+                        classNamePrefix="react-select"
+                        isMulti
+                        placeholder="Classification"
+                        aria-label="Classification"
+                        options={classificationFilterData}
+                        onChange={(selectedItems) => {
+                          const newValues = selectedItems.map((item) => item.value);
+                          if (newValues == null) return;
+
+                          newValues.forEach((val: any) => {
+                            if (!selectedClassification.includes(val)) addSelection(val, 'classification');
+                          });
+                          selectedClassification.forEach((val) => {
+                            if (!newValues.includes(val)) removeSelection(val, 'classification');
+                          });
+                        }}
+                        filterOption={(option, inputValue) => {
+                          const searchTerm = inputValue.toLowerCase();
+                          const searchTermNoSpaces = searchTerm.replace(/\s+/g, '');
+                          const name = option.data.data.name.toLowerCase();
+                          const nameNoSpaces = name.replace(/\s+/g, '');
+                          const code = option.data.data.code.toLowerCase();
+                          const codeNoSpaces = code.replace(/\s+/g, '');
+
+                          // Regular matching
+                          const regularMatch =
+                            name.includes(searchTerm) ||
+                            code.includes(searchTerm) ||
+                            `${name} ${code}`.includes(searchTerm);
+
+                          // No-spaces matching
+                          const noSpacesMatch =
+                            nameNoSpaces.includes(searchTermNoSpaces) ||
+                            codeNoSpaces.includes(searchTermNoSpaces) ||
+                            `${nameNoSpaces}${codeNoSpaces}`.includes(searchTermNoSpaces);
+
+                          return regularMatch || noSpacesMatch;
                         }}
                       ></Select>
                     </Form.Item>

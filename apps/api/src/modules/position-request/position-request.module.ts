@@ -9,11 +9,12 @@ import { OrganizationModule } from '../organization/organization.module';
 import { OrganizationService } from '../organization/organization/organization.service';
 import { PrismaModule } from '../prisma/prisma.module';
 import { SearchModule } from '../search/search.module';
+import { UserModule } from '../user/user.module';
 import { PositionRequestApiResolver } from './position-request.resolver';
 import { PositionRequestApiService } from './position-request.service';
 
 @Module({
-  imports: [ExternalModule, HttpModule, OrganizationModule, PrismaModule, PrismaModule, SearchModule],
+  imports: [ExternalModule, HttpModule, OrganizationModule, PrismaModule, PrismaModule, SearchModule, UserModule],
   providers: [
     ClassificationService,
     DepartmentService,

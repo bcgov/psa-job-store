@@ -1,15 +1,17 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { CheckCircleFilled } from '@ant-design/icons';
 import { Card, Col, Row, Tag, Tooltip, Typography } from 'antd';
-import { CSSProperties } from 'react';
+import { CSSProperties, useEffect, useState } from 'react';
 import { useAuth } from 'react-oidc-context';
 import { Handle, NodeProps, Position } from 'reactflow';
+import { useLazyGetPositionRequestByPositionNumberQuery } from '../../../redux/services/graphql-api/position-request.api';
 import { getUserRoles } from '../../../utils/get-user-roles.util';
 import { OrgChartContext } from '../enums/org-chart-context.enum';
 import { OrgChartType } from '../enums/org-chart-type.enum';
 import { Elements } from '../interfaces/elements.interface';
 import { CreatePositionButton } from './create-position-button.component';
 import './org-chart-node.component.css';
+import { ViewPositionButton } from './view-position-button.component';
 
 const { Top, Bottom } = Position;
 const { Text } = Typography;
@@ -77,11 +79,42 @@ export const OrgChartNode = ({
   const positionIsVacant = data.employees.length === 0;
 
   const roles: string[] = getUserRoles(auth.user);
+  const [prTrigger, { isFetching: isLoadingPositionRequest }] = useLazyGetPositionRequestByPositionNumberQuery();
+
+  const checkForPositionRequest = async (positionNumber: string) => {
+    if (!isLoadingPositionRequest) {
+      const prData = await prTrigger({ positionNumber: positionNumber }).unwrap();
+      return prData?.positionRequestByNumber;
+    }
+  };
+  const [positionRequestId, setPositionRequestId] = useState<number | undefined>(undefined);
+
+  // Fetch position request data when the node is selected
+  useEffect(() => {
+    let isMounted = true;
+    const fetchPositionRequest = async () => {
+      if (selected) {
+        const prId = await checkForPositionRequest(data.id);
+        if (isMounted) {
+          setPositionRequestId(prId);
+        }
+      } else {
+        // Clear out the stored ID when no longer selected (optional)
+        setPositionRequestId(undefined);
+      }
+    };
+
+    fetchPositionRequest();
+    return () => {
+      isMounted = false;
+    };
+  }, [selected, data.id]); // Re-run whenever the selection state changes or the data.id changes
 
   return (
     <>
       <Handle type="target" position={targetPosition} isConnectable={isConnectable} />
       <div
+        className="org-chart-node"
         data-testid={`org-chart-node-${data.id}`}
         tabIndex={0}
         aria-label={`
@@ -115,6 +148,8 @@ export const OrgChartNode = ({
                         positionIsVacant={positionIsVacant}
                         supervisorId={data.id}
                       />,
+                      <ViewPositionButton positionRequestId={positionRequestId} />,
+                      ,
                     ]
                   : // without this select node doesn't fire for some reason, need to render something
                     // otherwise node doesn't get selected properly

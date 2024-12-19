@@ -39,7 +39,6 @@ export class SearchService {
 
   async search(index: SearchIndex, query?: QueryDslQueryContainer) {
     const results = await this.elasticService.search({ index, query });
-
     return results;
   }
 
@@ -92,6 +91,8 @@ export class SearchService {
 
   async searchJobProfiles(value: string) {
     // console.log('searchProfiles: ', value);
+    const isNumber = !isNaN(parseInt(value));
+    // console.log('search is a number: ', isNumber);
     const results = await this.elasticService.search({
       index: SearchIndex.JobProfile,
       size: 20,
@@ -100,7 +101,7 @@ export class SearchService {
           should: [
             {
               match_phrase_prefix: {
-                title: value,
+                title: { query: value, boost: 10 }, // exact title match
               },
             },
             {
@@ -109,12 +110,13 @@ export class SearchService {
                   query: value,
                   fuzziness: 1,
                   operator: 'and',
+                  boost: 5, // fuzzy title match
                 },
               },
             },
-            !isNaN(parseInt(value)) && {
+            isNumber && {
               term: {
-                number: { value: parseInt(value), boost: 5 },
+                number: { value: parseInt(value), boost: 100 },
               },
             },
             {
@@ -332,6 +334,10 @@ export class SearchService {
       },
     });
 
+    // console.log(
+    //   'results: ',
+    //   results.hits.hits.map((h) => h._id),
+    // );
     return results.hits.hits.map((h) => +h._id);
   }
 

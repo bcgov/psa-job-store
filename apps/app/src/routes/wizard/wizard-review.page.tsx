@@ -1,12 +1,10 @@
-import { ArrowLeftOutlined, EllipsisOutlined } from '@ant-design/icons';
-import { Button, Col, Menu, Modal, Row, Typography } from 'antd';
+import { ArrowLeftOutlined } from '@ant-design/icons';
+import { Button, Col, Row } from 'antd';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
-import AccessiblePopoverMenu from '../../components/app/common/components/accessible-popover-menu';
 import { useLazyGetJobProfileQuery } from '../../redux/services/graphql-api/job-profile.api';
 import {
   GetPositionRequestResponseContent,
-  useDeletePositionRequestMutation,
   useUpdatePositionRequestMutation,
 } from '../../redux/services/graphql-api/position-request.api';
 import { JobProfileWithDiff } from '../classification-tasks/components/job-profile-with-diff.component';
@@ -16,6 +14,7 @@ import WizardContentWrapper from './components/wizard-content-wrapper';
 import { WizardPageWrapper } from './components/wizard-page-wrapper.component';
 import StatusIndicator from './components/wizard-position-request-status-indicator';
 import { useWizardContext } from './components/wizard.provider';
+import { WizardContextMenu } from './wizard-context-menu';
 
 interface WizardReviewPageProps {
   onNext?: () => void;
@@ -39,6 +38,7 @@ export const WizardReviewPage: React.FC<WizardReviewPageProps> = ({
   const [isLoading, setIsLoading] = useState(false);
 
   useEffect(() => {
+    if (!positionRequestData?.parent_job_profile_id && !positionRequestData?.parent_job_profile_version) return;
     triggerGetJobProfile({
       id: positionRequestData?.parent_job_profile_id,
       version: positionRequestData?.parent_job_profile_version,
@@ -72,74 +72,6 @@ export const WizardReviewPage: React.FC<WizardReviewPageProps> = ({
       if (onBack) onBack();
     }
     // navigate(-1);
-  };
-
-  // const [hasScrolledPast, setHasScrolledPast] = useState(false);
-
-  // const handleScroll = () => {
-  //   const layoutScrollContainer = document.querySelector('.ant-layout > div > div') as HTMLElement;
-  //   if (layoutScrollContainer && collapseRef.current) {
-  //     const collapseTop = collapseRef.current.getBoundingClientRect().top;
-  //     const containerTop = layoutScrollContainer.getBoundingClientRect().top;
-
-  //     // Check if the Collapse top is above the container top
-  //     setHasScrolledPast(collapseTop < containerTop);
-  //   }
-  // };
-
-  // useEffect(() => {
-  //   const layoutScrollContainer = document.querySelector('.ant-layout > div > div');
-  //   if (layoutScrollContainer) {
-  //     layoutScrollContainer.addEventListener('scroll', handleScroll);
-  //   }
-
-  //   return () => {
-  //     if (layoutScrollContainer) {
-  //       layoutScrollContainer.removeEventListener('scroll', handleScroll);
-  //     }
-  //   };
-  // }, []);
-
-  // const collapseRef = useRef<HTMLDivElement>(null);
-
-  const [deletePositionRequest] = useDeletePositionRequestMutation();
-  const deleteRequest = async () => {
-    if (!positionRequestId) return;
-    Modal.confirm({
-      title: 'Delete Position Request',
-      content: 'Do you want to delete the position request?',
-      okText: 'Yes',
-      cancelText: 'No',
-      onOk: async () => {
-        await deletePositionRequest({ id: positionRequestId });
-        disableBlockingAndNavigateHome();
-      },
-    });
-  };
-  const getMenuContent = () => {
-    return (
-      <Menu className="wizard-menu">
-        <Menu.Item key="save" onClick={disableBlockingAndNavigateHome}>
-          <div style={{ padding: '5px 0' }}>
-            Save and quit
-            <Typography.Text type="secondary" style={{ marginTop: '5px', display: 'block' }}>
-              Saves your progress. You can access this position request from the 'My Position Requests' page.
-            </Typography.Text>
-          </div>
-        </Menu.Item>
-        <Menu.Divider />
-        <Menu.ItemGroup key="others" title={<b>Others</b>}>
-          <Menu.Item key="delete" onClick={deleteRequest}>
-            <div style={{ padding: '5px 0' }}>
-              Delete
-              <Typography.Text type="secondary" style={{ marginTop: '5px', display: 'block' }}>
-                Removes this position request from 'My Position Requests'. This action is irreversible.
-              </Typography.Text>
-            </div>
-          </Menu.Item>
-        </Menu.ItemGroup>
-      </Menu>
-    );
   };
 
   const switchStep = async (step: number) => {
@@ -179,12 +111,13 @@ export const WizardReviewPage: React.FC<WizardReviewPageProps> = ({
           <div style={{ marginRight: '1rem' }} key="statusIndicator">
             <StatusIndicator status={positionRequest?.status ?? ''} />
           </div>,
-          <AccessiblePopoverMenu
-            key={'menu'}
-            triggerButton={<Button data-testid="ellipsis-menu" tabIndex={-1} icon={<EllipsisOutlined />}></Button>}
-            content={getMenuContent()}
-            ariaLabel="Open position request menu"
-          ></AccessiblePopoverMenu>,
+          <WizardContextMenu
+            positionRequestId={positionRequestId}
+            onSaveAndQuit={disableBlockingAndNavigateHome}
+            onNavigateHome={disableBlockingAndNavigateHome}
+            shareableLink={positionRequest?.shareUUID}
+            positionRequestStatus={positionRequest?.status}
+          />,
           <Button onClick={onBackCallback} key="back" data-testid="back-button">
             Back
           </Button>,

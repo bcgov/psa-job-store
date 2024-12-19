@@ -114,8 +114,10 @@ export const DynamicOrgChart = ({
   // render data when it changes (e.g. department change)
   useEffect(() => {
     if (orgChartData?.orgChart != null) {
-      console.log('== data changed');
-      const elements = autolayout(orgChartData?.orgChart);
+      // console.log('== data changed', orgChartData?.orgChart);
+
+      // add extra vertical space for nodes to accomodate "View position details" button
+      const elements = autolayout(orgChartData?.orgChart, undefined, 260);
 
       // if (targetId != null) {
       //   const targetIndex = elements.nodes.findIndex((node: Node) => node.id === targetId);
@@ -344,19 +346,26 @@ export const DynamicOrgChart = ({
     if (sSearchTerm != null && sSearchTerm.length > 0) {
       const searchResultIds = search(sSearchTerm);
 
+      // console.log('searchResultIds: ', searchResultIds);
       const results = nodes
         .filter((node: Node) => searchResultIds.includes(node.id))
-        .map((node: Node) => {
-          const employeeName =
-            node.data.employees && node.data.employees.length > 0 ? node.data.employees[0].name : 'Vacant';
+        .flatMap((node: Node) => {
+          console.log('processing node: ', node);
+          const employees =
+            node.data.employees && node.data.employees.length > 0 ? node.data.employees : [{ name: 'Vacant' }];
+
           const classification = node.data.classification?.code || 'N/A';
           const positionNumber = node.data.id || 'N/A';
 
-          return {
+          const res = employees.map((employee: any) => ({
             id: node.id,
-            title: `${employeeName} - ${node.data.title || node.id} (${classification}) - ${positionNumber}`,
-          };
+            title: `${employee.name} - ${node.data.title || node.id} (${classification}) - ${positionNumber}`,
+          }));
+          // if (res.length > 1) return res.slice(0, 1);
+          console.log('res: ', res);
+          return res;
         });
+      console.log('setting search results: ', results);
       setSearchResults(results);
 
       if (searchResultIds.length > 1) {
@@ -388,7 +397,7 @@ export const DynamicOrgChart = ({
       }
 
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
-      setSearchResultCount(searchResultIds.length);
+      setSearchResultCount(results.length);
     } else {
       console.log('onSearch, no search term, resetting nodes');
       setSearchResults([]);
@@ -410,8 +419,12 @@ export const DynamicOrgChart = ({
         includeMatches: true,
         includeScore: true,
         threshold: 0,
+        findAllMatches: true,
+        minMatchCharLength: 2,
+        ignoreLocation: true,
       });
 
+      // console.log('searching nodes: ', searchTerm, elements.nodes);
       const stringSearch = new Fuse(elements.nodes, {
         keys: ['data.title', 'data.employees.name'],
         includeMatches: true,
@@ -422,7 +435,11 @@ export const DynamicOrgChart = ({
       const idResults = idSearch.search(searchTerm);
       const stringResults = stringSearch.search(searchTerm);
 
-      return [...idResults.map((r) => r.item), ...stringResults.map((r) => r.item)].flatMap((node) => node.id);
+      const searchResults = [...idResults.map((r) => r.item), ...stringResults.map((r) => r.item)].flatMap(
+        (node) => node.id,
+      );
+      // console.log('searchResults: ', searchResults);
+      return searchResults;
     },
     [elements.nodes],
   );
@@ -434,32 +451,34 @@ export const DynamicOrgChart = ({
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', width: '100%' }} data-testid="org-chart">
       <Row gutter={[8, 8]} justify="space-between" style={{ margin: '0.5rem 1rem' }}>
-        <Col xs={24} md={{ offset: 12, span: 12 }}>
+        <Col xs={24} md={8}>
+          <PositionSearch
+            onSearch={onSearch}
+            disabled={departmentId == null || departmentIdIsLoading}
+            searchResultsCount={searchTerm ? searchResultCount : null}
+            searchTerm={searchTerm}
+            searchResults={searchResults}
+            onSelectResult={handleSelectResult}
+          />
+        </Col>
+        <Col xs={24} md={{ span: 8, offset: 8 }}>
           <Space direction="vertical" style={{ width: '100%' }}>
             {showDepartmentFilter && (
               <DepartmentFilter
                 setDepartmentId={setDepartmentId}
                 departmentId={departmentId}
                 loading={departmentIdIsLoading}
-                // focusable={false}
               />
             )}
-            <PositionSearch
-              // setSearchTerm={setSearchTerm}
-              onSearch={onSearch}
-              disabled={departmentId == null || departmentIdIsLoading}
-              searchResultsCount={searchTerm ? searchResultCount : null}
-              searchTerm={searchTerm}
-              searchResults={searchResults}
-              onSelectResult={handleSelectResult}
-              // focusable={false}
-            />
-            <div style={{ position: 'absolute', bottom: '-32px', right: '0', zIndex: '1' }}>
+            <div
+              style={{ position: 'absolute', bottom: showDepartmentFilter ? '-32px' : '0', right: '0', zIndex: '1' }}
+            >
               <DownloadButton />
             </div>
           </Space>
         </Col>
       </Row>
+
       {orgChartDataIsFetching || !initialized ? (
         <div
           style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', width: '100%' }}

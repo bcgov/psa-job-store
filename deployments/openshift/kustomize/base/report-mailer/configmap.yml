@@ -1,0 +1,13 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: report-mailer-config
+data:
+  SMTP_HOST: apps.smtp.gov.bc.ca
+  SMTP_PORT: "25"
+  SMTP_USER: ""
+  SMTP_PASS: ""
+  EMAIL_FROM: 
+  EMAIL_TO: 
+  # START_DATE: "2024-10-01"
+  # END_DATE: "2024-10-31"
