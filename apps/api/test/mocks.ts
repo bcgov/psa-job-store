@@ -9,3 +9,5 @@ jest.mock('@prisma/client', () => ({
     defineExtension: jest.fn().mockImplementation((callback) => callback(mockDeep())),
   },
 }));
+
+jest.mock('common-kit', () => mockDeep<any>(), { virtual: true });

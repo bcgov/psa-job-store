@@ -2,7 +2,7 @@ module.exports = {
   collectCoverageFrom: ['**/*.(t|j)s'],
   coverageDirectory: '../coverage',
   moduleFileExtensions: ['js', 'json', 'ts'],
-  setupFilesAfterEnv: ['<rootDir>/../test/prisma.mock.ts'],
+  setupFilesAfterEnv: ['<rootDir>/../test/mocks.ts'],
   rootDir: 'src',
   testEnvironment: 'node',
   testRegex: '.*\\.spec\\.ts$',
