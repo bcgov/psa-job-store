@@ -32,7 +32,7 @@ export class ScheduledTaskService {
     const metadata = await this.prisma.scheduledTaskMetadata.findUnique({
       where: { task },
     });
-    console.log('isMetadataOutdated');
+    console.log('isMetadataOutdated2');
     if (metadata == null || metadata.last_run_at == null) return true;
 
     const lastRunAt = dayjs(metadata.last_run_at).set('ms', 0);
