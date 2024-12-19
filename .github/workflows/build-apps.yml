@@ -124,7 +124,7 @@ jobs:
     runs-on: ubuntu-20.04
     if: |
       always() &&
-      (github.ref_name == 'develop')
+      (github.ref_name == 'stage')
     steps:
       - name: Trigger Unit Tests
         uses: actions/github-script@v6
