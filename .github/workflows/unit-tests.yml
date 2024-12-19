@@ -15,30 +15,30 @@ jobs:
         with:
           ref: ${{ github.ref }}
 
-      - name: Setup Node.js with NPM Cache
-        uses: actions/setup-node@v4
-        with:
-          node-version: '20.11.1'
-          cache: 'npm'
-          cache-dependency-path: '**/package-lock.json'
+      # - name: Setup Node.js with NPM Cache
+      #   uses: actions/setup-node@v4
+      #   with:
+      #     node-version: '20.11.1'
+      #     cache: 'npm'
+      #     cache-dependency-path: '**/package-lock.json'
 
-      - name: Cache Node Modules
-        id: cache-node-modules
-        uses: actions/cache@v4
-        with:
-          path: |
-            node_modules
-            */*/node_modules
-          key: ${{ runner.os }}-node-modules-${{ hashFiles('**/package-lock.json') }}
+      # - name: Cache Node Modules
+      #   id: cache-node-modules
+      #   uses: actions/cache@v4
+      #   with:
+      #     path: |
+      #       node_modules
+      #       */*/node_modules
+      #     key: ${{ runner.os }}-node-modules-${{ hashFiles('**/package-lock.json') }}
 
-      - name: Restore Node Modules Cache
-        id: cache-node-modules-restore
-        uses: actions/cache/restore@v4
-        with:
-          path: |
-            node_modules
-            */*/node_modules
-          key: ${{ runner.os }}-node-modules-${{ hashFiles('**/package-lock.json') }}
+      # - name: Restore Node Modules Cache
+      #   id: cache-node-modules-restore
+      #   uses: actions/cache/restore@v4
+      #   with:
+      #     path: |
+      #       node_modules
+      #       */*/node_modules
+      #     key: ${{ runner.os }}-node-modules-${{ hashFiles('**/package-lock.json') }}
 
       - name: Install Root Dependencies
         if: steps.cache-node-modules-restore.outputs.cache-hit != 'true'
@@ -46,14 +46,14 @@ jobs:
         env:
           HUSKY: 0
 
-      - name: Save Node Modules Cache
-        if: steps.cache-node-modules-restore.outputs.cache-hit != 'true'
-        uses: actions/cache/save@v4
-        with:
-          path: |
-            node_modules
-            */*/node_modules
-          key: ${{ runner.os }}-node-modules-${{ hashFiles('**/package-lock.json') }}
+      # - name: Save Node Modules Cache
+      #   if: steps.cache-node-modules-restore.outputs.cache-hit != 'true'
+      #   uses: actions/cache/save@v4
+      #   with:
+      #     path: |
+      #       node_modules
+      #       */*/node_modules
+      #     key: ${{ runner.os }}-node-modules-${{ hashFiles('**/package-lock.json') }}
 
       - name: Run React Tests
         run: npx -w app jest
