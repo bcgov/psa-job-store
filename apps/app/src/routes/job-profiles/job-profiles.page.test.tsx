@@ -2,8 +2,9 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { render } from '@testing-library/react';
 // import { debug } from 'jest-preview';
+import { useState } from 'react';
 import { Provider } from 'react-redux';
-import { RouterProvider, createMemoryRouter } from 'react-router-dom';
+import { MemoryRouter } from 'react-router-dom';
 import { JobProfilesPage } from './job-profiles.page';
 
 // Mock the graphqlApi reducer and middleware
@@ -41,17 +42,46 @@ jest.mock('react-oidc-context', () => ({
   }),
 }));
 
+let mockSearchParam = '';
+
+jest.mock('react-router-dom', () => ({
+  ...jest.requireActual('react-router-dom'),
+  useSearchParams: () => {
+    const [params, setParams] = useState(new URLSearchParams(mockSearchParam));
+    return [
+      params,
+      (newParams) => {
+        mockSearchParam = newParams;
+        setParams(new URLSearchParams(newParams));
+      },
+    ];
+  },
+  useLocation: () => ({
+    pathname: '/',
+    search: mockSearchParam,
+    hash: '',
+    state: null,
+  }),
+  useMatches: () => [
+    {
+      id: '0',
+      pathname: '/',
+      params: {},
+      data: null,
+      handle: null,
+    },
+  ],
+}));
+
 describe('JobProfilesPage', () => {
   it('renders the page header and job profiles', () => {
-    const router = createMemoryRouter([{ path: '/', element: <JobProfilesPage /> }]);
     const { getByText } = render(
       <Provider store={store}>
-        <RouterProvider router={router} />
+        <MemoryRouter>
+          <JobProfilesPage />
+        </MemoryRouter>
       </Provider>,
     );
-
-    // debug();
-    // screen.debug();
 
     expect(getByText('Job profiles')).toBeInTheDocument();
     expect(getByText('Explore job profiles')).toBeInTheDocument();

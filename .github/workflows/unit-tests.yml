@@ -62,12 +62,16 @@ jobs:
         if: always()
         run: npx -w api jest
 
-      - name: Upload Test Results
+      - name: Run commonJS tests
         if: always()
-        uses: actions/upload-artifact@v3
-        with:
-          name: test-results
-          path: |
-            apps/app/junit.xml
-            apps/api/junit.xml
-            apps/api/coverage
+        run: npx -w common-kit jest
+
+      # - name: Upload Test Results
+      #   if: always()
+      #   uses: actions/upload-artifact@v3
+      #   with:
+      #     name: test-results
+      #     path: |
+      #       apps/app/junit.xml
+      #       apps/api/junit.xml
+      #       apps/api/coverage
