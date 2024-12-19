@@ -380,6 +380,9 @@ export const PositionRequestPage = () => {
           positionRequestData={{ positionRequest: wizardContextPositionRequestData } as GetPositionRequestResponse}
         ></ServiceRequestDetails>
       ),
+      props: {
+        role: 'tab',
+      },
     },
     {
       key: '2',
@@ -393,6 +396,9 @@ export const PositionRequestPage = () => {
           />
         </div>
       ),
+      props: {
+        role: 'tab',
+      },
     },
     ...(!isSharedRoute || (isSharedRoute && wizardContextPositionRequestData?.profile_json)
       ? [
@@ -406,6 +412,9 @@ export const PositionRequestPage = () => {
                 colProps={{ xs: 24, sm: 24, md: 24, lg: 20, xl: 16 }}
               />
             ),
+            props: {
+              role: 'tab',
+            },
           },
         ]
       : []),
@@ -691,6 +700,9 @@ export const PositionRequestPage = () => {
                 )}
               </>
             ),
+            props: {
+              role: 'tab',
+            },
           },
         ]
       : []),
@@ -770,6 +782,7 @@ export const PositionRequestPage = () => {
                   defaultActiveKey={readOnlySelectedTab}
                   items={tabItems}
                   tabBarStyle={{ backgroundColor: '#fff', margin: '0 -1rem', padding: '0 1rem 0px 1rem' }}
+                  data-testid="tab-bar"
                 />
               ) : (
                 <LoadingSpinnerWithMessage />
