@@ -19,9 +19,6 @@ spec:
                 - name: kibana
                   image: docker.elastic.co/kibana/kibana:8.16.0
                   resources:
-                      limits:
-                          cpu: 100m
-                          memory: 1Gi
                       requests:
                           cpu: 10m
                           memory: 500Mi

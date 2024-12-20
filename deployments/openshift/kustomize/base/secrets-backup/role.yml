@@ -1,0 +1,9 @@
+# This role binding was created for the custom service account, secret-backup, to be able to read oc secrets
+apiVersion: rbac.authorization.k8s.io/v1
+kind: Role
+metadata:
+  name: secret-reader
+rules:
+  - apiGroups: [""]
+    resources: ["secrets"]
+    verbs: ["get", "list"]
