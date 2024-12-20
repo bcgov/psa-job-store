@@ -17,7 +17,6 @@ import { ServiceRequestDetails } from '../classification-tasks/components/servic
 import NotFoundComponent from '../not-found/404';
 import { OrgChart } from '../org-chart/components/org-chart';
 import { OrgChartType } from '../org-chart/enums/org-chart-type.enum';
-import StatusIndicator from '../wizard/components/wizard-position-request-status-indicator';
 
 // import '../wizard/wizard-review.page.css';
 // import './total-comp-approved-request.page.css';
@@ -43,22 +42,11 @@ export const ViewPositionPage = () => {
 
   const handleCopyURL = () => {
     // Implement URL copy functionality here
-    const linkToCopy = `${window.location.origin}/requests/positions/share/${data?.positionRequest?.shareUUID}`;
+    const linkToCopy = `${window.location.origin}/my-departments/position/${data?.positionRequest?.id}`;
 
     // Use the Clipboard API to copy the link to the clipboard
     if (!isTestUser) copy(linkToCopy);
     message.success('Link copied to clipboard!');
-  };
-
-  const StatusIcon = ({ status }: any) => {
-    // const statusInfo = statusIconColorMap[status];
-    // return statusInfo?.icon ? (
-    //   <Space>
-    //     <span style={{ color: statusInfo.color }}>{statusInfo.icon}</span>
-    //     <span style={{ color: statusInfo.textColor }}>{statusInfo.text}</span>
-    //   </Space>
-    // ) : null;
-    return <StatusIndicator status={status} />;
   };
 
   if (!data) {
@@ -149,8 +137,6 @@ export const ViewPositionPage = () => {
       <PageHeader
         extra={
           <>
-            {data?.positionRequest?.status && <StatusIcon status={data.positionRequest.status} />}
-
             <Divider type="vertical" />
             <Dropdown menu={{ items }} placement="bottom" trigger={['click']}>
               <Button icon={<EllipsisOutlined />}></Button>
