@@ -3,7 +3,7 @@ kind: CronJob
 metadata:
   name: secrets-backup
 spec:
-  schedule: "0 0 * * *"   # Every day at midnight
+  schedule: "0 8 * * *"   # Every day at midnight
   jobTemplate:
     spec:
       template:
