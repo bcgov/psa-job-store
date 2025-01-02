@@ -72,3 +72,30 @@ WHERE jpr.classification_id = mapping.old_id
         AND jpr2.classification_peoplesoft_id     = cnew.peoplesoft_id
     );
 
+-- 2) DELETE any leftover rows that are still referencing the old IDs
+--    (i.e. they couldn't be updated because a duplicate row already existed)
+WITH mapping AS (
+    SELECT '351052' AS old_id
+    UNION ALL SELECT '351103'
+    UNION ALL SELECT '351104'
+    UNION ALL SELECT '351105'
+    UNION ALL SELECT '351501'
+    UNION ALL SELECT '351503'
+    UNION ALL SELECT '351533'
+    UNION ALL SELECT '353103'
+    UNION ALL SELECT '353104'
+    UNION ALL SELECT '353105'
+)
+DELETE FROM job_profile_reports_to jpr
+USING mapping
+WHERE jpr.classification_id = mapping.old_id
+  AND jpr.classification_employee_group_id = (
+      SELECT employee_group_id
+      FROM classification
+      WHERE id = mapping.old_id
+    )
+  AND jpr.classification_peoplesoft_id = (
+      SELECT peoplesoft_id
+      FROM classification
+      WHERE id = mapping.old_id
+    );
