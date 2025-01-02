@@ -1,7 +1,7 @@
 apiVersion: postgres-operator.crunchydata.com/v1beta1
 kind: PostgresCluster
 metadata:
-  name: api-postgres-beta
+  name: api-postgres-alpha
 spec:
   shutdown: false
   instances:
@@ -10,9 +10,6 @@ spec:
         requests:
           cpu: '250m'
           memory: '256Mi'
-        limits:
-          cpu: '550m'
-          memory: '512Mi'
       dataVolumeClaimSpec:
         accessModes:
           - 'ReadWriteOnce'
@@ -25,9 +22,6 @@ spec:
             requests:
               cpu: '5m'
               memory: '10Mi'
-            limits:
-              cpu: '10m'
-              memory: '20Mi'
   backups:
     pgbackrest:
       global:
@@ -51,26 +45,17 @@ spec:
           requests:
             cpu: 10m
             memory: 64Mi
-          limits:
-            cpu: 150m
-            memory: 128Mi
       sidecars:
         pgbackrest:
           resources:
             requests:
               cpu: '50m'
               memory: '150Mi'
-            limits:
-              cpu: '100m'
-              memory: '256Mi'
         pgbackrestConfig:
           resources:
             requests:
               cpu: '5m'
               memory: '10Mi'
-            limits:
-              cpu: '10m'
-              memory: '20Mi'
   postgresVersion: 16
   # image: 'registry.redhat.io/rhel8/postgresql-15'  # Use Crunchy Data equivalent image
   patroni:
@@ -90,9 +75,6 @@ spec:
   #     requests:
   #       cpu: 1m
   #       memory: 64Mi
-  #     limits:
-  #       cpu: 10m
-  #       memory: 128Mi
   primary:
     expose:
       service:
