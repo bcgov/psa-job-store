@@ -145,7 +145,6 @@ export const OrgChartNode = ({
                       <CreatePositionButton
                         departmentId={data.department?.id}
                         elements={orgChartData}
-                        positionIsVacant={positionIsVacant}
                         supervisorId={data.id}
                       />,
                       <ViewPositionButton positionRequestId={positionRequestId} />,
