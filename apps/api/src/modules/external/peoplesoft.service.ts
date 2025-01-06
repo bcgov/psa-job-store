@@ -85,16 +85,33 @@ export class PeoplesoftService {
     );
 
     // Filter by applicable employee groups
+    // Filter out specific job codes for Category B, as these are not currently supported
     // Sort rows by effective date ASC
-    const sortedRows = (response?.data?.query?.rows ?? []).sort((a, b) => {
-      if (a.EFFDT > b.EFFDT) {
-        return -1;
-      } else if (b.EFFDT > a.EFFDT) {
-        return 1;
-      } else {
-        return 0;
-      }
-    });
+    const sortedRows = (response?.data?.query?.rows ?? [])
+      .sort((a, b) => {
+        if (a.EFFDT > b.EFFDT) {
+          return -1;
+        } else if (b.EFFDT > a.EFFDT) {
+          return 1;
+        } else {
+          return 0;
+        }
+      })
+      .filter(
+        (row) =>
+          ![
+            '351052',
+            '351103',
+            '351104',
+            '351105',
+            '351501',
+            '351503',
+            '351533',
+            '353103',
+            '353104',
+            '353105',
+          ].includes(row.JOBCODE),
+      );
 
     const employeeGroups: string[] = sortedRows.flatMap((row) => row.SAL_ADMIN_PLAN as string);
     for await (const id of new Set(employeeGroups)) {
