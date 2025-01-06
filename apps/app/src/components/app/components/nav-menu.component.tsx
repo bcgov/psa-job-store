@@ -13,8 +13,8 @@ import {
 } from '@ant-design/icons';
 import { Flex, Menu } from 'antd';
 import { useCallback, useEffect, useMemo, useState } from 'react';
-import { useAuth } from 'react-oidc-context';
 import { useLocation, useParams } from 'react-router-dom';
+import { useTypedSelector } from '../../../redux/redux.hooks';
 import { FileSettingOutlined } from '../../icons/file-setting-outlined';
 import { PartitionSettingOutlined } from '../../icons/partition-setting-outlined';
 import { PositionRequestOutlined } from '../../icons/position-request-outlined';
@@ -31,7 +31,7 @@ export interface NavMenuProps {
 }
 
 export const NavMenu = ({ collapsed }: NavMenuProps) => {
-  const auth = useAuth();
+  const auth = useTypedSelector((state) => state.authReducer);
   const location = useLocation();
 
   // Function to get all parent keys of a menu item
@@ -126,10 +126,10 @@ export const NavMenu = ({ collapsed }: NavMenuProps) => {
               },
             ]
         : []),
-      ...(userCanAccess(auth.user, ['user'])
+      ...(userCanAccess(auth.user, ['bceid', 'idir'])
         ? [createMenuItem({ key: '/', icon: <HomeOutlined aria-hidden className="" />, label: 'Home', title: 'Home' })]
         : []),
-      ...(userCanAccess(auth.user, ['user'])
+      ...(userCanAccess(auth.user, ['idir'])
         ? [
             createMenuItem({
               key: '/my-departments',
@@ -139,7 +139,7 @@ export const NavMenu = ({ collapsed }: NavMenuProps) => {
             }),
           ]
         : []),
-      ...(userCanAccess(auth.user, ['user', 'total-compensation'])
+      ...(userCanAccess(auth.user, ['bceid', 'idir', 'total-compensation'])
         ? [
             createMenuGroup({
               key: 'job-profiles',
@@ -147,7 +147,7 @@ export const NavMenu = ({ collapsed }: NavMenuProps) => {
               icon: <FileOutlined aria-hidden />,
               label: 'Job Profiles',
               children: [
-                ...(userCanAccess(auth.user, ['user'])
+                ...(userCanAccess(auth.user, ['bceid', 'idir'])
                   ? [
                       createMenuItem({
                         key: '/job-profiles',
@@ -156,7 +156,7 @@ export const NavMenu = ({ collapsed }: NavMenuProps) => {
                       }),
                     ]
                   : []),
-                // ...(userCanAccess(auth.user, ['user'])
+                // ...(userCanAccess(auth.user, ['idir'])
                 //   ? [
                 //       createMenuItem({
                 //         key: '/job-profiles/saved',

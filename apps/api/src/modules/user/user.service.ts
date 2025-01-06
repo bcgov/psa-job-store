@@ -252,23 +252,26 @@ export class UserService {
       await this.syncUser(user.id);
     }
 
+    // Previously, we removed users from the Job Store if they no longer exist in Keycloak.  This isn't totally correct,
+    // as we want to show historic data inside the application.
+    // --------------------------------------------------------
     // Delete active users which do not appear in the list of keycloak users
-    await this.prisma.user.updateMany({
-      where: {
-        AND: [
-          // Users not in list of keycloak users
-          { id: { notIn: users.map((user) => user.id) } },
-          // Only update users who are not currently deleted
-          { deleted_at: { equals: null } },
-          // Ignore system user
-          { name: { not: { equals: 'SYSTEM USER' } } },
-        ],
-      },
-      data: {
-        deleted_at: new Date().toISOString(),
-        roles: [],
-      },
-    });
+    // await this.prisma.user.updateMany({
+    //   where: {
+    //     AND: [
+    //       // Users not in list of keycloak users
+    //       { id: { notIn: users.map((user) => user.id) } },
+    //       // Only update users who are not currently deleted
+    //       { deleted_at: { equals: null } },
+    //       // Ignore system user
+    //       { name: { not: { equals: 'SYSTEM USER' } } },
+    //     ],
+    //   },
+    //   data: {
+    //     deleted_at: new Date().toISOString(),
+    //     roles: [],
+    //   },
+    // });
   }
 
   async upsertUser(user: UserUpdateInput) {

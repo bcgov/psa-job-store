@@ -1,4 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { Field, Int, ObjectType } from '@nestjs/graphql';
 import { PositionRequest, Prisma } from '@prisma/client';
 import {
@@ -117,6 +118,7 @@ export class PositionRequestApiService {
 
   constructor(
     private readonly classificationService: ClassificationService,
+    private readonly configService: ConfigService,
     private readonly crmService: CrmService,
     private readonly departmentService: DepartmentService,
     private readonly peoplesoftService: PeoplesoftService,
@@ -191,7 +193,7 @@ export class PositionRequestApiService {
         // in testmode, we can skip the peoplesoft call to create position
         let position, positionRequestNeedsReview;
         try {
-          if (process.env.TEST_ENV === 'true') {
+          if (this.configService.get('TEST_ENV') === 'true') {
             positionRequestNeedsReview = (await this.positionRequestNeedsReview(id)).result;
 
             if (positionRequestNeedsReview === true)
@@ -1431,7 +1433,8 @@ export class PositionRequestApiService {
       });
       const { metadata } = await this.prisma.user.findUnique({ where: { id: positionRequest.user_id } });
       const contactId =
-        ((metadata ?? {}) as Record<string, any>).crm?.contact_id ?? (process.env.TEST_ENV === 'true' ? 231166 : null);
+        ((metadata ?? {}) as Record<string, any>).crm?.contact_id ??
+        (this.configService.get('TEST_ENV') === 'true' ? 231166 : null);
 
       // without contactId we cannot create an incident
       // this can happen if this is new staff member and they have not been assigned a CRM contact yet

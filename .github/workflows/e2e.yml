@@ -300,8 +300,6 @@ jobs:
           config: 'video=true'
         env:
           CYPRESS_BASE_URL: ${{ secrets.CYPRESS_BASE_URL }}
-          CYPRESS_VITE_KEYCLOAK_REALM_URL: ${{ secrets.CYPRESS_VITE_KEYCLOAK_REALM_URL }}
-          CYPRESS_VITE_KEYCLOAK_CLIENT_ID: ${{ secrets.CYPRESS_VITE_KEYCLOAK_CLIENT_ID }}
           CYPRESS_VITE_BACKEND_URL: ${{ secrets.CYPRESS_VITE_BACKEND_URL }}
           CYPRESS_VITE_E2E_AUTH_KEY: ${{ secrets.CYPRESS_VITE_E2E_AUTH_KEY }}
 
