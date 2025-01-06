@@ -59,8 +59,6 @@ export const WizardOrgChartPage = ({
   // const [isLoading, setIsLoading] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
   const [nextButtonTooltipTitle, setNextButtonTooltipTitle] = useState<string>('');
-  const [positionVacant, setPositionVacant] = useState<boolean>(false);
-  const positionVacantTooltipText = "You can't create a new position which reports to a vacant position.";
 
   const [currentView] = useState<'chart' | 'tree'>('chart');
   const [horizontal, setHorizontal] = useState(false);
@@ -90,7 +88,7 @@ export const WizardOrgChartPage = ({
   const nextButtonIsDisabled = useCallback(() => {
     const matches = orgChartData.nodes.filter((node) => node.id === selectedPositionId);
 
-    return matches.length > 0 ? matches[0].data.employees.length === 0 : true;
+    return matches.length == 0;
   }, [selectedPositionId, orgChartData.nodes]);
 
   useEffect(() => {
@@ -99,9 +97,7 @@ export const WizardOrgChartPage = ({
     if (selectedNodes.length === 0) {
       setNextButtonTooltipTitle('Select a supervisor position to continue');
     } else {
-      const positionIsVacant = selectedNodes[0].data.employees.length === 0;
-      setNextButtonTooltipTitle(positionIsVacant ? positionVacantTooltipText : '');
-      setPositionVacant(positionIsVacant);
+      setNextButtonTooltipTitle('');
     }
 
     // if (nextButtonIsDisabled() === true) {
@@ -227,9 +223,7 @@ export const WizardOrgChartPage = ({
         // hasUnsavedChanges={hasUnsavedChanges}
         maxStepCompleted={positionRequest?.max_step_completed}
         onStepClick={switchStep}
-        disabledTooltip={
-          positionVacant ? positionVacantTooltipText : nextButtonTooltipTitle != '' ? nextButtonTooltipTitle : null
-        }
+        disabledTooltip={nextButtonTooltipTitle != '' ? nextButtonTooltipTitle : null}
       ></WizardSteps>
       <WizardContentWrapper>
         {isLoadingUserProfile || isFetchingUserProfile || isResetting ? (
