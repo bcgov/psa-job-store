@@ -13,20 +13,6 @@ jest.mock('./envConfig', () => ({
   VITE_ENV: VITE_ENV,
 }));
 
-jest.mock('react-oidc-context', () => ({
-  ...jest.requireActual('react-oidc-context'),
-  useAuth: () => ({
-    isAuthenticated: true,
-    user: {
-      profile: {
-        client_roles: ['total-compensation', 'classification', 'hiring-manager', 'super-admin'],
-      },
-    },
-    isLoading: false,
-    // Add other auth methods if needed
-  }),
-}));
-
 jest.mock('./src/redux/services/graphql-api/position.api', () => ({
   useLazyGetPositionProfileQuery: jest.fn().mockReturnValue([
     jest.fn(), // mock trigger function

@@ -29,18 +29,6 @@ jest.mock('../../redux/redux.store', () => ({
   }),
 }));
 
-jest.mock('react-oidc-context', () => ({
-  useAuth: () => ({
-    isAuthenticated: false,
-    user: {
-      profile: {
-        idir_username: 'Bob',
-      },
-    },
-    isLoading: false,
-  }),
-}));
-
 describe('JobProfilesPage', () => {
   it('renders the page header and job profiles', () => {
     const router = createMemoryRouter([{ path: '/', element: <JobProfilesPage /> }]);
