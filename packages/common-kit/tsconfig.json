@@ -1,4 +1,5 @@
 {
+  "compilerOptions": { "types": ["node", "jest"] },
   "extends": "tsconfig/vite-library.json",
   "include": ["src"],
   "exclude": ["dist", "node_modules"]
