@@ -100,6 +100,6 @@
     "node": ">=22.11.0 <23.0.0"
   },
   "prisma": {
-    "seed": "ts-node prisma/choose-seed.js"
+    "seed": "npx ts-node --skipProject prisma/choose-seed.js"
   }
 }
