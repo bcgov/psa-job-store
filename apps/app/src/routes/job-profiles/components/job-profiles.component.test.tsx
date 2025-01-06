@@ -1,6 +1,5 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { act, fireEvent, render, waitFor, within } from '@testing-library/react';
-import { AuthProvider } from 'react-oidc-context';
 import { Provider } from 'react-redux';
 import { MemoryRouter, useParams } from 'react-router-dom';
 import JobProfiles from './job-profiles.component';
