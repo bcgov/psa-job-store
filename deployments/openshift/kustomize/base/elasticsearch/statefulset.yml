@@ -19,9 +19,6 @@ spec:
                 - name: elasticsearch
                   image: docker.elastic.co/elasticsearch/elasticsearch:8.16.0
                   resources:
-                      limits:
-                          cpu: 500m
-                          memory: 3Gi
                       requests:
                           cpu: 200m
                           memory: 1.5Gi
