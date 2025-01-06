@@ -263,7 +263,7 @@ export const ServiceRequestDetails: React.FC<ServiceRequestDetailsProps> = ({ po
   ];
 
   return (
-    <Row justify="center">
+    <Row justify="center" data-testid="job-details-component">
       <Col xs={24} sm={24} md={24} lg={24} xl={24} xxl={16}>
         <Card className="tableHeader" style={{ marginTop: '1rem' }}>
           <Row gutter={24} wrap>

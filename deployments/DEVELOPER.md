@@ -237,6 +237,13 @@ Shut down temporary sql instance:
 
 `pg_ctl -D /pgdata/restore stop`
 
+### Secret Backup and Restore
+
+There is a cron job (secrets-backup) that backs up the openshift secrets object daily. These backups are stored on a PVC, and stored for 60 days.
+
+The PVC is mounted to the sidecar under /backups for easy access. If the secrets ever need to be restored, you can fetch
+from here, and decode the base64 values.
+
 ## Notes:
 
 For the api project, stateful sets are contained within the overlays instead of the base. This is due to a kubernetes/kustomize limitation that prevents the storage amount for a volumeclaimtemplate from being changed. If we use the same storage amount in every enviroment, this can be moved back to the base.

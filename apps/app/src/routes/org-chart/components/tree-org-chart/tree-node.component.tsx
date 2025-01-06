@@ -129,32 +129,23 @@ const TreeNode: React.FC<TreeNodeProps> = ({
             <span>{data.children.length}</span>
           </div>
           {!onSelect ? (
-            <Tooltip
-              title={
-                !data.data.employees[0]?.name
-                  ? "You can't create a new position which reports to a vacant position."
-                  : undefined
-              }
+            <Button
+              type="link"
+              icon={<UserOutlined />}
+              onClick={handleCreateNewReport}
+              onKeyDown={(e) => {
+                if (e.key === 'Enter' || e.key === ' ') {
+                  e.stopPropagation();
+                  e.preventDefault();
+                  handleCreateNewReport();
+                }
+              }}
+              style={{ borderRadius: 0, border: 'none', paddingLeft: '0' }}
+              tabIndex={-1}
+              // loading={isLoading}
             >
-              <Button
-                type="link"
-                icon={<UserOutlined />}
-                onClick={handleCreateNewReport}
-                onKeyDown={(e) => {
-                  if (e.key === 'Enter' || e.key === ' ') {
-                    e.stopPropagation();
-                    e.preventDefault();
-                    handleCreateNewReport();
-                  }
-                }}
-                style={{ borderRadius: 0, border: 'none', paddingLeft: '0' }}
-                disabled={!data.data.employees[0]?.name}
-                tabIndex={-1}
-                // loading={isLoading}
-              >
-                Create new direct report
-              </Button>
-            </Tooltip>
+              Create new direct report
+            </Button>
           ) : (
             isSelected && (
               <div

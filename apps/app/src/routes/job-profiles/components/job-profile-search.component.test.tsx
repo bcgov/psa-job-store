@@ -108,7 +108,7 @@ describe('JobProfileSearch', () => {
     }
 
     // Wait for dropdown options to be visible
-    const dropdownOption = await screen.findByText('Communications Officer R30');
+    const dropdownOption = await screen.findByText('Communications Officer R30 (GEU)');
 
     // Click on the first dropdown option
     fireEvent.click(dropdownOption);
@@ -161,7 +161,7 @@ describe('JobProfileSearch', () => {
     if (clickEl == null) throw Error('selector not found');
     else fireEvent.mouseDown(clickEl);
 
-    const classificationOption = await screen.findByText('Communications Officer R30');
+    const classificationOption = await screen.findByText('Communications Officer R30 (GEU)');
     fireEvent.click(classificationOption);
 
     await waitFor(() => {
@@ -247,7 +247,7 @@ describe('JobProfileSearch', () => {
     // Find the classification tag with specific text and class
     const classificationTag = await waitFor(() => {
       const tags = container.querySelectorAll('.ant-tag');
-      return Array.from(tags).find((tag) => tag.textContent === 'Communications Officer R30');
+      return Array.from(tags).find((tag) => tag.textContent === 'Communications Officer R30 (GEU)');
     });
 
     if (!classificationTag) throw new Error('Classification tag not found');

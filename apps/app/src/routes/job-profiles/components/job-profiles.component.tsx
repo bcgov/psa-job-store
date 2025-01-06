@@ -255,7 +255,7 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
       //   return;
       // }
 
-      if (lastSearchParams.current == searchParams.toString()) {
+      if (lastSearchParams.current == searchParams.toString() && !shouldFetch) {
         // console.log('params didnt change, returning..', searchParams.toString());
         return;
       } else {

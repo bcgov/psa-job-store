@@ -220,7 +220,7 @@ export class PositionRequestApiResolver {
   async positionNeedsReview(@CurrentUser() user: Express.User, @Args('id') id: number) {
     const position = await this.positionRequestService.getPositionRequest(+id, user.id, user.roles);
     if (!position) {
-      return false;
+      return { result: false, reasons: [] };
     }
     return this.positionRequestService.positionRequestNeedsReview(+id);
   }
