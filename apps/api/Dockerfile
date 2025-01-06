@@ -16,17 +16,6 @@ ARG KEYCLOAK_LOGOUT_REDIRECT_URL
 ARG KEYCLOAK_CLIENT_ID
 ARG KEYCLOAK_CLIENT_SECRET
 
-RUN test -n "$SSO_ENVIRONMENT"
-RUN test -n "$SSO_INTEGRATION_ID"
-RUN test -n "$CSS_API_CLIENT_ID"
-RUN test -n "$CSS_API_CLIENT_SECRET"
-RUN test -n "$SESSION_SECRET"
-RUN test -n "$KEYCLOAK_REALM_URL"
-RUN test -n "$KEYCLOAK_CALLBACK_URL"
-RUN test -n "$KEYCLOAK_LOGOUT_REDIRECT_URL"
-RUN test -n "$KEYCLOAK_CLIENT_ID"
-RUN test -n "$KEYCLOAK_CLIENT_SECRET"
-
 # Copy application dependency manifests to the container image.
 COPY package*.json ./
 COPY packages ./packages

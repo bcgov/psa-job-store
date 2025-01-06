@@ -1,51 +1,6 @@
 version: '3.8'
 
 services:
-  # nestjs-app:
-  #   env_file:
-  #       - .env
-  #   build:
-  #     context: .
-  #     image: pjs-frontend:18-alpine
-  #     dockerfile: apps/api/Dockerfile.dev
-  #     args:
-  #       - POSTGRES_DB=${POSTGRES_DB}
-  #       - POSTGRES_USER=${POSTGRES_USER}
-  #       - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
-  #       - DATABASE_URL=${DATABASE_URL}
-  #       - SESSION_SECRET=${SESSION_SECRET}
-  #       - KEYCLOAK_REALM_URL=${KEYCLOAK_REALM_URL}
-  #       - KEYCLOAK_CALLBACK_URL=${KEYCLOAK_CALLBACK_URL}
-  #       - KEYCLOAK_LOGOUT_REDIRECT_URL=${KEYCLOAK_LOGOUT_REDIRECT_URL}
-  #       - KEYCLOAK_CLIENT_ID=${KEYCLOAK_CLIENT_ID}
-  #       - KEYCLOAK_CLIENT_SECRET=${KEYCLOAK_CLIENT_SECRET}
-  #       - KEYCLOAK_REDIRECT_URL=${KEYCLOAK_REDIRECT_URL}
-  #   ports:
-  #     - 4000:4000
-  #   depends_on:
-  #     db:
-  #       condition: service_started
-  #   volumes:
-  #     - ./apps/api/src:/usr/src/app/src:cached
-  #     - ./apps/api/prisma:/usr/src/app/prisma
-  #     - api-nodemodules:/node_modules
-  #   networks:
-  #     - psa-job-store
-
-  # http://localhost:5173/
-  # vite_docker:
-  #   build:
-  #     context: .
-  #     dockerfile: apps/app/Dockerfile
-  #     args:
-  #       - VITE_BACKEND_URL=${VITE_BACKEND_URL}
-  #   ports:
-  #     - 5173:5173
-  #   volumes:
-  #     - ./src:/usr/src/app/src:cached
-  #   networks:
-  #     - psa-job-store
-
   db:
     image: postgres:16
     user: postgres
