@@ -33,7 +33,7 @@ spec:
                     valueFrom:
                       secretKeyRef:
                         name: secrets
-                        key: KEYCLOAK_API_ENVIRONMENT
+                        key: SSO_ENVIRONMENT
                   - name: DISCOVERY
                     valueFrom:
                       secretKeyRef:
