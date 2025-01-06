@@ -3,12 +3,7 @@ import { Button } from 'antd';
 import { PositionProvider, usePosition } from '../../../components/app/common/contexts/position.context';
 import { Elements } from '../interfaces/elements.interface';
 
-const NaiveCreatePositionButton = ({
-  departmentId,
-  elements,
-  positionIsVacant,
-  supervisorId,
-}: CreatePositionButtonProps) => {
+const NaiveCreatePositionButton = ({ departmentId, elements, supervisorId }: CreatePositionButtonProps) => {
   const { createNewPosition } = usePosition();
   // const { getNodes } = useReactFlow();
   // const [isLoading, setIsLoading] = useState(false);
@@ -48,7 +43,6 @@ const NaiveCreatePositionButton = ({
 export interface CreatePositionButtonProps {
   departmentId: string;
   elements: Elements;
-  positionIsVacant: boolean;
   supervisorId: string;
 }
 
