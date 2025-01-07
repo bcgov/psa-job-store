@@ -35,8 +35,9 @@ async function bootstrap() {
       store: new PostgresSessionStore({
         conObject: {
           connectionString: configService.get('DATABASE_URL'),
-          ssl:
-            configService.get('NODE_ENV') === 'development' || configService.get('E2E_TESTING') === true ? false : true,
+          ssl: {
+            rejectUnauthorized: false,
+          },
         },
         tableName: '_session',
       }),
