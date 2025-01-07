@@ -33,7 +33,11 @@ async function bootstrap() {
       saveUninitialized: false,
       secret: configService.get('SESSION_SECRET'),
       store: new PostgresSessionStore({
-        conString: configService.get('DATABASE_URL'),
+        conObject: {
+          connectionString: configService.get('DATABASE_URL'),
+          ssl:
+            configService.get('NODE_ENV') === 'development' || configService.get('E2E_TESTING') === true ? false : true,
+        },
         tableName: '_session',
       }),
     }),
