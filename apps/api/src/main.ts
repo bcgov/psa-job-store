@@ -26,8 +26,7 @@ async function bootstrap() {
       cookie: {
         httpOnly: true,
         maxAge: configService.get('E2E_TESTING') === 'true' ? 24 * 60 * 60 * 1000 : 30 * 60 * 1000, // 24 hours/30 mins,
-        secure:
-          configService.get('NODE_ENV') === 'development' || configService.get('E2E_TESTING') === true ? false : true,
+        secure: 'auto',
       },
       resave: false,
       rolling: true,
