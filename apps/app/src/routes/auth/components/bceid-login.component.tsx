@@ -20,7 +20,7 @@ export const BCeIDLogin = () => {
       <Button
         onClick={() => {
           setIsLoading(true);
-          window.location.href = 'http://localhost:4000/auth/login/bceid';
+          window.location.href = `${import.meta.env.VITE_BACKEND_URL}/auth/login/bceid`;
         }}
         icon={<LoginOutlined />}
         loading={isLoading}

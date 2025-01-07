@@ -14,7 +14,7 @@ export const IDIRLogin = () => {
       <Button
         onClick={() => {
           setIsLoading(true);
-          window.location.href = 'http://localhost:4000/auth/login/idir';
+          window.location.href = `${import.meta.env.VITE_BACKEND_URL}/auth/login/idir`;
         }}
         icon={<LoginOutlined />}
         loading={isLoading}
