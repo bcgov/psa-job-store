@@ -128,64 +128,69 @@ export class AuthService {
           peoplesoft: peoplesoftMetadata,
         };
       }
-    } else if (this.configService.get('E2E_TESTING') !== 'true') {
-      // If we're e2e testing, use the data from the database as is without updates
-      // Check for differences between `existingUser.metadata.peoplesoft` and peoplesoftMetadata
-      const metadataUpdates: Record<string, any> = this.getPeoplesoftMetadataUpdates(existingUser, peoplesoftMetadata);
+    } else {
+      if (this.configService.get('E2E_TESTING') !== 'true') {
+        // If we're e2e testing, use the data from the database as is without updates
+        // Check for differences between `existingUser.metadata.peoplesoft` and peoplesoftMetadata
+        const metadataUpdates: Record<string, any> = this.getPeoplesoftMetadataUpdates(
+          existingUser,
+          peoplesoftMetadata,
+        );
 
-      // Peoplesoft metadata has changed
-      if (Object.keys(metadataUpdates).length > 0) {
-        // If the organization_id or position_id has changed, reset org chart department associations
-        if (Object.keys(metadataUpdates).some((key) => ['organization_id', 'position_id'].includes(key))) {
-          sessionUser.metadata.org_chart.department_ids = [metadataUpdates.department_id];
+        // Peoplesoft metadata has changed
+        if (Object.keys(metadataUpdates).length > 0) {
+          // If the organization_id or position_id has changed, reset org chart department associations
+          if (Object.keys(metadataUpdates).some((key) => ['organization_id', 'position_id'].includes(key))) {
+            sessionUser.metadata.org_chart.department_ids = [peoplesoftMetadata.department_id];
+          }
+
+          if (
+            Object.keys(metadataUpdates).every((key) => !['organization_id', 'position_id'].includes(key)) &&
+            Object.keys(metadataUpdates).includes('department_id')
+          ) {
+            sessionUser.metadata.org_chart.department_ids = Array.from(
+              new Set(sessionUser.metadata.org_chart.department_ids).add(metadataUpdates.deparment_id),
+            );
+          }
+
+          // Implement once 'strategic-hr' role is conceptualized
+          //
+          // // If any of department_id, employee_id, organization_id, position_id change, recheck for subordinates and assign/unassigh hiring-manager role
+          // if (
+          //   Object.keys(metadataUpdates).some((key) => ['department_id', 'employee_id', 'organization_id', 'position_id'])
+          // ) {
+          //   // Check for subordinates
+          //   const hasSubordinates = await this.userPositionHasSubordinates(
+          //     metadataUpdates.position_id ?? sessionUser.metadata.peoplesoft.position_id,
+          //   );
+          //   if (hasSubordinates) {
+          //     if (!sessionUser.roles.includes('hiring-manager')) {
+          //       const { data } = (await this.keycloakService.assignUserRoles(id, ['hiring-manager'])) ?? { data: [] };
+          //       // Update `sessionUser` to contain newly assigned roles
+          //       sessionUser.roles = data.map((role) => role.name);
+          //     }
+          //   } else {
+          //     const success = await this.keycloakService.unassignUserRole(id, 'hiring-manager');
+          //     if (success) {
+          //       sessionUser.roles = sessionUser.roles.filter((role) => role === 'hiring-manager');
+          //     }
+          //   }
+          // }
+
+          // If organization_id, position_id stays the same, but department changes
+          // if (
+          //   Object.keys(metadataUpdates).every((key) => !['orgnization_id', 'position_id'].includes(key)) &&
+          //   Object.keys(metadataUpdates).includes('department_id')
+          // ) {
+          //   if (sessionUser.roles.includes('hiring-manager')) {
+          //     sessionUser.metadata.org_chart.department_ids = Array.from(
+          //       new Set(sessionUser.metadata.org_chart.department_ids).add(metadataUpdates.deparment_id),
+          //     );
+          //   } else {
+          //     sessionUser.metadata.org_chart.department_ids = [metadataUpdates.department_id];
+          //   }
+          // }
         }
-
-        if (
-          Object.keys(metadataUpdates).every((key) => !['organization_id', 'position_id'].includes(key)) &&
-          Object.keys(metadataUpdates).includes('department_id')
-        ) {
-          sessionUser.metadata.org_chart.department_ids = Array.from(
-            new Set(sessionUser.metadata.org_chart.department_ids).add(metadataUpdates.deparment_id),
-          );
-        }
-
-        // Implement once 'strategic-hr' role is conceptualized
-        //
-        // // If any of department_id, employee_id, organization_id, position_id change, recheck for subordinates and assign/unassigh hiring-manager role
-        // if (
-        //   Object.keys(metadataUpdates).some((key) => ['department_id', 'employee_id', 'organization_id', 'position_id'])
-        // ) {
-        //   // Check for subordinates
-        //   const hasSubordinates = await this.userPositionHasSubordinates(
-        //     metadataUpdates.position_id ?? sessionUser.metadata.peoplesoft.position_id,
-        //   );
-        //   if (hasSubordinates) {
-        //     if (!sessionUser.roles.includes('hiring-manager')) {
-        //       const { data } = (await this.keycloakService.assignUserRoles(id, ['hiring-manager'])) ?? { data: [] };
-        //       // Update `sessionUser` to contain newly assigned roles
-        //       sessionUser.roles = data.map((role) => role.name);
-        //     }
-        //   } else {
-        //     const success = await this.keycloakService.unassignUserRole(id, 'hiring-manager');
-        //     if (success) {
-        //       sessionUser.roles = sessionUser.roles.filter((role) => role === 'hiring-manager');
-        //     }
-        //   }
-        // }
-
-        // If organization_id, position_id stays the same, but department changes
-        // if (
-        //   Object.keys(metadataUpdates).every((key) => !['orgnization_id', 'position_id'].includes(key)) &&
-        //   Object.keys(metadataUpdates).includes('department_id')
-        // ) {
-        //   if (sessionUser.roles.includes('hiring-manager')) {
-        //     sessionUser.metadata.org_chart.department_ids = Array.from(
-        //       new Set(sessionUser.metadata.org_chart.department_ids).add(metadataUpdates.deparment_id),
-        //     );
-        //   } else {
-        //     sessionUser.metadata.org_chart.department_ids = [metadataUpdates.department_id];
-        //   }
-        // }
       }
 
       const { name, email, username, roles, metadata } = sessionUser;
