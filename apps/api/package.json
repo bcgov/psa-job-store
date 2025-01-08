@@ -60,6 +60,7 @@
     "graphql-scalars": "^1.24.0",
     "graphql-type-json": "^0.3.2",
     "jsonwebtoken": "^9.0.2",
+    "memorystore": "^1.6.7",
     "openid-client": "^5.7.1",
     "passport": "^0.7.0",
     "passport-http-bearer": "^1.0.1",
