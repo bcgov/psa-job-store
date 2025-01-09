@@ -159,7 +159,7 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
           contact_id: 231166,
         },
         org_chart: {
-          department_ids: ['112-0074', '123-4567', 'DEPT03'],
+          department_ids: ['112-0074', '123-4567', '123-4568'],
         },
         peoplesoft: {
           employee_id: '188147',
@@ -186,7 +186,7 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
           contact_id: 231166,
         },
         org_chart: {
-          department_ids: ['112-0074', '123-4567', 'DEPT03'],
+          department_ids: ['112-0074', '123-4567', '123-4568'],
         },
         peoplesoft: {
           employee_id: '188148',
@@ -213,7 +213,7 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
           contact_id: 231166,
         },
         org_chart: {
-          department_ids: ['112-0074', '123-4567', 'DEPT03'],
+          department_ids: ['112-0074', '123-4567', '123-4568'],
         },
         peoplesoft: {
           employee_id: '188149',
@@ -3324,7 +3324,7 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
         effective_date: new Date('2022-01-01'),
       },
       {
-        id: 'DEPT03',
+        id: '123-4568',
         location_id: 'LOC03',
         organization_id: 'BC112',
         peoplesoft_id: 'PSFT03',
@@ -3351,7 +3351,7 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
         is_statutorily_excluded: false,
       },
       {
-        department_id: 'DEPT03',
+        department_id: '123-4568',
         is_statutorily_excluded: false,
       },
     ],
@@ -4402,8 +4402,8 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
           crm_id: 67890,
           crm_assigned_to_account_id: 12345,
           step: 4,
-          reports_to_position_id: 'POS789',
-          department_id: 'DEPT03',
+          reports_to_position_id: '00987654',
+          department_id: '123-4568',
           parent_job_profile_id: profile208.id,
           parent_job_profile_version: 1,
           crm_json: null,
@@ -4791,6 +4791,7 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
           submission_id: 'SUB003',
           submitted_at: new Date(),
           approved_at: new Date(),
+          shareUUID: '4419b4de-6696-426c-bc63-e871c711564a',
           status: 'COMPLETED',
           updated_at: new Date(),
           classification_employee_group_id: 'GEU',

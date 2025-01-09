@@ -1,18 +1,16 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { ArrowLeftOutlined, EllipsisOutlined } from '@ant-design/icons';
+import { ArrowLeftOutlined } from '@ant-design/icons';
 import { classValidatorResolver } from '@hookform/resolvers/class-validator';
-import { Button, Card, Col, Form, Input, Menu, Modal, Row, Tooltip, Typography } from 'antd';
+import { Button, Card, Col, Form, Input, Modal, Row, Tooltip, Typography } from 'antd';
 import { IsNotEmpty } from 'class-validator';
 import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { Link } from 'react-router-dom';
-import AccessiblePopoverMenu from '../../components/app/common/components/accessible-popover-menu';
 import LoadingComponent from '../../components/app/common/components/loading.component';
 import '../../components/app/common/css/custom-form.css';
 import {
   GetPositionRequestResponseContent,
-  useDeletePositionRequestMutation,
   useUpdatePositionRequestMutation,
 } from '../../redux/services/graphql-api/position-request.api';
 import { DepartmentFilter } from '../org-chart/components/department-filter.component';
@@ -23,6 +21,7 @@ import StatusIndicator from './components/wizard-position-request-status-indicat
 import { useWizardContext } from './components/wizard.provider';
 import { ExcludedManagerPicker } from './excluded-manager-picker';
 import './wizard-confirm-details.page.css';
+import { WizardContextMenu } from './wizard-context-menu';
 
 interface WizardConfirmPageProps {
   onNext?: () => void;
@@ -289,54 +288,13 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
 
       setSelectedDepartmentId(setDeptIdVal);
       setSetupDone(true);
-      console.log('setup done');
+      // console.log('setup done');
     }
   }, [positionRequestData, setValue, positionRequest]); // debouncedFetchPositionProfile
-
-  const [deletePositionRequest] = useDeletePositionRequestMutation();
-  const deleteRequest = async () => {
-    if (!positionRequestId) return;
-    Modal.confirm({
-      title: 'Delete Position Request',
-      content: 'Do you want to delete the position request?',
-      okText: 'Yes',
-      cancelText: 'No',
-      onOk: async () => {
-        await deletePositionRequest({ id: positionRequestId });
-        disableBlockingAndNavigateHome();
-      },
-    });
-  };
 
   const saveAndQuit = async () => {
     await showModal({ skipValidation: true, updateStep: false });
     disableBlockingAndNavigateHome();
-  };
-
-  const getMenuContent = () => {
-    return (
-      <Menu className="wizard-menu">
-        <Menu.Item key="save" onClick={saveAndQuit} data-testid="save-and-quit">
-          <div style={{ padding: '5px 0' }}>
-            Save and quit
-            <Typography.Text type="secondary" style={{ marginTop: '5px', display: 'block' }}>
-              Saves your progress. You can access this position request from the 'My Position Requests' page.
-            </Typography.Text>
-          </div>
-        </Menu.Item>
-        <Menu.Divider />
-        <Menu.ItemGroup key="others" title={<b>Others</b>}>
-          <Menu.Item key="delete" onClick={deleteRequest}>
-            <div style={{ padding: '5px 0' }}>
-              Delete
-              <Typography.Text type="secondary" style={{ marginTop: '5px', display: 'block' }}>
-                Removes this position request from 'My Position Requests'. This action is irreversible.
-              </Typography.Text>
-            </div>
-          </Menu.Item>
-        </Menu.ItemGroup>
-      </Menu>
-    );
   };
 
   const switchStep = async (step: number) => {
@@ -364,7 +322,7 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
     }
   };
 
-  console.log('positionRequest: ', positionRequest);
+  // console.log('positionRequest: ', positionRequest);
   return (
     <WizardPageWrapper
       title={
@@ -385,27 +343,32 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
         <div style={{ marginRight: '1rem' }} key="statusIndicator">
           <StatusIndicator status={positionRequest?.status ?? ''} />
         </div>,
-        <AccessiblePopoverMenu
-          triggerButton={<Button data-testid="ellipsis-menu" tabIndex={-1} icon={<EllipsisOutlined />}></Button>}
-          content={getMenuContent()}
-          ariaLabel="Open position request menu"
-        ></AccessiblePopoverMenu>,
-        <Tooltip
-          title={
-            isActionRequiredState
-              ? "Reporting relationship can't be changed once position request has been submitted"
-              : ''
-          }
-        >
-          <Button
-            onClick={() => showModal({ skipValidation: true, action: 'back' })}
-            key="back"
-            data-testid="back-button"
-            disabled={isActionRequiredState}
+        <>
+          <WizardContextMenu
+            positionRequestId={positionRequestId}
+            onSaveAndQuit={saveAndQuit}
+            onNavigateHome={disableBlockingAndNavigateHome}
+            shareableLink={positionRequest?.shareUUID}
+            positionRequestStatus={positionRequest?.status}
+          />
+
+          <Tooltip
+            title={
+              isActionRequiredState
+                ? "Reporting relationship can't be changed once position request has been submitted"
+                : ''
+            }
           >
-            Back
-          </Button>
-        </Tooltip>,
+            <Button
+              onClick={() => showModal({ skipValidation: true, action: 'back' })}
+              key="back"
+              data-testid="back-button"
+              disabled={isActionRequiredState}
+            >
+              Back
+            </Button>
+          </Tooltip>
+        </>,
         <Button
           key="next"
           type="primary"

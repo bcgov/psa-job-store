@@ -422,7 +422,8 @@ export const JobProfile: React.FC<JobProfileProps> = ({
   const screens = useBreakpoint();
 
   // If neither resolvedId nor profileData is present, throw an error
-  if (!jobNumber && !profileData) throw new Error('No ID');
+  // console.log('jobNumber: ', jobNumber);
+  // if (!jobNumber && !profileData) throw new Error('No ID');
 
   const [originalData, setOriginalData] = useState<JobProfileModel | null>(null); // for diff
 
@@ -927,20 +928,34 @@ export const JobProfile: React.FC<JobProfileProps> = ({
                       </div>
                     ) : (
                       //marginTop resets the applied marginButtom by antd
-                      <ul data-testid="optional-accountabilities" style={{ marginTop: '-14px' }}>
-                        {effectiveData?.accountabilities
-                          .filter((acc) => !acc.is_significant)
-                          .map((accountability, index) => {
-                            if (typeof accountability === 'string' || accountability.disabled) {
-                              return null;
-                            }
-                            if (accountability.text instanceof TrackedFieldArrayItem) {
-                              return <li key={index}>{accountability.text.text}</li>;
-                            } else if (typeof accountability.text === 'string') {
-                              return <li key={index}>{accountability.text}</li>;
-                            }
-                          })}
-                      </ul>
+                      <div
+                        style={{
+                          borderLeft: '1px solid #D8D8D8',
+                          paddingLeft: '12px',
+                          marginBottom: '12px',
+                          marginLeft: '23px',
+                        }}
+                        className="optionalList"
+                      >
+                        <span style={{ fontSize: '12px', fontWeight: 700, color: '#474543' }}>
+                          <h4>Optional accountabilities</h4>
+                        </span>
+
+                        <ul data-testid="optional-accountabilities" style={{ paddingInlineStart: '27px' }}>
+                          {effectiveData?.accountabilities
+                            .filter((acc) => !acc.is_significant)
+                            .map((accountability, index) => {
+                              if (typeof accountability === 'string' || accountability.disabled) {
+                                return null;
+                              }
+                              if (accountability.text instanceof TrackedFieldArrayItem) {
+                                return <li key={index}>{accountability.text.text}</li>;
+                              } else if (typeof accountability.text === 'string') {
+                                return <li key={index}>{accountability.text}</li>;
+                              }
+                            })}
+                        </ul>
+                      </div>
                     ))}
                 </span>
               </>
@@ -1066,19 +1081,35 @@ export const JobProfile: React.FC<JobProfileProps> = ({
                           </ul>
                         </div>
                       ) : (
-                        effectiveData?.professional_registration_requirements
-                          .filter((acc) => !acc.is_significant)
-                          .map((professional_registration_requirement, index) => {
-                            if (
-                              typeof professional_registration_requirement === 'string' ||
-                              professional_registration_requirement.disabled
-                            ) {
-                              return null;
-                            }
-                            if (typeof professional_registration_requirement.text === 'string') {
-                              return <li key={index}>{professional_registration_requirement.text}</li>;
-                            }
-                          })
+                        <div
+                          style={{
+                            borderLeft: '1px solid #D8D8D8',
+                            paddingLeft: '12px',
+                            marginBottom: '12px',
+                            marginLeft: '23px',
+                          }}
+                          className="optionalList"
+                        >
+                          <span style={{ fontSize: '12px', fontWeight: 700, color: '#474543' }}>
+                            <h4>Optional professional registration requirements</h4>
+                          </span>
+
+                          <ul data-testid="optional-requirements" style={{ paddingInlineStart: '27px' }}>
+                            {effectiveData?.professional_registration_requirements
+                              .filter((acc) => !acc.is_significant)
+                              .map((professional_registration_requirement, index) => {
+                                if (
+                                  typeof professional_registration_requirement === 'string' ||
+                                  professional_registration_requirement.disabled
+                                ) {
+                                  return null;
+                                }
+                                if (typeof professional_registration_requirement.text === 'string') {
+                                  return <li key={index}>{professional_registration_requirement.text}</li>;
+                                }
+                              })}
+                          </ul>
+                        </div>
                       )}
                     </>
                   )}
@@ -1202,18 +1233,32 @@ export const JobProfile: React.FC<JobProfileProps> = ({
                         </div>
                       ) : (
                         //marginTop resets the applied marginButtom by antd
-                        <ul data-testid="optional-accountabilities" style={{ marginTop: '-14px' }}>
-                          {effectiveData?.security_screenings
-                            .filter((acc) => !acc.is_significant)
-                            .map((security_screening, index) => {
-                              if (typeof security_screening === 'string' || security_screening.disabled) {
-                                return null;
-                              }
-                              if (typeof security_screening.text === 'string') {
-                                return <li key={index}>{security_screening.text}</li>;
-                              }
-                            })}
-                        </ul>
+                        <div
+                          style={{
+                            borderLeft: '1px solid #D8D8D8',
+                            paddingLeft: '12px',
+                            marginBottom: '12px',
+                            marginLeft: '23px',
+                          }}
+                          className="optionalList"
+                        >
+                          <span style={{ fontSize: '12px', fontWeight: 700, color: '#474543' }}>
+                            <h4>Optional security screenings</h4>
+                          </span>
+
+                          <ul data-testid="optional-screenings" style={{ paddingInlineStart: '27px' }}>
+                            {effectiveData?.security_screenings
+                              .filter((acc) => !acc.is_significant)
+                              .map((security_screening, index) => {
+                                if (typeof security_screening === 'string' || security_screening.disabled) {
+                                  return null;
+                                }
+                                if (typeof security_screening.text === 'string') {
+                                  return <li key={index}>{security_screening.text}</li>;
+                                }
+                              })}
+                          </ul>
+                        </div>
                       )}
                     </>
                   )}

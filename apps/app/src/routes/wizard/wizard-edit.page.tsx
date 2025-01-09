@@ -1,14 +1,11 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ArrowLeftOutlined, EllipsisOutlined } from '@ant-design/icons';
-import { Button, Col, FormInstance, List, Menu, Modal, Row, Typography } from 'antd';
+import { ArrowLeftOutlined } from '@ant-design/icons';
+import { Button, Col, FormInstance, List, Modal, Row } from 'antd';
 import { useRef, useState } from 'react';
 import { Link } from 'react-router-dom';
-import AccessiblePopoverMenu from '../../components/app/common/components/accessible-popover-menu';
-import LoadingComponent from '../../components/app/common/components/loading.component';
 import { JobProfileModel } from '../../redux/services/graphql-api/job-profile-types';
 import {
   GetPositionRequestResponseContent,
-  useDeletePositionRequestMutation,
   useUpdatePositionRequestMutation,
 } from '../../redux/services/graphql-api/position-request.api';
 import { WizardSteps } from '../wizard/components/wizard-steps.component';
@@ -17,6 +14,7 @@ import WizardEditProfile from './components/wizard-edit-profile';
 import { WizardPageWrapper } from './components/wizard-page-wrapper.component';
 import StatusIndicator from './components/wizard-position-request-status-indicator';
 import { useWizardContext } from './components/wizard.provider';
+import { WizardContextMenu } from './wizard-context-menu';
 
 export interface InputData {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
@@ -53,7 +51,6 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
 
   const [isLoading, setIsLoading] = useState(false);
   const [isLoadingBack, setIsLoadingBack] = useState(false);
-  const [saveAndQuitLoading, setSaveAndQuitLoading] = useState(false);
   const [isFormModified, setIsFormModified] = useState(false);
 
   const handleFormChange = (state: boolean) => {
@@ -190,7 +187,6 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
 
     if (action === 'next') setIsLoading(true);
     else if (action == 'back') setIsLoadingBack(true);
-    else setSaveAndQuitLoading(true);
 
     try {
       // Create an entry in My Position Requests
@@ -262,7 +258,6 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
     } finally {
       if (action === 'next') setIsLoading(false);
       else if (action === 'back') setIsLoadingBack(false);
-      else setSaveAndQuitLoading(false);
     }
   };
 
@@ -274,68 +269,11 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
     await saveData('back');
   };
 
-  // console.log('wizardData: ', wizardData);
-
-  // todo: refactor this into WizardPageWrapper component
-
-  const [deletePositionRequest] = useDeletePositionRequestMutation();
-  const deleteRequest = async () => {
-    if (!positionRequestId) return;
-    Modal.confirm({
-      title: 'Delete Position Request',
-      content: 'Do you want to delete the position request?',
-      okText: 'Yes',
-      cancelText: 'No',
-      onOk: async () => {
-        await deletePositionRequest({ id: positionRequestId });
-        disableBlockingAndNavigateHome();
-      },
-    });
-  };
-
   const saveAndQuit = async () => {
     // console.log('disableBlockingAndNavigateHome');
     await saveData('stay');
     disableBlockingAndNavigateHome();
   };
-
-  const getMenuContent = () => {
-    return (
-      <Menu className="wizard-menu">
-        <Menu.Item key="save" onClick={saveAndQuit} disabled={saveAndQuitLoading}>
-          <div style={{ position: 'relative' }}>
-            {saveAndQuitLoading && (
-              <div style={{ position: 'absolute', top: '0', height: '100%', width: '100%', background: '#ffffffa8' }}>
-                <div style={{ margin: 'auto', display: 'block', marginTop: '13px', textAlign: 'center' }}>
-                  <LoadingComponent mode="small"></LoadingComponent>
-                </div>
-              </div>
-            )}
-
-            <div style={{ padding: '5px 0' }}>
-              Save and quit
-              <Typography.Text type="secondary" style={{ marginTop: '5px', display: 'block' }}>
-                Saves your progress. You can access this position request from the 'My Position Requests' page.
-              </Typography.Text>
-            </div>
-          </div>
-        </Menu.Item>
-        <Menu.Divider />
-        <Menu.ItemGroup key="others" title={<b>Others</b>}>
-          <Menu.Item key="delete" onClick={deleteRequest}>
-            <div style={{ padding: '5px 0' }}>
-              Delete
-              <Typography.Text type="secondary" style={{ marginTop: '5px', display: 'block' }}>
-                Removes this position request from 'My Position Requests'. This action is irreversible.
-              </Typography.Text>
-            </div>
-          </Menu.Item>
-        </Menu.ItemGroup>
-      </Menu>
-    );
-  };
-
-  // const [isSwitchStepLoading, setIsSwitchStepLoading] = useState(false);
 
   const switchStep = async (step: number) => {
     if (isFormModified) {
@@ -394,14 +332,13 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
         <div style={{ marginRight: '1rem' }} key="statusIndicator">
           <StatusIndicator status={positionRequest?.status ?? ''} />
         </div>,
-
-        <AccessiblePopoverMenu
-          key="menu"
-          triggerButton={<Button data-testid="ellipsis-menu" tabIndex={-1} icon={<EllipsisOutlined />}></Button>}
-          content={getMenuContent()}
-          ariaLabel="Open position request menu"
-        ></AccessiblePopoverMenu>,
-
+        <WizardContextMenu
+          positionRequestId={positionRequestId}
+          onSaveAndQuit={saveAndQuit}
+          onNavigateHome={disableBlockingAndNavigateHome}
+          shareableLink={positionRequest?.shareUUID}
+          positionRequestStatus={positionRequest?.status}
+        />,
         <Button onClick={onBackCallback} key="back" data-testid="back-button" loading={isLoadingBack}>
           Back
         </Button>,

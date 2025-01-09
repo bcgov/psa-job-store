@@ -211,37 +211,78 @@ export class UserService {
    * Synchronizes a user's data from various sources and updates the local database.
    */
   async syncUser(id: string) {
-    // Fetch the latest user data from Keycloak
-    const user = await this.keycloakService.getUser(id);
+    // console.log(`[syncUser] Starting sync for user ID: ${id}`);
 
-    // Retrieve CRM metadata for the user
-    const crmMetadata = await this.getCrmMetadata(user.username);
+    try {
+      // Fetch the latest user data from Keycloak
+      // console.log(`[syncUser] Fetching Keycloak data for user ID: ${id}`);
+      const user = await this.keycloakService.getUser(id);
+      // console.log('[syncUser] Keycloak user data:', {
+      //   id: user.id,
+      //   username: user.username,
+      //   roles: user.roles,
+      //   // Log other relevant user fields but exclude sensitive data
+      // });
 
-    // Fetch and extract Peoplesoft metadata for the user
-    const { metadata: peoplesoftMetadata } = await this.getPeoplesoftMetadata(user.username);
+      // Retrieve CRM metadata for the user
+      // console.log(`[syncUser] Fetching CRM metadata for username: ${user.username}`);
+      const crmMetadata = await this.getCrmMetadata(user.username);
+      // console.log('[syncUser] CRM metadata:', crmMetadata);
 
-    // Get the existing user data from the local database, if any
-    const existingUser: User | null = await this.getUser({ where: { id } });
+      // Fetch and extract Peoplesoft metadata for the user
+      // console.log(`[syncUser] Fetching Peoplesoft metadata for username: ${user.username}`);
+      const { metadata: peoplesoftMetadata } = await this.getPeoplesoftMetadata(user.username);
+      // console.log('[syncUser] Peoplesoft metadata:', peoplesoftMetadata);
 
-    // Determine the user's org chart assignments based on Peoplesoft metadata changes
-    const orgChartMetadata = {
-      department_ids: this.getOrgChartAssignmentsForUser(existingUser, peoplesoftMetadata),
-    };
+      // Get the existing user data from the local database
+      // console.log(`[syncUser] Checking for existing user in local DB with ID: ${id}`);
+      const existingUser: User | null = await this.getUser({ where: { id } });
+      // console.log('[syncUser] Existing user found:', !!existingUser);
+      if (existingUser) {
+        // console.log('[syncUser] Existing user metadata:', existingUser.metadata);
+      }
 
-    // Combine all metadata into a single object
-    const metadata = {
-      crm: crmMetadata,
-      org_chart: orgChartMetadata,
-      peoplesoft: peoplesoftMetadata,
-    };
+      // Determine org chart assignments
+      // console.log('[syncUser] Calculating org chart assignments');
+      const orgChartMetadata = {
+        department_ids: this.getOrgChartAssignmentsForUser(existingUser, peoplesoftMetadata),
+      };
+      // console.log('[syncUser] Org chart metadata:', orgChartMetadata);
 
-    // Update or create the user in the local database
-    await this.upsertUser({
-      ...user,
-      // Todo:should this be "undefined"? Since: UserUpdateInput.deleted_at?: string | Date | undefined
-      deleted_at: null, // Undelete user if it is returned from Keycloak
-      metadata,
-    });
+      // Combine all metadata
+      const metadata = {
+        crm: crmMetadata,
+        org_chart: orgChartMetadata,
+        peoplesoft: peoplesoftMetadata,
+      };
+      // console.log('[syncUser] Combined metadata:', metadata);
+
+      // Update or create the user
+      // console.log('[syncUser] Performing upsert operation');
+      await this.upsertUser({
+        ...user,
+        deleted_at: null,
+        metadata,
+      });
+      // console.log(`[syncUser] Successfully synced user ID: ${id}`);
+    } catch (error) {
+      // if (error instanceof Error) {
+      //   console.error('[syncUser] Error during user sync:', {
+      //     userId: id,
+      //     error: error.message,
+      //     stack: error.stack,
+      //   });
+      // } else {
+      //   console.error(
+      //     '[syncUser] Error during user sync:',
+      //     {
+      //       userId: id,
+      //     },
+      //     error,
+      //   );
+      // }
+      throw error;
+    }
   }
 
   async syncUsers() {

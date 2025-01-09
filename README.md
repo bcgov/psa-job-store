@@ -92,19 +92,15 @@ Run `npx -w jobstore-cypress cypress open`
 
 To run in same environment as GitHub actions: `npx cypress run --browser edge --headless`
 
-## Running React component tests
+## Running Unit Tests
 
-Run `npx -w app jest`
+In the root, run `npx jest`
+
+This will run tests in all projects.
 
 _Note:_ If you receive a `EBUSY: resource busy or locked, open..` error, run with a --no-cache flag
 
 To genereate coverage report, run with `--coverage` flag
-
-Project is also configured to generate reports with `jest-html-reporter`, which outputs test results to `app/test-report.html`
-
-## Running NestJS unit tests
-
-`npx -w api jest --no-cache`
 
 ## Updating seed file secret
 

@@ -10,7 +10,7 @@ export interface OrgChartDepartmentFilterModel {
 }
 
 export interface GetOrgChartDepartmentFilterResponse {
-  getOrgChartDepartmentFilter: OrgChartDepartmentFilterModel;
+  getOrgChartDepartmentFilter: OrgChartDepartmentFilterModel[];
 }
 
 export interface OrgChartModel {

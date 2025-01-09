@@ -21,9 +21,6 @@ spec:
           requests:
             cpu: 300m 
             memory: 600Mi 
-          limits:
-            cpu: 500m 
-            memory: 1000Mi
 ---
 apiVersion: route.openshift.io/v1
 kind: Route
