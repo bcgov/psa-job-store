@@ -20,9 +20,6 @@ spec:
                   image: artifacts.developer.gov.bc.ca/af3c-gen-docker-local/nginx-auth-rp:develop-latest
                   imagePullPolicy: Always
                   resources:
-                      limits:
-                          cpu: 50m
-                          memory: 100Mi
                       requests:
                           cpu: 10m
                           memory: 50Mi

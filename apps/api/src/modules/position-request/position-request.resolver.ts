@@ -213,12 +213,22 @@ export class PositionRequestApiResolver {
   async getSharedPositionRequest(@Args('uuid') uuid: string) {
     return this.positionRequestService.getSharedPositionRequest(uuid);
   }
-
+  @Query(() => Int, { name: 'positionRequestByNumber', nullable: true })
+  async getPositionRequestByNumber(
+    @GqlCurrentUser() user: Express.User,
+    @Args('positionNumber') positionNumber: string,
+  ) {
+    return this.positionRequestService.getPositionRequestByNumber(+positionNumber, user.id, user.roles);
+  }
+  @Query(() => PositionRequest, { name: 'positionRequestForDept', nullable: true })
+  async getPositionRequestForDept(@GqlCurrentUser() user: Express.User, @Args('id') id: number) {
+    return this.positionRequestService.getPositionRequestForDept(+id, user.id);
+  }
   @Query(() => PositionNeedsReviewResult, { name: 'positionNeedsRivew' })
   async positionNeedsReview(@GqlCurrentUser() user: Express.User, @Args('id') id: number) {
     const position = await this.positionRequestService.getPositionRequest(+id, user.id, user.roles);
     if (!position) {
-      return false;
+      return { result: false, reasons: [] };
     }
     return this.positionRequestService.positionRequestNeedsReview(+id);
   }

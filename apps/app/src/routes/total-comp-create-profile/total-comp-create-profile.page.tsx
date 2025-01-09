@@ -24,7 +24,7 @@ export const TotalCompCreateProfilePage = () => {
     setVersion(searchParams.get('version') ?? '');
 
     // setSearchParams(version ?? '');
-    if (urlId) {
+    if (id) {
       trigger(
         { id: parseInt(id ?? ''), version: version ? parseInt(version ?? '') : undefined },
         // {

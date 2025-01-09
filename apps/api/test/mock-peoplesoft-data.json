@@ -1,6 +1,7 @@
 {
   "employees": [
     { "id": "00132136", "name": "Testing User", "status": "Active" },
+    { "id": "00121521", "name": "Testing Manager", "status": "Active" },
     { "id": "00132137", "name": "George D'Cruz", "status": "Active" },
     { "id": "00132138", "name": "Alex Struk", "status": "Active" },
     { "id": "00132139", "name": "Hannah Morgan", "status": "Active" },
@@ -122,11 +123,6 @@
     {
       "id": "00132135",
       "name": "Maria Garcia",
-      "status": "Active"
-    },
-    {
-      "id": "00132136",
-      "name": "Ana Rodriguez",
       "status": "Active"
     },
     {
@@ -432,6 +428,12 @@
       "name": "Testing User",
       "email": "tuser@gov.bc.ca",
       "employee_id": "00132136"
+    },
+    {
+      "idir": "TESTINGMANAGER",
+      "name": "Testing Manager",
+      "email": "tmanager@gov.bc.ca",
+      "employee_id": "00121521"
     },
     {
       "idir": "GEORGED'CRUZ",

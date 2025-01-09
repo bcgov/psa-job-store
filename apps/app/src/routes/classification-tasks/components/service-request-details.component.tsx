@@ -44,7 +44,7 @@ export const ServiceRequestDetails: React.FC<ServiceRequestDetailsProps> = ({ po
     {
       key: 'ticketId',
       label: 'CRM service request',
-      children: (
+      children: positionRequestData?.positionRequest?.crm_lookup_name && (
         <div>
           {positionRequestData?.positionRequest?.crm_lookup_name}{' '}
           <CopyOutlined
@@ -74,7 +74,7 @@ export const ServiceRequestDetails: React.FC<ServiceRequestDetailsProps> = ({ po
     {
       key: 'positionNumber',
       label: 'Position Number',
-      children: (
+      children: positionRequestData?.positionRequest?.position_number && (
         <div>
           {positionRequestData?.positionRequest?.position_number}
           <CopyOutlined
@@ -112,7 +112,7 @@ export const ServiceRequestDetails: React.FC<ServiceRequestDetailsProps> = ({ po
     {
       key: 'jobStoreProfileNumber',
       label: 'Job Store profile number',
-      children: (
+      children: positionRequestData?.positionRequest?.parent_job_profile?.number && (
         <div>
           <div>{positionRequestData?.positionRequest?.parent_job_profile?.number}</div>
 
@@ -263,7 +263,7 @@ export const ServiceRequestDetails: React.FC<ServiceRequestDetailsProps> = ({ po
   ];
 
   return (
-    <Row justify="center">
+    <Row justify="center" data-testid="job-details-component">
       <Col xs={24} sm={24} md={24} lg={24} xl={24} xxl={16}>
         <Card className="tableHeader" style={{ marginTop: '1rem' }}>
           <Row gutter={24} wrap>

@@ -66,6 +66,8 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
     const [isSearchingOrFiltering, setIsSearchingOrFiltering] = useState(false);
     const [isLoadingCalcualted, setIsLoadingCalculated] = useState(false);
     const [tabSwitchedLoading, setTabSwitchedLoading] = useState(false);
+    // ref for storing searchparams for last request
+    const lastSearchParams = useRef<string | null>(null);
     const { setShouldFetch, shouldFetch, clearingFilters, setClearingFilters, setClearingSearch } =
       useJobProfilesProvider();
     const { positionRequestId, number } = useParams();
@@ -124,6 +126,7 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
         setLoadProfileIds(null);
         // console.log('setSearchParams to empty B');
         setSearchParams(new URLSearchParams({}));
+        // console.log('setting clearing filters 2');
         setClearingFilters(true);
         setClearingSearch(true);
         setShouldFetch(true);
@@ -131,6 +134,7 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
         // console.log('setSearchParams to empty C');
         setSearchParams(new URLSearchParams({}));
         setLoadProfileIds(savedJobProfileIds?.getSavedJobProfileIds ?? []);
+        // console.log('setting clearing filters 3');
         setClearingFilters(true);
         setClearingSearch(true);
         setShouldFetch(true);
@@ -244,6 +248,20 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
 
     useEffect(() => {
       // console.log('fetch hook');
+      // if (skipFetch) {
+      //   console.log('skip fetch, returning..');
+      //   setSkipFetch(false);
+      //   lastSearchParams.current = searchParams.toString();
+      //   return;
+      // }
+
+      if (lastSearchParams.current == searchParams.toString() && !shouldFetch) {
+        // console.log('params didnt change, returning..', searchParams.toString());
+        return;
+      } else {
+        // console.log('params changed, continuing..', searchParams.toString(), lastSearchParams.current);
+      }
+
       // Use the following for the `search` property.
       // Search terms need to be joined with specific syntax, <-> in this case
       // const search = searchParams.get('search')?.replace(/(\w)\s+(\w)/g, '$1 <-> $2');
@@ -277,6 +295,7 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
         // if we're clearing filters, then we need to fetch again
         if (!clearingFilters) {
           // console.log('returning B');
+          lastSearchParams.current = searchParams.toString();
           return;
         }
       }
@@ -312,6 +331,7 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
             searchParams.delete('search');
           }
           // searchParams.set('clearFilters', 'true');
+          // console.log('setting clearing filters 4');
           setClearingFilters(true);
           // console.log('navigate to C: ', searchParams.toString());
 
@@ -323,6 +343,7 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
             { replace: true },
           );
           // console.log('returning C');
+          // lastSearchParams.current = searchParams.toString();
           return;
         }
       }
@@ -351,7 +372,9 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
 
       selectProfileForPageNumber.current = toSelectProfileNumber ?? '';
 
-      console.log('TRIGGER, search: ', search);
+      // console.log('TRIGGER, search: ', search);
+      // console.log('search params are: ', searchParams.toString());
+      lastSearchParams.current = searchParams.toString();
       trigger({
         ...(search != null && { search }),
         where: {
@@ -528,7 +551,7 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
     useEffect(() => {
       // console.log('set? ', !data, isFetching, isLoading);
       if (data && !isFetching && !isLoading) {
-        // console.log('setting useData: ', data.jobProfilesCount);
+        // console.log('setting useData: ', data);
         setUseData({
           jobProfiles: data.jobProfiles,
           jobProfilesCount: data.jobProfilesCount,
@@ -549,7 +572,7 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
             ? location.pathname
             : getBasePath(location.pathname);
 
-          // console.log('navigate to A: ', searchParams.toString());
+          // console.log('NAVIGATING TO A: ', searchParams.toString());
           navigate({
             pathname: basePath,
             search: searchParams.toString(),
@@ -561,6 +584,7 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
           // if it's not present and we are on /job-profiles/saved, it could mean user linked to a profile that is not in the
           // other's users list. In this case, redirect to /job-profiles/:number
           if (location.pathname.startsWith('/job-profiles/saved') && selectProfileNumber) {
+            // console.log('navigate to B: ', selectProfileNumber);
             navigate(`/job-profiles/${selectProfileNumber}`);
           }
         }
@@ -589,7 +613,7 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
 
       const basePath = getBasePath(location.pathname);
 
-      // console.log('navigate to B: ', searchParams.toString());
+      // console.log('navigate to BB: ', searchParams.toString());
       navigate(
         {
           pathname: basePath,
@@ -742,7 +766,7 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
 
     const renderProfileList = (onSelectProfileF: any, profiles: any[]) => (
       <>
-        {!isLoading && positionRequestId && (
+        {isSearchingOrFiltering && !isLoading && (
           <Alert
             role="info"
             data-testid="verification-warning-message"

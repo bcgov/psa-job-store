@@ -15,6 +15,7 @@ const store = configureStore({
   reducer: {
     // Use a mock reducer
     mockReducer: mockGraphqlApiReducer,
+    authReducer: (state = { user: { username: 'TEST' } }) => state,
   },
   middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(mockMiddleware),
 });

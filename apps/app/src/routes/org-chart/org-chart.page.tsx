@@ -46,7 +46,8 @@ export const OrgChartPage = () => {
                   id="changes"
                   role="note"
                   type="link"
-                  aria-label="Why can't I make changes? Because information shown here is dependent on the values that you selected in the previous steps."
+                  style={{ textDecoration: 'underline' }}
+                  aria-label="Why can't I make changes? Because the position might be in a different department ID. Please check Peoplesoft for the latest org structure."
                 >
                   Why can't I make changes?
                 </Button>
