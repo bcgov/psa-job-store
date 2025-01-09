@@ -29,6 +29,7 @@ import { KeycloakModule } from './modules/keycloak/keycloak.module';
 import { OrganizationModule } from './modules/organization/organization.module';
 import { PositionRequestModule } from './modules/position-request/position-request.module';
 import { SavedJobProfileModule } from './modules/saved-job-profile/saved-job-profile.module';
+import { ScheduledTaskModule } from './modules/scheduled-task/scheduled-task.module';
 import { SearchModule } from './modules/search/search.module';
 import { SettingsModule } from './modules/settings/settings.module';
 import { UserModule } from './modules/user/user.module';
@@ -77,7 +78,7 @@ import { validateAppConfig } from './utils/validate-app-config.util';
     SettingsModule,
     OrganizationModule,
     AuthModule,
-    // ScheduledTaskModule,
+    ScheduledTaskModule,
     E2EAuthModule,
   ],
   controllers: [],
