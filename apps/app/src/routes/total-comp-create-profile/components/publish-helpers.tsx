@@ -303,11 +303,15 @@ export const useSave = () => {
   if (!context) {
     throw new Error('Form context must be used within FormContext.Provider');
   }
-  const { jobProfileUseFormReturn, basicUseFormReturn } = context;
-  const { getValues: getProfileValues, setValue: profileSetValue } = jobProfileUseFormReturn;
-  const { getValues: getBasicDetailsValues } = basicUseFormReturn;
+  const { jobProfileUseFormReturn, basicUseFormReturn, watchedState: state } = context;
+  const {
+    getValues: getProfileValues,
+    setValue: profileSetValue,
+    formState: profileFormState,
+  } = jobProfileUseFormReturn;
+  const { getValues: getBasicDetailsValues, formState: basicFormState } = basicUseFormReturn;
 
-  const { setProfileJson, setJobProfileMeta, jobProfileData, setId, id, state } = useTCContext();
+  const { setProfileJson, setJobProfileMeta, jobProfileData, setId, id } = useTCContext();
   const { submitJobProfileData } = useJobProfileSubmit(setId);
 
   const [triggerGetJobProfile, { data: lazyJobProfile }] = useLazyGetJobProfileQuery();
@@ -325,12 +329,14 @@ export const useSave = () => {
     }
   }, [jobProfileMeta]);
 
+  // console.log('profileFormState.errors: ', profileFormState.errors);
+
   const save = useCallback(
-    async ({ isPublishing = false, isUnpublishing = false, profileFormErrors, basicFormErrors }: any = {}) => {
+    async ({ isPublishing = false, isUnpublishing = false }: any = {}) => {
       // validate only if publishing
       if (state === 'PUBLISHED' || isPublishing) {
         // console.log('PUBLISHING, state: ', state, ', isPublishing: ', isPublishing);
-        const errors = Object.values(profileFormErrors).map((error: any) => {
+        const errors = Object.values(profileFormState.errors).map((error: any) => {
           const message =
             error.message != null
               ? error.message
@@ -344,7 +350,7 @@ export const useSave = () => {
           return message;
         });
 
-        const errors2 = Object.values(basicFormErrors)
+        const errors2 = Object.values(basicFormState.errors)
           .map((error: any) => {
             // only interested in title validation here
             // todo: tag the error so it's easier to identify
@@ -397,13 +403,14 @@ export const useSave = () => {
         state,
         profileSetValue,
       });
+
       await submitJobProfileData(transformedData, isPublishing);
       // Refetch job profile data
       if (isNaN(parseInt(id ?? ''))) return;
 
       await triggerGetJobProfile({ id: parseInt(id ?? '') });
     },
-    [],
+    [basicFormState, profileFormState, state, id, jobProfileData, basicFormState.errors, profileFormState.errors],
   );
 
   return save;
@@ -417,38 +424,46 @@ export const useSave = () => {
 //   await save(true);
 // };
 
-export const showPublishConfirm = () => {
+export const usePublishConfirm = () => {
   const save = useSave();
-  Modal.confirm({
-    title: 'Publish profile',
-    content:
-      'Publishing the job profile to the Job Store will allow hiring managers view the profile. Are you sure you want to continue?',
-    okText: 'Publish profile',
-    cancelText: 'Cancel',
-    async onOk() {
-      // Call the function to handle the publish action
-      await save({ isPublishing: true });
-    },
-    onCancel() {
-      console.log('Cancel');
-    },
-  });
+
+  const showPublishConfirm = useCallback(() => {
+    Modal.confirm({
+      title: 'Publish profile',
+      content:
+        'Publishing the job profile to the Job Store will allow hiring managers view the profile. Are you sure you want to continue?',
+      okText: 'Publish profile',
+      cancelText: 'Cancel',
+      async onOk() {
+        // Call the function to handle the publish action
+        await save({ isPublishing: true });
+      },
+      onCancel() {
+        console.log('Cancel');
+      },
+    });
+  }, [save]);
+
+  return showPublishConfirm;
 };
 
-export const showUnPublishConfirm = () => {
+export const useUnPublishConfirm = () => {
   const save = useSave();
-  Modal.confirm({
-    title: 'Unpublish Profile',
-    content:
-      'Unpublishing the job profile from the Job Store will remove public access to the profile. Are you sure you want to continue?',
-    okText: 'Unpublish profile',
-    cancelText: 'Cancel',
-    async onOk() {
-      // Call the function to handle the publish action
-      await save({ isPublishing: false, isUnpublishing: true });
-    },
-    onCancel() {
-      console.log('Cancel');
-    },
-  });
+  const showUnPublishConfirm = useCallback(() => {
+    Modal.confirm({
+      title: 'Unpublish Profile',
+      content:
+        'Unpublishing the job profile from the Job Store will remove public access to the profile. Are you sure you want to continue?',
+      okText: 'Unpublish profile',
+      cancelText: 'Cancel',
+      async onOk() {
+        // Call the function to handle the publish action
+        await save({ isPublishing: false, isUnpublishing: true });
+      },
+      onCancel() {
+        console.log('Cancel');
+      },
+    });
+  }, [save]);
+  return showUnPublishConfirm;
 };

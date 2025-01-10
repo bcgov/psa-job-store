@@ -19,7 +19,7 @@ import { useTCContext } from './total-comp-create-profile.provider';
 interface TotalCompCreateJobProfileProps {}
 
 export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps> = ({}) => {
-  const { isCurrentVersion, setState, jobProfileData, pickerData } = useTCContext();
+  const { isCurrentVersion, pickerData } = useTCContext();
 
   const context = useContext(FormContext);
   if (!context) {
@@ -47,61 +47,6 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
     move: moveProfessionalRegistrationRequirement,
     update: updateProfessionalRegistrationRequirement,
   } = professionalRegistrationRequirementsFieldArray;
-
-  // set initial data
-  useEffect(() => {
-    // console.log('jobProfileData: ', jobProfileData);
-    if (jobProfileData) {
-      // Profile Form
-      if (jobProfileData.jobProfile.state) profileSetValue('state', jobProfileData.jobProfile.state);
-
-      profileSetValue('overview.text', jobProfileData.jobProfile.overview as string);
-      profileSetValue('program_overview.text', jobProfileData.jobProfile.program_overview as string);
-
-      profileSetValue(
-        'markAllNonEditable',
-        jobProfileData.jobProfile.total_comp_create_form_misc?.markAllNonEditable ?? false,
-      );
-      profileSetValue(
-        'markAllSignificant',
-        jobProfileData.jobProfile.total_comp_create_form_misc?.markAllSignificant ?? false,
-      );
-      profileSetValue(
-        'markAllNonEditableEdu',
-        jobProfileData.jobProfile.total_comp_create_form_misc?.markAllNonEditableEdu ?? false,
-      );
-      profileSetValue(
-        'markAllSignificantEdu',
-        jobProfileData.jobProfile.total_comp_create_form_misc?.markAllSignificantEdu ?? false,
-      );
-      profileSetValue(
-        'markAllNonEditableProReg',
-        jobProfileData.jobProfile.total_comp_create_form_misc?.markAllNonEditableProReg ?? false,
-      );
-      profileSetValue(
-        'markAllSignificantProReg',
-        jobProfileData.jobProfile.total_comp_create_form_misc?.markAllSignificantProReg ?? false,
-      );
-      profileSetValue(
-        'markAllSignificantSecurityScreenings',
-        jobProfileData.jobProfile.total_comp_create_form_misc?.markAllSignificantSecurityScreenings ?? false,
-      );
-      profileSetValue(
-        'markAllNonEditableJob_experience',
-        jobProfileData.jobProfile.total_comp_create_form_misc?.markAllNonEditableJob_experience ?? false,
-      );
-      profileSetValue(
-        'markAllSignificantJob_experience',
-        jobProfileData.jobProfile.total_comp_create_form_misc?.markAllSignificantJob_experience ?? false,
-      );
-
-      profileSetValue(
-        'markAllNonEditableSec',
-        jobProfileData.jobProfile.total_comp_create_form_misc?.markAllNonEditableSec ?? false,
-      );
-      triggerProfileValidation();
-    }
-  }, [jobProfileData, profileSetValue, triggerProfileValidation]);
 
   // use ref to hold the flag for auto security settings setup
   const autoSecuritySettingsSetup = useRef(false);
@@ -235,11 +180,6 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
     profileSetValue('security_screenings', securityScreeningsUpdated as SecurityScreeningItem[]);
   };
 
-  const state = profileWatch('state');
-  useEffect(() => {
-    setState(state);
-  }, [setState]);
-
   const markAllNonEditable = profileWatch('markAllNonEditable');
   const markAllNonEditableEdu = profileWatch('markAllNonEditableEdu');
   const markAllSignificantEdu = profileWatch('markAllSignificantEdu');
@@ -344,7 +284,7 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
     name: 'preferences',
   });
 
-  console.log('preferencesFields: ', preferencesFields);
+  // console.log('preferencesFields: ', preferencesFields);
 
   const handlePreferencesMove = (index: number, direction: 'up' | 'down') => {
     if (direction === 'up') {

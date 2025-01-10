@@ -143,7 +143,65 @@ export const TotalCompCreateProfileComponent2: React.FC<TotalCompCreateProfileCo
     },
   });
 
-  const { trigger: triggerProfileValidation } = jobProfileUseFormReturn;
+  const { trigger: triggerProfileValidation, setValue: profileSetValue, watch: profileWatch } = jobProfileUseFormReturn;
+
+  useEffect(() => {
+    // console.log('jobProfileData: ', jobProfileData);
+    if (jobProfileData) {
+      // Profile Form
+      if (jobProfileData.jobProfile.state) profileSetValue('state', jobProfileData.jobProfile.state);
+
+      profileSetValue('overview.text', jobProfileData.jobProfile.overview as string);
+      profileSetValue('program_overview.text', jobProfileData.jobProfile.program_overview as string);
+
+      profileSetValue(
+        'markAllNonEditable',
+        jobProfileData.jobProfile.total_comp_create_form_misc?.markAllNonEditable ?? false,
+      );
+      profileSetValue(
+        'markAllSignificant',
+        jobProfileData.jobProfile.total_comp_create_form_misc?.markAllSignificant ?? false,
+      );
+      profileSetValue(
+        'markAllNonEditableEdu',
+        jobProfileData.jobProfile.total_comp_create_form_misc?.markAllNonEditableEdu ?? false,
+      );
+      profileSetValue(
+        'markAllSignificantEdu',
+        jobProfileData.jobProfile.total_comp_create_form_misc?.markAllSignificantEdu ?? false,
+      );
+      profileSetValue(
+        'markAllNonEditableProReg',
+        jobProfileData.jobProfile.total_comp_create_form_misc?.markAllNonEditableProReg ?? false,
+      );
+      profileSetValue(
+        'markAllSignificantProReg',
+        jobProfileData.jobProfile.total_comp_create_form_misc?.markAllSignificantProReg ?? false,
+      );
+      profileSetValue(
+        'markAllSignificantSecurityScreenings',
+        jobProfileData.jobProfile.total_comp_create_form_misc?.markAllSignificantSecurityScreenings ?? false,
+      );
+      profileSetValue(
+        'markAllNonEditableJob_experience',
+        jobProfileData.jobProfile.total_comp_create_form_misc?.markAllNonEditableJob_experience ?? false,
+      );
+      profileSetValue(
+        'markAllSignificantJob_experience',
+        jobProfileData.jobProfile.total_comp_create_form_misc?.markAllSignificantJob_experience ?? false,
+      );
+
+      profileSetValue(
+        'markAllNonEditableSec',
+        jobProfileData.jobProfile.total_comp_create_form_misc?.markAllNonEditableSec ?? false,
+      );
+      setTimeout(() => {
+        triggerProfileValidation();
+      });
+    }
+  }, [jobProfileData, profileSetValue, triggerProfileValidation]);
+
+  const state = profileWatch('state');
 
   const professionsDat = jobProfileData?.jobProfile.jobFamilies.map((family: any) => ({
     jobFamily: family.jobFamily.id,
@@ -251,7 +309,15 @@ export const TotalCompCreateProfileComponent2: React.FC<TotalCompCreateProfileCo
 
   return (
     <>
-      <FormContext.Provider value={formMethods}>
+      <FormContext.Provider value={{ ...formMethods, watchedState: state }}>
+        {/* <div
+          onClick={() => {
+            triggerBasicDetailsValidation();
+            triggerProfileValidation();
+          }}
+        >
+          VALIDATE
+        </div> */}
         {isLoading ? <></> : <JobProfileHeader title={title} />}
 
         <TCTabBar></TCTabBar>

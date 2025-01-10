@@ -205,7 +205,6 @@ export const BasicDetails: React.FC<BasicDetailsProps> = ({}) => {
     if (jobProfileData) {
       // Basic Details Form
 
-      console.log('SET VALUE setting values.. jobstore number: ', jobProfileData.jobProfile.number.toString());
       setValue('title.text', jobProfileData.jobProfile.title as string);
       setValue('jobStoreNumber', jobProfileData.jobProfile.number.toString());
       setValue('originalJobStoreNumber', jobProfileData.jobProfile.number.toString());
@@ -224,7 +223,7 @@ export const BasicDetails: React.FC<BasicDetailsProps> = ({}) => {
             return 0;
           }) ?? null;
 
-      console.log('rawClassification: ', rawClassification);
+      // console.log('rawClassification: ', rawClassification);
       if (rawClassification != null) {
         replaceEmployeeClassificationGroups(rawClassification);
         // reset({
@@ -404,11 +403,11 @@ export const BasicDetails: React.FC<BasicDetailsProps> = ({}) => {
   }, [urlId, setValue, allMinistriesData]);
 
   useEffect(() => {
-    console.log(
-      'number validation effect, jobStoreNumber, originalJobStoreNumber: ',
-      jobStoreNumber,
-      originalJobStoreNumber,
-    );
+    // console.log(
+    //   'number validation effect, jobStoreNumber, originalJobStoreNumber: ',
+    //   jobStoreNumber,
+    //   originalJobStoreNumber,
+    // );
     const numberValue = parseInt(jobStoreNumber, 10);
     const originalNumberValue = parseInt(originalJobStoreNumber, 10);
 

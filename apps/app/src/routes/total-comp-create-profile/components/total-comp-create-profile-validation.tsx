@@ -131,8 +131,6 @@ export function JobStoreNumberValidator(validationOptions?: ValidationOptions) {
           const isValidStatus = context._validationStatus === 'valid';
           const hasValue = value && value.length > 0;
 
-          console.log('validating job store number: ', value, context._validationStatus);
-
           return hasValue && isValidStatus;
         },
         defaultMessage(args: ValidationArguments): string {

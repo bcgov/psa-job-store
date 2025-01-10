@@ -1,11 +1,12 @@
 import { Menu, Typography } from 'antd';
-import { useState } from 'react';
+import { useContext, useState } from 'react';
 import { useLocation, useNavigate } from 'react-router-dom';
 import { PageHeader } from '../../../components/app/page-header.component';
 import { DownloadJobProfileComponent } from '../../../components/shared/download-job-profile/download-job-profile.component';
 import { IdVersion } from '../../../redux/services/graphql-api/job-profile-types';
 import { useTestUser } from '../../../utils/useTestUser';
-import { showPublishConfirm, showUnPublishConfirm, useSave } from './publish-helpers';
+import { FormContext } from './form.context';
+import { usePublishConfirm, useSave, useUnPublishConfirm } from './publish-helpers';
 import { CopyLinkButton } from './total-comp-create-profile-copy-link.component';
 import { DuplicateButton } from './total-comp-create-profile-duplicate.component';
 import { useTCContext } from './total-comp-create-profile.provider';
@@ -16,13 +17,22 @@ interface JobProfileHeaderProps {
 }
 
 export const JobProfileHeader: React.FC<JobProfileHeaderProps> = ({ title }) => {
-  const { state, profileJson, setId, jobProfileData, setVersion, link } = useTCContext();
+  const { profileJson, setId, jobProfileData, setVersion, link } = useTCContext();
+
+  const context = useContext(FormContext);
+  if (!context) {
+    throw new Error('Form context must be used within FormContext.Provider');
+  }
+  const { watchedState: state } = context;
+
   const isTestUser = useTestUser();
   const save = useSave();
   const [selectedKeys, setSelectedKeys] = useState<string[]>([]);
   const location = useLocation();
   const navigate = useNavigate();
   const isCurrentVersion = jobProfileData?.jobProfile?.is_current_version;
+  const showPublishConfirm = usePublishConfirm();
+  const showUnPublishConfirm = useUnPublishConfirm();
 
   const getMenuContent = () => {
     return (

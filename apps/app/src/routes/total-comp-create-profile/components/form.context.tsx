@@ -6,6 +6,7 @@ import { BasicDetailsValidationModel } from './total-comp-create-profile.compone
 interface FormContextType {
   basicUseFormReturn: UseFormReturn<BasicDetailsValidationModel>;
   jobProfileUseFormReturn: UseFormReturn<JobProfileValidationModel>;
+  watchedState: string;
 }
 
 export const FormContext = React.createContext<FormContextType | undefined>(undefined);

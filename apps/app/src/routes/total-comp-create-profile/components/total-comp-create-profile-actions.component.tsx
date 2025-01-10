@@ -1,8 +1,10 @@
 import { Button, Card, Col, Divider, Input, Row, Space, Typography } from 'antd';
+import { useContext } from 'react';
 import { useNavigate } from 'react-router-dom';
 import { DownloadJobProfileComponent } from '../../../components/shared/download-job-profile/download-job-profile.component';
 import { useTestUser } from '../../../utils/useTestUser';
-import { showPublishConfirm, showUnPublishConfirm, useSave } from './publish-helpers';
+import { FormContext } from './form.context';
+import { usePublishConfirm, useSave, useUnPublishConfirm } from './publish-helpers';
 import { CopyLinkButton } from './total-comp-create-profile-copy-link.component';
 import { DuplicateButton } from './total-comp-create-profile-duplicate.component';
 import { useTCContext } from './total-comp-create-profile.provider';
@@ -10,10 +12,19 @@ import { useTCContext } from './total-comp-create-profile.provider';
 interface TotalCompCreateJobProfileActionsProps {}
 
 export const TotalCompCreateJobProfileActions: React.FC<TotalCompCreateJobProfileActionsProps> = ({}) => {
-  const { state, isCurrentVersion, jobProfileMeta, profileJson, jobProfileData, link } = useTCContext();
+  const { isCurrentVersion, jobProfileMeta, profileJson, jobProfileData, link } = useTCContext();
+
+  const context = useContext(FormContext);
+  if (!context) {
+    throw new Error('Form context must be used within FormContext.Provider');
+  }
+  const { watchedState: state } = context;
+
   const save = useSave();
   const isTestUser = useTestUser();
   const navigate = useNavigate();
+  const showPublishConfirm = usePublishConfirm();
+  const showUnPublishConfirm = useUnPublishConfirm();
 
   return (
     <>

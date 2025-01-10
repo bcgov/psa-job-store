@@ -6,8 +6,6 @@ interface TCContextProps {
   setProfileJson: React.Dispatch<React.SetStateAction<any>>;
   isLoading: boolean;
   setIsLoading: React.Dispatch<React.SetStateAction<boolean>>;
-  state: string;
-  setState: React.Dispatch<React.SetStateAction<string>>;
   setJobProfileData: React.Dispatch<React.SetStateAction<any>>;
   jobProfileData: any;
   versionInReview: number;
@@ -54,7 +52,6 @@ export const useTCContext = () => {
 export const TCProvider: React.FC<TCProviderProps> = ({ children }) => {
   const [profileJson, setProfileJson] = useState<any>(null);
   const [isLoading, setIsLoading] = useState(false);
-  const [state, setState] = useState('');
   const [jobProfileData, setJobProfileData] = useState<any>(null);
 
   const [versionInReview, setVersionInReview] = useState<number>(-1); // set to -1 to for triggering second call
@@ -75,8 +72,6 @@ export const TCProvider: React.FC<TCProviderProps> = ({ children }) => {
     setProfileJson,
     isLoading,
     setIsLoading,
-    state,
-    setState,
     setJobProfileData,
     jobProfileData,
     versionInReview,
