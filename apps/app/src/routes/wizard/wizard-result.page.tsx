@@ -431,7 +431,7 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
             maxStepCompleted={positionRequest?.max_step_completed}
           ></WizardSteps>
           {/* Invisible org chart so we can generate a png image to attach with the submission to CRM */}
-          <div style={{ height: '1px', overflow: 'hidden', position: 'relative' }}>
+          <div {...{ inert: '' }} style={{ height: '1px', overflow: 'hidden', position: 'relative' }}>
             <div style={{ height: '400px', width: '100%', position: 'absolute', top: 0, left: 0 }}>
               <OrgChart
                 type={OrgChartType.READONLY}
