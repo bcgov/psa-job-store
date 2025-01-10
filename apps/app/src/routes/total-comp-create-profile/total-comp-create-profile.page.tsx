@@ -7,7 +7,7 @@ import '../../components/app/common/css/custom-form.css';
 import '../../components/app/common/css/filtered-table.page.css';
 import { useLazyGetJobProfileQuery } from '../../redux/services/graphql-api/job-profile.api';
 import NotFoundComponent from '../not-found/404';
-import { TotalCompCreateProfileComponent2 } from './components/total-comp-create-profile.component2';
+import { TotalCompCreateProfileComponent } from './components/total-comp-create-profile.component';
 import { useTCContext } from './components/total-comp-create-profile.provider';
 
 export const TotalCompCreateProfilePage = () => {
@@ -52,7 +52,7 @@ export const TotalCompCreateProfilePage = () => {
         setId={setId}
         setVersion={setVersion}
       ></TotalCompCreateProfileComponent> */}
-      <TotalCompCreateProfileComponent2 jobProfileData={jobProfileData}></TotalCompCreateProfileComponent2>
+      <TotalCompCreateProfileComponent jobProfileData={jobProfileData}></TotalCompCreateProfileComponent>
     </>
   );
 };
