@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { UseFormReturn, UseFormTrigger } from 'react-hook-form';
 import { JobProfileValidationModel } from '../../job-profiles/components/job-profile.component';
-import { BasicDetailsValidationModel } from '../../total-comp-create-profile/components/total-comp-create-profile.component';
+import { BasicDetailsValidationModel } from '../../total-comp-create-profile/components/total-comp-create-profile-validation';
 import WizardTextField from './wizard-edit-profile-text-field';
 
 interface SingleTextFieldProps {
