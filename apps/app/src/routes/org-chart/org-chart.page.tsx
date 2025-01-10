@@ -49,9 +49,9 @@ export const OrgChartPage = () => {
                   role="note"
                   type="link"
                   style={{ textDecoration: 'underline' }}
-                  aria-label="Why can't I make changes? Because the position might be in a different department ID. Please check Peoplesoft for the latest org structure."
+                  aria-label="Why can't I see all positions? Because the position might be in a different department ID. Please check Peoplesoft for the latest org structure."
                 >
-                  Why can't I make changes?
+                  Why can't I see all positions?
                 </Button>
               </Tooltip>
               <OrgChartHelpButton />
