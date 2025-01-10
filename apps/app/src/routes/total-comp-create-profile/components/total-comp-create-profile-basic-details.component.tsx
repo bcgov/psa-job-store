@@ -120,13 +120,6 @@ export const BasicDetails: React.FC<BasicDetailsProps> = ({}) => {
 
   const transformToTreeData = useCallback((groupedClassifications: any) => {
     const transformItem = (item: any) => {
-      // console.log('transformItem item: ', item, selectedClassificationId);
-      // Filter out the selected classification
-      // if (selectedClassificationId && item.id === selectedClassificationId) {
-      //   console.log('FILTERED ITEM: ', item);
-      //   return;
-      // }
-
       return {
         title: (item.groupName || item.name) + (item.employee_group_id ? ' (' + item.employee_group_id + ')' : ''),
         value: item.id != null ? `${item.id}.${item.employee_group_id}.${item.peoplesoft_id}` : item.groupName,
@@ -146,32 +139,6 @@ export const BasicDetails: React.FC<BasicDetailsProps> = ({}) => {
   const ministriesData = useGetJobProfilesDraftsMinistriesQuery().data?.jobProfilesDraftsMinistries;
   const { data: allMinistriesData } = useGetOrganizationsQuery();
 
-  // NEW
-
-  // const useWatchWithValues = (control, name, getValues) => {
-  //   // const a = useWatch({
-  //   //   control,
-  //   //   name,
-  //   //   defaultValue: '',
-  //   // });
-  //   const b = getValues(name);
-
-  //   // console.log('a: ', a);
-  //   // console.log('b: ', b);
-  //   return { value: b };
-  //   // const firstName = useWatch({
-  //   //   control,
-  //   //   name,
-  //   //   defaultValue: 'default',
-  //   // });
-
-  //   // return firstName;
-  // };
-
-  // const originalJobStoreNumber = useWatchWithValues(control, 'originalJobStoreNumber', getBasicDetailsValues);
-  // const jobStoreNumber = useWatchWithValues(control, 'jobStoreNumber', getBasicDetailsValues);
-  // END NEW
-
   // job store number validation
   // const jobStoreNumber = watch('jobStoreNumber');
   const jobStoreNumber = useWatch({
@@ -179,7 +146,6 @@ export const BasicDetails: React.FC<BasicDetailsProps> = ({}) => {
     name: 'jobStoreNumber',
   });
 
-  // console.log('SETUP USE WATCH');
   const originalJobStoreNumber = useWatch({
     control,
     name: 'originalJobStoreNumber',
@@ -226,10 +192,6 @@ export const BasicDetails: React.FC<BasicDetailsProps> = ({}) => {
       // console.log('rawClassification: ', rawClassification);
       if (rawClassification != null) {
         replaceEmployeeClassificationGroups(rawClassification);
-        // reset({
-        //   employeeClassificationGroups: rawClassification,
-        // });
-        // setValue('employeeClassificationGroups', rawClassification);
       } else {
         setValue('employeeClassificationGroups', []);
       }
@@ -246,11 +208,7 @@ export const BasicDetails: React.FC<BasicDetailsProps> = ({}) => {
       }
 
       setValue('classificationReviewRequired', jobProfileData.jobProfile.review_required);
-      if (typeof jobProfileData.jobProfile.context === 'string') {
-        setValue('jobContext', jobProfileData.jobProfile.context);
-      } else {
-        setValue('jobContext', jobProfileData.jobProfile.context);
-      }
+      setValue('jobContext', jobProfileData.jobProfile.context);
 
       const allReportsToValue = jobProfileData.jobProfile.all_reports_to;
       setValue('all_reports_to', allReportsToValue);
@@ -349,10 +307,6 @@ export const BasicDetails: React.FC<BasicDetailsProps> = ({}) => {
     // Trigger the query to get the next available number
 
     if (originalJobStoreNumber) {
-      // console.log(
-      //   'have original number, not featching, setting jobStoreNumber to originalJobStoreNumber: ',
-      //   originalJobStoreNumber,
-      // );
       setValue('jobStoreNumber', originalJobStoreNumber);
       return;
     }
@@ -403,11 +357,6 @@ export const BasicDetails: React.FC<BasicDetailsProps> = ({}) => {
   }, [urlId, setValue, allMinistriesData]);
 
   useEffect(() => {
-    // console.log(
-    //   'number validation effect, jobStoreNumber, originalJobStoreNumber: ',
-    //   jobStoreNumber,
-    //   originalJobStoreNumber,
-    // );
     const numberValue = parseInt(jobStoreNumber, 10);
     const originalNumberValue = parseInt(originalJobStoreNumber, 10);
 
