@@ -1,20 +1,20 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { useEffect, useState } from 'react';
+import { useEffect } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import LoadingComponent from '../../components/app/common/components/loading.component';
 import '../../components/app/common/css/custom-form.css';
 import '../../components/app/common/css/filtered-table.page.css';
 import { useLazyGetJobProfileQuery } from '../../redux/services/graphql-api/job-profile.api';
 import NotFoundComponent from '../not-found/404';
-import { TotalCompCreateProfileComponent } from './components/total-comp-create-profile.component';
+import { TotalCompCreateProfileComponent2 } from './components/total-comp-create-profile.component2';
+import { useTCContext } from './components/total-comp-create-profile.provider';
 
 export const TotalCompCreateProfilePage = () => {
   const { id: urlId } = useParams();
   const [searchParams, setSearchParams] = useSearchParams();
-  const [id, setId] = useState(urlId);
-  const [version, setVersion] = useState('');
 
+  const { setVersion, setId, id, version } = useTCContext();
   const [trigger, { data: jobProfileData, isFetching, isError, error }] = useLazyGetJobProfileQuery();
   const navigate = useNavigate();
 
@@ -45,11 +45,14 @@ export const TotalCompCreateProfilePage = () => {
   return id && jobProfileData && !jobProfileData?.jobProfile && !isFetching ? (
     <NotFoundComponent entity="Profile" />
   ) : (
-    <TotalCompCreateProfileComponent
-      jobProfileData={jobProfileData}
-      id={id}
-      setId={setId}
-      setVersion={setVersion}
-    ></TotalCompCreateProfileComponent>
+    <>
+      {/* <TotalCompCreateProfileComponent
+        jobProfileData={jobProfileData}
+        id={id}
+        setId={setId}
+        setVersion={setVersion}
+      ></TotalCompCreateProfileComponent> */}
+      <TotalCompCreateProfileComponent2 jobProfileData={jobProfileData}></TotalCompCreateProfileComponent2>
+    </>
   );
 };
