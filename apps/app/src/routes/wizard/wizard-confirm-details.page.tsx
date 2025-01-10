@@ -412,9 +412,25 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
                     >
                       <Card
                         title={
-                          <span id="department-id-label">
-                            <h3 style={{ fontWeight: '600', fontSize: '16px' }}>Department ID</h3>
-                          </span>
+                          <div id="department-id-label" style={{ display: 'flex' }}>
+                            <h3 style={{ fontWeight: '600', fontSize: '16px', flex: 'auto' }}>Department ID</h3>
+                            <Tooltip
+                              placement="top"
+                              title={
+                                'You must have access to department IDs in which you wish to create a new position.'
+                              }
+                            >
+                              <Button
+                                id="changes"
+                                role="note"
+                                type="link"
+                                style={{ textDecoration: 'underline' }}
+                                aria-label="Why can't I select another department ID? You must have access to department IDs in which you wish to create a new position."
+                              >
+                                Why can't I select another department ID?
+                              </Button>
+                            </Tooltip>
+                          </div>
                         }
                         // title="Department & work location"
                         bordered={false}

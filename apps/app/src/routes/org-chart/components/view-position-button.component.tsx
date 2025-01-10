@@ -15,6 +15,7 @@ export const ViewPositionButton = ({ positionRequestId }: ViewPositionButtonProp
       }}
     >
       <Tooltip
+        placement="bottom"
         title={
           !positionRequestId ? 'Position details are only available for positions created in the Job Store.' : undefined
         }

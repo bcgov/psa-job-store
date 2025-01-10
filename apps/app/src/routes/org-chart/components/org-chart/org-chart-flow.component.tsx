@@ -185,10 +185,15 @@ const OrgChartFlow: React.FC<OrgChartFlowProps> = ({
       // console.log('nodeElement: ', nodeElement);
       if (nodeElement) {
         if (focusButton) {
-          const buttonElement = nodeElement.querySelector('button');
-          // console.log('button element: ', buttonElement);
+          const buttonElements = nodeElement.querySelectorAll('button:not([disabled])');
+          const buttonElement = Array.from(buttonElements).find(
+            (node) => !node.isEqualNode(document.activeElement),
+          ) as HTMLButtonElement | null;
           if (buttonElement) {
             buttonElement.focus();
+            !Array.from(buttonElements)
+              .at(buttonElements.length - 1)
+              ?.isEqualNode(document.activeElement) && setIsButtonFocused(false);
           } else {
             nodeElement.focus();
           }
@@ -395,6 +400,7 @@ const OrgChartFlow: React.FC<OrgChartFlowProps> = ({
               }
             } else {
               // If node is focused and button is not disabled, focus on the button
+
               event.preventDefault();
               setIsButtonFocused(true);
               updateSelectedNode(selectedNodeId, true);
