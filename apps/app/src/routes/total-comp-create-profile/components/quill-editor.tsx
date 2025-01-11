@@ -12,7 +12,7 @@ interface QuillEditorProps {
 
 const QuillEditor = forwardRef<Quill, QuillEditorProps>(
   ({ readOnly, value, onTextChange, onSelectionChange, onBlur }, ref) => {
-    const Delta = Quill.import('delta');
+    // const Delta = Quill.import('delta');
     const containerRef = useRef<HTMLDivElement | null>(null);
     const onTextChangeRef = useRef(onTextChange);
     const onSelectionChangeRef = useRef(onSelectionChange);
@@ -34,6 +34,7 @@ const QuillEditor = forwardRef<Quill, QuillEditorProps>(
       if (quillInstanceRef.current && value !== undefined) {
         const currentContent = quillInstanceRef.current.root.innerHTML;
         if (currentContent !== value) {
+          quillInstanceRef.current.setText('');
           quillInstanceRef.current.clipboard.dangerouslyPasteHTML(0, value);
         }
       }
@@ -66,7 +67,9 @@ const QuillEditor = forwardRef<Quill, QuillEditorProps>(
       quillInstanceRef.current = quill;
 
       if (value) {
-        quill.setContents(new Delta().insert(value));
+        // quill.setText('');
+        // quill.setContents(new Delta().insert(value));
+        quill.clipboard.dangerouslyPasteHTML(value);
       }
 
       quill.on(Quill.events.TEXT_CHANGE, (...args) => {
