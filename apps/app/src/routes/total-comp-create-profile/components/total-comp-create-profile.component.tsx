@@ -3,7 +3,7 @@
 
 import { classValidatorResolver } from '@hookform/resolvers/class-validator';
 import { useEffect } from 'react';
-import { useForm } from 'react-hook-form';
+import { useFieldArray, useForm } from 'react-hook-form';
 import '../../../components/app/common/css/custom-form.css';
 import '../../../components/app/common/css/filtered-table.page.css';
 import {
@@ -298,6 +298,11 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
     }
   }, [jobProfileData, jobProfileMetaData, positionRequestsCount, triggerGetPositionRequestsCount, versionInReview]);
 
+  const professionalRegistrationRequirementsFieldArray = useFieldArray({
+    control: jobProfileUseFormReturn.control,
+    name: 'professional_registration_requirements',
+  });
+
   const title = basicFormWatch('title.text');
 
   const formMethods = {
@@ -307,7 +312,13 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
 
   return (
     <>
-      <FormContext.Provider value={{ ...formMethods, watchedState: state }}>
+      <FormContext.Provider
+        value={{
+          ...formMethods,
+          watchedState: state,
+          professionalRegistrationRequirementsFieldArray: professionalRegistrationRequirementsFieldArray,
+        }}
+      >
         {isLoading ? <></> : <JobProfileHeader title={title} />}
 
         <TCTabBar></TCTabBar>

@@ -83,7 +83,7 @@ export const BasicDetails: React.FC<BasicDetailsProps> = ({}) => {
   if (!context) {
     throw new Error('Form context must be used within FormContext.Provider');
   }
-  const { basicUseFormReturn, jobProfileUseFormReturn } = context;
+  const { basicUseFormReturn, jobProfileUseFormReturn, professionalRegistrationRequirementsFieldArray } = context;
 
   const {
     setValue: profileSetValue,
@@ -106,11 +106,6 @@ export const BasicDetails: React.FC<BasicDetailsProps> = ({}) => {
     trigger: triggerBasicDetailsValidation,
     formState: basicFormState,
   } = basicUseFormReturn; //useFormContext<BasicDetailsValidationModel>();
-
-  const professionalRegistrationRequirementsFieldArray = useFieldArray({
-    control: jobProfileUseFormReturn.control,
-    name: 'professional_registration_requirements',
-  });
 
   const {
     fields: professionalRegistrationRequirementsFields,
@@ -679,8 +674,7 @@ export const BasicDetails: React.FC<BasicDetailsProps> = ({}) => {
       refetchPickerData().then((r) => {
         // console.log(
         //   'refetched, updateProfessionalRegistrationrequirements, professionalRequirementsPickerData now: ',
-        //   professionalRequirementsPickerData,
-        //   r,
+        //   r.data,
         // );
         updateProfessionalRegistrationrequirements(r.data);
       });

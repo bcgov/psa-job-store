@@ -25,7 +25,7 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
   if (!context) {
     throw new Error('Form context must be used within FormContext.Provider');
   }
-  const { jobProfileUseFormReturn } = context;
+  const { jobProfileUseFormReturn, professionalRegistrationRequirementsFieldArray } = context;
 
   const {
     control: profileControl,
@@ -34,11 +34,6 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
     trigger: triggerProfileValidation,
     formState: profileFormState,
   } = jobProfileUseFormReturn;
-
-  const professionalRegistrationRequirementsFieldArray = useFieldArray({
-    control: jobProfileUseFormReturn.control,
-    name: 'professional_registration_requirements',
-  });
 
   const {
     fields: professionalRegistrationRequirementsFields,
