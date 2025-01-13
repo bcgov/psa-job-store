@@ -1850,10 +1850,26 @@ export class PositionRequestApiService {
     // console.log('orgChart: ', orgChart);
     const managers: SuggestedManager[] = [];
 
-    // Start from the given position and traverse up
-    let currentPositionId = positionNumber;
-
     if (orgChart && typeof orgChart === 'object' && 'nodes' in orgChart && 'edges' in orgChart) {
+      // Check the initial position first
+      const initialNode = (orgChart.nodes as any[]).find((node: any) => node.id === positionNumber);
+      if (initialNode && initialNode.data.classification.name.includes('Band')) {
+        initialNode.data.employees.forEach((employee: any) => {
+          managers.push({
+            id: employee.id,
+            name: employee.name,
+            status: employee.status,
+            positionNumber: initialNode.id,
+            positionTitle: initialNode.data.title,
+            classification: initialNode.data.classification,
+            department: initialNode.data.department,
+          });
+        });
+      }
+
+      // Start traversing up from the given position
+      let currentPositionId = positionNumber;
+
       while (true) {
         // Find the edge where the current position is the target
         const currentEdge = (orgChart.edges as any[]).find((edge: any) => edge.target === currentPositionId);
