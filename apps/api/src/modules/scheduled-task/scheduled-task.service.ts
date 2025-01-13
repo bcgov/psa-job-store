@@ -14,10 +14,45 @@ export enum ScheduledTask {
   CrmSync = 'crm-sync',
   PeoplesoftSync = 'peoplesoft-sync',
   UserSync = 'user-sync',
+  FastTask = 'fast-task',
+  SlowTask = 'slow-task',
 }
 
+interface TaskConfig {
+  name: ScheduledTask;
+  lockTimeout: number; // in seconds
+  frequency: number;
+}
 @Injectable()
 export class ScheduledTaskService {
+  private readonly taskConfigs: Record<ScheduledTask, TaskConfig> = {
+    [ScheduledTask.UserSync]: {
+      name: ScheduledTask.UserSync,
+      lockTimeout: 3 * 60 * 60, // 3 hours
+      frequency: 24 * 60 * 60, // 24 hours
+    },
+    [ScheduledTask.PeoplesoftSync]: {
+      name: ScheduledTask.PeoplesoftSync,
+      lockTimeout: 3 * 60 * 60, // 3 hours
+      frequency: 24 * 60 * 60, // 24 hours
+    },
+    [ScheduledTask.CrmSync]: {
+      name: ScheduledTask.CrmSync,
+      lockTimeout: 5 * 60, // 5 minutes
+      frequency: 60,
+    },
+    [ScheduledTask.FastTask]: {
+      name: ScheduledTask.FastTask,
+      lockTimeout: 30, // 30 seconds
+      frequency: 10, // every 10 seconds
+    },
+    [ScheduledTask.SlowTask]: {
+      name: ScheduledTask.SlowTask,
+      lockTimeout: 60, // 60 seconds
+      frequency: 20, // every 20 seconds
+    },
+  };
+
   private readonly logger = new Logger(ScheduledTaskService.name);
 
   constructor(
@@ -57,35 +92,97 @@ export class ScheduledTaskService {
     });
   }
 
-  @Cron('*/5 * * * * *')
-  async syncPeoplesoftData() {
-    if (process.env.E2E_TESTING === 'true') {
+  private async acquireLock(task: ScheduledTask): Promise<boolean> {
+    const lockTimeout = this.taskConfigs[task].lockTimeout;
+
+    try {
+      // Clean expired locks first
+      const deletedLocks = await this.prisma.cronLock.deleteMany({
+        where: {
+          name: task,
+          locked_at: {
+            lt: new Date(Date.now() - lockTimeout * 1000),
+          },
+        },
+      });
+
+      if (deletedLocks.count > 0) {
+        this.logger.warn(`Cleaned up ${deletedLocks.count} expired lock(s) for ${task}`);
+      }
+
+      await this.prisma.cronLock.create({
+        data: {
+          name: task,
+          locked_at: new Date(),
+        },
+      });
+
+      this.logger.log(`Lock acquired for ${task} by ${process.env.HOSTNAME || 'local'}`);
+      return true;
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      this.logger.debug(`Failed to acquire lock for ${task}: ${errorMessage}`);
+      return false;
+    }
+  }
+
+  private async releaseLock(task: ScheduledTask) {
+    try {
+      await this.prisma.cronLock.delete({
+        where: { name: task },
+      });
+      this.logger.log(`Lock released for ${task}`);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      this.logger.error(`Failed to release lock for ${task}: ${errorMessage}`);
+    }
+  }
+
+  private async executeTask(task: ScheduledTask, execution: () => Promise<void>) {
+    const config = this.taskConfigs[task];
+    let needsUpdate = await this.isMetadataOutdated(task);
+
+    if (process.env.E2E_TESTING === 'true' && task !== ScheduledTask.CrmSync) return;
+
+    // Only run CRM sync in E2E testing - will sync against mock CRM
+    if (process.env.E2E_TESTING === 'true' && task == ScheduledTask.CrmSync) needsUpdate = true;
+
+    if (!needsUpdate) {
+      this.logger.debug(`${task} doesn't need update yet`);
       return;
     }
-    const needsUpdate = await this.isMetadataOutdated(ScheduledTask.PeoplesoftSync);
 
-    if (needsUpdate === true) {
-      await this.updateMetadata(ScheduledTask.PeoplesoftSync, 86400);
-      await this.peoplesoftService.syncClassifications();
-      await this.peoplesoftService.syncLocations();
-      await this.peoplesoftService.syncOrganizationsAndDepartments();
+    const hasLock = await this.acquireLock(task);
+    if (!hasLock) {
+      this.logger.debug(`${task} couldn't acquire lock, skipping`);
+      return;
+    }
+
+    try {
+      this.logger.log(`Starting ${task} @ ${new Date()}`);
+      await execution();
+      await this.updateMetadata(task, config.frequency);
+      this.logger.log(`Completed ${task} @ ${new Date()}`);
+    } catch (error) {
+      const errorMessage = error instanceof Error ? error.message : String(error);
+      this.logger.error(`Error in ${task}: ${errorMessage}`);
+    } finally {
+      await this.releaseLock(task);
     }
   }
 
   @Cron('*/5 * * * * *')
+  async syncPeoplesoftData() {
+    await this.executeTask(ScheduledTask.PeoplesoftSync, async () => {
+      await this.peoplesoftService.syncClassifications();
+      await this.peoplesoftService.syncLocations();
+      await this.peoplesoftService.syncOrganizationsAndDepartments();
+    });
+  }
+
+  @Cron('*/5 * * * * *')
   async syncPositionStatuses() {
-    // if (process.env.E2E_TESTING === 'true') {
-    //   return;
-    // }
-    const needsUpdate =
-      process.env.E2E_TESTING === 'true' ? true : await this.isMetadataOutdated(ScheduledTask.CrmSync);
-    // console.log('syncPositionStatuses, needsUpdate:', needsUpdate);
-
-    if (needsUpdate === true) {
-      await this.updateMetadata(ScheduledTask.CrmSync, 60);
-
-      if (process.env.E2E_TESTING !== 'true') this.logger.log(`Start syncPositionStatus @ ${new Date()}`);
-
+    await this.executeTask(ScheduledTask.CrmSync, async () => {
       await this.crmService.syncIncidentStatus().then(async (rows) => {
         // console.log('this.crmService.syncIncidentStatus rows: ', rows);
         for (const row of rows) {
@@ -135,9 +232,9 @@ export class ScheduledTaskService {
               if (positionRequest.status !== incomingPositionRequestStatus) {
                 this.logger.log(
                   `Updating status ${positionRequest.status} to ${incomingPositionRequestStatus} 
-                  crm_id: ${crm_id}, crm_lookup_name: ${crm_lookup_name}, 
-                  crm status:  ${crm_status}, crm category: ${crm_category}, 
-                  ps status: ${positionObj['A.POSN_STATUS']}, ps effective status: ${positionObj['A.EFF_STATUS']}`,
+                    crm_id: ${crm_id}, crm_lookup_name: ${crm_lookup_name}, 
+                    crm status:  ${crm_status}, crm category: ${crm_category}, 
+                    ps status: ${positionObj['A.POSN_STATUS']}, ps effective status: ${positionObj['A.EFF_STATUS']}`,
                 );
 
                 const status = incomingPositionRequestStatus as PositionRequestStatus;
@@ -160,25 +257,12 @@ export class ScheduledTaskService {
           }
         }
       });
-      if (process.env.E2E_TESTING !== 'true') this.logger.log(`End syncPositionStatus @ ${new Date()}`);
-    }
+    });
   }
 
   @Cron('*/5 * * * * *')
   async syncUsers() {
-    if (process.env.E2E_TESTING === 'true') {
-      return;
-    }
-    const needsUpdate = await this.isMetadataOutdated(ScheduledTask.UserSync);
-
-    if (needsUpdate === true) {
-      this.logger.log(`Start syncUsers @ ${new Date()}`);
-
-      await this.updateMetadata(ScheduledTask.UserSync, 86400);
-      await this.userService.syncUsers();
-
-      this.logger.log(`End syncUsers @ ${new Date()}`);
-    }
+    await this.executeTask(ScheduledTask.UserSync, async () => await this.userService.syncUsers());
   }
 
   @Cron('*/20 * * * * *')
@@ -209,5 +293,34 @@ export class ScheduledTaskService {
     await this.cacheManager.del('jobProfileCounts');
 
     return (await this.prisma.$transaction(updates)).length;
+  }
+
+  // Test tasks
+  @Cron('*/20 * * * * *')
+  async fastTask() {
+    await this.executeTask(ScheduledTask.FastTask, async () => {
+      this.logger.log('Fast task processing...');
+      await new Promise((resolve) => setTimeout(resolve, 2000)); // 2 second task
+      this.logger.log('Fast task done');
+    });
+  }
+
+  @Cron('*/20 * * * * *')
+  async slowTask() {
+    await this.executeTask(ScheduledTask.SlowTask, async () => {
+      this.logger.log('Slow task processing...');
+      await new Promise((resolve) => setTimeout(resolve, 15000)); // 15 second task
+      this.logger.log('Slow task done');
+    });
+  }
+
+  // Simulate a crash by not releasing the lock
+  @Cron('*/30 * * * * *')
+  async crashingTask() {
+    const task = ScheduledTask.FastTask;
+    if (await this.acquireLock(task)) {
+      this.logger.warn('Simulating crash - lock will not be released');
+      throw new Error('Simulated crash');
+    }
   }
 }
