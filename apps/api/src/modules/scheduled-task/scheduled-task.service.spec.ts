@@ -181,6 +181,14 @@ describe('ScheduledTaskService', () => {
         'isMetadataOutdated',
       );
       spy.mockResolvedValue(true);
+
+      // Mock acquireLock
+      const lockSpy = jest.spyOn(
+        scheduledTaskService as unknown as { acquireLock: () => Promise<boolean> },
+        'acquireLock',
+      );
+      lockSpy.mockResolvedValue(true);
+
       await scheduledTaskService.syncPeoplesoftData();
       expect(peoplesoftService.syncClassifications).toHaveBeenCalled();
       expect(peoplesoftService.syncLocations).toHaveBeenCalled();
@@ -233,6 +241,13 @@ describe('ScheduledTaskService', () => {
         crm_lookup_name: 'TEST',
         submitted_at: new Date(),
       });
+
+      // Mock acquireLock
+      const lockSpy = jest.spyOn(
+        scheduledTaskService as unknown as { acquireLock: () => Promise<boolean> },
+        'acquireLock',
+      );
+      lockSpy.mockResolvedValue(true);
 
       await scheduledTaskService.syncPositionStatuses();
 
