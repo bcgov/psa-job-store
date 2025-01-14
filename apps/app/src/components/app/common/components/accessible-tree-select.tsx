@@ -167,9 +167,14 @@ const TreeViewDropdown = ({
                     </div>
                   )}
                   <label
+                    // if it's branch, clicking on label expands/collapses the branch
+                    // if it's not, then clicking the label selects it
+
                     onClick={(e: any) => {
-                      handleSelect(e);
-                      e.stopPropagation();
+                      if (!isBranch) {
+                        handleSelect(e);
+                        e.stopPropagation();
+                      }
                     }}
                     style={{ display: 'inline-flex', alignItems: 'center' }}
                   >
