@@ -5,36 +5,12 @@ import * as dotenv from 'dotenv';
 import { useState } from 'react';
 dotenv.config();
 
-const {
-  VITE_KEYCLOAK_REALM_URL,
-  VITE_KEYCLOAK_CLIENT_ID,
-  VITE_BACKEND_URL,
-  VITE_KEYCLOAK_REDIRECT_URL,
-  VITE_SUPPORT_EMAIL,
-  VITE_ENV,
-} = process.env;
+const { VITE_BACKEND_URL, VITE_SUPPORT_EMAIL, VITE_ENV } = process.env;
 
 jest.mock('./envConfig', () => ({
   VITE_BACKEND_URL: VITE_BACKEND_URL,
-  VITE_KEYCLOAK_REALM_URL: VITE_KEYCLOAK_REALM_URL,
-  VITE_KEYCLOAK_CLIENT_ID: VITE_KEYCLOAK_CLIENT_ID,
-  VITE_KEYCLOAK_REDIRECT_URL: VITE_KEYCLOAK_REDIRECT_URL,
   VITE_SUPPORT_EMAIL: VITE_SUPPORT_EMAIL,
   VITE_ENV: VITE_ENV,
-}));
-
-jest.mock('react-oidc-context', () => ({
-  ...jest.requireActual('react-oidc-context'),
-  useAuth: () => ({
-    isAuthenticated: true,
-    user: {
-      profile: {
-        client_roles: ['total-compensation', 'classification', 'hiring-manager', 'super-admin'],
-      },
-    },
-    isLoading: false,
-    // Add other auth methods if needed
-  }),
 }));
 
 jest.mock('./src/redux/services/graphql-api/position.api', () => ({

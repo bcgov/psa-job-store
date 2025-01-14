@@ -12,19 +12,16 @@ services:
         - POSTGRES_USER=${POSTGRES_USER}
         - POSTGRES_PASSWORD=${POSTGRES_PASSWORD}
         - DATABASE_URL=${DATABASE_URL}
-        - KEYCLOAK_API_URL=${KEYCLOAK_API_URL}
-        - KEYCLOAK_API_TOKEN_URL=${KEYCLOAK_API_TOKEN_URL}
         - SSO_ENVIRONMENT=${SSO_ENVIRONMENT}
         - SSO_INTEGRATION_ID=${SSO_INTEGRATION_ID}
         - CSS_API_CLIENT_ID=${CSS_API_CLIENT_ID}
         - CSS_API_CLIENT_SECRET=${CSS_API_CLIENT_SECRET}
+        - SESSION_SECRET=${SESSION_SECRET}
         - KEYCLOAK_REALM_URL=${KEYCLOAK_REALM_URL}
-        - KEYCLOAK_CLIENT_ID_PRIVATE=${KEYCLOAK_CLIENT_ID_PRIVATE}
-        - KEYCLOAK_CLIENT_ID_PUBLIC=${KEYCLOAK_CLIENT_ID_PUBLIC}
+        - KEYCLOAK_CALLBACK_URL=${KEYCLOAK_CALLBACK_URL}
+        - KEYCLOAK_LOGOUT_REDIRECT_URL=${KEYCLOAK_LOGOUT_REDIRECT_URL}
+        - KEYCLOAK_CLIENT_ID=${KEYCLOAK_CLIENT_ID}
         - KEYCLOAK_REDIRECT_URL=${KEYCLOAK_REDIRECT_URL}
-        - BI_URL=${BI_URL}
-        - BI_USERNAME=${BI_USERNAME}
-        - BI_PASSWORD=${BI_PASSWORD}
         - ELASTIC_NODE=${ELASTIC_NODE}
         - ELASTIC_USERNAME=${ELASTIC_USERNAME}
         - ELASTIC_PASSWORD=${ELASTIC_PASSWORD}
@@ -55,7 +52,7 @@ services:
       - .env.docker
   elasticsearch:
     container_name: elasticsearch
-    image: docker.elastic.co/elasticsearch/elasticsearch:${STACK_VERSION}
+    image: docker.elastic.co/elasticsearch/elasticsearch:${ELASTIC_STACK_VERSION}
     # 8.x
     environment:
       [
@@ -84,7 +81,7 @@ services:
         reservations:
           cpus: '1.0'
   kibana:
-    image: docker.elastic.co/kibana/kibana:${STACK_VERSION}
+    image: docker.elastic.co/kibana/kibana:${ELASTIC_STACK_VERSION}
     container_name: kibana
     environment:
       XPACK_ENCRYPTEDSAVEDOBJECTS_ENCRYPTIONKEY: d1a66dfd-c4d3-4a0a-8290-2abcb83ab3aa
@@ -105,7 +102,7 @@ services:
       context: ../../deployments/builds/nginx_rp/
       args:
         - DISCOVERY=${KEYCLOAK_REALM_URL}
-        - CLIENT_ID=${KEYCLOAK_CLIENT_ID_PRIVATE}
+        - CLIENT_ID=${KEYCLOAK_CLIENT_ID}
         - CLIENT_SECRET=${KEYCLOAK_CLIENT_SECRET}
         - REFRESH_SESSION_INTERVAL=${REFRESH_SESSION_INTERVAL}
         - ACCESS_TOKEN_EXPIRES_IN=${ACCESS_TOKEN_EXPIRES_IN}

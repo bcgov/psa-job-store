@@ -27,7 +27,7 @@ export type UserWithoutRoles = Omit<User, 'roles'>;
 export class KeycloakService {
   async assignUserRoles(id: string, roles: string[]) {
     const guid = uuidToGuid(id);
-    await assignUserRoles(`${guid}@idir`, roles);
+    return await assignUserRoles(`${guid}@idir`, roles);
   }
 
   async findUsers(field: keyof IDIRUserQuery, value: string) {
@@ -173,5 +173,6 @@ export class KeycloakService {
     const guid = uuidToGuid(id);
 
     await unassignUserRole(`${guid}@idir`, role);
+    return true;
   }
 }

@@ -11,5 +11,5 @@ if (process.env.SEED_FILE) {
 }
 
 // Execute the seed file
-console.log(`Running seed: ${seedFile}`);
+// console.log(`Running seed: ${seedFile}`);
 execSync(`ts-node ${path.resolve(seedFile)}`, { stdio: 'inherit' });

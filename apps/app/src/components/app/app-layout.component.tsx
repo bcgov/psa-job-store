@@ -1,8 +1,8 @@
 import { MenuFoldOutlined, MenuUnfoldOutlined } from '@ant-design/icons';
 import { Button, Layout } from 'antd';
-import { useAuth } from 'react-oidc-context';
 import { useLocation } from 'react-router-dom';
 import { useLocalStorage } from 'usehooks-ts';
+import { useTypedSelector } from '../../redux/redux.hooks';
 import { ErrorBoundaryLayout } from '../../routes/not-found/error';
 import { AppHeader } from '../app/header.component';
 import { NavMenu } from './components/nav-menu.component';
@@ -10,7 +10,7 @@ import { NavMenu } from './components/nav-menu.component';
 const { Content, Sider } = Layout;
 
 const RenderOutlet = () => {
-  const auth = useAuth();
+  const auth = useTypedSelector((state) => state.authReducer);
   const location = useLocation();
 
   // Render the <Outlet /> if user is on the login/logout page, or is logged in.
@@ -22,7 +22,7 @@ const RenderOutlet = () => {
 };
 
 export const AppLayout = () => {
-  const auth = useAuth();
+  const auth = useTypedSelector((state) => state.authReducer);
   const [collapsed, setCollapsed] = useLocalStorage('sider-collapsed', false);
 
   return (

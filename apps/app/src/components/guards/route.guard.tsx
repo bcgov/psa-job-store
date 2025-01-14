@@ -1,9 +1,9 @@
 import { useEffect } from 'react';
-import { useAuth } from 'react-oidc-context';
 import { Navigate, Outlet, useNavigate } from 'react-router-dom';
+import { useTypedSelector } from '../../redux/redux.hooks';
 
 export const RouteGuard = () => {
-  const auth = useAuth();
+  const auth = useTypedSelector((state) => state.authReducer);
   const navigate = useNavigate();
 
   useEffect(() => {
