@@ -1,40 +1,16 @@
 import { App, ConfigProvider } from 'antd';
 import 'antd/dist/reset.css';
-import { WebStorageStateStore } from 'oidc-client-ts';
 import React from 'react';
 import ReactDOM from 'react-dom/client';
 import { Helmet, HelmetProvider } from 'react-helmet-async';
-import { AuthProvider, AuthProviderProps } from 'react-oidc-context';
 import { Provider as ReduxProvider } from 'react-redux';
 import { RouterProvider } from 'react-router-dom';
 import 'reflect-metadata';
-import { VITE_KEYCLOAK_CLIENT_ID, VITE_KEYCLOAK_REALM_URL } from '../envConfig';
 import './global.css';
 import { store } from './redux/redux.store';
-import { router } from './router/index';
+import { nextRouter } from './router/next.router';
 import { WizardProvider } from './routes/wizard/components/wizard.provider';
 import { sendLogToServer } from './utils/logger-service.util';
-
-const origin = window.location.origin;
-// console.log('debuging app log');
-// console.log('window.location: ', window.location.toString());
-
-//  on login is http://localhost:5173/?state=123...
-// VITE_KEYCLOAK_REDIRECT_URL is http://localhost:5173/login/auth/login
-
-export const oidcConfig: AuthProviderProps = {
-  userStore: new WebStorageStateStore({
-    store: localStorage,
-  }),
-  authority: VITE_KEYCLOAK_REALM_URL,
-  client_id: VITE_KEYCLOAK_CLIENT_ID,
-  redirect_uri: origin + '/auth/login', //,VITE_KEYCLOAK_REDIRECT_URL
-};
-
-// window.addEventListener('error', function (event) {
-//   console.error('Caught by global error listener:', event.error);
-//   sendLogToServer(event.error);
-// });
 
 window.onerror = function (_message, _source, _lineno, _colno, error) {
   console.error('Caught by window.onerror:', error);
@@ -49,52 +25,50 @@ window.addEventListener('unhandledrejection', function (event) {
 ReactDOM.createRoot(document.getElementById('root')!).render(
   <React.StrictMode>
     {/* <ErrorBoundary > */}
-    <AuthProvider {...oidcConfig} automaticSilentRenew>
-      <ReduxProvider store={store}>
-        <ConfigProvider
-          theme={{
-            // todo: this causes some issues (for example steps component on wizard doesn't render properly), needed to render AccessibleList on dev
-            // hashed: false,
-            components: {
-              Layout: {
-                siderBg: '#FFF',
-              },
+    <ReduxProvider store={store}>
+      <ConfigProvider
+        theme={{
+          // todo: this causes some issues (for example steps component on wizard doesn't render properly), needed to render AccessibleList on dev
+          // hashed: false,
+          components: {
+            Layout: {
+              siderBg: '#FFF',
             },
-            token: {
-              colorLink: '#0057AD',
-              colorPrimary: '#0057AD',
-              // colorTextSecondary: 'red',
-              // colorText: 'red',
-              colorTextTertiary: '#6E6E6E',
-              fontSizeHeading1: 20,
-              fontSizeHeading2: 18,
-              fontSizeHeading3: 16,
-              fontSizeHeading4: 14,
-              fontSizeHeading5: 14,
+          },
+          token: {
+            colorLink: '#0057AD',
+            colorPrimary: '#0057AD',
+            // colorTextSecondary: 'red',
+            // colorText: 'red',
+            colorTextTertiary: '#6E6E6E',
+            fontSizeHeading1: 20,
+            fontSizeHeading2: 18,
+            fontSizeHeading3: 16,
+            fontSizeHeading4: 14,
+            fontSizeHeading5: 14,
 
-              controlItemBgActive: '#F1F8FE',
+            controlItemBgActive: '#F1F8FE',
 
-              lineHeightHeading1: 1.4,
-              lineHeightHeading2: 1.33333,
-              lineHeightHeading3: 1.375,
-              lineHeightHeading4: 1,
-              lineHeightHeading5: 2,
+            lineHeightHeading1: 1.4,
+            lineHeightHeading2: 1.33333,
+            lineHeightHeading3: 1.375,
+            lineHeightHeading4: 1,
+            lineHeightHeading5: 2,
 
-              colorTextPlaceholder: '#6E6E6E',
-            },
-          }}
-        >
-          <HelmetProvider>
-            <App>
-              <Helmet defaultTitle="Job Store" titleTemplate="%s | Job Store" />
-              <WizardProvider>
-                <RouterProvider router={router} />
-              </WizardProvider>
-            </App>
-          </HelmetProvider>
-        </ConfigProvider>
-      </ReduxProvider>
-    </AuthProvider>
+            colorTextPlaceholder: '#6E6E6E',
+          },
+        }}
+      >
+        <HelmetProvider>
+          <App>
+            <Helmet defaultTitle="Job Store" titleTemplate="%s | Job Store" />
+            <WizardProvider>
+              <RouterProvider router={nextRouter} />
+            </WizardProvider>
+          </App>
+        </HelmetProvider>
+      </ConfigProvider>
+    </ReduxProvider>
     {/* </ErrorBoundary> */}
   </React.StrictMode>,
 );

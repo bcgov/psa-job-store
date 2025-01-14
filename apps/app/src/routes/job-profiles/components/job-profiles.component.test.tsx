@@ -1,6 +1,5 @@
 import { configureStore } from '@reduxjs/toolkit';
 import { act, fireEvent, render, waitFor, within } from '@testing-library/react';
-import { AuthProvider } from 'react-oidc-context';
 import { Provider } from 'react-redux';
 import { MemoryRouter, useParams } from 'react-router-dom';
 import JobProfiles from './job-profiles.component';
@@ -16,6 +15,7 @@ const store = configureStore({
   reducer: {
     // Use a mock reducer
     mockReducer: mockGraphqlApiReducer,
+    authReducer: (state = { user: { username: 'TEST' } }) => state,
   },
   middleware: (getDefaultMiddleware) => getDefaultMiddleware().concat(mockMiddleware),
 });
@@ -106,13 +106,11 @@ describe('JobProfiles', () => {
     await act(async () => {
       rendered = render(
         <Provider store={store}>
-          <AuthProvider>
-            <JobProfilesProvider>
-              <MemoryRouter>
-                <JobProfiles key={'SearchProfiles'} page_size={10} selectProfileNumber={null} showVersions={true} />
-              </MemoryRouter>
-            </JobProfilesProvider>
-          </AuthProvider>
+          <JobProfilesProvider>
+            <MemoryRouter>
+              <JobProfiles key={'SearchProfiles'} page_size={10} selectProfileNumber={null} showVersions={true} />
+            </MemoryRouter>
+          </JobProfilesProvider>
         </Provider>,
       );
     });
@@ -130,13 +128,11 @@ describe('JobProfiles', () => {
     await act(async () => {
       rendered = render(
         <Provider store={store}>
-          <AuthProvider>
-            <JobProfilesProvider>
-              <MemoryRouter>
-                <JobProfiles key={'SearchProfiles'} page_size={10} showVersions={true} />
-              </MemoryRouter>
-            </JobProfilesProvider>
-          </AuthProvider>
+          <JobProfilesProvider>
+            <MemoryRouter>
+              <JobProfiles key={'SearchProfiles'} page_size={10} showVersions={true} />
+            </MemoryRouter>
+          </JobProfilesProvider>
         </Provider>,
       );
     });
@@ -162,14 +158,12 @@ describe('JobProfiles', () => {
     await act(async () => {
       rendered = render(
         <Provider store={store}>
-          <AuthProvider>
-            <JobProfilesProvider>
-              <MemoryRouter>
-                <TestComponent />
-                <JobProfiles key={'SearchProfiles'} page_size={2} showVersions={true} />
-              </MemoryRouter>
-            </JobProfilesProvider>
-          </AuthProvider>
+          <JobProfilesProvider>
+            <MemoryRouter>
+              <TestComponent />
+              <JobProfiles key={'SearchProfiles'} page_size={2} showVersions={true} />
+            </MemoryRouter>
+          </JobProfilesProvider>
         </Provider>,
       );
     });
@@ -202,13 +196,11 @@ describe('JobProfiles', () => {
     await act(async () => {
       rendered = render(
         <Provider store={store}>
-          <AuthProvider>
-            <JobProfilesProvider>
-              <MemoryRouter>
-                <JobProfiles key={'SearchProfiles'} page_size={2} showVersions={true} />
-              </MemoryRouter>
-            </JobProfilesProvider>
-          </AuthProvider>
+          <JobProfilesProvider>
+            <MemoryRouter>
+              <JobProfiles key={'SearchProfiles'} page_size={2} showVersions={true} />
+            </MemoryRouter>
+          </JobProfilesProvider>
         </Provider>,
       );
     });

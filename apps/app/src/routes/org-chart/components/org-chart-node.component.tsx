@@ -2,8 +2,8 @@
 import { CheckCircleFilled } from '@ant-design/icons';
 import { Card, Col, Row, Tag, Tooltip, Typography } from 'antd';
 import { CSSProperties, useEffect, useState } from 'react';
-import { useAuth } from 'react-oidc-context';
 import { Handle, NodeProps, Position } from 'reactflow';
+import { useTypedSelector } from '../../../redux/redux.hooks';
 import { useLazyGetPositionRequestByPositionNumberQuery } from '../../../redux/services/graphql-api/position-request.api';
 import { getUserRoles } from '../../../utils/get-user-roles.util';
 import { OrgChartContext } from '../enums/org-chart-context.enum';
@@ -46,7 +46,7 @@ const renderPositionNumber = (roles: string[], positionData: Record<string, any>
 
   if (roles.includes('classification') || roles.includes('total-compensation')) {
     return positionData.id;
-  } else if (roles.includes('hiring-manager') || roles.includes('user')) {
+  } else if (roles.includes('hiring-manager') || roles.includes('idir')) {
     // Approved is the PeopleSoft status, for positions which were created outside the Job Store
     // COMPLETED is the Job Store status, for positions which were created inside the Job Store (PS === Active, CRM === Completed)
     // todo - currently the status is always "Approved" - need to do more complex logic involving PR
@@ -75,7 +75,7 @@ export const OrgChartNode = ({
   orgChartData,
   orgChartType,
 }: OrgChartNodeProps) => {
-  const auth = useAuth();
+  const auth = useTypedSelector((state) => state.authReducer);
   const positionIsVacant = data.employees.length === 0;
 
   const roles: string[] = getUserRoles(auth.user);

@@ -1,6 +1,7 @@
 /* eslint-disable prettier/prettier */
 import { Controller, Get, UseGuards } from '@nestjs/common';
 import { exec } from 'child_process';
+import { PublicRoute } from '../auth/decorators/public-route.decorator';
 import { TestEnvironmentGuard } from '../auth/guards/test-environment.guard';
 import { SearchService } from '../search/search.service';
 
@@ -18,12 +19,14 @@ export class HealthCheckController {
     private readonly prisma: PrismaService,
   ) {}
 
+  @PublicRoute()
   @Get('check')
   async checkReadiness() {
     // Perform any necessary checks here
     return { status: 'ok' };
   }
 
+  @PublicRoute()
   @Get('gitsha')
   async gitsha() {
     // Perform any necessary checks here
@@ -34,6 +37,7 @@ export class HealthCheckController {
     };
   }
 
+  @PublicRoute()
   @Get('resetIndex')
   @UseGuards(TestEnvironmentGuard)
   async resetIndex() {
@@ -43,6 +47,7 @@ export class HealthCheckController {
     };
   }
 
+  @PublicRoute()
   @Get('dumpCreateSchema')
   @UseGuards(E2EAuthGuard)
   async dumpCreateSchema() {
