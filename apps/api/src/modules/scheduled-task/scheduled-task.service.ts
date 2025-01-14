@@ -121,7 +121,7 @@ export class ScheduledTaskService {
       return true;
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
-      this.logger.debug(`Failed to acquire lock for ${task}: ${errorMessage}`);
+      this.logger.log(`Failed to acquire lock for ${task}: ${errorMessage}`);
       return false;
     }
   }
@@ -148,20 +148,20 @@ export class ScheduledTaskService {
     if (process.env.E2E_TESTING === 'true' && task == ScheduledTask.CrmSync) needsUpdate = true;
 
     if (!needsUpdate) {
-      this.logger.debug(`${task} doesn't need update yet`);
+      this.logger.log(`${task} doesn't need update yet`);
       return;
     }
 
     const hasLock = await this.acquireLock(task);
     if (!hasLock) {
-      this.logger.debug(`${task} couldn't acquire lock, skipping`);
+      this.logger.log(`${task} couldn't acquire lock, skipping`);
       return;
     }
 
     try {
       this.logger.log(`Starting ${task} @ ${new Date()}`);
-      await execution();
       await this.updateMetadata(task, config.frequency);
+      await execution();
       this.logger.log(`Completed ${task} @ ${new Date()}`);
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
