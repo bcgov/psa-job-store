@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // JobProfilesContent.jsx
 import { ExclamationCircleFilled, FileTextFilled, LeftOutlined, RightOutlined } from '@ant-design/icons';
-import { Alert, Breakpoint, Col, Empty, Grid, Pagination, Row, Skeleton, Space, Tabs, Typography } from 'antd';
+import { Alert, Col, Empty, Pagination, Row, Skeleton, Space, Tabs, Typography } from 'antd';
 import { MutableRefObject, forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import useAnnounce from '../../../components/app/common/hooks/announce';
@@ -20,7 +20,6 @@ import JobProfileViewCounter from './job-profile-view-counter.component';
 import { JobProfile } from './job-profile.component';
 import { useJobProfilesProvider } from './job-profiles.context';
 const { Text, Title } = Typography;
-const { useBreakpoint } = Grid;
 
 interface JobProfilesContentProps {
   // searchQuery: string | null;
@@ -152,8 +151,6 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
     // console.log('searchParams: ', searchParams.toString());
 
     const navigate = useNavigate();
-
-    const screens: Partial<Record<Breakpoint, boolean>> = useBreakpoint();
 
     // useref to keep track of whether we fetched with selectProfileId
     const selectProfileIdRan = useRef(false);
