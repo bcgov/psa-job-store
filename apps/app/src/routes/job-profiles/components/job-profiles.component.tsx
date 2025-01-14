@@ -68,8 +68,15 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
     const [tabSwitchedLoading, setTabSwitchedLoading] = useState(false);
     // ref for storing searchparams for last request
     const lastSearchParams = useRef<string | null>(null);
-    const { setShouldFetch, shouldFetch, clearingFilters, setClearingFilters, setClearingSearch } =
-      useJobProfilesProvider();
+    const {
+      setShouldFetch,
+      shouldFetch,
+      clearingFilters,
+      setClearingFilters,
+      setClearingSearch,
+      setReselectOriginalWizardProfile,
+      reselectOriginalWizardProfile,
+    } = useJobProfilesProvider();
     const { positionRequestId, number } = useParams();
     // console.log('number: ', number);
 
@@ -366,8 +373,10 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
 
       let toSelectProfileNumber = selectProfileNumber;
 
-      if (clearingFilters && positionRequestId) {
+      if (clearingFilters && positionRequestId && !reselectOriginalWizardProfile) {
         toSelectProfileNumber = searchParams.get('selectedProfile') ?? selectProfileNumber;
+      } else if (reselectOriginalWizardProfile) {
+        setReselectOriginalWizardProfile(false);
       }
 
       selectProfileForPageNumber.current = toSelectProfileNumber ?? '';
@@ -834,23 +843,26 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
           ministriesData={ministriesData}
         />
         <Row justify="center" gutter={16}>
-          {screens['xl'] === true ? (
-            <>
-              <Col span={8}>
-                <JobProfileViewCounter onProfileView={onSelectProfile} renderSearchResults={renderSearchResults} />
-              </Col>
-              <Col span={16} role="region" aria-label="Selected job profile contents">
-                {renderJobProfile()}
-              </Col>
-            </>
-          ) : params.number ? (
+          {/* {screens['xl'] === true ? ( */}
+          <>
+            <Col span={8}>
+              <JobProfileViewCounter onProfileView={onSelectProfile} renderSearchResults={renderSearchResults} />
+            </Col>
+            <Col span={16} role="region" aria-label="Selected job profile contents">
+              {renderJobProfile()}
+            </Col>
+          </>
+          {/* ) : params.number ? (
             <Col span={24} role="region" aria-label="Selected job profile contents">
               {renderJobProfile()}
             </Col>
-          ) : (
+          )  */}
+          {!params.number ? (
             <>
               <JobProfileViewCounter onProfileView={onSelectProfile} renderSearchResults={renderSearchResults} />
             </>
+          ) : (
+            <></>
           )}
         </Row>
       </>
