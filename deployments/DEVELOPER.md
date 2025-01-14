@@ -15,18 +15,74 @@ When developing locally, pass in environment variables using the following `.env
 `apps/api/.env`
 
 ```sh
+# Node Settings
+NODE_ENV=
 
+# E2E Settings
+USE_MOCKS=
+E2E_TESTING=
+E2E_AUTH_KEY=
+E2E_JWT_SECRET=
+SEED_FILE=./prisma/run-e2e-seed.ts
+
+# CRM Settings
+CRM_APPLICATION_CONTEXT=
+CRM_URL=
+CRM_USERNAME=
+CRM_PASSWORD=
+
+# Database Settings
+CLUSTER_NAME=
+DATABASE_URL=
+
+# Elasticsearch & Kibana Settings
+ELASTIC_NODE=
+ELASTIC_USERNAME=
+ELASTIC_PASSWORD=
+# KIBANA_PASSWORD=
+
+# `express-session` Settings
+SESSION_SECRET=
+
+# PeopleSoft Settings
+PEOPLESOFT_URL=
+PEOPLESOFT_USERNAME=
+PEOPLESOFT_PASSWORD=
+
+# Keycloak Settings
+KEYCLOAK_REALM_URL=
+KEYCLOAK_CALLBACK_URL=
+KEYCLOAK_LOGOUT_REDIRECT_URL=
+KEYCLOAK_CLIENT_ID=
+KEYCLOAK_CLIENT_SECRET=
+
+# `@bcgov/citz-imb-sso-css-api` Settings
+# See: https://github.com/bcgov/citz-imb-sso-css-api
+CSS_API_CLIENT_ID=
+CSS_API_CLIENT_SECRET=
+SSO_ENVIRONMENT=
+SSO_INTEGRATION_ID=
+
+#React App Settings
+REACT_APP_URL=
 ```
 
 `apps/app/.env`
 
 ```sh
+# URI of api server
+VITE_BACKEND_URL=
 
+# development | production
+VITE_ENV=
+
+# Job Store email address
+VITE_SUPPORT_EMAIL=
 ```
 
 ### GitHub
 
-Merging with `develop`, `staging` or `main` will kick off the CI/CD pipeline. The following **Environment secrets** are required in `GitHub > Settings > Environments > [dev|test|prod]:
+Merging with `develop`, `staging` or `main` will kick off the CI/CD pipeline. The following **Environment secrets** are required in `GitHub > Settings > Environments > [dev|test|prod]`:
 
 ```sh
 # Used when running tests
