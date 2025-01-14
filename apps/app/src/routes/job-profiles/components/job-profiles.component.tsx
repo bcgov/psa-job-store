@@ -68,8 +68,15 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
     const [tabSwitchedLoading, setTabSwitchedLoading] = useState(false);
     // ref for storing searchparams for last request
     const lastSearchParams = useRef<string | null>(null);
-    const { setShouldFetch, shouldFetch, clearingFilters, setClearingFilters, setClearingSearch } =
-      useJobProfilesProvider();
+    const {
+      setShouldFetch,
+      shouldFetch,
+      clearingFilters,
+      setClearingFilters,
+      setClearingSearch,
+      setReselectOriginalWizardProfile,
+      reselectOriginalWizardProfile,
+    } = useJobProfilesProvider();
     const { positionRequestId, number } = useParams();
     // console.log('number: ', number);
 
@@ -366,8 +373,10 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
 
       let toSelectProfileNumber = selectProfileNumber;
 
-      if (clearingFilters && positionRequestId) {
+      if (clearingFilters && positionRequestId && !reselectOriginalWizardProfile) {
         toSelectProfileNumber = searchParams.get('selectedProfile') ?? selectProfileNumber;
+      } else if (reselectOriginalWizardProfile) {
+        setReselectOriginalWizardProfile(false);
       }
 
       selectProfileForPageNumber.current = toSelectProfileNumber ?? '';
