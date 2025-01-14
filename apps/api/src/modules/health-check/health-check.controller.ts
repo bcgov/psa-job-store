@@ -78,6 +78,7 @@ export class HealthCheckController {
     }
   }
 
+  @PublicRoute()
   @Get('testLoad')
   @UseGuards(E2EAuthGuard)
   async testLoad() {
