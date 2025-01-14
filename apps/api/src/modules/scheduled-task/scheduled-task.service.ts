@@ -14,8 +14,8 @@ export enum ScheduledTask {
   CrmSync = 'crm-sync',
   PeoplesoftSync = 'peoplesoft-sync',
   UserSync = 'user-sync',
-  FastTask = 'fast-task',
-  SlowTask = 'slow-task',
+  // FastTask = 'fast-task',
+  // SlowTask = 'slow-task',
 }
 
 interface TaskConfig {
@@ -28,29 +28,29 @@ export class ScheduledTaskService {
   private readonly taskConfigs: Record<ScheduledTask, TaskConfig> = {
     [ScheduledTask.UserSync]: {
       name: ScheduledTask.UserSync,
-      lockTimeout: 3 * 60 * 60, // 3 hours
+      lockTimeout: 12 * 60 * 60, // 12 hours
       frequency: 24 * 60 * 60, // 24 hours
     },
     [ScheduledTask.PeoplesoftSync]: {
       name: ScheduledTask.PeoplesoftSync,
-      lockTimeout: 3 * 60 * 60, // 3 hours
+      lockTimeout: 12 * 60 * 60, // 12 hours
       frequency: 24 * 60 * 60, // 24 hours
     },
     [ScheduledTask.CrmSync]: {
       name: ScheduledTask.CrmSync,
       lockTimeout: 5 * 60, // 5 minutes
-      frequency: 60,
+      frequency: 1 * 60, // 1 minute
     },
-    [ScheduledTask.FastTask]: {
-      name: ScheduledTask.FastTask,
-      lockTimeout: 30, // 30 seconds
-      frequency: 10, // every 10 seconds
-    },
-    [ScheduledTask.SlowTask]: {
-      name: ScheduledTask.SlowTask,
-      lockTimeout: 60, // 60 seconds
-      frequency: 20, // every 20 seconds
-    },
+    // [ScheduledTask.FastTask]: {
+    //   name: ScheduledTask.FastTask,
+    //   lockTimeout: 30, // 30 seconds
+    //   frequency: 10, // every 10 seconds
+    // },
+    // [ScheduledTask.SlowTask]: {
+    //   name: ScheduledTask.SlowTask,
+    //   lockTimeout: 60, // 60 seconds
+    //   frequency: 20, // every 20 seconds
+    // },
   };
 
   private readonly logger = new Logger(ScheduledTaskService.name);
@@ -148,13 +148,13 @@ export class ScheduledTaskService {
     if (process.env.E2E_TESTING === 'true' && task == ScheduledTask.CrmSync) needsUpdate = true;
 
     if (!needsUpdate) {
-      this.logger.log(`${task} doesn't need update yet`);
+      // this.logger.log(`${task} doesn't need update yet`);
       return;
     }
 
     const hasLock = await this.acquireLock(task);
     if (!hasLock) {
-      this.logger.log(`${task} couldn't acquire lock, skipping`);
+      // this.logger.log(`${task} couldn't acquire lock, skipping`);
       return;
     }
 
@@ -296,31 +296,31 @@ export class ScheduledTaskService {
   }
 
   // Test tasks
-  @Cron('*/20 * * * * *')
-  async fastTask() {
-    await this.executeTask(ScheduledTask.FastTask, async () => {
-      this.logger.log('Fast task processing...');
-      await new Promise((resolve) => setTimeout(resolve, 2000)); // 2 second task
-      this.logger.log('Fast task done');
-    });
-  }
+  // @Cron('*/20 * * * * *')
+  // async fastTask() {
+  //   await this.executeTask(ScheduledTask.FastTask, async () => {
+  //     this.logger.log('Fast task processing...');
+  //     await new Promise((resolve) => setTimeout(resolve, 2000)); // 2 second task
+  //     this.logger.log('Fast task done');
+  //   });
+  // }
 
-  @Cron('*/20 * * * * *')
-  async slowTask() {
-    await this.executeTask(ScheduledTask.SlowTask, async () => {
-      this.logger.log('Slow task processing...');
-      await new Promise((resolve) => setTimeout(resolve, 15000)); // 15 second task
-      this.logger.log('Slow task done');
-    });
-  }
+  // @Cron('*/20 * * * * *')
+  // async slowTask() {
+  //   await this.executeTask(ScheduledTask.SlowTask, async () => {
+  //     this.logger.log('Slow task processing...');
+  //     await new Promise((resolve) => setTimeout(resolve, 15000)); // 15 second task
+  //     this.logger.log('Slow task done');
+  //   });
+  // }
 
-  // Simulate a crash by not releasing the lock
-  @Cron('*/30 * * * * *')
-  async crashingTask() {
-    const task = ScheduledTask.FastTask;
-    if (await this.acquireLock(task)) {
-      this.logger.warn('Simulating crash - lock will not be released');
-      throw new Error('Simulated crash');
-    }
-  }
+  // // Simulate a crash by not releasing the lock
+  // @Cron('*/30 * * * * *')
+  // async crashingTask() {
+  //   const task = ScheduledTask.FastTask;
+  //   if (await this.acquireLock(task)) {
+  //     this.logger.warn('Simulating crash - lock will not be released');
+  //     throw new Error('Simulated crash');
+  //   }
+  // }
 }
