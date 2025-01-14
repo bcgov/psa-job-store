@@ -843,23 +843,26 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
           ministriesData={ministriesData}
         />
         <Row justify="center" gutter={16}>
-          {screens['xl'] === true ? (
-            <>
-              <Col span={8}>
-                <JobProfileViewCounter onProfileView={onSelectProfile} renderSearchResults={renderSearchResults} />
-              </Col>
-              <Col span={16} role="region" aria-label="Selected job profile contents">
-                {renderJobProfile()}
-              </Col>
-            </>
-          ) : params.number ? (
+          {/* {screens['xl'] === true ? ( */}
+          <>
+            <Col span={8}>
+              <JobProfileViewCounter onProfileView={onSelectProfile} renderSearchResults={renderSearchResults} />
+            </Col>
+            <Col span={16} role="region" aria-label="Selected job profile contents">
+              {renderJobProfile()}
+            </Col>
+          </>
+          {/* ) : params.number ? (
             <Col span={24} role="region" aria-label="Selected job profile contents">
               {renderJobProfile()}
             </Col>
-          ) : (
+          )  */}
+          {!params.number ? (
             <>
               <JobProfileViewCounter onProfileView={onSelectProfile} renderSearchResults={renderSearchResults} />
             </>
+          ) : (
+            <></>
           )}
         </Row>
       </>
