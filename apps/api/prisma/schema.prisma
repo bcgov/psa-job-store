@@ -593,3 +593,11 @@ model Session {
   @@index([expire])
   @@map("_session")
 }
+
+model CronLock {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  locked_at DateTime @default(now())
+
+  @@map("cron_locks")
+}

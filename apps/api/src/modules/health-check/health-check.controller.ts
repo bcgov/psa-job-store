@@ -8,12 +8,16 @@ import { SearchService } from '../search/search.service';
 import * as fs from 'fs';
 import { promisify } from 'util';
 import { E2EAuthGuard } from '../auth/guards/e2e-auth.guard';
+import { PrismaService } from '../prisma/prisma.service';
 
 const execAsync = promisify(exec);
 
 @Controller('health')
 export class HealthCheckController {
-  constructor(private readonly searchService: SearchService) {}
+  constructor(
+    private readonly searchService: SearchService,
+    private readonly prisma: PrismaService,
+  ) {}
 
   @PublicRoute()
   @Get('check')
@@ -72,5 +76,14 @@ export class HealthCheckController {
         message: error?.message,
       };
     }
+  }
+
+  @Get('testLoad')
+  @UseGuards(E2EAuthGuard)
+  async testLoad() {
+    const data = await this.prisma.currentJobProfile.findMany({
+      take: 20,
+    });
+    return data;
   }
 }
