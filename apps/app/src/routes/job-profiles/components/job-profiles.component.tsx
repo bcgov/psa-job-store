@@ -854,13 +854,13 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
               {renderJobProfile()}
             </Col>
           )  */}
-          {!params.number ? (
+          {/* {!params.number ? (
             <>
               <JobProfileViewCounter onProfileView={onSelectProfile} renderSearchResults={renderSearchResults} />
             </>
           ) : (
             <></>
-          )}
+          )} */}
         </Row>
       </>
     );
