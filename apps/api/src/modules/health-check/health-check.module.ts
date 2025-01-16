@@ -3,7 +3,7 @@ import { SearchModule } from '../search/search.module';
 import { HealthCheckController } from './health-check.controller';
 
 @Module({
-  imports: [SearchModule], // , PrismaModule
+  imports: [SearchModule],
   controllers: [HealthCheckController],
 })
 export class HealthCheckModule {}
