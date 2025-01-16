@@ -17,6 +17,8 @@ import { MyPositionsRoute } from '../routes/my-position-requests';
 import { MyPositionsPage } from '../routes/my-position-requests/my-position-requests.page';
 import { OrgChartRoute } from '../routes/org-chart';
 import { OrgChartPage } from '../routes/org-chart/org-chart.page';
+import { PositionRoute } from '../routes/position';
+import { ViewPositionPage } from '../routes/position/view-position.page';
 import { SettingsRoute } from '../routes/settings';
 import { DepartmentDetailPage } from '../routes/settings/department/department-detail.page';
 import { DepartmentListPage } from '../routes/settings/department/department-list.page';
@@ -96,6 +98,16 @@ export const nextRouter = createBrowserRouter([
                     index: true,
                     element: <OrgChartPage />,
                   },
+                  {
+                    path: 'position',
+                    element: <PositionRoute />,
+                    children: [
+                      {
+                        path: ':positionRequestId',
+                        element: <ViewPositionPage />,
+                      },
+                    ],
+                  },
                 ],
               },
               // Job Profiles
@@ -117,6 +129,7 @@ export const nextRouter = createBrowserRouter([
                       icon: <FileTextOutlined />,
                     },
                   },
+
                   // {
                   //   path: 'saved',
                   //   element: <JobProfilesRoute />,

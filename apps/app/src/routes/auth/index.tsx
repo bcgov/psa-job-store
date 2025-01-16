@@ -26,7 +26,7 @@ export const AuthRoute = () => {
   }, [location]);
 
   if (auth.isAuthenticated) {
-    return <Navigate replace state={{ from: location }} to="/" />;
+    return <Navigate replace to="/" state={{ from: location }} />;
   } else {
     return (
       <>

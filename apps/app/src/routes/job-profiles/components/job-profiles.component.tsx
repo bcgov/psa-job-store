@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 // JobProfilesContent.jsx
 import { ExclamationCircleFilled, FileTextFilled, LeftOutlined, RightOutlined } from '@ant-design/icons';
-import { Alert, Breakpoint, Col, Empty, Grid, Pagination, Row, Skeleton, Space, Tabs, Typography } from 'antd';
+import { Alert, Col, Empty, Pagination, Row, Skeleton, Space, Tabs, Typography } from 'antd';
 import { MutableRefObject, forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import useAnnounce from '../../../components/app/common/hooks/announce';
@@ -20,7 +20,6 @@ import JobProfileViewCounter from './job-profile-view-counter.component';
 import { JobProfile } from './job-profile.component';
 import { useJobProfilesProvider } from './job-profiles.context';
 const { Text, Title } = Typography;
-const { useBreakpoint } = Grid;
 
 interface JobProfilesContentProps {
   // searchQuery: string | null;
@@ -68,8 +67,15 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
     const [tabSwitchedLoading, setTabSwitchedLoading] = useState(false);
     // ref for storing searchparams for last request
     const lastSearchParams = useRef<string | null>(null);
-    const { setShouldFetch, shouldFetch, clearingFilters, setClearingFilters, setClearingSearch } =
-      useJobProfilesProvider();
+    const {
+      setShouldFetch,
+      shouldFetch,
+      clearingFilters,
+      setClearingFilters,
+      setClearingSearch,
+      setReselectOriginalWizardProfile,
+      reselectOriginalWizardProfile,
+    } = useJobProfilesProvider();
     const { positionRequestId, number } = useParams();
     // console.log('number: ', number);
 
@@ -145,8 +151,6 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
     // console.log('searchParams: ', searchParams.toString());
 
     const navigate = useNavigate();
-
-    const screens: Partial<Record<Breakpoint, boolean>> = useBreakpoint();
 
     // useref to keep track of whether we fetched with selectProfileId
     const selectProfileIdRan = useRef(false);
@@ -366,8 +370,10 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
 
       let toSelectProfileNumber = selectProfileNumber;
 
-      if (clearingFilters && positionRequestId) {
+      if (clearingFilters && positionRequestId && !reselectOriginalWizardProfile) {
         toSelectProfileNumber = searchParams.get('selectedProfile') ?? selectProfileNumber;
+      } else if (reselectOriginalWizardProfile) {
+        setReselectOriginalWizardProfile(false);
       }
 
       selectProfileForPageNumber.current = toSelectProfileNumber ?? '';
@@ -834,24 +840,27 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
           ministriesData={ministriesData}
         />
         <Row justify="center" gutter={16}>
-          {screens['xl'] === true ? (
-            <>
-              <Col span={8}>
-                <JobProfileViewCounter onProfileView={onSelectProfile} renderSearchResults={renderSearchResults} />
-              </Col>
-              <Col span={16} role="region" aria-label="Selected job profile contents">
-                {renderJobProfile()}
-              </Col>
-            </>
-          ) : params.number ? (
+          {/* {screens['xl'] === true ? ( */}
+          <>
+            <Col span={8}>
+              <JobProfileViewCounter onProfileView={onSelectProfile} renderSearchResults={renderSearchResults} />
+            </Col>
+            <Col span={16} role="region" aria-label="Selected job profile contents">
+              {renderJobProfile()}
+            </Col>
+          </>
+          {/* ) : params.number ? (
             <Col span={24} role="region" aria-label="Selected job profile contents">
               {renderJobProfile()}
             </Col>
-          ) : (
+          )  */}
+          {/* {!params.number ? (
             <>
               <JobProfileViewCounter onProfileView={onSelectProfile} renderSearchResults={renderSearchResults} />
             </>
-          )}
+          ) : (
+            <></>
+          )} */}
         </Row>
       </>
     );
