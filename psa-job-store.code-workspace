@@ -24,6 +24,10 @@
       "path": "apps/app"
     },
     {
+      "name": "apps/css-migration-util",
+      "path": "apps/css-migration-util"
+    },
+    {
       "name": "apps/jobstore-cypress",
       "path": "apps/jobstore-cypress"
     },
