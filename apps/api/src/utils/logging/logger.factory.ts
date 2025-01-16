@@ -49,9 +49,9 @@ export const loggerFactory = () => {
           options: {
             colorize: true,
           },
-          level: NODE_ENV !== 'production2' ? 'debug' : 'info',
+          level: NODE_ENV !== 'production' ? 'debug' : 'info',
         },
-        ...(NODE_ENV == 'production2'
+        ...(NODE_ENV == 'production'
           ? [
               {
                 target: 'pino/file',
