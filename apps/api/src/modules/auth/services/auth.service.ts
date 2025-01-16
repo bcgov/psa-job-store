@@ -187,36 +187,17 @@ export class AuthService {
         //   }
         // }
       }
+    }
 
-      const { name, email, username, roles, metadata } = sessionUser;
+    const { name, email, username, roles, metadata } = sessionUser;
 
-      // if E2E_TESTING is true, do not update the database
-      // if user exists, don't update, if user doesn't exist, create
-      if (this.configService.get('E2E_TESTING') === 'true') {
-        if (!existingUser) {
-          await this.prisma.user.create({
-            data: {
-              id,
-              name,
-              email,
-              username,
-              roles,
-              metadata,
-            },
-          });
-        }
-      } else {
-        await this.prisma.user.upsert({
-          where: { id },
-          create: {
+    // if E2E_TESTING is true, do not update the database
+    // if user exists, don't update, if user doesn't exist, create
+    if (this.configService.get('E2E_TESTING') === 'true') {
+      if (!existingUser) {
+        await this.prisma.user.create({
+          data: {
             id,
-            name,
-            email,
-            username,
-            roles,
-            metadata,
-          },
-          update: {
             name,
             email,
             username,
@@ -225,6 +206,25 @@ export class AuthService {
           },
         });
       }
+    } else {
+      await this.prisma.user.upsert({
+        where: { id },
+        create: {
+          id,
+          name,
+          email,
+          username,
+          roles,
+          metadata,
+        },
+        update: {
+          name,
+          email,
+          username,
+          roles,
+          metadata,
+        },
+      });
     }
 
     return sessionUser;
