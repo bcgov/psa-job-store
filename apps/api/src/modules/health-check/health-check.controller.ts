@@ -8,7 +8,7 @@ import { SearchService } from '../search/search.service';
 import * as fs from 'fs';
 import { promisify } from 'util';
 import { E2EAuthGuard } from '../auth/guards/e2e-auth.guard';
-import { PrismaService } from '../prisma/prisma.service';
+// import { PrismaService } from '../prisma/prisma.service';
 
 const execAsync = promisify(exec);
 
@@ -16,7 +16,7 @@ const execAsync = promisify(exec);
 export class HealthCheckController {
   constructor(
     private readonly searchService: SearchService,
-    private readonly prisma: PrismaService,
+    // private readonly prisma: PrismaService,
   ) {}
 
   @PublicRoute()
@@ -82,10 +82,10 @@ export class HealthCheckController {
   @Get('testLoad')
   @UseGuards(E2EAuthGuard)
   async testLoad() {
-    const data = await this.prisma.currentJobProfile.findMany({
-      take: 20,
-    });
-    return data;
+    // const data = await this.prisma.currentJobProfile.findMany({
+    //   take: 20,
+    // });
+    // return data;
   }
 
   @PublicRoute()
