@@ -41,6 +41,7 @@
     "@nestjs/platform-express": "^10.4.12",
     "@nestjs/schedule": "^4.1.1",
     "@prisma/client": "^5.22.0",
+    "@prisma/extension-read-replicas": "^0.4.0",
     "axios": "^1.7.8",
     "axios-oauth-client": "^2.2.0",
     "cache-manager": "^5.7.6",

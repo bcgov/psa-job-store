@@ -1,8 +1,19 @@
 import { PrismaClient } from '@prisma/client';
+import { readReplicas } from '@prisma/extension-read-replicas';
 import { findManyAndCountExtension } from './extensions/find-many-with-count.extension';
 
 function extendClient(base: PrismaClient) {
-  return base.$extends(findManyAndCountExtension);
+  let client = base.$extends(findManyAndCountExtension);
+
+  if (process.env.NODE_ENV !== 'development') {
+    client = client.$extends(
+      readReplicas({
+        url: process.env.DATABASE_READ_URL,
+      }),
+    );
+  }
+
+  return client;
 }
 
 class UntypedExtendedClient extends PrismaClient {
