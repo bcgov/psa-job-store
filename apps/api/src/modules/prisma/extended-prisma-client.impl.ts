@@ -8,7 +8,7 @@ function extendClient(base: PrismaClient) {
   if (process.env.NODE_ENV !== 'development') {
     const replicaClient = new PrismaClient({
       datasourceUrl: process.env.DATABASE_READ_URL,
-      log: [{ level: 'query', emit: 'event' }],
+      // log: [{ level: 'query', emit: 'event' }],
     });
 
     return client.$extends(

@@ -13,6 +13,7 @@ const prismaBlank = new PrismaClient();
 
 const SYSTEM_USER_ID = 'f1851282-d875-4f22-9590-6c0405d3bc78';
 const TEST_USER_ID = '88bd8bb6-c449-4c13-8204-d91539f548d4';
+const TEST_USER_ID2 = '88bd8bb6-c449-4c13-8204-d91539f548d5';
 
 export async function seed(prismaInp?: ExtendedPrismaClientType) {
   const prisma = prismaInp || prismaBlank;
@@ -45,6 +46,33 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
     where: { id: TEST_USER_ID },
     create: {
       id: TEST_USER_ID,
+      name: 'xxxx',
+      roles: ['hiring-manager'],
+      metadata: {
+        crm: {
+          account_id: null,
+          contact_id: 231166,
+        },
+        org_chart: {
+          department_ids: ['112-0074', '123-4567'],
+        },
+        peoplesoft: {
+          employee_id: '188146',
+          position_id: '00132136',
+          department_id: '112-0074',
+          organization_id: 'BC112',
+        },
+      },
+    },
+    update: {
+      name: 'xxxx',
+    },
+  });
+
+  await prisma.user.upsert({
+    where: { id: TEST_USER_ID2 },
+    create: {
+      id: TEST_USER_ID2,
       name: 'xxxx',
       roles: ['hiring-manager'],
       metadata: {
@@ -5726,7 +5754,7 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
           },
         ],
       },
-      user_id: TEST_USER_ID,
+      user_id: TEST_USER_ID2,
       title: 'Senior Product Manager',
       position_number: 678901,
       classification_id: '752203',

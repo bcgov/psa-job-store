@@ -1853,7 +1853,8 @@ export class PositionRequestApiService {
     if (orgChart && typeof orgChart === 'object' && 'nodes' in orgChart && 'edges' in orgChart) {
       // Check the initial position first
       const initialNode = (orgChart.nodes as any[]).find((node: any) => node.id === positionNumber);
-      if (initialNode && initialNode.data.classification.name.includes('Band')) {
+      // console.log('initialNode: ', initialNode);
+      if (initialNode) {
         initialNode.data.employees.forEach((employee: any) => {
           managers.push({
             id: employee.id,

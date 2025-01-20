@@ -26,7 +26,7 @@ export const NextRouteGuard = () => {
             const json = await response.json();
             dispatch(setUser(json));
             setIsLoading(false);
-            navigate(location.pathname);
+            // navigate(location.pathname);
           }
         } catch (error) {
           setIsLoading(false);
