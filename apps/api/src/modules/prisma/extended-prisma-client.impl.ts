@@ -6,13 +6,17 @@ function extendClient(base: PrismaClient) {
   let client = base.$extends(findManyAndCountExtension);
 
   if (process.env.NODE_ENV !== 'development') {
-    client = client.$extends(
+    const replicaClient = new PrismaClient({
+      datasourceUrl: process.env.DATABASE_READ_URL,
+      log: [{ level: 'query', emit: 'event' }],
+    });
+
+    return client.$extends(
       readReplicas({
-        url: process.env.DATABASE_READ_URL,
+        replicas: [replicaClient],
       }),
     );
   }
-
   return client;
 }
 
