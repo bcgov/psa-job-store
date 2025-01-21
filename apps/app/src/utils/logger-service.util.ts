@@ -1,17 +1,6 @@
 import axios from 'axios';
 import { VITE_BACKEND_URL } from '../../envConfig';
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function checkForExpiredSessionError(response: any) {
-  if (response.meta && response.meta.response && Array.isArray(response.meta.response.errors)) {
-    for (const error of response.meta.response.errors) {
-      if (error.message === 'Your session has expired. Please log in again.') {
-        return true;
-      }
-    }
-  }
-  return false;
-}
+import { checkForExpiredSessionError } from '../redux/services/graphql-api';
 
 interface LogMessage {
   level: string;

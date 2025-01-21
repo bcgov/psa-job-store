@@ -13,8 +13,11 @@ import { HomeRoute } from '../routes/home';
 import { HomePage } from '../routes/home/components/home-page.component';
 import { JobProfilesRoute } from '../routes/job-profiles';
 import { JobProfilesPage } from '../routes/job-profiles/job-profiles.page';
+import { MocksRoute } from '../routes/mocks';
+import MocksPage from '../routes/mocks/mocks.page';
 import { MyPositionsRoute } from '../routes/my-position-requests';
 import { MyPositionsPage } from '../routes/my-position-requests/my-position-requests.page';
+import NotFoundComponent from '../routes/not-found/404';
 import { OrgChartRoute } from '../routes/org-chart';
 import { OrgChartPage } from '../routes/org-chart/org-chart.page';
 import { PositionRoute } from '../routes/position';
@@ -399,6 +402,16 @@ export const nextRouter = createBrowserRouter([
                   },
                 ],
               },
+              {
+                path: '/mocks/:id',
+                element: <MocksRoute />,
+                children: [
+                  {
+                    index: true,
+                    element: <MocksPage />,
+                  },
+                ],
+              },
               // Legacy redirects to support previous URL scheme
               // These links specifically were used in share links, CRM service incidents
               {
@@ -421,47 +434,26 @@ export const nextRouter = createBrowserRouter([
                 path: '/classification-tasks/:id',
                 element: <Redirect to="/requests/positions/manage/:id" replace />,
               },
+              {
+                path: '*',
+                element: <Redirect to="/not-found" replace />,
+              },
+              {
+                path: '/not-found',
+                element: <NotFoundComponent />, // This will handle all unmatched routes
+              },
             ],
           },
         ],
       },
     ],
   },
-  // {
-  //   path: 'auth',
-  //   element: (
-  //     <ErrorBoundary>
-  //       <AuthRoute />
-  //     </ErrorBoundary>
-  //   ),
-  //   children: [
-  //     {
-  //       // element: <AppLayout />,
-  //       element: <Outlet />,
-  //       children: [
-  //         {
-  //           path: 'login',
-  //           element: <LoginPage />,
-  //         },
-  //         {
-  //           path: 'logout',
-  //           element: <LoginPage />,
-  //         },
-  //       ],
-  //     },
-  //   ],
-  // },
-  // {
-  //   element: (
-  //     <ErrorBoundary>
-  //       <NextRouteGuard />
-  //     </ErrorBoundary>
-  //   ),
-  //   children: [
-  //     {
-  //       path: '/',
-  //       element: <NextHomeRoute />,
-  //     },
-  //   ],
-  // },
+  {
+    path: '*',
+    element: <Redirect to="/not-found" replace />,
+  },
+  {
+    path: '/not-found',
+    element: <NotFoundComponent />, // This will handle all unmatched routes
+  },
 ]);
