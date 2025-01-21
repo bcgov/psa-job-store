@@ -1,18 +1,35 @@
-import { HttpModule } from '@nestjs/axios';
 import { Module } from '@nestjs/common';
-import { CrmService } from '../external/crm.service';
+import { PassportModule } from '@nestjs/passport';
 import { ExternalModule } from '../external/external.module';
-import { PeoplesoftService } from '../external/peoplesoft.service';
+import { KeycloakModule } from '../keycloak/keycloak.module';
 import { PrismaModule } from '../prisma/prisma.module';
 import { UserModule } from '../user/user.module';
-import { UserService } from '../user/user.service';
-import { AuthService } from './auth.service';
-import { ProfileResolver } from './profile.resolver';
-import { KeycloakStrategy } from './strategies/keycloak.strategy';
+import { AuthController } from './controllers/auth.controller';
+import { BCeIDStrategyFactory, IDIRStrategyFactory } from './factories/oidc-strategy.factory';
+import { PublicRouteBypassGuard } from './guards/public-route-bypass.guard';
+import { SessionAuthGuard } from './guards/session-auth.guard';
+import { SessionSerializer } from './serializers/session.serializer';
+import { AuthService } from './services/auth.service';
 
 @Module({
-  imports: [HttpModule, PrismaModule, ExternalModule, UserModule],
-  providers: [AuthService, CrmService, KeycloakStrategy, PeoplesoftService, ProfileResolver, UserService],
-  exports: [AuthService],
+  imports: [
+    PassportModule.register({
+      // keepSessionInfo: true,
+      session: true,
+    }),
+    ExternalModule,
+    KeycloakModule,
+    PrismaModule,
+    UserModule,
+  ],
+  providers: [
+    AuthService,
+    BCeIDStrategyFactory,
+    IDIRStrategyFactory,
+    PublicRouteBypassGuard,
+    SessionAuthGuard,
+    SessionSerializer,
+  ],
+  controllers: [AuthController],
 })
 export class AuthModule {}

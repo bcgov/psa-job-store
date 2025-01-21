@@ -33,8 +33,8 @@ Then('they proceed to the additional information step', () => {
 });
 
 When('the user fills out the required additional information', () => {
-  cy.get('[data-testid="loading-spinner"]').should('be.visible');
-  cy.get('[data-testid="loading-spinner"]', { timeout: 15000 }).should('not.exist');
+  cy.get('[data-testid="excluded-select"] .ant-select-selection-search-input').type('00121521');
+  cy.contains('00121521 Testing Manager').click();
 
   cy.get('[data-testid="branch-input"]').type('test branch');
   cy.get('[data-testid="division-input"]').type('test division');
@@ -62,20 +62,11 @@ When('the user applies filters', () => {
   // Type the extracted classification into the search field within the dropdown
   cy.get('[data-cy="Classification-filter"]').find('input').type(classification);
 
-  // Wait for the search results to appear, gather all the matching elements and then click on the last one
+  // Use contains with the exact text match
   cy.get('[data-cy="Classification-filter"]')
-    .find('.react-select__menu div')
-    .filter(`:contains("${classification}")`)
-    .filter((_index, element) => {
-      // Filter elements to match the text exactly with the extracted classification
-      return element.textContent?.trim() === classification;
-    })
-    .then((searchResults) => {
-      if (searchResults.length > 0) {
-        // Click on the last element of the filtered results
-        cy.wrap(searchResults).last().click();
-      }
-    });
+    .find('.react-select__menu-list div')
+    .contains(`${classification} (GEU)`)
+    .click();
 
   const classification2 = 'Supervisor R15';
 
@@ -85,23 +76,20 @@ When('the user applies filters', () => {
   // Type the extracted classification into the search field within the dropdown
   cy.get('[data-cy="Classification-filter"]').find('input').type(classification2);
 
-  // Wait for the search results to appear, gather all the matching elements and then click on the last one
+  // Use contains with the exact text match
   cy.get('[data-cy="Classification-filter"]')
-    .find('.react-select__menu div')
-    .filter(`:contains("${classification2}")`)
-    .filter((_index, element) => {
-      // Filter elements to match the text exactly with the extracted classification
-      return element.textContent?.trim() === classification2;
-    })
-    .then((searchResults) => {
-      if (searchResults.length > 0) {
-        // Click on the last element of the filtered results
-        cy.wrap(searchResults).last().click();
-      }
-    });
+    .find('.react-select__menu-list div')
+    .contains(`${classification2} (GEU)`)
+    .click();
+});
+
+When('the results have loaded', () => {
+  cy.get('[data-testid="skeleton-loading"]').should('exist');
+  cy.get('[data-testid="skeleton-loading"]').should('not.exist');
 });
 
 When('the user applies search', () => {
+  cy.wait(2000);
   cy.get('[aria-label="Search by job title or keyword"]').type('scientist');
   cy.contains('button', 'Find job profiles').click();
 });

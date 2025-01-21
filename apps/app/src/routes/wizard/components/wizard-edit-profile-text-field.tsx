@@ -6,7 +6,7 @@ import { useState } from 'react';
 import { Controller, UseFormReturn, UseFormTrigger } from 'react-hook-form';
 import { FormItem } from '../../../utils/FormItem';
 import { JobProfileValidationModel } from '../../job-profiles/components/job-profile.component';
-import { BasicDetailsValidationModel } from '../../total-comp-create-profile/components/total-comp-create-profile.component';
+import { BasicDetailsValidationModel } from '../../total-comp-create-profile/components/total-comp-create-profile-validation';
 
 type AllowedFieldNames = 'overview' | 'program_overview' | 'title';
 

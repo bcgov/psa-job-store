@@ -83,9 +83,6 @@ jobs:
           labels: ${{ steps.docker-metadata.outputs.labels }}
           build-args: |
             GITHUB_SHA=${{ github.sha }}
-            VITE_KEYCLOAK_REDIRECT_URL=${{ secrets.KEYCLOAK_REDIRECT_URL }}
-            VITE_KEYCLOAK_CLIENT_ID=${{ secrets.KEYCLOAK_CLIENT_ID_PUBLIC }}
-            VITE_KEYCLOAK_REALM_URL=${{ secrets.KEYCLOAK_ISSUER }}
             VITE_BACKEND_URL=${{ secrets.VITE_BACKEND_URL }}
             VITE_SUPPORT_EMAIL=${{ secrets.VITE_SUPPORT_EMAIL }}
             VITE_ENV=${{ secrets.VITE_ENV }}
@@ -93,9 +90,12 @@ jobs:
             SSO_INTEGRATION_ID=${{ secrets.SSO_INTEGRATION_ID }}
             CSS_API_CLIENT_ID=${{ secrets.CSS_API_CLIENT_ID }}
             CSS_API_CLIENT_SECRET=${{ secrets.CSS_API_CLIENT_SECRET }}
+            SESSION_SECRET=${{ secrets.SESSION_SECRET }}
+            REACT_APP_URL=${{ secrets.REACT_APP_URL }}
             KEYCLOAK_REALM_URL=${{ secrets.KEYCLOAK_ISSUER }}
-            KEYCLOAK_CLIENT_ID_PRIVATE=${{ secrets.KEYCLOAK_CLIENT_ID_PRIVATE }}
-            KEYCLOAK_CLIENT_ID_PUBLIC=${{ secrets.KEYCLOAK_CLIENT_ID_PUBLIC }}
+            KEYCLOAK_CALLBACK_URL=${{ secrets.KEYCLOAK_CALLBACK_URL }}
+            KEYCLOAK_LOGOUT_REDIRECT_URL=${{ secrets.KEYCLOAK_LOGOUT_REDIRECT_URL }}
+            KEYCLOAK_CLIENT_ID=${{ secrets.KEYCLOAK_CLIENT_ID }}
             KEYCLOAK_CLIENT_SECRET=${{ secrets.KEYCLOAK_CLIENT_SECRET }}
             KEYCLOAK_ISSUER=${{ secrets.KEYCLOAK_ISSUER }}
 
@@ -124,7 +124,7 @@ jobs:
   #   runs-on: ubuntu-20.04
   #   if: |
   #     always() &&
-  #     (github.ref_name == 'develop')
+  #     (github.ref_name == 'stage')
   #   steps:
   #     - name: Trigger Unit Tests
   #       uses: actions/github-script@v6

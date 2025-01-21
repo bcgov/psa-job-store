@@ -31,6 +31,7 @@ const ReorderButtons: React.FC<ReorderButtonsProps> = ({ index, moveItem, upperD
           height: 'auto',
         }}
         icon={<CaretUpFilled />}
+        aria-label="Move up"
         onClick={() => moveItem(index, 'up')}
       />
       <Button
@@ -42,6 +43,7 @@ const ReorderButtons: React.FC<ReorderButtonsProps> = ({ index, moveItem, upperD
           height: 'auto',
         }}
         icon={<CaretDownFilled />}
+        aria-label="Move down"
         onClick={() => moveItem(index, 'down')}
       />
     </div>

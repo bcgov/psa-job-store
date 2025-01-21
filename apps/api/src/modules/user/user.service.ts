@@ -7,10 +7,12 @@ import { FindManyUserArgs, FindUniqueUserArgs, User, UserUpdateInput } from '../
 import { CACHE_USER_PREFIX } from '../auth/auth.constants';
 import { CrmService } from '../external/crm.service';
 import { PeoplesoftV2Service } from '../external/peoplesoft-v2.service';
+import { PeoplesoftService } from '../external/peoplesoft.service';
 import { KeycloakService } from '../keycloak/keycloak.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { SetUserOrgChartAccessInput } from './inputs/set-user-org-chart-access.input';
 import { PaginatedUsersResponse } from './outputs/paginated-users-response.output';
+import { UserSearchResponse } from './user.resolver';
 
 enum PeoplesoftMetadataChanged {
   POSITION = 'POSITION',
@@ -28,7 +30,8 @@ export class UserService {
     @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
     private readonly crmService: CrmService,
     private readonly keycloakService: KeycloakService,
-    private readonly peoplesoftService: PeoplesoftV2Service,
+    private readonly peoplesoftV2Service: PeoplesoftV2Service,
+    private readonly peoplesoftService: PeoplesoftService,
     private readonly prisma: PrismaService,
   ) {}
 
@@ -40,8 +43,8 @@ export class UserService {
   }
 
   private async getPeoplesoftMetadata(username: string) {
-    const profile = await this.peoplesoftService.getProfile(username);
-    const employee = profile ? await this.peoplesoftService.getEmployee(profile.EMPLID) : undefined;
+    const profile = await this.peoplesoftV2Service.getProfileV2(username);
+    const employee = profile ? await this.peoplesoftV2Service.getEmployee(profile.EMPLID) : undefined;
 
     // todo: how will potential null values here have downstream effects?
     return {
@@ -208,37 +211,78 @@ export class UserService {
    * Synchronizes a user's data from various sources and updates the local database.
    */
   async syncUser(id: string) {
-    // Fetch the latest user data from Keycloak
-    const user = await this.keycloakService.getUser(id);
+    // console.log(`[syncUser] Starting sync for user ID: ${id}`);
 
-    // Retrieve CRM metadata for the user
-    const crmMetadata = await this.getCrmMetadata(user.username);
+    try {
+      // Fetch the latest user data from Keycloak
+      // console.log(`[syncUser] Fetching Keycloak data for user ID: ${id}`);
+      const user = await this.keycloakService.getUser(id);
+      // console.log('[syncUser] Keycloak user data:', {
+      //   id: user.id,
+      //   username: user.username,
+      //   roles: user.roles,
+      //   // Log other relevant user fields but exclude sensitive data
+      // });
 
-    // Fetch and extract Peoplesoft metadata for the user
-    const { metadata: peoplesoftMetadata } = await this.getPeoplesoftMetadata(user.username);
+      // Retrieve CRM metadata for the user
+      // console.log(`[syncUser] Fetching CRM metadata for username: ${user.username}`);
+      const crmMetadata = await this.getCrmMetadata(user.username);
+      // console.log('[syncUser] CRM metadata:', crmMetadata);
 
-    // Get the existing user data from the local database, if any
-    const existingUser: User | null = await this.getUser({ where: { id } });
+      // Fetch and extract Peoplesoft metadata for the user
+      // console.log(`[syncUser] Fetching Peoplesoft metadata for username: ${user.username}`);
+      const { metadata: peoplesoftMetadata } = await this.getPeoplesoftMetadata(user.username);
+      // console.log('[syncUser] Peoplesoft metadata:', peoplesoftMetadata);
 
-    // Determine the user's org chart assignments based on Peoplesoft metadata changes
-    const orgChartMetadata = {
-      department_ids: this.getOrgChartAssignmentsForUser(existingUser, peoplesoftMetadata),
-    };
+      // Get the existing user data from the local database
+      // console.log(`[syncUser] Checking for existing user in local DB with ID: ${id}`);
+      const existingUser: User | null = await this.getUser({ where: { id } });
+      // console.log('[syncUser] Existing user found:', !!existingUser);
+      if (existingUser) {
+        // console.log('[syncUser] Existing user metadata:', existingUser.metadata);
+      }
 
-    // Combine all metadata into a single object
-    const metadata = {
-      crm: crmMetadata,
-      org_chart: orgChartMetadata,
-      peoplesoft: peoplesoftMetadata,
-    };
+      // Determine org chart assignments
+      // console.log('[syncUser] Calculating org chart assignments');
+      const orgChartMetadata = {
+        department_ids: this.getOrgChartAssignmentsForUser(existingUser, peoplesoftMetadata),
+      };
+      // console.log('[syncUser] Org chart metadata:', orgChartMetadata);
 
-    // Update or create the user in the local database
-    await this.upsertUser({
-      ...user,
-      // Todo:should this be "undefined"? Since: UserUpdateInput.deleted_at?: string | Date | undefined
-      deleted_at: null, // Undelete user if it is returned from Keycloak
-      metadata,
-    });
+      // Combine all metadata
+      const metadata = {
+        crm: crmMetadata,
+        org_chart: orgChartMetadata,
+        peoplesoft: peoplesoftMetadata,
+      };
+      // console.log('[syncUser] Combined metadata:', metadata);
+
+      // Update or create the user
+      // console.log('[syncUser] Performing upsert operation');
+      await this.upsertUser({
+        ...user,
+        deleted_at: null,
+        metadata,
+      });
+      // console.log(`[syncUser] Successfully synced user ID: ${id}`);
+    } catch (error) {
+      // if (error instanceof Error) {
+      //   console.error('[syncUser] Error during user sync:', {
+      //     userId: id,
+      //     error: error.message,
+      //     stack: error.stack,
+      //   });
+      // } else {
+      //   console.error(
+      //     '[syncUser] Error during user sync:',
+      //     {
+      //       userId: id,
+      //     },
+      //     error,
+      //   );
+      // }
+      throw error;
+    }
   }
 
   async syncUsers() {
@@ -249,23 +293,26 @@ export class UserService {
       await this.syncUser(user.id);
     }
 
+    // Previously, we removed users from the Job Store if they no longer exist in Keycloak.  This isn't totally correct,
+    // as we want to show historic data inside the application.
+    // --------------------------------------------------------
     // Delete active users which do not appear in the list of keycloak users
-    await this.prisma.user.updateMany({
-      where: {
-        AND: [
-          // Users not in list of keycloak users
-          { id: { notIn: users.map((user) => user.id) } },
-          // Only update users who are not currently deleted
-          { deleted_at: { equals: null } },
-          // Ignore system user
-          { name: { not: { equals: 'SYSTEM USER' } } },
-        ],
-      },
-      data: {
-        deleted_at: new Date().toISOString(),
-        roles: [],
-      },
-    });
+    // await this.prisma.user.updateMany({
+    //   where: {
+    //     AND: [
+    //       // Users not in list of keycloak users
+    //       { id: { notIn: users.map((user) => user.id) } },
+    //       // Only update users who are not currently deleted
+    //       { deleted_at: { equals: null } },
+    //       // Ignore system user
+    //       { name: { not: { equals: 'SYSTEM USER' } } },
+    //     ],
+    //   },
+    //   data: {
+    //     deleted_at: new Date().toISOString(),
+    //     roles: [],
+    //   },
+    // });
   }
 
   async upsertUser(user: UserUpdateInput) {
@@ -284,6 +331,72 @@ export class UserService {
 
     const user = await this.getUser({ where: { id } });
     return user;
+  }
+
+  async searchUsers(search: string): Promise<UserSearchResponse> {
+    // since we're searching the email field, we need to replace spaces with dots
+    const searchTerm = search.replace(/\s+/g, '.');
+
+    // Check if search is a number
+    if (/^\d+$/.test(searchTerm)) {
+      // Query peoplesoft for position number
+      const employeesForPositions = await this.peoplesoftService.getEmployeesForPositions([searchTerm]);
+
+      // Extract individual position/name pairs
+      const results: Array<{ position_number: string; name: string }> = [];
+      employeesForPositions.forEach((employees, positionNumber) => {
+        employees.forEach((employee) => {
+          results.push({
+            position_number: positionNumber,
+            name: employee.name,
+          });
+        });
+      });
+
+      return { numberOfResults: results.length, results: results };
+    } else {
+      // Search by name/email in Keycloak
+      const keycloakResponse = await this.keycloakService.findUsers('email', searchTerm);
+
+      // console.log('keycloakResponse: ', JSON.stringify(keycloakResponse, null, 2));
+
+      // Extract IDIR usernames from Keycloak results and limit to 10
+      let idirUsernames = keycloakResponse.map((user) => (user.attributes as any).idir_username[0]);
+      const searchCount = idirUsernames.length;
+      idirUsernames = idirUsernames.slice(0, 10);
+
+      // console.log('idirUsernames: ', idirUsernames);
+
+      // Get profiles for each IDIR username
+      const profiles = await Promise.all(
+        idirUsernames.map((username) => this.peoplesoftV2Service.getProfileV2(username, null)),
+      );
+
+      // console.log('profiles: ', JSON.stringify(profiles, null, 2));
+
+      // Filter out undefined profiles and get employee details
+      const validProfiles = profiles.filter((profile) => profile !== undefined);
+      const employeeDetails = await Promise.all(
+        validProfiles.map((profile) => this.peoplesoftService.getEmployee(profile.EMPLID)),
+      );
+
+      // console.log('employeeDetails: ', JSON.stringify(employeeDetails, null, 2));
+
+      // Compile final results
+      const ret = employeeDetails
+        .filter((detail) => detail?.data?.query?.rows?.[0])
+        .map((detail) => {
+          const employeeData = detail.data.query.rows[0];
+          // console.log('employeeData: ', JSON.stringify(employeeData, null, 2));
+          return {
+            position_number: employeeData.POSITION_NBR,
+            name: employeeData.NAME_DISPLAY,
+          };
+        });
+
+      // console.log('ret: ', JSON.stringify(ret, null, 2));
+      return { numberOfResults: searchCount, results: ret };
+    }
   }
 
   // async assignUserRoles(id: string, roles: string[]) {

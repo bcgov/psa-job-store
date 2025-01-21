@@ -50,6 +50,7 @@ export const PositionRequestPage = () => {
   const [mode, setMode] = useState('editable');
   const [readonlyMode, setReadonlyMode] = useState('');
   const [readOnlySelectedTab, setReadOnlySelectedTab] = useState('1');
+  const navigate = useNavigate();
 
   const {
     positionRequestId: wizardPositionRequestId,
@@ -118,6 +119,13 @@ export const PositionRequestPage = () => {
   // Determine if the current path is a shared URL
   const isSharedRoute = location.pathname.includes('/requests/positions/share/');
 
+  useEffect(() => {
+    const uuidRegex = /^[0-9A-Fa-f]{8}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{4}-[0-9A-Fa-f]{12}$/;
+    if (positionRequestId && !uuidRegex.test(positionRequestId) && isSharedRoute) {
+      navigate('/not-found');
+    }
+  }, [positionRequestId, navigate]);
+
   // position request id changed from what's being stored in the context,
   // clear context
   useEffect(() => {
@@ -137,7 +145,7 @@ export const PositionRequestPage = () => {
   // This could be a piece of state that determines which query to run, for example
   // const queryHook = isSharedRoute ? useLazyGetSharedPositionRequestQuery : useLazyGetPositionRequestQuery;
 
-  const [getPositionRequest, { data: positionRequestData }] = isSharedRoute
+  const [getPositionRequest, { data: positionRequestData, isLoading }] = isSharedRoute
     ? // eslint-disable-next-line react-hooks/rules-of-hooks
       useLazyGetSharedPositionRequestQuery()
     : // eslint-disable-next-line react-hooks/rules-of-hooks
@@ -163,7 +171,6 @@ export const PositionRequestPage = () => {
       // If it's a shared route, set modes or perform actions accordingly
       setMode('readonly');
     }
-    console.log(positionRequestData);
     setPositionRequestData(
       isSharedRoute
         ? (positionRequestData?.sharedPositionRequest ?? null)
@@ -254,9 +261,6 @@ export const PositionRequestPage = () => {
     setReadonlyMode(mode);
   };
 
-  // get navigate
-  const navigate = useNavigate();
-
   // nav block
   const isBlocking = useRef(true);
   const blocker = useBlocker(({ currentLocation, nextLocation }) => {
@@ -271,7 +275,7 @@ export const PositionRequestPage = () => {
       currentLocation.pathname !== nextLocation.pathname &&
       currentStep != 5 &&
       isBlocking.current &&
-      !positionRequestData
+      !!(positionRequestData?.positionRequest || positionRequestData?.sharedPositionRequest)
     );
   });
 
@@ -376,6 +380,9 @@ export const PositionRequestPage = () => {
           positionRequestData={{ positionRequest: wizardContextPositionRequestData } as GetPositionRequestResponse}
         ></ServiceRequestDetails>
       ),
+      props: {
+        role: 'tab',
+      },
     },
     {
       key: '2',
@@ -389,6 +396,9 @@ export const PositionRequestPage = () => {
           />
         </div>
       ),
+      props: {
+        role: 'tab',
+      },
     },
     ...(!isSharedRoute || (isSharedRoute && wizardContextPositionRequestData?.profile_json)
       ? [
@@ -402,6 +412,9 @@ export const PositionRequestPage = () => {
                 colProps={{ xs: 24, sm: 24, md: 24, lg: 20, xl: 16 }}
               />
             ),
+            props: {
+              role: 'tab',
+            },
           },
         ]
       : []),
@@ -687,6 +700,9 @@ export const PositionRequestPage = () => {
                 )}
               </>
             ),
+            props: {
+              role: 'tab',
+            },
           },
         ]
       : []),
@@ -694,8 +710,8 @@ export const PositionRequestPage = () => {
 
   if (classificationsDataLoading || !classificationsFetched) return <LoadingSpinnerWithMessage />;
 
-  return !wizardContextPositionRequestData ? (
-    <NotFoundComponent entity="position request" />
+  return !(wizardContextPositionRequestData || positionRequestData) && !isLoading ? (
+    <NotFoundComponent entity="Position request" />
   ) : (
     <>
       {mode === 'readonly' && (
@@ -766,6 +782,7 @@ export const PositionRequestPage = () => {
                   defaultActiveKey={readOnlySelectedTab}
                   items={tabItems}
                   tabBarStyle={{ backgroundColor: '#fff', margin: '0 -1rem', padding: '0 1rem 0px 1rem' }}
+                  data-testid="tab-bar"
                 />
               ) : (
                 <LoadingSpinnerWithMessage />

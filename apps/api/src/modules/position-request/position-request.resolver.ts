@@ -1,3 +1,4 @@
+import { ConfigService } from '@nestjs/config';
 import {
   Args,
   Field,
@@ -17,7 +18,8 @@ import {
   PositionRequestUpdateInput,
   UserCreateNestedOneWithoutPositionRequestInput,
 } from '../../@generated/prisma-nestjs-graphql';
-import { CurrentUser } from '../auth/decorators/current-user.decorator';
+import { AppConfigDto } from '../../dtos/app-config.dto';
+import { GqlCurrentUser } from '../auth/decorators/gql-current-user.decorator';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { ExtendedFindManyPositionRequestWithSearch } from './args/find-many-position-request-with-search.args';
 import {
@@ -87,13 +89,64 @@ registerEnumType(RequestingFeature, {
   name: 'RequestingFeature',
 });
 
+@ObjectType()
+export class SuggestedManagerClassification {
+  @Field(() => String)
+  id: string;
+
+  @Field(() => String)
+  code: string;
+
+  @Field(() => String)
+  name: string;
+}
+
+@ObjectType()
+export class SuggestedManagerDepartment {
+  @Field(() => String)
+  id: string;
+
+  @Field(() => String)
+  name: string;
+
+  @Field(() => String)
+  organization_id: string;
+}
+
+@ObjectType()
+export class SuggestedManager {
+  @Field(() => String)
+  id: string;
+
+  @Field(() => String)
+  name: string;
+
+  @Field(() => String)
+  status: string;
+
+  @Field(() => String)
+  positionNumber: string;
+
+  @Field(() => String)
+  positionTitle: string;
+
+  @Field(() => SuggestedManagerClassification)
+  classification: SuggestedManagerClassification;
+
+  @Field(() => SuggestedManagerDepartment)
+  department: SuggestedManagerDepartment;
+}
+
 @Resolver()
 export class PositionRequestApiResolver {
-  constructor(private positionRequestService: PositionRequestApiService) {}
+  constructor(
+    private readonly configService: ConfigService<AppConfigDto, true>,
+    private positionRequestService: PositionRequestApiService,
+  ) {}
 
   @Mutation(() => Int)
   async createPositionRequest(
-    @CurrentUser() { id: userId }: Express.User,
+    @GqlCurrentUser() { id: userId }: Express.User,
     @Args({ name: 'data', type: () => PositionRequestCreateInputWithoutUser })
     data: PositionRequestCreateInputWithoutUser,
   ) {
@@ -106,7 +159,7 @@ export class PositionRequestApiResolver {
   @Mutation(() => PositionRequest)
   async submitPositionRequest(
     @Args('id', { type: () => Int }) id: number,
-    @CurrentUser() user: Express.User,
+    @GqlCurrentUser() user: Express.User,
     @Args('comment', { nullable: true }) comment?: string,
     @Args('orgchart_png', { nullable: true }) orgchart_png?: string,
   ) {
@@ -121,7 +174,7 @@ export class PositionRequestApiResolver {
     @Args('id', { type: () => Int }) id: number,
     @Args('updateInput') updateInput: PositionRequestUpdateInput,
     @Args('returnFullObject', { type: () => Boolean, defaultValue: false }) returnFullObject: boolean,
-    @CurrentUser() user: Express.User,
+    @GqlCurrentUser() user: Express.User,
   ) {
     const updatedPositionRequest = await this.positionRequestService.updatePositionRequest(id, updateInput, user.id);
 
@@ -134,7 +187,7 @@ export class PositionRequestApiResolver {
 
   @Query(() => PositionRequestStatusCounts, { name: 'positionRequestsCount' })
   async positionRequestsCount(
-    @CurrentUser() user: Express.User,
+    @GqlCurrentUser() user: Express.User,
     @Args() args?: ExtendedFindManyPositionRequestWithSearch,
     @Args('requestingFeature', { type: () => RequestingFeature, nullable: true }) requestingFeature?: RequestingFeature,
   ) {
@@ -144,15 +197,15 @@ export class PositionRequestApiResolver {
   @Roles('classification', 'hiring-manager', 'total-compensation')
   @Query(() => [PositionRequest], { name: 'positionRequests' })
   async getPositionRequests(
-    @CurrentUser() user: Express.User,
+    @GqlCurrentUser() user: Express.User,
     @Args() args?: ExtendedFindManyPositionRequestWithSearch,
     @Args('requestingFeature', { type: () => RequestingFeature, nullable: true }) requestingFeature?: RequestingFeature,
   ) {
     return this.positionRequestService.getPositionRequests(args, user.id, user.roles, requestingFeature);
   }
 
-  @Query(() => PositionRequest, { name: 'positionRequest', nullable: true })
-  async getPositionRequest(@CurrentUser() user: Express.User, @Args('id') id: number) {
+  @Query(() => PositionRequest, { name: 'positionRequest' })
+  async getPositionRequest(@GqlCurrentUser() user: Express.User, @Args('id') id: number) {
     return this.positionRequestService.getPositionRequest(+id, user.id, user.roles);
   }
 
@@ -160,25 +213,35 @@ export class PositionRequestApiResolver {
   async getSharedPositionRequest(@Args('uuid') uuid: string) {
     return this.positionRequestService.getSharedPositionRequest(uuid);
   }
-
+  @Query(() => Int, { name: 'positionRequestByNumber', nullable: true })
+  async getPositionRequestByNumber(
+    @GqlCurrentUser() user: Express.User,
+    @Args('positionNumber') positionNumber: string,
+  ) {
+    return this.positionRequestService.getPositionRequestByNumber(+positionNumber, user.id, user.roles);
+  }
+  @Query(() => PositionRequest, { name: 'positionRequestForDept', nullable: true })
+  async getPositionRequestForDept(@GqlCurrentUser() user: Express.User, @Args('id') id: number) {
+    return this.positionRequestService.getPositionRequestForDept(+id, user.id);
+  }
   @Query(() => PositionNeedsReviewResult, { name: 'positionNeedsRivew' })
-  async positionNeedsReview(@CurrentUser() user: Express.User, @Args('id') id: number) {
+  async positionNeedsReview(@GqlCurrentUser() user: Express.User, @Args('id') id: number) {
     const position = await this.positionRequestService.getPositionRequest(+id, user.id, user.roles);
     if (!position) {
-      return false;
+      return { result: false, reasons: [] };
     }
     return this.positionRequestService.positionRequestNeedsReview(+id);
   }
 
   @Query(() => [PositionRequestUserClassification], { name: 'positionRequestUserClassifications' })
-  async getPositionRequestUserClassifications(@CurrentUser() { id: userId }: Express.User) {
+  async getPositionRequestUserClassifications(@GqlCurrentUser() { id: userId }: Express.User) {
     return this.positionRequestService.getPositionRequestUserClassifications(userId);
   }
 
   @Mutation(() => PositionRequestResponse, { name: 'deletePositionRequest' })
   async deletePositionRequest(
     @Args('id', { type: () => Int }) id: number,
-    @CurrentUser() { id: userId }: Express.User,
+    @GqlCurrentUser() { id: userId }: Express.User,
   ) {
     return this.positionRequestService.deletePositionRequest(id, userId);
   }
@@ -204,7 +267,7 @@ export class PositionRequestApiResolver {
   @Roles('total-compensation', 'classification')
   @Query(() => [UserBasicInfo], { name: 'positionRequestSubmittedBy' })
   async getpositionRequestSubmittedBy(
-    @CurrentUser() user: Express.User,
+    @GqlCurrentUser() user: Express.User,
     @Args('requestingFeature', { type: () => RequestingFeature, nullable: true }) requestingFeature?: RequestingFeature,
   ) {
     return this.positionRequestService.getPositionRequestSubmittedBy(user.roles, requestingFeature);
@@ -215,11 +278,11 @@ export class PositionRequestApiResolver {
   async updatePositionRequestStatus(
     @Args('id', { type: () => Int }) id: number,
     @Args('status', { type: () => Int }) status: number,
-    @CurrentUser() user: Express.User,
+    @GqlCurrentUser() user: Express.User,
   ) {
     // This is only for e2e testing to simulate classifications changing status of sercie request
     // check for test node env flag, if not true, return false
-    if (process.env.TEST_ENV !== 'true') {
+    if (this.configService.get('TEST_ENV') !== 'true') {
       return false;
     }
 
@@ -231,5 +294,14 @@ export class PositionRequestApiResolver {
 
     await this.positionRequestService.updatePositionRequestStatus(crmId, status);
     return true;
+  }
+
+  @Query(() => [SuggestedManager], { name: 'suggestedManagers' })
+  async suggestedManagers(
+    @Args('positionNumber') positionNumber: string,
+    @Args('positionRequestId') positionRequestId: number, // Fixed parameter name
+    @GqlCurrentUser() user: Express.User,
+  ) {
+    return await this.positionRequestService.getSuggestedManagers(positionNumber, positionRequestId);
   }
 }

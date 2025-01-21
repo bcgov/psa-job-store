@@ -16,11 +16,12 @@ import dayjs from 'dayjs';
 import { diff_match_patch } from 'diff-match-patch';
 import DOMPurify from 'dompurify';
 import { CSSProperties, useEffect, useState } from 'react';
-import { useAuth } from 'react-oidc-context';
 import { Link, useParams, useSearchParams } from 'react-router-dom';
 import LoadingSpinnerWithMessage from '../../../components/app/common/components/loading.component';
 import '../../../components/app/common/css/custom-descriptions.css';
 import { VersionSelect } from '../../../components/app/version-select.component';
+import { DownloadJobProfileComponent } from '../../../components/shared/download-job-profile/download-job-profile.component';
+import { useTypedSelector } from '../../../redux/redux.hooks';
 import {
   AccountabilitiesModel,
   IdVersion,
@@ -338,7 +339,7 @@ export class JobProfileValidationModel {
   optional_security_screenings: (TrackedFieldArrayItem | ValueString | AccountabilitiesModel)[];
 
   @BehaviouralCompetencyValidator({ message: 'The profile should have between 3 and 10 behavioural competencies' })
-  behavioural_competencies: { behavioural_competency: BehaviouralCompetency }[];
+  behavioural_competencies: BehaviouralCompetency[];
 
   // @CustomItemCountValidator(1, 10, 'professional registration and certification requirements', {
   //   message: 'There should be between $constraint1 and $constraint2 $constraint3.',
@@ -410,8 +411,8 @@ export const JobProfile: React.FC<JobProfileProps> = ({
   showBasicInfo = true,
   showVersions = false,
 }) => {
-  const auth = useAuth();
-  const roles = auth.user?.profile['client_roles'];
+  const auth = useTypedSelector((state) => state.authReducer);
+  const roles = auth.user?.roles ?? [];
   const [searchParams] = useSearchParams();
   const params = useParams();
   const jobNumber = params.number ?? searchParams.get('selectedProfile'); // Using prop ID or param ID
@@ -421,7 +422,8 @@ export const JobProfile: React.FC<JobProfileProps> = ({
   const screens = useBreakpoint();
 
   // If neither resolvedId nor profileData is present, throw an error
-  if (!jobNumber && !profileData) throw new Error('No ID');
+  // console.log('jobNumber: ', jobNumber);
+  // if (!jobNumber && !profileData) throw new Error('No ID');
 
   const [originalData, setOriginalData] = useState<JobProfileModel | null>(null); // for diff
 
@@ -539,7 +541,6 @@ export const JobProfile: React.FC<JobProfileProps> = ({
     hideDisabled?: boolean,
   ): JSX.Element[] => {
     const comparisonResult: JSX.Element[] = [];
-    console.log('original/modified 52: ', original, modified);
     if (!modified) return comparisonResult;
 
     // Add this check to handle null original
@@ -608,7 +609,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
   };
 
   const compareCompetencies = (original: BehaviouralCompetency[], modified: BehaviouralCompetency[]): JSX.Element[] => {
-    const allNames = new Set([...original.map((item) => item.name), ...modified.map((item) => item.name)]);
+    const allNames = new Set([...modified.map((item) => item.name), ...original.map((item) => item.name)]);
     const comparisonResult: JSX.Element[] = [];
 
     allNames.forEach((name) => {
@@ -927,20 +928,34 @@ export const JobProfile: React.FC<JobProfileProps> = ({
                       </div>
                     ) : (
                       //marginTop resets the applied marginButtom by antd
-                      <ul data-testid="optional-accountabilities" style={{ marginTop: '-14px' }}>
-                        {effectiveData?.accountabilities
-                          .filter((acc) => !acc.is_significant)
-                          .map((accountability, index) => {
-                            if (typeof accountability === 'string' || accountability.disabled) {
-                              return null;
-                            }
-                            if (accountability.text instanceof TrackedFieldArrayItem) {
-                              return <li key={index}>{accountability.text.text}</li>;
-                            } else if (typeof accountability.text === 'string') {
-                              return <li key={index}>{accountability.text}</li>;
-                            }
-                          })}
-                      </ul>
+                      <div
+                        style={{
+                          borderLeft: '1px solid #D8D8D8',
+                          paddingLeft: '12px',
+                          marginBottom: '12px',
+                          marginLeft: '23px',
+                        }}
+                        className="optionalList"
+                      >
+                        <span style={{ fontSize: '12px', fontWeight: 700, color: '#474543' }}>
+                          <h4>Optional accountabilities</h4>
+                        </span>
+
+                        <ul data-testid="optional-accountabilities" style={{ paddingInlineStart: '27px' }}>
+                          {effectiveData?.accountabilities
+                            .filter((acc) => !acc.is_significant)
+                            .map((accountability, index) => {
+                              if (typeof accountability === 'string' || accountability.disabled) {
+                                return null;
+                              }
+                              if (accountability.text instanceof TrackedFieldArrayItem) {
+                                return <li key={index}>{accountability.text.text}</li>;
+                              } else if (typeof accountability.text === 'string') {
+                                return <li key={index}>{accountability.text}</li>;
+                              }
+                            })}
+                        </ul>
+                      </div>
                     ))}
                 </span>
               </>
@@ -1066,19 +1081,35 @@ export const JobProfile: React.FC<JobProfileProps> = ({
                           </ul>
                         </div>
                       ) : (
-                        effectiveData?.professional_registration_requirements
-                          .filter((acc) => !acc.is_significant)
-                          .map((professional_registration_requirement, index) => {
-                            if (
-                              typeof professional_registration_requirement === 'string' ||
-                              professional_registration_requirement.disabled
-                            ) {
-                              return null;
-                            }
-                            if (typeof professional_registration_requirement.text === 'string') {
-                              return <li key={index}>{professional_registration_requirement.text}</li>;
-                            }
-                          })
+                        <div
+                          style={{
+                            borderLeft: '1px solid #D8D8D8',
+                            paddingLeft: '12px',
+                            marginBottom: '12px',
+                            marginLeft: '23px',
+                          }}
+                          className="optionalList"
+                        >
+                          <span style={{ fontSize: '12px', fontWeight: 700, color: '#474543' }}>
+                            <h4>Optional professional registration requirements</h4>
+                          </span>
+
+                          <ul data-testid="optional-requirements" style={{ paddingInlineStart: '27px' }}>
+                            {effectiveData?.professional_registration_requirements
+                              .filter((acc) => !acc.is_significant)
+                              .map((professional_registration_requirement, index) => {
+                                if (
+                                  typeof professional_registration_requirement === 'string' ||
+                                  professional_registration_requirement.disabled
+                                ) {
+                                  return null;
+                                }
+                                if (typeof professional_registration_requirement.text === 'string') {
+                                  return <li key={index}>{professional_registration_requirement.text}</li>;
+                                }
+                              })}
+                          </ul>
+                        </div>
                       )}
                     </>
                   )}
@@ -1202,18 +1233,32 @@ export const JobProfile: React.FC<JobProfileProps> = ({
                         </div>
                       ) : (
                         //marginTop resets the applied marginButtom by antd
-                        <ul data-testid="optional-accountabilities" style={{ marginTop: '-14px' }}>
-                          {effectiveData?.security_screenings
-                            .filter((acc) => !acc.is_significant)
-                            .map((security_screening, index) => {
-                              if (typeof security_screening === 'string' || security_screening.disabled) {
-                                return null;
-                              }
-                              if (typeof security_screening.text === 'string') {
-                                return <li key={index}>{security_screening.text}</li>;
-                              }
-                            })}
-                        </ul>
+                        <div
+                          style={{
+                            borderLeft: '1px solid #D8D8D8',
+                            paddingLeft: '12px',
+                            marginBottom: '12px',
+                            marginLeft: '23px',
+                          }}
+                          className="optionalList"
+                        >
+                          <span style={{ fontSize: '12px', fontWeight: 700, color: '#474543' }}>
+                            <h4>Optional security screenings</h4>
+                          </span>
+
+                          <ul data-testid="optional-screenings" style={{ paddingInlineStart: '27px' }}>
+                            {effectiveData?.security_screenings
+                              .filter((acc) => !acc.is_significant)
+                              .map((security_screening, index) => {
+                                if (typeof security_screening === 'string' || security_screening.disabled) {
+                                  return null;
+                                }
+                                if (typeof security_screening.text === 'string') {
+                                  return <li key={index}>{security_screening.text}</li>;
+                                }
+                              })}
+                          </ul>
+                        </div>
                       )}
                     </>
                   )}
@@ -1255,18 +1300,16 @@ export const JobProfile: React.FC<JobProfileProps> = ({
           <ul data-testid="behavioural-competencies">
             {showDiff && originalData
               ? compareCompetencies(
-                  originalData.behavioural_competencies.map((item) => item.behavioural_competency),
-                  effectiveData?.behavioural_competencies.map((item) => item.behavioural_competency) ?? [],
+                  originalData.behavioural_competencies,
+                  effectiveData?.behavioural_competencies ?? [],
                 )
-              : (effectiveData?.behavioural_competencies ?? []).map(
-                  ({ behavioural_competency: { name, description } }, index) => {
-                    return (
-                      <li key={index}>
-                        <Text strong>{name}</Text> {description}
-                      </li>
-                    );
-                  },
-                )}
+              : (effectiveData?.behavioural_competencies ?? []).map(({ name, description }, index) => {
+                  return (
+                    <li key={index}>
+                      <Text strong>{name}</Text> {description}
+                    </li>
+                  );
+                })}
           </ul>
         </span>
       ),
@@ -1275,8 +1318,9 @@ export const JobProfile: React.FC<JobProfileProps> = ({
     },
   ];
 
-  return !isLoading && !effectiveData ? (
-    <NotFoundComponent entity="profile" />
+  return (!isLoading && profileByNumber && !profileByNumber?.jobProfileByNumber) ||
+    (id && version && !isLoadingVersioned && versionedProfileData && !versionedProfileData?.jobProfile) ? (
+    <NotFoundComponent entity="Profile" />
   ) : (
     <div data-testid="job-profile" style={{ ...style }}>
       {screens.xl === false && showBackToResults ? (
@@ -1350,10 +1394,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
                 <h2 style={{ margin: '0' }}>Job profile</h2>
               </Col>{' '}
               <Col>
-                {showVersions &&
-                roles &&
-                ((roles as string[]).includes('total-compensation') ||
-                  (roles as string[]).includes('classification')) ? (
+                {showVersions && (roles.includes('total-compensation') || roles.includes('classification')) ? (
                   <VersionSelect
                     id={id ?? effectiveData?.id.toString() ?? '-1'}
                     version={version}
@@ -1361,6 +1402,13 @@ export const JobProfile: React.FC<JobProfileProps> = ({
                       triggerGetJobProfileById({ id: selectedVersion.id, version: selectedVersion.version });
                     }}
                   />
+                ) : (
+                  <></>
+                )}
+              </Col>
+              <Col>
+                {['bceid', 'total-compensation'].some((role) => roles.includes(role)) ? (
+                  <DownloadJobProfileComponent jobProfile={effectiveData} />
                 ) : (
                   <></>
                 )}

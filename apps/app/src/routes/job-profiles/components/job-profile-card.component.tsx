@@ -75,14 +75,14 @@ export const JobProfileCard = ({ data, onSavedCallback }: JobProfileCardProps) =
       }}
     >
       <Row gutter={8} align="top" style={{ display: 'flex', flexWrap: 'nowrap', alignItems: 'flex-start' }}>
-        <Col flex="1 1 calc(100% - 32px)">
+        <Col flex="1 1 calc(100% - 64px)">
           <Title level={3} style={{ fontSize: '1.25rem', lineHeight: '1.25rem' }} data-cy="card-title">
             {typeof data?.title === 'string' ? data?.title : data?.title?.text}
           </Title>
         </Col>
         {/* This is for absolutely positioned save button so it appears in correct tab order */}
-        <Col flex="0 0 32px">
-          <div style={{ width: '32px', height: '32px' }}></div>
+        <Col flex="0 0 64px">
+          <div style={{ width: '64px', height: '32px' }}></div>
         </Col>
       </Row>
 
@@ -116,7 +116,7 @@ export const JobProfileCard = ({ data, onSavedCallback }: JobProfileCardProps) =
         <Paragraph ellipsis={{ rows: 3 }}>
           <span
             dangerouslySetInnerHTML={{
-              __html: DOMPurify.sanitize(typeof data?.context === 'string' ? data.context : data.context ?? ''),
+              __html: DOMPurify.sanitize(typeof data?.context === 'string' ? data.context : (data.context ?? '')),
             }}
           ></span>
         </Paragraph>
@@ -137,7 +137,7 @@ export const JobProfileCard = ({ data, onSavedCallback }: JobProfileCardProps) =
         See details
       </Button>
 
-      <div style={{ position: 'absolute', top: '1rem', right: '1rem' }}>
+      <div style={{ position: 'absolute', top: '1rem', right: '1rem' }} className={'card-actions'}>
         <Space size={0}>
           {/* Button to copy link to profile */}
           <Tooltip title="Copy link to profile">

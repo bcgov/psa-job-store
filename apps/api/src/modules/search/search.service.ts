@@ -1,5 +1,5 @@
 import { QueryDslQueryContainer } from '@elastic/elasticsearch/lib/api/types';
-import { Inject, Injectable, forwardRef } from '@nestjs/common';
+import { Injectable } from '@nestjs/common';
 import { ElasticsearchService } from '@nestjs/elasticsearch';
 import { JobProfileState, Prisma } from '@prisma/client';
 import { PrismaService } from '../prisma/prisma.service';
@@ -13,13 +13,23 @@ export enum SearchIndex {
 export class SearchService {
   constructor(
     private readonly elasticService: ElasticsearchService,
-    @Inject(forwardRef(() => PrismaService))
     private readonly prisma: PrismaService,
-  ) {}
+    // private readonly eventsService: EventsService,
+  ) {
+    // console.log('searchServcie constructor');
+    // this.eventsService.on('search:resetIndex', async (data) => {
+    //   console.log('received search:resetIndex event');
+    //   await this.resetIndex();
+    //   console.log('done resetting index');
+    // });
+  }
+
+  async onModuleInit() {}
 
   async onApplicationBootstrap() {
     // onApplicationBootstrap fires later in the lifecycle than onModuleInit
     // this way prisma client is fully initialized before we start using it.
+    // console.log('application bootstrap reset index');
     await this.resetIndex();
   }
 
@@ -29,7 +39,6 @@ export class SearchService {
 
   async search(index: SearchIndex, query?: QueryDslQueryContainer) {
     const results = await this.elasticService.search({ index, query });
-
     return results;
   }
 
@@ -82,15 +91,17 @@ export class SearchService {
 
   async searchJobProfiles(value: string) {
     // console.log('searchProfiles: ', value);
-
+    const isNumber = !isNaN(parseInt(value));
+    // console.log('search is a number: ', isNumber);
     const results = await this.elasticService.search({
       index: SearchIndex.JobProfile,
+      size: 20,
       query: {
         bool: {
           should: [
             {
               match_phrase_prefix: {
-                title: value,
+                title: { query: value, boost: 10 }, // exact title match
               },
             },
             {
@@ -99,7 +110,13 @@ export class SearchService {
                   query: value,
                   fuzziness: 1,
                   operator: 'and',
+                  boost: 5, // fuzzy title match
                 },
+              },
+            },
+            isNumber && {
+              term: {
+                number: { value: parseInt(value), boost: 100 },
               },
             },
             {
@@ -317,6 +334,10 @@ export class SearchService {
       },
     });
 
+    // console.log(
+    //   'results: ',
+    //   results.hits.hits.map((h) => h._id),
+    // );
     return results.hits.hits.map((h) => +h._id);
   }
 
@@ -352,21 +373,27 @@ export class SearchService {
         accountabilities: (profile.accountabilities as Prisma.JsonObject[]).map(
           (accountability) => accountability.text,
         ),
-        behavioural_competencies: (
-          await this.prisma.jobProfileBehaviouralCompetency.findMany({
-            where: {
-              job_profile_id: profile.id,
-            },
-            select: {
-              behavioural_competency: {
-                select: {
-                  name: true,
-                  description: true,
-                },
-              },
-            },
-          })
-        ).map(({ behavioural_competency: { name, description } }) => `${name} ${description}`),
+        behavioural_competencies: profile.behavioural_competencies
+          ? (profile.behavioural_competencies as Prisma.JsonObject[]).map(
+              (competency) => `${competency.name} ${competency.description}`,
+            )
+          : [],
+
+        // (
+        //   await this.prisma.jobProfileBehaviouralCompetency.findMany({
+        //     where: {
+        //       job_profile_id: profile.id,
+        //     },
+        //     select: {
+        //       behavioural_competency: {
+        //         select: {
+        //           name: true,
+        //           description: true,
+        //         },
+        //       },
+        //     },
+        //   })
+        // ).map(({ behavioural_competency: { name, description } }) => `${name} ${description}`),
         professional_registration_requirements: (
           profile.professional_registration_requirements as Prisma.JsonObject[]
         )?.map((pr) => pr.text),

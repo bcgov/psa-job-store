@@ -19,22 +19,23 @@
     "build": "tsc && vite build",
     "dev": "vite",
     "preview": "vite preview",
-    "test": "vitest"
+    "test": "jest"
   },
   "dependencies": {
-    "@dagrejs/dagre": "^1.1.2",
-    "dayjs": "^1.11.10",
-    "docx": "^8.5.0",
-    "react-quill": "0.0.2",
-    "reactflow": "^11.11.1"
+    "@dagrejs/dagre": "^1.1.4",
+    "dayjs": "^1.11.13",
+    "docx": "^9.1.0",
+    "reactflow": "^11.11.4"
   },
   "devDependencies": {
-    "@types/node": "^20.11.17",
+    "@types/jest": "^29.5.14",
+    "@types/node": "^22.10.1",
     "eslint-config-custom": "*",
+    "ts-jest": "^29.2.5",
     "tsconfig": "*",
-    "typescript": "^5.2.2",
-    "vite": "^5.1.0",
+    "typescript": "^5.7.2",
+    "vite": "^6.0.1",
     "vite-plugin-dts": "^4.3.0",
-    "vitest": "^1.2.2"
+    "vitest": "^2.1.6"
   }
 }

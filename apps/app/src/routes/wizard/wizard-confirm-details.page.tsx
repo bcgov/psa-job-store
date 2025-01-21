@@ -1,30 +1,27 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
-import { ArrowLeftOutlined, EllipsisOutlined } from '@ant-design/icons';
+import { ArrowLeftOutlined } from '@ant-design/icons';
 import { classValidatorResolver } from '@hookform/resolvers/class-validator';
-import { Button, Card, Col, Form, Input, Menu, Modal, Row, Tooltip, Typography } from 'antd';
+import { Button, Card, Col, Form, Input, Modal, Row, Tooltip, Typography } from 'antd';
 import { IsNotEmpty } from 'class-validator';
-import debounce from 'lodash.debounce';
-import { useCallback, useEffect, useState } from 'react';
+import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { Link } from 'react-router-dom';
-import AccessiblePopoverMenu from '../../components/app/common/components/accessible-popover-menu';
-import LoadingSpinnerWithMessage from '../../components/app/common/components/loading.component';
+import LoadingComponent from '../../components/app/common/components/loading.component';
 import '../../components/app/common/css/custom-form.css';
 import {
   GetPositionRequestResponseContent,
-  useDeletePositionRequestMutation,
   useUpdatePositionRequestMutation,
 } from '../../redux/services/graphql-api/position-request.api';
-import { PositionProfileModel, useLazyGetPositionProfileQuery } from '../../redux/services/graphql-api/position.api';
 import { DepartmentFilter } from '../org-chart/components/department-filter.component';
-import { findExcludedManager } from '../org-chart/utils/find-excluded-manager.util';
 import { WizardSteps } from '../wizard/components/wizard-steps.component';
 import WizardContentWrapper from './components/wizard-content-wrapper';
 import { WizardPageWrapper } from './components/wizard-page-wrapper.component';
 import StatusIndicator from './components/wizard-position-request-status-indicator';
 import { useWizardContext } from './components/wizard.provider';
+import { ExcludedManagerPicker } from './excluded-manager-picker';
 import './wizard-confirm-details.page.css';
+import { WizardContextMenu } from './wizard-context-menu';
 
 interface WizardConfirmPageProps {
   onNext?: () => void;
@@ -33,19 +30,6 @@ interface WizardConfirmPageProps {
   positionRequest: GetPositionRequestResponseContent | null;
   setCurrentStep: React.Dispatch<React.SetStateAction<number | null>>;
 }
-
-// @ValidatorConstraint({ async: true })
-// class PositionValidator implements ValidatorConstraintInterface {
-//   validate(value: any, args: ValidationArguments) {
-//     const object = args.object as WizardConfirmDetailsModel;
-
-//     // Check if no positions are found or if the input value is empty
-//     if (object.noPositions || !value) {
-//       return false;
-//     }
-//     return true;
-//   }
-// }
 
 export class WizardConfirmDetailsModel {
   @IsNotEmpty({ message: 'Work location is required' })
@@ -60,17 +44,11 @@ export class WizardConfirmDetailsModel {
   @IsNotEmpty({ message: 'Division is required' })
   division: string;
 
-  // Validate only if the field is not empty
-  // @ValidateIf((o) => o.excludedManagerPositionNumber !== '')
-  // @Validate(PositionValidator, {
-  //   message: 'Invalid position number',
-  // })
-  // @ValidateIf((o) => o.excludedManagerPositionNumber !== '')
-  // @Validate(PositionValidator, {
-  //   message: 'Invalid position number',
-  // })
   @IsNotEmpty({ message: 'First level excluded manager position number is required' })
-  excludedManagerPositionNumber: string;
+  excludedManagerPositionNumberAndName: string | null;
+
+  excludedManagerPositionNumber: string | null;
+  excludedManagerName: string | null;
 
   noPositions: boolean;
 }
@@ -90,6 +68,7 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
   const [updatePositionRequest] = useUpdatePositionRequestMutation();
   const [isFormModified, setIsFormModified] = useState(false);
   const { positionRequestId, positionRequestData, setPositionRequestData } = useWizardContext();
+  const [setupDone, setSetupDone] = useState(false);
 
   // if position request is in "action required" state, this means user is re-submitting the request
   // in this case, disable the org chart step since they should not be able to change the reporting relationship
@@ -101,130 +80,47 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
     setIsFormModified(true);
   };
 
-  // this is for the first level excluded manager
-  const [
-    getPositionProfile,
-    { data: positionProfileData, isFetching: isFetchingPositionProfile, isError: isFetchingPositionProfileError },
-  ] = useLazyGetPositionProfileQuery();
-
-  // const departmentsData = useGetDepartmentsWithLocationQuery().data?.departments;
-
-  // State to track selected location
-  // const [selectedLocation, setSelectedLocation] = useState<string | null>(null);
-
-  // State to track selected department
-  // const [selectedDepartment, setSelectedDepartment] = useState<string | null>(null);
-
-  // useEffect(() => {
-  //   setSelectedDepartment(null); // Clear selected department
-  // }, [selectedLocation, positionProfileData]);
-
-  // Filter departments based on selected location
-
-  // const filteredDepartments = departmentsData?.filter((department) => department.location_id === selectedLocation);
-
-  const [additionalPositions, setAdditionalPositions] = useState(0);
-  const [noPositions, setNoPositions] = useState(false);
-  const [firstActivePosition, setFirstActivePosition] = useState<PositionProfileModel>();
-
-  useEffect(() => {
-    if (positionProfileData && positionProfileData.positionProfile) {
-      setNoPositions(false);
-      if (positionProfileData.positionProfile.length === 0) {
-        setNoPositions(true);
-      }
-      const activePositions = positionProfileData.positionProfile.filter((p) => p.status === 'Active');
-      setFirstActivePosition(activePositions[0] || null);
-      // Set state to the number of additional active positions
-      setAdditionalPositions(positionProfileData.positionProfile.length - 1);
-    }
-  }, [positionProfileData]);
-
-  // eslint-disable-next-line react-hooks/exhaustive-deps
-  const debouncedFetchPositionProfile = useCallback(
-    debounce(async (positionNumber: string) => {
-      try {
-        // console.log('debounce fetch: ', positionNumber);
-        getPositionProfile({ positionNumber, uniqueKey: 'excludedManagerProfile', suppressGlobalError: true });
-        trigger('excludedManagerPositionNumber');
-      } catch (e) {
-        // handled by isError, prevents showing error toast
-        console.log(e);
-      }
-    }, 300),
-    [getPositionProfile],
-  );
-
-  // get position request data
-
-  // const {
-  //   data: positionRequestData,
-  //   isLoading: positionRequestLoading,
-  //   isError: positionRequestLoadingError,
-  // } = useGetPositionRequestQuery({
-  //   id: positionRequestId ?? -1,
-  // });
-
-  // console.log('positionRequestData: ', positionRequestData);
-
-  // get profile info for excluded manager from additional_info_excluded_mgr_position_number using GetPositionProfileQuery and useEffect
-  useEffect(() => {
-    async function fetchExcludedManagerProfile() {
-      if (positionRequestData?.additional_info?.excluded_mgr_position_number) {
-        try {
-          // console.log('fetch2: ', positionRequestData?.additional_info?.excluded_mgr_position_number);
-          await getPositionProfile({
-            positionNumber: positionRequestData.additional_info.excluded_mgr_position_number,
-            uniqueKey: 'excludedManagerProfile',
-            suppressGlobalError: true,
-          }).unwrap();
-        } catch (e) {
-          setNoPositions(true);
-        }
-      }
-    }
-    fetchExcludedManagerProfile();
-  }, [positionRequestData?.additional_info?.excluded_mgr_position_number, getPositionProfile]);
-
   const showModal = async ({ skipValidation = false, updateStep = true, step = -1, action = 'next' } = {}) => {
     // console.log('showModal', skipValidation, updateStep);
 
-    if (isFetchingPositionProfile) return; // Do not show the modal while fetching position profile
+    // if (isFetchingPositionProfile) return; // Do not show the modal while fetching position profile
 
-    // Clear any existing errors on the excludedManagerPositionNumber field
-    if (!skipValidation) clearErrors('excludedManagerPositionNumber');
+    // Clear any existing errors on the excludedManagerPositionNumberAndName field
+    // if (!skipValidation) clearErrors('excludedManagerPositionNumberAndName');
 
-    // Check if noPositions is true and excludedManagerPositionNumber should be filled
-    const formValues = getValues();
-    // console.log('form values: ', formValues);
-    // skipValidation = true;
-    if (
-      !skipValidation &&
-      ((noPositions && formValues.excludedManagerPositionNumber) ||
-        (firstActivePosition && !firstActivePosition?.employeeName) ||
-        isFetchingPositionProfileError)
-    ) {
-      // Set an error on the excludedManagerPositionNumber field
-      setError('excludedManagerPositionNumber', {
-        type: 'manual',
-        message: noPositions
-          ? 'Position not found'
-          : !firstActivePosition?.employeeName
-            ? 'Position is unencumbered'
-            : 'Position not found',
-      });
-      // console.log('error, returning');
-      Modal.error({
-        title: 'Error',
-        content: (
-          <div>
-            <p>The form contains errors, please fix them before proceeding.</p>
-          </div>
-        ),
-        onOk() {},
-      });
-      return; // Do not open the modal
-    }
+    // // Check if noPositions is true and excludedManagerPositionNumberAndName should be filled
+    // const formValues = getValues();
+    // // console.log('form values: ', formValues);
+    // // skipValidation = true;
+    // if (
+    //   !skipValidation &&
+    //   1 != 1
+    //   // &&
+    //   // ((noPositions && formValues.excludedManagerPositionNumberAndName) ||
+    //   //   (firstActivePosition && !firstActivePosition?.employeeName) ||
+    //   //   isFetchingPositionProfileError)
+    // ) {
+    //   // Set an error on the excludedManagerPositionNumberAndName field
+    //   // setError('excludedManagerPositionNumberAndName', {
+    //   //   type: 'manual',
+    //   //   message: noPositions
+    //   //     ? 'Position not found'
+    //   //     : !firstActivePosition?.employeeName
+    //   //       ? 'Position is unencumbered'
+    //   //       : 'Position not found',
+    //   // });
+    //   // console.log('error, returning');
+    //   Modal.error({
+    //     title: 'Error',
+    //     content: (
+    //       <div>
+    //         <p>The form contains errors, please fix them before proceeding.</p>
+    //       </div>
+    //     ),
+    //     onOk() {},
+    //   });
+    //   return; // Do not open the modal
+    // }
 
     if (skipValidation) {
       // console.log('handleOk 2');
@@ -270,6 +166,7 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
     try {
       const formData = getValues();
       // console.log('formData: ', formData);
+
       if (positionRequestId) {
         // console.log('updatePositionRequest');
         const resp = await updatePositionRequest({
@@ -289,9 +186,11 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
             work_location_id: formData.workLocation?.split('|')[0] ?? undefined,
             work_location_name: formData.workLocation?.split('|')[1] ?? undefined,
             excluded_mgr_position_number:
-              !noPositions && formData.excludedManagerPositionNumber != ''
-                ? formData.excludedManagerPositionNumber
-                : undefined,
+              // !noPositions && formData.excludedManagerPositionNumber != ''
+              // ?
+              formData.excludedManagerPositionNumberAndName?.split('|')[0] ?? '',
+            // : undefined
+            excluded_mgr_name: formData.excludedManagerPositionNumberAndName?.split('|')[1] ?? '',
             branch: formData.branch,
             division: formData.division,
           },
@@ -315,16 +214,18 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
     control,
     handleSubmit,
     setValue,
-    setError,
-    clearErrors,
+    // setError,
+    // clearErrors,
     getValues,
     formState: { errors },
-    trigger,
+    // trigger,
   } = useForm<WizardConfirmDetailsModel>({
     resolver: classValidatorResolver(WizardConfirmDetailsModel),
     defaultValues: {
       workLocation: null as string | null,
-      excludedManagerPositionNumber: '',
+      excludedManagerPositionNumber: null as string | null,
+      excludedManagerPositionNumberAndName: null as string | null,
+      excludedManagerName: null as string | null,
       payListDepartmentId: null as string | null,
       branch: '',
       division: '',
@@ -333,8 +234,15 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
 
   useEffect(() => {
     if (positionRequestData) {
-      const { work_location_id, work_location_name, department_id, excluded_mgr_position_number, branch, division } =
-        positionRequestData.additional_info ?? {};
+      const {
+        work_location_id,
+        work_location_name,
+        department_id,
+        excluded_mgr_position_number,
+        excluded_mgr_name,
+        branch,
+        division,
+      } = positionRequestData.additional_info ?? {};
 
       setValue('branch', branch || '');
       setValue('division', division || '');
@@ -351,73 +259,42 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
       const setDeptIdVal = department_id || positionRequestData?.department_id || null;
       setValue('payListDepartmentId', setDeptIdVal);
 
-      const { orgchart_json, reports_to_position_id } = positionRequest ?? {
-        orgchart_json: undefined,
-        reports_to_position_id: undefined,
-      };
+      // const { orgchart_json, reports_to_position_id } = positionRequest ?? {
+      //   orgchart_json: undefined,
+      //   reports_to_position_id: undefined,
+      // };
 
-      // Find first parent which is an excluded manager
-      const lookup =
-        orgchart_json != null && reports_to_position_id != null
-          ? findExcludedManager(`${reports_to_position_id}`, orgchart_json)
-          : undefined;
+      // // Find first parent which is an excluded manager
+      // const lookup =
+      //   orgchart_json != null && reports_to_position_id != null
+      //     ? findExcludedManager(`${reports_to_position_id}`, orgchart_json)
+      //     : undefined;
 
-      const useExcludedMngr = excluded_mgr_position_number || lookup?.id || '';
+      const useExcludedMngr = excluded_mgr_position_number || null; //|| lookup?.id || '';
       setValue('excludedManagerPositionNumber', useExcludedMngr);
-      if (!excluded_mgr_position_number && lookup?.id) {
-        // console.log('debouncedFetchPositionProfile A: ', useExcludedMngr);
-        // fetch only if excluded manager wasn't previously set,  otherwise causes a double fetch because of the uniqueKey = true
-        debouncedFetchPositionProfile(useExcludedMngr);
-      }
+      // if (!excluded_mgr_position_number && lookup?.id) {
+      //   // console.log('debouncedFetchPositionProfile A: ', useExcludedMngr);
+      //   // fetch only if excluded manager wasn't previously set,  otherwise causes a double fetch because of the uniqueKey = true
+      //   // debouncedFetchPositionProfile(useExcludedMngr);
+      // }
+
+      const useExcludedMngrName = excluded_mgr_name || null;
+      setValue('excludedManagerName', useExcludedMngrName);
+
+      setValue(
+        'excludedManagerPositionNumberAndName',
+        useExcludedMngr && useExcludedMngrName ? useExcludedMngr + '|' + useExcludedMngrName : null,
+      );
 
       setSelectedDepartmentId(setDeptIdVal);
+      setSetupDone(true);
+      // console.log('setup done');
     }
-  }, [positionRequestData, setValue, debouncedFetchPositionProfile, positionRequest]);
-
-  const [deletePositionRequest] = useDeletePositionRequestMutation();
-  const deleteRequest = async () => {
-    if (!positionRequestId) return;
-    Modal.confirm({
-      title: 'Delete Position Request',
-      content: 'Do you want to delete the position request?',
-      okText: 'Yes',
-      cancelText: 'No',
-      onOk: async () => {
-        await deletePositionRequest({ id: positionRequestId });
-        disableBlockingAndNavigateHome();
-      },
-    });
-  };
+  }, [positionRequestData, setValue, positionRequest]); // debouncedFetchPositionProfile
 
   const saveAndQuit = async () => {
     await showModal({ skipValidation: true, updateStep: false });
     disableBlockingAndNavigateHome();
-  };
-
-  const getMenuContent = () => {
-    return (
-      <Menu className="wizard-menu">
-        <Menu.Item key="save" onClick={saveAndQuit} data-testid="save-and-quit">
-          <div style={{ padding: '5px 0' }}>
-            Save and quit
-            <Typography.Text type="secondary" style={{ marginTop: '5px', display: 'block' }}>
-              Saves your progress. You can access this position request from the 'My Position Requests' page.
-            </Typography.Text>
-          </div>
-        </Menu.Item>
-        <Menu.Divider />
-        <Menu.ItemGroup key="others" title={<b>Others</b>}>
-          <Menu.Item key="delete" onClick={deleteRequest}>
-            <div style={{ padding: '5px 0' }}>
-              Delete
-              <Typography.Text type="secondary" style={{ marginTop: '5px', display: 'block' }}>
-                Removes this position request from 'My Position Requests'. This action is irreversible.
-              </Typography.Text>
-            </div>
-          </Menu.Item>
-        </Menu.ItemGroup>
-      </Menu>
-    );
   };
 
   const switchStep = async (step: number) => {
@@ -445,9 +322,7 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
     }
   };
 
-  // console.log('firstActivePosition:', firstActivePosition);
-  // console.log('errors.excludedManagerPosit: ', errors.excludedManagerPositionNumber);
-
+  // console.log('positionRequest: ', positionRequest);
   return (
     <WizardPageWrapper
       title={
@@ -468,280 +343,211 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
         <div style={{ marginRight: '1rem' }} key="statusIndicator">
           <StatusIndicator status={positionRequest?.status ?? ''} />
         </div>,
-        <AccessiblePopoverMenu
-          triggerButton={<Button data-testid="ellipsis-menu" tabIndex={-1} icon={<EllipsisOutlined />}></Button>}
-          content={getMenuContent()}
-          ariaLabel="Open position request menu"
-        ></AccessiblePopoverMenu>,
-        <Tooltip
-          title={
-            isActionRequiredState
-              ? "Reporting relationship can't be changed once position request has been submitted"
-              : ''
-          }
-        >
-          <Button
-            onClick={() => showModal({ skipValidation: true, action: 'back' })}
-            key="back"
-            data-testid="back-button"
-            disabled={isActionRequiredState}
+        <>
+          <WizardContextMenu
+            positionRequestId={positionRequestId}
+            onSaveAndQuit={saveAndQuit}
+            onNavigateHome={disableBlockingAndNavigateHome}
+            shareableLink={positionRequest?.shareUUID}
+            positionRequestStatus={positionRequest?.status}
+          />
+
+          <Tooltip
+            title={
+              isActionRequiredState
+                ? "Reporting relationship can't be changed once position request has been submitted"
+                : ''
+            }
           >
-            Back
-          </Button>
-        </Tooltip>,
+            <Button
+              onClick={() => showModal({ skipValidation: true, action: 'back' })}
+              key="back"
+              data-testid="back-button"
+              disabled={isActionRequiredState}
+            >
+              Back
+            </Button>
+          </Tooltip>
+        </>,
         <Button
           key="next"
           type="primary"
           onClick={() => showModal()}
           data-testid="next-button"
           loading={isLoading}
-          disabled={isFetchingPositionProfile}
+          // disabled={isFetchingPositionProfile}
         >
           Save and next
         </Button>,
       ]}
     >
-      <WizardSteps
-        onStepClick={switchStep}
-        current={1}
-        maxStepCompleted={positionRequest?.max_step_completed}
-        disabledTooltip={isFetchingPositionProfile ? 'Loading, please wait...' : null}
-      ></WizardSteps>
+      {!setupDone ? (
+        <LoadingComponent />
+      ) : (
+        <>
+          <WizardSteps
+            onStepClick={switchStep}
+            current={1}
+            maxStepCompleted={positionRequest?.max_step_completed}
+            // disabledTooltip={isFetchingPositionProfile ? 'Loading, please wait...' : null}
+          ></WizardSteps>
 
-      <WizardContentWrapper>
-        <Row
-          justify="center"
-          gutter={16}
-          role="form"
-          aria-label="additional information"
-          data-testid="additional-information-form"
-        >
-          <Col sm={24} md={24} lg={24} xxl={18}>
-            <Row justify="center">
-              <Col xs={24} sm={24} md={24} lg={24} xl={24}>
-                <Form
-                  layout="vertical"
-                  onFinish={handleSubmit(() => {
-                    // console.log(data);
-                  })}
-                  onChange={handleFormChange}
-                >
-                  <Card
-                    title={
-                      <span id="department-id-label">
-                        <h3 style={{ fontWeight: '600', fontSize: '16px' }}>Department ID</h3>
-                      </span>
-                    }
-                    // title="Department & work location"
-                    bordered={false}
-                    className="custom-card"
-                    style={{ marginTop: 16 }}
-                  >
-                    <Row justify="start">
-                      <Col xs={24} sm={24} md={24} lg={18} xl={12}>
-                        <Form.Item
-                          name="payListDepartmentId"
-                          // label="Department ID"
-                          // labelCol={{ className: 'card-label' }}
-                          validateStatus={errors.payListDepartmentId ? 'error' : ''}
-                          help={errors.payListDepartmentId?.message}
-                          data-testid="department-select"
-                        >
-                          <DepartmentFilter
-                            setDepartmentId={() => {}}
-                            onSelect={(dept) => {
-                              if (dept?.metadata?.value) {
-                                const deptId = dept.metadata.value.toString();
-                                setValue('payListDepartmentId', deptId === undefined ? null : String(deptId));
-                                setValue(
-                                  'workLocation',
-                                  dept.metadata?.location_id + '|' + dept.metadata?.location_name || null,
-                                );
-                                setSelectedDepartmentId(deptId);
+          <WizardContentWrapper>
+            <Row
+              justify="center"
+              gutter={16}
+              role="form"
+              aria-label="additional information"
+              data-testid="additional-information-form"
+            >
+              <Col sm={24} md={24} lg={24} xxl={18}>
+                <Row justify="center">
+                  <Col xs={24} sm={24} md={24} lg={24} xl={24}>
+                    <Form
+                      layout="vertical"
+                      onFinish={handleSubmit(() => {
+                        // console.log(data);
+                      })}
+                      onChange={handleFormChange}
+                    >
+                      <Card
+                        title={
+                          <div id="department-id-label" style={{ display: 'flex' }}>
+                            <h3 style={{ fontWeight: '600', fontSize: '16px', flex: 'auto' }}>Department ID</h3>
+                            <Tooltip
+                              placement="top"
+                              title={
+                                'You must have access to department IDs in which you wish to create a new position.'
                               }
-                            }}
-                            departmentId={selectedDepartmentId}
-                            // loading={profileDataIsFetching}
-                          />
-                          {/* <Controller
-                            name="payListDepartmentId"
-                            control={control}
-                            render={({ field: { onChange, onBlur, value } }) => (
-                              <Select
-                                aria-labelledby="department-id-label"
-                                data-testid="department-select"
-                                onChange={(newValue) => {
-                                  const selectedDept = departmentsData?.find((dept) => dept.id === newValue);
-                                  // setSelectedDepartment(selectedDept?.name || ''); // Update selected department name
-                                  setValue(
-                                    'workLocation',
-                                    selectedDept?.location.id + '|' + selectedDept?.location.name || null,
-                                  );
-                                  // setSelectedLocation(newValue);
-                                  onChange(newValue); // Update the form state
+                            >
+                              <Button
+                                id="changes"
+                                role="note"
+                                type="link"
+                                style={{ textDecoration: 'underline' }}
+                                aria-label="Why can't I select another department ID? You must have access to department IDs in which you wish to create a new position."
+                              >
+                                Why can't I select another department ID?
+                              </Button>
+                            </Tooltip>
+                          </div>
+                        }
+                        // title="Department & work location"
+                        bordered={false}
+                        className="custom-card"
+                        style={{ marginTop: 16 }}
+                      >
+                        <Row justify="start">
+                          <Col xs={24} sm={24} md={24} lg={18} xl={12}>
+                            <Form.Item
+                              name="payListDepartmentId"
+                              // label="Department ID"
+                              // labelCol={{ className: 'card-label' }}
+                              validateStatus={errors.payListDepartmentId ? 'error' : ''}
+                              help={errors.payListDepartmentId?.message}
+                              data-testid="department-select"
+                            >
+                              <DepartmentFilter
+                                setDepartmentId={() => {}}
+                                onSelect={(dept) => {
+                                  if (dept?.metadata?.value) {
+                                    const deptId = dept.metadata.value.toString();
+                                    setValue('payListDepartmentId', deptId === undefined ? null : String(deptId));
+                                    setValue(
+                                      'workLocation',
+                                      dept.metadata?.location_id + '|' + dept.metadata?.location_name || null,
+                                    );
+                                    setSelectedDepartmentId(deptId);
+                                  }
                                 }}
-                                showSearch
-                                onBlur={onBlur}
-                                value={value}
-                                filterOption={(input, option) => {
-                                  if (!option) return false;
-                                  return option.label.toLowerCase().indexOf(input.toLowerCase()) >= 0;
-                                }}
-                                options={departmentsData?.map((group) => ({
-                                  label: `${group.name + ' ' + group.id}`,
-                                  value: group.id,
-                                }))}
-                                placeholder="Select department"
-                                notFoundContent={
-                                  <Empty
-                                    image={Empty.PRESENTED_IMAGE_SIMPLE}
-                                    description={
-                                      <span style={{ color: 'black' }}>
-                                        No departments - please select a location with departments
-                                      </span>
-                                    }
-                                  />
-                                }
-                              ></Select>
-                            )}
-                          /> */}
-                          {/* {errors.payListDepartmentId && <p style={{ color: 'red' }}>{errors.payListDepartmentId.message}</p>} */}
-                        </Form.Item>
-                      </Col>
-                    </Row>
-                  </Card>
-
-                  <Card
-                    title={
-                      <span id="excluded-manager-id-label">
-                        <h3 style={{ fontWeight: '600', fontSize: '16px' }}>First level excluded manager</h3>
-                      </span>
-                    }
-                    bordered={false}
-                    className="custom-card"
-                    style={{ marginTop: 16 }}
-                  >
-                    <Row justify="start">
-                      <Col xs={24} sm={24} md={24} lg={18} xl={12}>
-                        <Form.Item
-                          style={{ margin: 0 }}
-                          name="firstLevelExcludedManager"
-                          validateStatus={
-                            (errors.excludedManagerPositionNumber && !isFetchingPositionProfile) ||
-                            (noPositions && !isFetchingPositionProfile) ||
-                            (firstActivePosition && !firstActivePosition?.employeeName && !isFetchingPositionProfile) ||
-                            isFetchingPositionProfileError
-                              ? 'error'
-                              : ''
-                          }
-                          help={
-                            (errors.excludedManagerPositionNumber && !isFetchingPositionProfile) || // error is present and not fetching OR
-                            (noPositions && !isFetchingPositionProfile) || // no positions and not fetching
-                            (firstActivePosition && !firstActivePosition?.employeeName && !isFetchingPositionProfile) ||
-                            isFetchingPositionProfileError // fetch error
-                              ? errors.excludedManagerPositionNumber
-                                ? errors.excludedManagerPositionNumber?.message
-                                : firstActivePosition && !firstActivePosition.employeeName
-                                  ? 'Position is unencumbered'
-                                  : 'Position not found'
-                              : ''
-                          }
-                        >
-                          <Controller
-                            name="excludedManagerPositionNumber"
-                            control={control}
-                            render={({ field: { onChange, onBlur, value } }) => (
-                              <Input
-                                aria-labelledby="excluded-manager-id-label"
-                                data-testid="reporting-manager-input"
-                                onBlur={onBlur}
-                                value={value}
-                                onChange={(e) => {
-                                  // console.log('debouncedFetchPositionProfile B: ', e.target.value);
-                                  debouncedFetchPositionProfile(e.target.value); // Fetch position profile
-                                  onChange(e); // Update controller state
-                                }}
-                                placeholder="Position number"
+                                departmentId={selectedDepartmentId}
                               />
-                            )}
-                          />
+                            </Form.Item>
+                          </Col>
+                        </Row>
+                      </Card>
 
-                          {/* <div>
-                              errors.excludedManagerPositionNumber:{' '}
-                              {errors.excludedManagerPositionNumber &&
-                                JSON.stringify(errors.excludedManagerPositionNumber)}
-                            </div>
-                            <div>noPositions: {noPositions.toString()}</div>
-                            <div>isFetchingPositionProfileError: {isFetchingPositionProfileError.toString()}</div> */}
-                        </Form.Item>
-                        <div>
-                          {firstActivePosition &&
-                            !isFetchingPositionProfile &&
-                            firstActivePosition.employeeName &&
-                            !noPositions &&
-                            !errors.excludedManagerPositionNumber &&
-                            !isFetchingPositionProfileError && (
-                              <div style={{ height: '15px' }}>
-                                <p>
-                                  {`${firstActivePosition.employeeName} - ${firstActivePosition.ministry}`}
-                                  {additionalPositions > 0 && ` +${additionalPositions}`}
-                                </p>
-                              </div>
-                            )}
-                          {isFetchingPositionProfile && (
-                            <LoadingSpinnerWithMessage data-testid="loading-spinner" mode="small" />
-                          )}
-                        </div>
-                      </Col>
-                    </Row>
-                  </Card>
+                      <Card
+                        title={
+                          <>
+                            <span id="excluded-manager-id-label">
+                              <h3 style={{ fontWeight: '600', fontSize: '16px', marginTop: '15px' }}>
+                                Excluded manager
+                              </h3>
+                            </span>
+                            <Typography.Paragraph type="secondary" style={{ fontWeight: 'normal' }}>
+                              Please select the excluded manager who approved the use of the job profile.
+                            </Typography.Paragraph>
+                          </>
+                        }
+                        bordered={false}
+                        className="custom-card"
+                        style={{ marginTop: 16 }}
+                      >
+                        <ExcludedManagerPicker
+                          control={control}
+                          errors={errors}
+                          positionNumber={positionRequestData?.reports_to_position_id?.toString()}
+                          positionRequestId={positionRequestId ?? undefined}
+                        />
+                      </Card>
 
-                  <Card
-                    title={
-                      <span id="excluded-manager-id-label">
-                        <h3 style={{ fontWeight: '600', fontSize: '16px' }}>Branch and Division</h3>
-                      </span>
-                    }
-                    bordered={false}
-                    className="custom-card"
-                    style={{ marginTop: 16 }}
-                  >
-                    <Row justify="start">
-                      <Col xs={24} sm={24} md={24} lg={18} xl={12}>
-                        <Form.Item
-                          name="branch"
-                          label="Branch Name (Please use full name, avoid acronyms)"
-                          validateStatus={errors.branch ? 'error' : ''}
-                          help={errors.branch?.message}
-                        >
-                          <Controller
-                            name="branch"
-                            control={control}
-                            render={({ field }) => <Input data-testid="branch-input" {...field} />}
-                          />
-                        </Form.Item>
+                      <Card
+                        title={
+                          <span id="excluded-manager-id-label">
+                            <h3 style={{ fontWeight: '600', fontSize: '16px' }}>Branch and Division</h3>
+                          </span>
+                        }
+                        bordered={false}
+                        className="custom-card"
+                        style={{ marginTop: 16 }}
+                      >
+                        <Row justify="start">
+                          <Col xs={24} sm={24} md={24} lg={18} xl={12}>
+                            <Form.Item
+                              name="branch"
+                              label="Branch Name (Please use full name, avoid acronyms)"
+                              validateStatus={errors.branch ? 'error' : ''}
+                              help={errors.branch?.message}
+                            >
+                              <Controller
+                                name="branch"
+                                control={control}
+                                render={({ field }) => (
+                                  <Input
+                                    aria-label="Branch Name (Please use full name, avoid acronyms)"
+                                    data-testid="branch-input"
+                                    {...field}
+                                  />
+                                )}
+                              />
+                            </Form.Item>
 
-                        <Form.Item
-                          name="division"
-                          label="Division"
-                          validateStatus={errors.division ? 'error' : ''}
-                          help={errors.division?.message}
-                        >
-                          <Controller
-                            name="division"
-                            control={control}
-                            render={({ field }) => <Input data-testid="division-input" {...field} />}
-                          />
-                        </Form.Item>
-                      </Col>
-                    </Row>
-                  </Card>
-                </Form>
+                            <Form.Item
+                              name="division"
+                              label="Division"
+                              validateStatus={errors.division ? 'error' : ''}
+                              help={errors.division?.message}
+                            >
+                              <Controller
+                                name="division"
+                                control={control}
+                                render={({ field }) => (
+                                  <Input aria-label="Division" data-testid="division-input" {...field} />
+                                )}
+                              />
+                            </Form.Item>
+                          </Col>
+                        </Row>
+                      </Card>
+                    </Form>
+                  </Col>
+                </Row>
               </Col>
             </Row>
-          </Col>
-        </Row>
-      </WizardContentWrapper>
+          </WizardContentWrapper>
+        </>
+      )}
     </WizardPageWrapper>
   );
 };

@@ -1,20 +1,19 @@
 import { FileAddOutlined, FileOutlined } from '@ant-design/icons';
 import { Button, Flex, Menu } from 'antd';
-import { MenuItemType } from 'antd/es/menu/hooks/useItems';
+import { MenuItemType } from 'antd/es/menu/interface';
 import { useMemo } from 'react';
-import { useAuth } from 'react-oidc-context';
 import { Link, NavLink } from 'react-router-dom';
+import { useTypedSelector } from '../../../redux/redux.hooks';
 import { PositionRequestOutlined } from '../../icons/position-request-outlined';
 import AccessiblePopoverMenu from '../common/components/accessible-popover-menu';
 import { createMenuItem } from '../utils/nav-menu.utils';
 import { userCanAccess } from '../utils/user-has-roles.util';
-
 export type CreateButtonProps = { collapsed: boolean };
 
 export const CreateButton = ({ collapsed }: CreateButtonProps) => {
-  const auth = useAuth();
+  const auth = useTypedSelector((state) => state.authReducer);
 
-  const menuItems = useMemo(
+  const menuItems: MenuItemType[] = useMemo(
     () => [
       ...(userCanAccess(auth.user, ['hiring-manager'])
         ? [
@@ -47,12 +46,12 @@ export const CreateButton = ({ collapsed }: CreateButtonProps) => {
         justify={collapsed ? 'left' : 'center'}
         style={{ width: '100%' }}
         role="button"
-        aria-label={menuItems.length === 1 ? `Create ${menuItems[0].title}` : 'Create'}
-        title={menuItems.length === 1 ? `Create ${menuItems[0].title}` : 'Create'}
+        aria-label={menuItems.length === 1 ? `Create ${menuItems[0]?.title}` : 'Create'}
+        title={menuItems.length === 1 ? `Create ${menuItems[0]?.title}` : 'Create'}
         tabIndex={0}
       >
         <FileAddOutlined aria-hidden />
-        <span>{menuItems.length === 1 ? `Create ${menuItems[0].title}` : 'Create'}</span>
+        <span>{menuItems.length === 1 ? `Create ${menuItems[0]?.title}` : 'Create'}</span>
       </Flex>
     ),
     [collapsed],
@@ -61,7 +60,7 @@ export const CreateButton = ({ collapsed }: CreateButtonProps) => {
   return menuItems.length > 0 ? (
     <div style={{ width: '100%' }}>
       {menuItems.length === 1 ? (
-        <NavLink to={menuItems[0].key as string}>{renderButton(menuItems)}</NavLink>
+        <NavLink to={menuItems[0]?.key as string}>{renderButton(menuItems)}</NavLink>
       ) : (
         <>
           {/* If current solution is found to lack accessibility, implement something like below */}

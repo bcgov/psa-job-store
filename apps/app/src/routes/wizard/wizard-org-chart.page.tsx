@@ -7,11 +7,11 @@ import { useReactFlow } from 'reactflow';
 import 'reactflow/dist/style.css';
 import LoadingComponent from '../../components/app/common/components/loading.component';
 import { usePosition } from '../../components/app/common/contexts/position.context';
+import { useTypedSelector } from '../../redux/redux.hooks';
 import {
   GetPositionRequestResponseContent,
   useUpdatePositionRequestMutation,
 } from '../../redux/services/graphql-api/position-request.api';
-import { useGetProfileQuery } from '../../redux/services/graphql-api/profile.api';
 import { DepartmentFilter } from '../org-chart/components/department-filter.component';
 import { OrgChart } from '../org-chart/components/org-chart';
 import { TreeChartSearchProvider } from '../org-chart/components/tree-org-chart/tree-org-chart-search-context';
@@ -37,6 +37,7 @@ export const WizardOrgChartPage = ({
   positionRequest,
   setCurrentStep,
 }: WizardOrgChartPageProps) => {
+  const auth = useTypedSelector((state) => state.authReducer);
   const [updatePositionRequest] = useUpdatePositionRequestMutation();
   const { positionRequestDepartmentId, resetWizardContext, positionRequestData, positionRequestId } =
     useWizardContext();
@@ -59,26 +60,18 @@ export const WizardOrgChartPage = ({
   // const [isLoading, setIsLoading] = useState(false);
   const [isResetting, setIsResetting] = useState(false);
   const [nextButtonTooltipTitle, setNextButtonTooltipTitle] = useState<string>('');
-  const [positionVacant, setPositionVacant] = useState<boolean>(false);
-  const positionVacantTooltipText = "You can't create a new position which reports to a vacant position.";
 
   const [currentView] = useState<'chart' | 'tree'>('chart');
   const [horizontal, setHorizontal] = useState(false);
   const [searchTerm, setSearchTerm] = useState<string | undefined>(undefined);
 
-  const {
-    data: profileData,
-    isLoading: isLoadingUserProfile,
-    isFetching: isFetchingUserProfile,
-  } = useGetProfileQuery();
-
   // if wizard context has department info (e.g. if user is editing a position request), use that as the default
   // otherwise, use the user's department from their profile
   useEffect(() => {
-    if (profileData?.profile.department_id != null && !selectedDepartment) {
-      setSelectedDepartment(profileData.profile.department_id);
+    if (auth.user?.metadata.peoplesoft.department_id != null && !selectedDepartment) {
+      setSelectedDepartment(auth.user?.metadata.peoplesoft.department_id);
     }
-  }, [profileData, selectedDepartment]);
+  }, [auth.user, selectedDepartment]);
 
   const navigate = useNavigate();
 
@@ -90,7 +83,7 @@ export const WizardOrgChartPage = ({
   const nextButtonIsDisabled = useCallback(() => {
     const matches = orgChartData.nodes.filter((node) => node.id === selectedPositionId);
 
-    return matches.length > 0 ? matches[0].data.employees.length === 0 : true;
+    return matches.length == 0;
   }, [selectedPositionId, orgChartData.nodes]);
 
   useEffect(() => {
@@ -99,9 +92,7 @@ export const WizardOrgChartPage = ({
     if (selectedNodes.length === 0) {
       setNextButtonTooltipTitle('Select a supervisor position to continue');
     } else {
-      const positionIsVacant = selectedNodes[0].data.employees.length === 0;
-      setNextButtonTooltipTitle(positionIsVacant ? positionVacantTooltipText : '');
-      setPositionVacant(positionIsVacant);
+      setNextButtonTooltipTitle('');
     }
 
     // if (nextButtonIsDisabled() === true) {
@@ -183,7 +174,7 @@ export const WizardOrgChartPage = ({
   // ensure that position request and profile data are loaded to prevent race condition
   // for what node to select when org chart loads: targetId={selectedPositionId ?? profileData?.profile.position_id}
   // selectedPositionId is sourced from positionRequest data, which will always be defined when this component renders
-  if (locationProcessed === false || !profileData?.profile) {
+  if (locationProcessed === false) {
     return <LoadingComponent />;
   }
 
@@ -227,12 +218,10 @@ export const WizardOrgChartPage = ({
         // hasUnsavedChanges={hasUnsavedChanges}
         maxStepCompleted={positionRequest?.max_step_completed}
         onStepClick={switchStep}
-        disabledTooltip={
-          positionVacant ? positionVacantTooltipText : nextButtonTooltipTitle != '' ? nextButtonTooltipTitle : null
-        }
+        disabledTooltip={nextButtonTooltipTitle != '' ? nextButtonTooltipTitle : null}
       ></WizardSteps>
       <WizardContentWrapper>
-        {isLoadingUserProfile || isFetchingUserProfile || isResetting ? (
+        {isResetting ? (
           <LoadingComponent height="100%"></LoadingComponent>
         ) : (
           <TreeChartSearchProvider>
@@ -255,7 +244,7 @@ export const WizardOrgChartPage = ({
                   <TreeOrgChartSearch
                     setSearchTerm={setSearchTerm}
                     onSearch={handleSearch}
-                    disabled={selectedDepartment == null || isFetchingUserProfile}
+                    disabled={selectedDepartment == null}
                     searchTerm={searchTerm}
                   />
                 )}
@@ -271,11 +260,7 @@ export const WizardOrgChartPage = ({
               <Col flex="auto"> {/* This empty column will create the gap */}</Col>
               <Col flex="500px">
                 {currentView === 'tree' && (
-                  <DepartmentFilter
-                    setDepartmentId={setSelectedDepartment}
-                    departmentId={selectedDepartment}
-                    loading={isFetchingUserProfile}
-                  />
+                  <DepartmentFilter setDepartmentId={setSelectedDepartment} departmentId={selectedDepartment} />
                 )}
               </Col>
             </Row>
@@ -300,8 +285,7 @@ export const WizardOrgChartPage = ({
                     setOrgChartData(elements);
                   }}
                   departmentId={selectedDepartment}
-                  departmentIdIsLoading={isFetchingUserProfile}
-                  targetId={selectedPositionId ?? profileData?.profile.position_id}
+                  targetId={selectedPositionId ?? auth.user?.metadata.peoplesoft.position_id}
                   wrapProvider={false}
                   // wizardNextHandler={next}
                 />
@@ -309,7 +293,6 @@ export const WizardOrgChartPage = ({
               {
                 currentView !== 'chart' && (
                   <TreeOrgChart
-                    departmentIdIsLoading={isFetchingUserProfile}
                     departmentId={selectedDepartment ?? ''}
                     isHorizontal={horizontal}
                     searchTerm={searchTerm}

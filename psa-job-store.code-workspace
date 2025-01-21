@@ -24,8 +24,16 @@
       "path": "apps/app"
     },
     {
+      "name": "apps/css-migration-util",
+      "path": "apps/css-migration-util"
+    },
+    {
       "name": "apps/jobstore-cypress",
       "path": "apps/jobstore-cypress"
+    },
+    {
+      "name": "apps/report-mailer",
+      "path": "apps/report-mailer"
     },
     {
       "name": "packages/common-kit",

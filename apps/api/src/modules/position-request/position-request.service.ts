@@ -1,4 +1,5 @@
 import { Injectable, Logger } from '@nestjs/common';
+import { ConfigService } from '@nestjs/config';
 import { Field, Int, ObjectType } from '@nestjs/graphql';
 import { PositionRequest, Prisma } from '@prisma/client';
 import {
@@ -16,6 +17,7 @@ import {
   PositionRequestStatus,
   PositionRequestUpdateInput,
   PositionRequestWhereInput,
+  User,
   UuidFilter,
 } from '../../@generated/prisma-nestjs-graphql';
 import { AlexandriaError, AlexandriaErrorClass } from '../../utils/alexandria-error';
@@ -39,8 +41,13 @@ import { PositionService } from '../external/position.service';
 import { JobProfileService } from '../job-profile/job-profile.service';
 import { DepartmentService } from '../organization/department/department.service';
 import { PrismaService } from '../prisma/prisma.service';
+import { UserService } from '../user/user.service';
 import { ExtendedFindManyPositionRequestWithSearch } from './args/find-many-position-request-with-search.args';
-import { PositionRequestCreateInputWithoutUser, RequestingFeature } from './position-request.resolver';
+import {
+  PositionRequestCreateInputWithoutUser,
+  RequestingFeature,
+  SuggestedManager,
+} from './position-request.resolver';
 
 @ObjectType()
 export class PositionRequestResponse {
@@ -94,6 +101,7 @@ interface AdditionalInfo {
   excluded_mgr_position_number?: string;
   branch?: string;
   division?: string;
+  excluded_mgr_name?: string;
 }
 
 function generateShortId(length: number): string {
@@ -112,12 +120,14 @@ export class PositionRequestApiService {
 
   constructor(
     private readonly classificationService: ClassificationService,
+    private readonly configService: ConfigService,
     private readonly crmService: CrmService,
     private readonly departmentService: DepartmentService,
     private readonly peoplesoftService: PeoplesoftService,
     private readonly prisma: PrismaService,
     private readonly positionService: PositionService,
     private readonly jobProfileService: JobProfileService,
+    private readonly userService: UserService,
   ) {}
 
   async generateUniqueShortId(length: number, retries: number = 5): Promise<string> {
@@ -186,7 +196,7 @@ export class PositionRequestApiService {
         // in testmode, we can skip the peoplesoft call to create position
         let position, positionRequestNeedsReview;
         try {
-          if (process.env.TEST_ENV === 'true') {
+          if (this.configService.get('TEST_ENV') === 'true') {
             positionRequestNeedsReview = (await this.positionRequestNeedsReview(id)).result;
 
             if (positionRequestNeedsReview === true)
@@ -305,12 +315,27 @@ export class PositionRequestApiService {
       const reportsTo = (
         await this.positionService.getPositionProfile(positionRequest.reports_to_position_id, true)
       )[0];
-      const excludedMgr = (
-        await this.positionService.getPositionProfile(
-          (positionRequest.additional_info as Record<string, any>).excluded_mgr_position_number,
-          true,
-        )
-      )[0];
+      let excludedMgr;
+      const additionalInfo = positionRequest.additional_info as Record<string, any>;
+      const positionNumber = additionalInfo.excluded_mgr_position_number;
+      const managerName = additionalInfo.excluded_mgr_name;
+
+      // Get all position profiles for the position number
+      const positionProfiles = await this.positionService.getPositionProfile(positionNumber, true);
+
+      if (positionProfiles.length > 0) {
+        if (managerName) {
+          // Find the specific profile matching the manager name
+          excludedMgr = positionProfiles.find((profile) => profile.employeeName === managerName);
+          // If no match found, use the first profile as fallback
+          if (!excludedMgr) {
+            excludedMgr = positionProfiles[0];
+          }
+        } else {
+          // Legacy case - use the first profile
+          excludedMgr = positionProfiles[0];
+        }
+      }
 
       await this.prisma.positionRequest.update({
         where: { id },
@@ -354,14 +379,16 @@ export class PositionRequestApiService {
       //   category: crm_category,
       //   crm_status: crm_status,
       //   ps_status: positionObj['A.POSN_STATUS'],
-      //   ps_effective_status: positionObj['EFF_STATUS'],
+      //   ps_effective_status: positionObj['A.EFF_STATUS'],
       // });
+
+      // console.log('positionObj: ', positionObj);
 
       const incomingPositionRequestStatus = getALStatus({
         category: crm_category,
         crm_status: crm_status,
         ps_status: positionObj['A.POSN_STATUS'],
-        ps_effective_status: positionObj['EFF_STATUS'],
+        ps_effective_status: positionObj['A.EFF_STATUS'],
       });
 
       if (incomingPositionRequestStatus === 'UNKNOWN') {
@@ -588,6 +615,85 @@ export class PositionRequestApiService {
     return positionRequest;
   }
 
+  async getPositionRequestByNumber(positionNumber: number, userId: string, userRoles: string[] = []) {
+    PositionRequestStatus.COMPLETED;
+    const positionRequest = await this.prisma.positionRequest.findMany({
+      where: {
+        position_number: { equals: positionNumber },
+        status: {
+          in: [PositionRequestStatus.COMPLETED, PositionRequestStatus.VERIFICATION, PositionRequestStatus.REVIEW],
+        },
+      },
+    });
+    return positionRequest.length ? positionRequest[0].id : null;
+  }
+
+  async getPositionRequestForDept(id: number, userId: string) {
+    let whereCondition: {
+      id: number;
+      user_id?: UuidFilter;
+      OR?: Array<PositionRequestWhereInput>;
+      NOT?: Array<PositionRequestWhereInput>;
+    } = { id };
+    const user: User = await this.userService.getUser({ where: { id: userId } });
+    console.log(user.metadata.org_chart.department_ids);
+
+    whereCondition = {
+      ...whereCondition,
+
+      OR: [
+        { user_id: { equals: userId } },
+        {
+          AND: [
+            { department_id: { in: user.metadata.org_chart.department_ids } },
+            {
+              status: {
+                in: [PositionRequestStatus.COMPLETED, PositionRequestStatus.VERIFICATION, PositionRequestStatus.REVIEW],
+              },
+            },
+          ],
+        },
+      ],
+
+      //user_id: { equals: userId },
+      ///   dept_id: ]// SAME DEPT AND status: {
+      //   in: [PositionRequestStatus.COMPLETED, PositionRequestStatus.VERIFICATION, PositionRequestStatus.REVIEW],
+      // }
+    };
+
+    const positionRequest = await this.prisma.positionRequest.findUnique({
+      where: whereCondition,
+      include: {
+        parent_job_profile: true,
+        classification: {
+          select: {
+            id: true,
+            code: true,
+            employee_group_id: true,
+            peoplesoft_id: true,
+          },
+        },
+        user: {
+          select: {
+            id: true,
+            name: true,
+            email: true,
+          },
+        },
+      },
+    });
+
+    if (!positionRequest) {
+      return null;
+    }
+
+    return {
+      ...positionRequest,
+      classification_employee_group_id: positionRequest.classification?.employee_group_id,
+      classification_peoplesoft_id: positionRequest.classification?.peoplesoft_id,
+    };
+  }
+
   async getPositionRequest(id: number, userId: string, userRoles: string[] = []) {
     let whereCondition: { id: number; user_id?: UuidFilter; NOT?: Array<PositionRequestWhereInput> } = { id };
 
@@ -596,7 +702,9 @@ export class PositionRequestApiService {
     } else {
       whereCondition = {
         ...whereCondition,
-        user_id: { equals: userId },
+        user_id: { equals: userId }, //OR SAME DEPT AND status: {
+        //   in: [PositionRequestStatus.COMPLETED, PositionRequestStatus.VERIFICATION, PositionRequestStatus.REVIEW],
+        // }
       };
     }
 
@@ -943,6 +1051,11 @@ export class PositionRequestApiService {
           additionalInfo.excluded_mgr_position_number;
       }
 
+      if (additionalInfo.excluded_mgr_name !== undefined) {
+        (updatePayload.additional_info as Record<string, Prisma.JsonValue>).excluded_mgr_name =
+          additionalInfo.excluded_mgr_name;
+      }
+
       if (additionalInfo.department_id !== undefined) {
         (updatePayload.additional_info as Record<string, Prisma.JsonValue>).department_id =
           additionalInfo.department_id;
@@ -1018,6 +1131,10 @@ export class PositionRequestApiService {
             (node) => node.id === additionalInfo.excluded_mgr_position_number,
           );
 
+          // excluded manager may not be in additional info, for example if user is using "Save and quit feature"
+          // without filling that field
+          const excludedManagerPresent = additionalInfo.excluded_mgr_position_number;
+
           // console.log('isExcludedManagerInOrgChart: ', isExcludedManagerInOrgChart);
 
           // excluded manager is not in the org chart, add it
@@ -1025,7 +1142,7 @@ export class PositionRequestApiService {
             edges: any[];
             nodes: any[];
           } = { edges: [], nodes: [] };
-          if (!isExcludedManagerInOrgChart) {
+          if (!isExcludedManagerInOrgChart && excludedManagerPresent) {
             // console.log('isExcludedManagerInOrgChart false');
 
             const employeeInfo = await this.positionService.getPositionProfile(
@@ -1033,11 +1150,7 @@ export class PositionRequestApiService {
               true,
             );
 
-            // console.log('employeeInfo: ', employeeInfo);
-
             const topLevelPositionId = this.getTopLevelReportingChain(orgChart, positionRequest.reports_to_position_id);
-
-            // console.log('topLevelPositionId: ', topLevelPositionId);
 
             updatedOrgChart = {
               ...orgChart,
@@ -1083,7 +1196,7 @@ export class PositionRequestApiService {
                 },
               ],
             };
-          } else {
+          } else if (excludedManagerPresent) {
             // excluded manager is in the org chart
             // we may still need to update the org chart in case user changed excluded manager from
             // excluded manager that was outside of the department to one being inside the department
@@ -1096,28 +1209,41 @@ export class PositionRequestApiService {
             };
           }
 
-          // find the excluded manager node and mark it as excluded manager
-          // unmark any other node that was previously marked as excluded manager
-          updatedNodes = updatedOrgChart.nodes.map((node) => {
-            if (node.id === additionalInfo.excluded_mgr_position_number) {
-              // console.log('found excluded manager, marking..');
-              return {
-                ...node,
-                data: {
-                  ...node.data,
-                  isExcludedManager: true,
-                },
-              };
-            } else {
-              return {
-                ...node,
-                data: {
-                  ...node.data,
-                  isExcludedManager: false,
-                },
-              };
-            }
-          });
+          if (excludedManagerPresent) {
+            // find the excluded manager node and mark it as excluded manager
+            // unmark any other node that was previously marked as excluded manager
+            updatedNodes = updatedOrgChart.nodes.map((node) => {
+              if (node.id === additionalInfo.excluded_mgr_position_number) {
+                // console.log('found excluded manager, marking..');
+                return {
+                  ...node,
+                  data: {
+                    ...node.data,
+                    isExcludedManager: true,
+                  },
+                };
+              } else {
+                return {
+                  ...node,
+                  data: {
+                    ...node.data,
+                    isExcludedManager: false,
+                  },
+                };
+              }
+            });
+
+            updatedOrgChart = {
+              ...orgChart,
+              nodes: [...updatedNodes],
+              edges: [...updatedOrgChart.edges],
+            };
+
+            updatePayload.orgchart_json = autolayout(updatedOrgChart) as {
+              edges: any[];
+              nodes: any[];
+            };
+          }
 
           // if updatePayload.additional_info.department_id is provided, update department_id on the node with isNewPosition == true
           // this way new position node will have correct department id when viewed in shared mode
@@ -1140,17 +1266,6 @@ export class PositionRequestApiService {
               }
             });
           }
-
-          updatedOrgChart = {
-            ...orgChart,
-            nodes: [...updatedNodes],
-            edges: [...updatedOrgChart.edges],
-          };
-
-          updatePayload.orgchart_json = autolayout(updatedOrgChart) as {
-            edges: any[];
-            nodes: any[];
-          };
         }
       }
     } else if (additionalInfo === null) {
@@ -1408,7 +1523,8 @@ export class PositionRequestApiService {
       });
       const { metadata } = await this.prisma.user.findUnique({ where: { id: positionRequest.user_id } });
       const contactId =
-        ((metadata ?? {}) as Record<string, any>).crm?.contact_id ?? (process.env.TEST_ENV === 'true' ? 231166 : null);
+        ((metadata ?? {}) as Record<string, any>).crm?.contact_id ??
+        (this.configService.get('TEST_ENV') === 'true' ? 231166 : null);
 
       // without contactId we cannot create an incident
       // this can happen if this is new staff member and they have not been assigned a CRM contact yet
@@ -1568,7 +1684,7 @@ export class PositionRequestApiService {
               <li>Is the position full-time or part-time?    Full-time</li>
               <li>What is the job title?    ${positionRequest.title}</li>
               <li>Is this a regular or temporary position?    Regular</li>
-              <li>Who is the first level excluded manager for this position?    ${
+              <li>Who is the excluded manager who approved the profile?    ${
                 positionRequest.reports_to_position_id
               }</li>
               <li>Where is the position location?    ${location.name}</li>
@@ -1652,9 +1768,41 @@ export class PositionRequestApiService {
       where: { id: additionalInfo.department_id },
     });
 
-    const employees = (
-      await this.peoplesoftService.getEmployeesForPositions([additionalInfo.excluded_mgr_position_number])
-    ).get(additionalInfo.excluded_mgr_position_number);
+    // if excluded_mgr_position_number is not in a format like this '0123456 | First Last', then it's legacy, where it
+    // was just the position number
+
+    let excludedPositionNumber = '';
+    let excludedEmployeeName = '';
+
+    if (additionalInfo.excluded_mgr_position_number && additionalInfo.excluded_mgr_name) {
+      // new format with separate position number and name
+      excludedPositionNumber = additionalInfo.excluded_mgr_position_number;
+      excludedEmployeeName = additionalInfo.excluded_mgr_name;
+    } else {
+      // legacy format, just the position number
+      excludedPositionNumber = additionalInfo.excluded_mgr_position_number;
+    }
+
+    // console.log('excludedPositionNumber/Name: ', excludedPositionNumber, excludedEmployeeName);
+    const employees = (await this.peoplesoftService.getEmployeesForPositions([excludedPositionNumber])).get(
+      excludedPositionNumber,
+    );
+
+    // Filter employees based on name if available
+    if (employees.length > 0) {
+      if (excludedEmployeeName) {
+        const employee = employees.find((employee) => employee.name === excludedEmployeeName);
+        if (employee) {
+          employees.splice(0, employees.length, employee);
+        }
+      } else {
+        // if we have multiple employees and no name, use the first one
+        employees.splice(0, employees.length, employees[0]);
+      }
+    }
+
+    // console.log('employees: ', employees);
+
     const employeeId = employees.length > 0 ? employees[0].id : null;
 
     const data = {
@@ -1688,5 +1836,77 @@ export class PositionRequestApiService {
   //deprecated
   async updatePositionRequestStatus(id: number, status: number) {
     return await this.crmService.updateIncidentStatus(id, status);
+  }
+
+  async getSuggestedManagers(positionNumber: string, positionRequestId: number): Promise<SuggestedManager[]> {
+    // console.log('getSuggestedManagers: ', positionNumber, positionRequestId);
+
+    const positionRequest = await this.prisma.positionRequest.findUnique({
+      where: { id: positionRequestId },
+      select: { orgchart_json: true, reports_to_position_id: true },
+    });
+
+    const orgChart = positionRequest.orgchart_json;
+    // console.log('orgChart: ', orgChart);
+    const managers: SuggestedManager[] = [];
+
+    if (orgChart && typeof orgChart === 'object' && 'nodes' in orgChart && 'edges' in orgChart) {
+      // Check the initial position first
+      const initialNode = (orgChart.nodes as any[]).find((node: any) => node.id === positionNumber);
+      if (initialNode && initialNode.data.classification.name.includes('Band')) {
+        initialNode.data.employees.forEach((employee: any) => {
+          managers.push({
+            id: employee.id,
+            name: employee.name,
+            status: employee.status,
+            positionNumber: initialNode.id,
+            positionTitle: initialNode.data.title,
+            classification: initialNode.data.classification,
+            department: initialNode.data.department,
+          });
+        });
+      }
+
+      // Start traversing up from the given position
+      let currentPositionId = positionNumber;
+
+      while (true) {
+        // Find the edge where the current position is the target
+        const currentEdge = (orgChart.edges as any[]).find((edge: any) => edge.target === currentPositionId);
+
+        if (!currentEdge) {
+          break;
+        }
+
+        // Get the source node (manager's position)
+        const managerNode = (orgChart.nodes as any[]).find((node: any) => node.id === currentEdge.source);
+
+        if (!managerNode) {
+          break;
+        }
+
+        // console.log('checking manager classification: ', managerNode.data.classification);
+        // Check if the position's classification contains "Band"
+        if (managerNode.data.classification.name.includes('Band')) {
+          // Add all employees in this position to the managers array
+          managerNode.data.employees.forEach((employee: any) => {
+            managers.push({
+              id: employee.id,
+              name: employee.name,
+              status: employee.status,
+              positionNumber: managerNode.id,
+              positionTitle: managerNode.data.title,
+              classification: managerNode.data.classification,
+              department: managerNode.data.department,
+            });
+          });
+        }
+
+        // Move up the chain
+        currentPositionId = currentEdge.source;
+      }
+    }
+
+    return managers;
   }
 }

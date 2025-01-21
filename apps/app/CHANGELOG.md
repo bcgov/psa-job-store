@@ -1,5 +1,29 @@
 # app
 
+## 0.16.1
+
+### Patch Changes
+
+- [#1171](https://github.com/bcgov/psa-job-store/pull/1171) [`2b92560`](https://github.com/bcgov/psa-job-store/commit/2b92560d468cbf2e6197419a4c4b1727737453fb) Thanks [@alex-struk](https://github.com/alex-struk)! - AL-1050 Add 'Share' feature to other pages
+
+## 0.16.0
+
+### Minor Changes
+
+- [#1135](https://github.com/bcgov/psa-job-store/pull/1135) [`309d026`](https://github.com/bcgov/psa-job-store/commit/309d02616f633bf175b71cf533aff18cf9258dbd) Thanks [@alex-struk](https://github.com/alex-struk)! - AX-208 Dev - Excluded manager (Auth ID) update
+
+## 0.15.0
+
+### Minor Changes
+
+- [#1043](https://github.com/bcgov/psa-job-store/pull/1043) [`bd3fd3f`](https://github.com/bcgov/psa-job-store/commit/bd3fd3f90183f48253c8db4605fb3753f598a0e9) Thanks [@alex-struk](https://github.com/alex-struk)! - AL-838 Saved profiles functionality
+
+- [#1043](https://github.com/bcgov/psa-job-store/pull/1043) [`475b3c0`](https://github.com/bcgov/psa-job-store/commit/475b3c0cf6d62987daf0fd4a37f4bca23990036f) Thanks [@alex-struk](https://github.com/alex-struk)! - AL-977 Improve submitted date when user submits for verification
+
+- [#1043](https://github.com/bcgov/psa-job-store/pull/1043) [`475b3c0`](https://github.com/bcgov/psa-job-store/commit/475b3c0cf6d62987daf0fd4a37f4bca23990036f) Thanks [@alex-struk](https://github.com/alex-struk)! - AL-1013 Job profile number validation
+
+- [#1103](https://github.com/bcgov/psa-job-store/pull/1103) [`b733f10`](https://github.com/bcgov/psa-job-store/commit/b733f10ec2597cfc5aeccfe763e7c0a47791a83a) Thanks [@alex-struk](https://github.com/alex-struk)! - AX-702 Replace react-quill with a different package
+
 ## 0.14.3
 
 ### Patch Changes

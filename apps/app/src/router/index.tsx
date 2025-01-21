@@ -14,11 +14,15 @@ import { HomeRoute } from '../routes/home';
 import { HomePage } from '../routes/home/components/home-page.component';
 import { JobProfilesRoute } from '../routes/job-profiles';
 import { JobProfilesPage } from '../routes/job-profiles/job-profiles.page';
+import { MocksRoute } from '../routes/mocks';
+import MocksPage from '../routes/mocks/mocks.page';
 import { MyPositionsRoute } from '../routes/my-position-requests';
 import { MyPositionsPage } from '../routes/my-position-requests/my-position-requests.page';
 import NotFoundComponent from '../routes/not-found/404';
 import { OrgChartRoute } from '../routes/org-chart';
 import { OrgChartPage } from '../routes/org-chart/org-chart.page';
+import { PositionRoute } from '../routes/position';
+import { ViewPositionPage } from '../routes/position/view-position.page';
 import { SettingsRoute } from '../routes/settings';
 import { DepartmentDetailPage } from '../routes/settings/department/department-detail.page';
 import { DepartmentListPage } from '../routes/settings/department/department-list.page';
@@ -86,6 +90,7 @@ export const router = createBrowserRouter([
                 },
                 element: <HomePage />,
               },
+
               // Org Chart
               {
                 path: 'my-departments',
@@ -98,6 +103,16 @@ export const router = createBrowserRouter([
                   {
                     index: true,
                     element: <OrgChartPage />,
+                  },
+                  {
+                    path: 'position',
+                    element: <PositionRoute />,
+                    children: [
+                      {
+                        path: ':positionRequestId',
+                        element: <ViewPositionPage />,
+                      },
+                    ],
                   },
                 ],
               },
@@ -304,7 +319,7 @@ export const router = createBrowserRouter([
                         ],
                       },
                       {
-                        path: 'share/:positionRequestId([A-Za-z0-9-]+)',
+                        path: 'share/:positionRequestId',
                         element: <WizardRoute />,
                         children: [
                           {
@@ -380,6 +395,16 @@ export const router = createBrowserRouter([
                   {
                     index: true,
                     element: <UnauthorizedPage />,
+                  },
+                ],
+              },
+              {
+                path: '/mocks/:id',
+                element: <MocksRoute />,
+                children: [
+                  {
+                    index: true,
+                    element: <MocksPage />,
                   },
                 ],
               },

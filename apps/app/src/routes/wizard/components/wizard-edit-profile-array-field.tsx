@@ -91,6 +91,7 @@ const WizardEditProfileArrayField: React.FC<WizardEditProfileArrayFieldProps> = 
 
       <WizardEditAddButton
         testId={`add-${testId}-button`}
+        isSignificant={false}
         onClick={() => {
           handleAddNew();
         }}

@@ -1,5 +1,5 @@
 import { Button, Col, Result, Row } from 'antd';
-import { useNavigate } from 'react-router-dom';
+import { useLocation, useNavigate } from 'react-router-dom';
 import ErrorDepartment from '../../assets/error-department.svg';
 import ErrorPage from '../../assets/error-page.svg';
 import ErrorProfile from '../../assets/error-profile.svg';
@@ -7,30 +7,34 @@ import ErrorRequest from '../../assets/error-request.svg';
 import ErrorUser from '../../assets/error-user.svg';
 import { NeedHelpComponent } from './need-help.component';
 
-type entity = 'page' | 'profile' | 'position request' | 'department' | 'user';
+type entity = 'Page' | 'Profile' | 'Position request' | 'Department' | 'User';
 
 interface NotFoundComponentProps {
   entity?: entity;
+  redirect?: string;
 }
 
 // const entites: Array<[{entity: entity, redirect: string}]> = [
 const entites = [
-  { entity: 'page', redirect: '/', icon: ErrorPage },
-  { entity: 'profile', redirect: '/job-profiles', icon: ErrorProfile },
-  { entity: 'position request', redirect: '/requests/positions', icon: ErrorRequest },
-  { entity: 'department', redirect: '/departments', icon: ErrorDepartment },
-  { entity: 'user', redirect: '/users', icon: ErrorUser },
+  { entity: 'Page', redirect: '/', icon: ErrorPage },
+  { entity: 'Profile', redirect: '/job-profiles', icon: ErrorProfile },
+  { entity: 'Position request', redirect: '/requests/positions', icon: ErrorRequest },
+  { entity: 'Department', redirect: '/departments', icon: ErrorDepartment },
+  { entity: 'User', redirect: '/users', icon: ErrorUser },
 ];
 
-export const NotFoundComponent: React.FC<NotFoundComponentProps> = ({ entity }) => {
+export const NotFoundComponent: React.FC<NotFoundComponentProps> = ({ entity, redirect }) => {
   const navigate = useNavigate();
+  const { pathname } = useLocation();
+  const parent = pathname.split('/').slice(0, -1).join('/') || '/';
 
-  const redirect = entites.find((e) => e.entity == entity)?.redirect ?? '/';
+  // const redirect = entites.find((e) => e.entity == entity)?.redirect ?? '/';
   const icon = entites.find((e) => e.entity == entity)?.icon ?? ErrorPage;
+  const label = entity ?? 'Page';
   return (
     <Result
-      title={'Not found'}
-      subTitle={'Sorry, the ' + (entity ?? 'page') + ' you were looking for does not exist.'}
+      title={label + ' not found'}
+      subTitle={'Sorry, the ' + label.toLowerCase() + ' you were looking for does not exist.'}
       icon={<img src={icon} alt="Error" />}
       extra={
         <Row
@@ -40,7 +44,7 @@ export const NotFoundComponent: React.FC<NotFoundComponentProps> = ({ entity }) 
         >
           <Col span={12}>
             <NeedHelpComponent />
-            <Button type="primary" onClick={() => navigate(redirect)}>
+            <Button type="primary" onClick={() => navigate(redirect ?? parent)}>
               Back
             </Button>
           </Col>

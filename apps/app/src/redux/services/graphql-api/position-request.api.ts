@@ -4,6 +4,31 @@ import { graphqlApi } from '.';
 import { IdVersion } from './job-profile-types';
 import { PositionProfileModel } from './position.api';
 
+export interface GetSuggestedManagersArgs {
+  positionNumber?: string;
+  positionRequestId?: number;
+}
+
+export interface SuggestedManagersResponse {
+  suggestedManagers: {
+    id: string;
+    name: string;
+    status: string;
+    positionNumber: string;
+    positionTitle: string;
+    classification: {
+      id: string;
+      code: string;
+      name: string;
+    };
+    department: {
+      id: string;
+      name: string;
+      organization_id: string;
+    };
+  }[];
+}
+
 export interface UserConnect {
   id: string;
 }
@@ -36,6 +61,9 @@ export interface CreatePositionRequestInput {
     };
   };
   orgchart_png?: string;
+}
+export interface GetPositionRequestByNumberResponseContent {
+  positionRequestByNumber: number;
 }
 export interface GetPositionRequestResponseContent {
   id: number;
@@ -86,6 +114,7 @@ export interface AdditionalInfo {
   comments?: string;
   branch?: string;
   division?: string;
+  excluded_mgr_name?: string;
 }
 
 export interface GetPositionRequestResponse {
@@ -128,6 +157,7 @@ export interface GetPositionsRequestResponse {
 
 export interface GetPositionRequestArgs {
   id?: number;
+  positionNumber?: string;
   uuid?: string; // this is for GetSharedPositionRequestArgs
 }
 
@@ -342,6 +372,58 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
         };
       },
     }),
+    getPositionRequestForDept: build.query<GetPositionRequestResponse, GetPositionRequestArgs>({
+      // providesTags: ['positionRequest'],
+      // result
+      //   ? [{ type: 'PositionRequest' as const, id: result.positionRequest.id }]
+      //   : [{ type: 'PositionRequest' as const, id: 'id' }],
+      query: (args: GetPositionRequestArgs) => {
+        return {
+          document: gql`
+            query positionRequestForDept {
+              positionRequest: positionRequestForDept(id: ${args.id}) {
+                  id
+                  step
+                  max_step_completed
+                  reports_to_position_id
+                  reports_to_position
+                  excluded_manager_position
+                  parent_job_profile_id
+                  parent_job_profile_version
+                  profile_json
+                  orgchart_json
+                  user {
+                    id
+                    name
+                    email
+                  }
+                  classification {
+                    employee_group_id
+                    code
+                    id
+                  }
+                  title
+                  position_number
+                  submission_id
+                  status
+                  updated_at
+                  resubmitted_at
+                  submitted_at
+                  department_id
+                  approved_at
+                  parent_job_profile {
+                    number
+                  }
+                  additional_info
+                  crm_id
+                  crm_lookup_name
+                  shareUUID
+              }
+          }
+          `,
+        };
+      },
+    }),
     getSharedPositionRequest: build.query<GetPositionRequestResponse, GetPositionRequestArgs>({
       // providesTags: ['positionRequest'],
       // result
@@ -386,6 +468,21 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
                   crm_id
                   crm_lookup_name
               }
+          }
+          `,
+        };
+      },
+    }),
+    getPositionRequestByPositionNumber: build.query<GetPositionRequestByNumberResponseContent, GetPositionRequestArgs>({
+      // providesTags: ['positionRequest'],
+      // result
+      //   ? [{ type: 'PositionRequest' as const, id: result.positionRequest.id }]
+      //   : [{ type: 'PositionRequest' as const, id: 'id' }],
+      query: (args: GetPositionRequestArgs) => {
+        return {
+          document: gql`
+            query PositionRequestByNumber {
+              positionRequestByNumber(positionNumber: "${args.positionNumber}")
           }
           `,
         };
@@ -642,6 +739,37 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
         };
       },
     }),
+    getSuggestedManagers: build.query<SuggestedManagersResponse, GetSuggestedManagersArgs>({
+      query: (args: GetSuggestedManagersArgs) => {
+        return {
+          document: gql`
+            query SuggestedManagers($positionNumber: String!, $positionRequestId: Float!) {
+              suggestedManagers(positionNumber: $positionNumber, positionRequestId: $positionRequestId) {
+                id
+                name
+                status
+                positionNumber
+                positionTitle
+                classification {
+                  id
+                  code
+                  name
+                }
+                department {
+                  id
+                  name
+                  organization_id
+                }
+              }
+            }
+          `,
+          variables: {
+            positionNumber: args.positionNumber,
+            positionRequestId: args.positionRequestId,
+          },
+        };
+      },
+    }),
   }),
 });
 
@@ -650,6 +778,7 @@ export const {
   useGetPositionRequestsQuery,
   useLazyGetPositionRequestsQuery,
   useGetPositionRequestQuery,
+  useGetPositionRequestForDeptQuery,
   useLazyGetPositionRequestQuery,
   useCreatePositionRequestMutation,
   useUpdatePositionRequestMutation,
@@ -665,4 +794,6 @@ export const {
   useLazyPositionNeedsRivewQuery,
   useGetSharedPositionRequestQuery,
   useLazyGetSharedPositionRequestQuery,
+  useGetSuggestedManagersQuery,
+  useLazyGetPositionRequestByPositionNumberQuery,
 } = positionRequestApi;

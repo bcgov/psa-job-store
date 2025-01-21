@@ -32,11 +32,13 @@ export class JobProfileService {
     // console.log('searchConditions: ', searchConditions, search);
     if (!searchConditions) searchResultIds = search != null ? await this.searchService.searchJobProfiles(search) : null;
 
+    // console.log('searchResultIds: ', searchResultIds);
     const currentJobProfiles =
       state == 'PUBLISHED'
         ? await this.prisma.currentJobProfile.findMany({
             select: { id: true, version: true },
             where: { ...(searchResultIds != null && { id: { in: searchResultIds } }) },
+            orderBy: [{ title: 'asc' }, { id: 'asc' }],
           })
         : undefined;
 
@@ -52,17 +54,26 @@ export class JobProfileService {
     // console.log('where arg: ', where);
     // console.log('args: ', args);
 
-    return this.prisma.jobProfile.findMany({
+    // Create ordered list of profiles that exist in both searchResultIds and currentJobProfiles
+    const orderedProfiles = searchResultIds
+      ? searchResultIds.map((id) => currentJobProfiles?.find((p) => p.id === id)).filter(Boolean)
+      : currentJobProfiles;
+
+    // console.log(
+    //   'orderdProfiles ids: ',
+    //   orderedProfiles?.map((profile) => profile.id),
+    // );
+
+    const { take, skip, ...restArgs } = args;
+    const ret = await this.prisma.jobProfile.findMany({
       where: {
         is_archived: include_archived,
-        // ...(searchResultIds != null && { id: { in: searchResultIds } }),
-        ...(currentJobProfiles && {
-          OR: currentJobProfiles.map((record) => ({
-            id: record.id,
-            version: record.version,
+        ...(orderedProfiles && {
+          OR: orderedProfiles.map((profile) => ({
+            id: profile.id,
+            version: profile.version,
           })),
         }),
-        // ...(owner_id != null && { owner_id }),
         ...(searchConditions != null && searchConditions),
         state,
         ...where,
@@ -83,16 +94,16 @@ export class JobProfileService {
               }
             : undefined,
       },
-      ...args,
+      ...restArgs,
+      // ...(searchResultIds ? restArgs : args),
       // profiles may have same titles, so we need to sort by title and id
       // otherwise, the order of profiles may change between requests
       // when paginating
-      orderBy: [...(args.orderBy || []), { title: 'asc' }, { id: 'asc' }],
+      orderBy: [...(args.orderBy || [])],
       include: {
         owner: true,
         published_by: true,
         updated_by: true,
-        behavioural_competencies: true,
         classifications: {
           include: {
             classification: true,
@@ -123,6 +134,32 @@ export class JobProfileService {
         role_type: true,
       },
     });
+
+    // console.log(
+    //   'ret profile ids: ',
+    //   ret.map((profile) => profile.id),
+    // );
+
+    // Sort according to search order
+    if (orderedProfiles) {
+      const searchOrder = new Map(orderedProfiles.map((profile, index) => [profile.id, index]));
+      ret.sort((a, b) => (searchOrder.get(a.id) as unknown as any) - (searchOrder.get(b.id) as unknown as any));
+    }
+
+    // console.log(
+    //   'ret profile ids sorted: ',
+    //   ret.map((profile) => profile.id),
+    // );
+
+    const sliced = typeof skip === 'number' && typeof take === 'number' ? ret.slice(skip, skip + take) : ret;
+
+    // console.log('slice params skip/take: ', skip, take);
+    // console.log(
+    //   'sliced profile ids: ',
+    //   sliced.map((profile) => profile.id),
+    // );
+    // Apply pagination AFTER all filtering and sorting
+    return sliced;
   }
 
   private getDraftSearchConditions(search: string) {
@@ -258,8 +295,6 @@ export class JobProfileService {
 
     if (selectProfile) {
       // Fetch all job profiles based on the search and where conditions
-
-      // Fetch all job profiles based on the search and where conditions
       const allJobProfiles = await this.getJobProfilesWithSearch(
         search,
         this.transformWhereForAllOrgs(where),
@@ -366,6 +401,7 @@ export class JobProfileService {
           })
         : undefined;
     if (selectProfile) {
+      // console.log('getJobProfiles, selectProfile, args: ', args);
       // Fetch all job profiles based on the search and where conditions
       const allJobProfiles = await this.getJobProfilesWithSearch(
         search,
@@ -405,6 +441,7 @@ export class JobProfileService {
         // Calculate the new skip value based on the page number and take value
         const newSkip = (pageNumber - 1) * args.take;
 
+        // console.log('getJobProfiles2, selectProfile, args: ', args);
         // Fetch the job profiles for the calculated page
         jobProfiles = await this.getJobProfilesWithSearch(
           search,
@@ -579,12 +616,6 @@ export class JobProfileService {
             stream: true,
           },
         },
-
-        behavioural_competencies: {
-          include: {
-            behavioural_competency: true,
-          },
-        },
       },
     });
     // : await this.prisma.currentJobProfile.findUnique({
@@ -630,7 +661,7 @@ export class JobProfileService {
     //   });
 
     // if profile is not published and user is not total compensation, deny access
-    if (jobProfile.state !== 'PUBLISHED' && !userRoles.includes('total-compensation')) {
+    if (jobProfile?.state !== 'PUBLISHED' && !userRoles.includes('total-compensation')) {
       throw AlexandriaError('You do not have permission to view this job profile');
     }
     return jobProfile;
@@ -669,12 +700,6 @@ export class JobProfileService {
         streams: {
           include: {
             stream: true,
-          },
-        },
-
-        behavioural_competencies: {
-          include: {
-            behavioural_competency: true,
           },
         },
       },
@@ -849,15 +874,6 @@ export class JobProfileService {
     return uniqueOrganizations;
   }
 
-  async getBehaviouralCompetencies(job_profile_id: number, job_profile_version: number) {
-    return this.prisma.jobProfileBehaviouralCompetency.findMany({
-      where: { job_profile_id, job_profile_version },
-      include: {
-        behavioural_competency: true,
-      },
-    });
-  }
-
   async createOrUpdateJobProfile(data: ExtendedJobProfileCreateInput, userId: string) {
     // todo: catch the "number" constraint failure and process the error on the client appropriately
     const jobProfileState = data.state ? data.state : JobProfileState.DRAFT;
@@ -977,13 +993,7 @@ export class JobProfileService {
       create: {
         id: id,
         version: version,
-        behavioural_competencies: {
-          create: data.behavioural_competencies.create.map((item) => ({
-            behavioural_competency: {
-              connect: { id: item.behavioural_competency.connect.id },
-            },
-          })),
-        },
+        behavioural_competencies: data.behavioural_competencies,
         ...(data.classifications && {
           classifications: {
             create: data.classifications.create.map((item) => ({
@@ -1085,12 +1095,7 @@ export class JobProfileService {
 
         ...(data.state && { state: jobProfileState }),
 
-        behavioural_competencies: {
-          deleteMany: {}, // Deletes all existing competencies for this job profile
-          create: data.behavioural_competencies.create.map((item) => ({
-            behavioural_competency: { connect: { id: item.behavioural_competency.connect.id } },
-          })),
-        },
+        behavioural_competencies: data.behavioural_competencies,
 
         classifications: data.classifications
           ? {
@@ -1231,11 +1236,6 @@ export class JobProfileService {
     const jobProfileToDuplicate = await this.prisma.jobProfile.findUnique({
       where: { id_version: { id: jobProfileId, version: jobProfileVersion } },
       include: {
-        behavioural_competencies: {
-          include: {
-            behavioural_competency: true,
-          },
-        },
         classifications: {
           include: {
             classification: true,
@@ -1315,12 +1315,6 @@ export class JobProfileService {
       // Generate a new unique number
       number: await this.getNextAvailableNumber(),
 
-      // Map each relation
-      behavioural_competencies: {
-        create: jobProfileToDuplicate.behavioural_competencies.map((bc) => ({
-          behavioural_competency: { connect: { id: bc.behavioural_competency_id } },
-        })),
-      },
       classifications: {
         create: jobProfileToDuplicate.classifications.map((cl) => ({
           classification: {
@@ -1439,9 +1433,6 @@ export class JobProfileService {
       if (!anyPositionRequests) {
         // If the job profile does not have links to PositionRequests, delete it along with related entities
         await this.prisma.$transaction([
-          this.prisma.jobProfileBehaviouralCompetency.deleteMany({
-            where: { job_profile_id: jobProfileId },
-          }),
           this.prisma.jobProfileClassification.deleteMany({
             where: { job_profile_id: jobProfileId },
           }),
@@ -1563,7 +1554,11 @@ export class JobProfileService {
     // Flatten the array of organizations and deduplicate
     const allOrganizations = jobProfiles.flatMap((profile) => profile.organizations.map((o) => o.organization));
     // console.log('allOrganizations: ', allOrganizations);
-    const uniqueOrganizations = Array.from(new Map(allOrganizations.map((org) => [org['id'], org])).values());
+
+    // Deduplicate and sort by name
+    const uniqueOrganizations = Array.from(new Map(allOrganizations.map((org) => [org['id'], org])).values()).sort(
+      (a, b) => a.name.localeCompare(b.name),
+    );
 
     return uniqueOrganizations;
   }
@@ -1592,7 +1587,7 @@ export class JobProfileService {
           return [`${id}.${employee_group_id}.${peoplesoft_id}`, classification];
         }),
       ).values(),
-    );
+    ).sort((a, b) => a.name.localeCompare(b.name));
 
     return uniqueClassifications;
   }

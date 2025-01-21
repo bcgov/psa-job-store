@@ -1,15 +1,13 @@
-import { ArrowLeftOutlined, EllipsisOutlined } from '@ant-design/icons';
-import { Button, Menu, Modal, Typography } from 'antd';
+import { ArrowLeftOutlined } from '@ant-design/icons';
+import { Button, Modal } from 'antd';
 import { useEffect, useRef, useState } from 'react';
-import { Link, useNavigate, useSearchParams } from 'react-router-dom';
-import AccessiblePopoverMenu from '../../components/app/common/components/accessible-popover-menu';
+import { Link, useSearchParams } from 'react-router-dom';
 import LoadingComponent from '../../components/app/common/components/loading.component';
 import PositionProfile from '../../components/app/common/components/positionProfile';
 import { useGetDepartmentQuery } from '../../redux/services/graphql-api/department.api';
 import { JobProfileModel } from '../../redux/services/graphql-api/job-profile-types';
 import {
   GetPositionRequestResponseContent,
-  useDeletePositionRequestMutation,
   useUpdatePositionRequestMutation,
 } from '../../redux/services/graphql-api/position-request.api';
 import { useTestUser } from '../../utils/useTestUser';
@@ -19,6 +17,7 @@ import WizardContentWrapper from './components/wizard-content-wrapper';
 import { WizardPageWrapper } from './components/wizard-page-wrapper.component';
 import { WizardSteps } from './components/wizard-steps.component';
 import { useWizardContext } from './components/wizard.provider';
+import { WizardContextMenu } from './wizard-context-menu';
 
 interface WizardPageProps {
   onBack?: () => void;
@@ -46,7 +45,7 @@ export const WizardPage: React.FC<WizardPageProps> = ({
   const [selectedProfileVersion, setSelectedProfileVersion] = useState<string | null>(null);
   const [selectedProfileNumber, setSelectedProfileNumber] = useState<string | null>(null);
   const [selectedProfileName, setSelectedProfileName] = useState<string | null>(null);
-  const { setShouldFetch, setClearingFilters } = useJobProfilesProvider();
+  const { setShouldFetch, setClearingFilters, setReselectOriginalWizardProfile } = useJobProfilesProvider();
   const [selectProfileNumber, setSelectProfileNumber] = useState<string | null>(null);
 
   // stores searchParams for when user navigates back from edit page
@@ -74,7 +73,6 @@ export const WizardPage: React.FC<WizardPageProps> = ({
     setWizardData,
   } = useWizardContext();
   const [searchParams, setSearchParams] = useSearchParams();
-  const navigate = useNavigate();
 
   // get organization for the department in which the position is being created in
   // this will be used to filter the profiles to ones that belong to this organization only
@@ -93,17 +91,6 @@ export const WizardPage: React.FC<WizardPageProps> = ({
     }
   }, [positionRequestData, setSearchParams, searchParams]);
 
-  const getBasePath = (path: string) => {
-    if (positionRequestId) return `/requests/positions/${positionRequestId}`;
-
-    const pathParts = path.split('/');
-    // Check if the last part is a number (ID), if so, remove it
-    if (!isNaN(Number(pathParts[pathParts.length - 1]))) {
-      pathParts.pop(); // Remove the last part (job profile ID)
-    }
-    return pathParts.join('/');
-  };
-
   const [isSwitchStepLoading, setIsSwitchStepLoading] = useState(false);
 
   const onSubmit = async (
@@ -112,10 +99,22 @@ export const WizardPage: React.FC<WizardPageProps> = ({
     alertNoProfile = true,
     step = -1,
   ): Promise<string> => {
-    console.log('onSubmit: ', action, switchToNextStep, alertNoProfile, step);
+    // console.log(
+    //   'onSubmit: ',
+    //   action,
+    //   switchToNextStep,
+    //   alertNoProfile,
+    //   step,
+    //   positionRequestData?.parent_job_profile?.number,
+    //   parseInt(selectedProfileNumber ?? ''),
+    // );
+
+    // if user is changing the profile, show a warning
+    // must be on step 3 or higher to show a warning (indicates there may have been edits done on existing profile)
     if (
       positionRequestData?.parent_job_profile?.number &&
-      positionRequestData?.parent_job_profile?.number !== parseInt(selectedProfileNumber ?? '')
+      positionRequestData?.parent_job_profile?.number !== parseInt(selectedProfileNumber ?? '') &&
+      (positionRequestData?.max_step_completed ?? 0) >= 3
     ) {
       return new Promise((resolve) => {
         Modal.confirm({
@@ -154,25 +153,33 @@ export const WizardPage: React.FC<WizardPageProps> = ({
           },
           onCancel: () => {
             // re-select profile on the correct page
+            // console.log('previousSearchState.current: ', previousSearchState.current);
+            // console.log('jobProfileSearchResultsRef.current: ', jobProfileSearchResultsRef.current);
+
             if (previousSearchState.current && jobProfileSearchResultsRef.current) {
-              const basePath = getBasePath(location.pathname);
+              // const basePath = getBasePath(location.pathname);
 
               const searchParams = new URLSearchParams(previousSearchState.current);
               if (searchParams.get('search')) searchParams.delete('search');
 
               setShouldFetch(true);
+              // console.log('setting clearing filters 5');
               setClearingFilters(true);
+              setReselectOriginalWizardProfile(true);
               // searchParams.set('clearFilters', 'true');
               const page = parseInt(searchParams.get('page') || '1', 10);
               jobProfileSearchResultsRef.current.handlePageChange(page);
 
-              navigate(
-                {
-                  pathname: basePath,
-                  search: searchParams.toString(),
-                },
-                { replace: true },
-              );
+              // console.log('navigating to: ', basePath, searchParams.toString());
+
+              setSearchParams(searchParams, { replace: true });
+              // navigate(
+              //   {
+              //     pathname: basePath,
+              //     search: searchParams.toString(),
+              //   },
+              //   { replace: true },
+              // );
             }
             resolve('CANCELLED');
           },
@@ -186,7 +193,7 @@ export const WizardPage: React.FC<WizardPageProps> = ({
   };
 
   const handleNext = async (action = 'next', switchToNextStep = true, alertNoProfile = true, step = -1, state = '') => {
-    console.log('handleNext: ', action, switchToNextStep, alertNoProfile, step, state);
+    // console.log('handleNext: ', action, switchToNextStep, alertNoProfile, step, state);
 
     // we are on the second step of the process (user already selected a position on org chart and is no selecting a profile)
     setIsLoading(true);
@@ -208,16 +215,19 @@ export const WizardPage: React.FC<WizardPageProps> = ({
               step: step == -1 ? (action === 'next' ? 3 : 2) : step,
 
               // increment max step only if it's not incremented
+              // and the user is proceeding to the next step
               ...(action === 'next' && (positionRequest?.max_step_completed ?? 0) < 3 && step == -1
                 ? { max_step_completed: 3 }
                 : {}),
-              // if user selected same profile as before, do not clear profile_json
-              // also do not update title to default
-              ...(positionRequestData?.parent_job_profile?.number !== parseInt(selectedProfileNumber ?? '') && {
-                profile_json: null,
-                title: selectedProfileName ?? undefined,
-                max_step_completed: 3,
-              }),
+              // if user selected a different profile than the one already associated with the position request
+              // clear profile_json, set title to the selected profile name, and set max_step_completed to 3
+              ...(positionRequestData?.parent_job_profile?.number &&
+                positionRequestData?.parent_job_profile?.number !== parseInt(selectedProfileNumber ?? '') && {
+                  profile_json: null,
+                  title: selectedProfileName ?? undefined,
+                  // set this only if max step is greater than 3
+                  ...((positionRequestData?.max_step_completed ?? 0 > 3) ? { max_step_completed: 3 } : {}),
+                }),
               parent_job_profile: {
                 connect: { id_version: { id: parseInt(selectedProfileId), version: parseInt(selectedProfileVersion) } },
               },
@@ -244,9 +254,10 @@ export const WizardPage: React.FC<WizardPageProps> = ({
 
         if (action === 'next') {
           if (onNext && switchToNextStep) {
-            console.log('onNext callback');
+            // console.log('onNext callback');
             onNext();
           }
+          // console.log('setSearchParams to blank 1');
           setSearchParams({}, { replace: true });
         }
       } else {
@@ -260,6 +271,7 @@ export const WizardPage: React.FC<WizardPageProps> = ({
 
   useEffect(() => {
     const selectedProfile = searchParams.get('selectedProfile');
+    // console.log('seletedProfile hook: ', selectedProfile);
     if (selectedProfile) {
       setSelectedProfileNumber(selectedProfile);
     } else {
@@ -283,11 +295,13 @@ export const WizardPage: React.FC<WizardPageProps> = ({
         id: positionRequestId,
         step: 0,
       }).unwrap();
+    // console.log('setSearchParams to blank 2');
     setSearchParams({}, { replace: true });
     if (onBack) onBack();
   };
 
   const onSelectProfile = (profile: JobProfileModel) => {
+    // console.log('onSelectProfile: ', profile);
     // if there is a profile already associated with the position request, show a warning
     setSelectedProfileName(profile.title.toString());
     setSelectedProfileId(profile.id.toString());
@@ -311,51 +325,51 @@ export const WizardPage: React.FC<WizardPageProps> = ({
     }
   };
 
-  const [deletePositionRequest] = useDeletePositionRequestMutation();
-  const deleteRequest = async () => {
-    if (!positionRequestId) return;
-    Modal.confirm({
-      title: 'Delete Position Request',
-      content: 'Do you want to delete the position request?',
-      okText: 'Yes',
-      cancelText: 'No',
-      onOk: async () => {
-        await deletePositionRequest({ id: positionRequestId });
-        disableBlockingAndNavigateHome();
-      },
-    });
-  };
+  // const [deletePositionRequest] = useDeletePositionRequestMutation();
+  // const deleteRequest = async () => {
+  //   if (!positionRequestId) return;
+  //   Modal.confirm({
+  //     title: 'Delete Position Request',
+  //     content: 'Do you want to delete the position request?',
+  //     okText: 'Yes',
+  //     cancelText: 'No',
+  //     onOk: async () => {
+  //       await deletePositionRequest({ id: positionRequestId });
+  //       disableBlockingAndNavigateHome();
+  //     },
+  //   });
+  // };
 
   const saveAndQuit = async () => {
     const res = await onSubmit('quit');
     if (res !== 'CANCELLED') disableBlockingAndNavigateHome();
   };
 
-  const getMenuContent = () => {
-    return (
-      <Menu className="wizard-menu">
-        <Menu.Item key="save" onClick={saveAndQuit}>
-          <div style={{ padding: '5px 0' }}>
-            Save and quit
-            <Typography.Text type="secondary" style={{ marginTop: '5px', display: 'block' }}>
-              Saves your progress. You can access this position request from the 'My Position Requests' page.
-            </Typography.Text>
-          </div>
-        </Menu.Item>
-        <Menu.Divider />
-        <Menu.ItemGroup key="others" title={<b>Others</b>}>
-          <Menu.Item key="delete" onClick={deleteRequest}>
-            <div style={{ padding: '5px 0' }}>
-              Delete
-              <Typography.Text type="secondary" style={{ marginTop: '5px', display: 'block' }}>
-                Removes this position request from 'My Position Requests'. This action is irreversible.
-              </Typography.Text>
-            </div>
-          </Menu.Item>
-        </Menu.ItemGroup>
-      </Menu>
-    );
-  };
+  // const getMenuContent = () => {
+  //   return (
+  //     <Menu className="wizard-menu">
+  //       <Menu.Item key="save" onClick={saveAndQuit}>
+  //         <div style={{ padding: '5px 0' }}>
+  //           Save and quit
+  //           <Typography.Text type="secondary" style={{ marginTop: '5px', display: 'block' }}>
+  //             Saves your progress. You can access this position request from the 'My Position Requests' page.
+  //           </Typography.Text>
+  //         </div>
+  //       </Menu.Item>
+  //       <Menu.Divider />
+  //       <Menu.ItemGroup key="others" title={<b>Others</b>}>
+  //         <Menu.Item key="delete" onClick={deleteRequest}>
+  //           <div style={{ padding: '5px 0' }}>
+  //             Delete
+  //             <Typography.Text type="secondary" style={{ marginTop: '5px', display: 'block' }}>
+  //               Removes this position request from 'My Position Requests'. This action is irreversible.
+  //             </Typography.Text>
+  //           </div>
+  //         </Menu.Item>
+  //       </Menu.ItemGroup>
+  //     </Menu>
+  //   );
+  // };
 
   const updatePositionRequestAndSetStep = async (step: number) => {
     if (positionRequestId) {
@@ -407,12 +421,13 @@ export const WizardPage: React.FC<WizardPageProps> = ({
       hpad={false}
       grayBg={false}
       pageHeaderExtra={[
-        <AccessiblePopoverMenu
-          triggerButton={<Button data-testid="ellipsis-menu" tabIndex={-1} icon={<EllipsisOutlined />}></Button>}
-          content={getMenuContent()}
-          ariaLabel="Open position request menu"
-          key="menu"
-        ></AccessiblePopoverMenu>,
+        <WizardContextMenu
+          positionRequestId={positionRequestId}
+          onSaveAndQuit={saveAndQuit}
+          onNavigateHome={disableBlockingAndNavigateHome}
+          shareableLink={positionRequest?.shareUUID}
+          positionRequestStatus={positionRequest?.status}
+        />,
         <Button onClick={back} key="back" data-testid="back-button">
           Back
         </Button>,
