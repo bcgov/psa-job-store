@@ -170,7 +170,6 @@ model JobProfile {
   behavioural_competencies Json?                      @db.JsonB
   classifications          JobProfileClassification[]
   organizations            JobProfileOrganization[]
-  all_organizations        Boolean                    @default(true)
   all_reports_to           Boolean                    @default(false)
 
   context         String?
@@ -230,7 +229,6 @@ view CurrentJobProfile {
   behavioural_competencies               Json?                      @db.JsonB
   classifications                        JobProfileClassification[] @relation("currentJobProfileClassifications")
   organizations                          JobProfileOrganization[]   @relation("currentJobProfileOrganizations")
-  all_organizations                      Boolean
   all_reports_to                         Boolean
   context                                String?
   role                                   JobProfileRole?            @relation(fields: [role_id], references: [id])
