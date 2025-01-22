@@ -85,13 +85,12 @@ import { validateAppConfig } from './utils/validate-app-config.util';
   providers: [
     {
       provide: APP_GUARD,
-      useClass: OrGuard([PublicRouteBypassGuard, SessionAuthGuard]),
-      // useClass: OrGuard([PublicRouteBypassGuard, SessionAuthGuard], {
-      //   // "a boolean to tell the OrGuard if the last error should be handled with return false or just thrown."
-      //   // this ensures that UnauthorizedException thrown by session-auth.guard is actually shown to the client
-      //   // otherwise it gets handled as return false and results in forbidden response
-      //   throwLastError: true,
-      // }),
+      useClass: OrGuard([PublicRouteBypassGuard, SessionAuthGuard], {
+        // "a boolean to tell the OrGuard if the last error should be handled with return false or just thrown."
+        // this ensures that UnauthorizedException thrown by session-auth.guard is actually shown to the client
+        // otherwise it gets handled as return false and results in forbidden response
+        throwLastError: true,
+      }),
     },
   ],
 })

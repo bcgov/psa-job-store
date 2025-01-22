@@ -1,4 +1,4 @@
-import { ExecutionContext, Injectable } from '@nestjs/common';
+import { ExecutionContext, Injectable, UnauthorizedException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { Reflector } from '@nestjs/core';
 import { GqlExecutionContext } from '@nestjs/graphql';
@@ -33,14 +33,13 @@ export class SessionAuthGuard extends AuthGuard('oidc') {
     const request: Request = gqlContext.getContext().req;
     const requiredRoles: string[] | undefined = this.reflector.get<string[]>(ROLES, context.getHandler());
 
-    return this.isAuthenticated(request) && this.userHasRoles(request, requiredRoles);
-    // const isAuthenticated = this.isAuthenticated(request);
-    // const hasRoles = this.userHasRoles(request, requiredRoles);
+    const isAuthenticated = this.isAuthenticated(request);
+    const hasRoles = this.userHasRoles(request, requiredRoles);
 
-    // if (!isAuthenticated) {
-    //   throw new UnauthorizedException('UNAUTHENTICATED');
-    // }
+    if (!isAuthenticated) {
+      throw new UnauthorizedException('UNAUTHENTICATED');
+    }
 
-    // return isAuthenticated && hasRoles;
+    return isAuthenticated && hasRoles;
   }
 }
