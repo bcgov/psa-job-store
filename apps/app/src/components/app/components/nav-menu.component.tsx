@@ -71,7 +71,7 @@ export const NavMenu = ({ collapsed }: NavMenuProps) => {
                 className: 'create-menu-button',
                 key: 'create-menu',
                 collapsed,
-                icon: <FileAddOutlined aria-hidden />,
+                icon: <FileAddOutlined aria-hidden style={{ color: 'white' }} />,
                 style: {
                   backgroundColor: '#0057ad',
                   color: 'white',
