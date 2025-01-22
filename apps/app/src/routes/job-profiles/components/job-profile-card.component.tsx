@@ -94,9 +94,7 @@ export const JobProfileCard = ({ data, onSavedCallback }: JobProfileCardProps) =
         </Text>
         <Text type="secondary" data-cy="card-info">
           # {data.number} |{' '}
-          {data.all_organizations ? (
-            <>All ministries</>
-          ) : data.organizations.length > 1 ? (
+          {data.organizations.length > 1 ? (
             <Tooltip
               title={data.organizations.map((o) => (
                 <div key={o.organization.name}>{o.organization.name}</div>

@@ -96,7 +96,6 @@ export class HealthCheckController {
       {
         id: 1,
         all_reports_to: false,
-        all_organizations: true,
         streams: [
           {
             stream: {
@@ -305,7 +304,6 @@ export class HealthCheckController {
       {
         id: 3,
         all_reports_to: false,
-        all_organizations: true,
         streams: [
           {
             stream: {
@@ -534,7 +532,6 @@ export class HealthCheckController {
       {
         id: 6,
         all_reports_to: false,
-        all_organizations: true,
         streams: [
           {
             stream: {
@@ -786,7 +783,6 @@ export class HealthCheckController {
       {
         id: 7,
         all_reports_to: false,
-        all_organizations: true,
         streams: [
           {
             stream: {
@@ -1057,7 +1053,6 @@ export class HealthCheckController {
       {
         id: 2,
         all_reports_to: false,
-        all_organizations: true,
         streams: [
           {
             stream: {
@@ -1296,7 +1291,6 @@ export class HealthCheckController {
       {
         id: 4,
         all_reports_to: false,
-        all_organizations: true,
         streams: [
           {
             stream: {
@@ -1509,7 +1503,6 @@ export class HealthCheckController {
       {
         id: 5,
         all_reports_to: false,
-        all_organizations: true,
         streams: [
           {
             stream: {
@@ -1761,7 +1754,6 @@ export class HealthCheckController {
       {
         id: 1,
         all_reports_to: false,
-        all_organizations: true,
         streams: [
           {
             stream: {
@@ -1970,7 +1962,6 @@ export class HealthCheckController {
       {
         id: 3,
         all_reports_to: false,
-        all_organizations: true,
         streams: [
           {
             stream: {
@@ -2199,7 +2190,6 @@ export class HealthCheckController {
       {
         id: 6,
         all_reports_to: false,
-        all_organizations: true,
         streams: [
           {
             stream: {
@@ -2451,7 +2441,6 @@ export class HealthCheckController {
       {
         id: 7,
         all_reports_to: false,
-        all_organizations: true,
         streams: [
           {
             stream: {
@@ -2722,7 +2711,6 @@ export class HealthCheckController {
       {
         id: 2,
         all_reports_to: false,
-        all_organizations: true,
         streams: [
           {
             stream: {
@@ -2961,7 +2949,6 @@ export class HealthCheckController {
       {
         id: 4,
         all_reports_to: false,
-        all_organizations: true,
         streams: [
           {
             stream: {
@@ -3174,7 +3161,6 @@ export class HealthCheckController {
       {
         id: 5,
         all_reports_to: false,
-        all_organizations: true,
         streams: [
           {
             stream: {
@@ -3426,7 +3412,6 @@ export class HealthCheckController {
       {
         id: 1,
         all_reports_to: false,
-        all_organizations: true,
         streams: [
           {
             stream: {
@@ -3635,7 +3620,6 @@ export class HealthCheckController {
       {
         id: 3,
         all_reports_to: false,
-        all_organizations: true,
         streams: [
           {
             stream: {
@@ -3864,7 +3848,6 @@ export class HealthCheckController {
       {
         id: 6,
         all_reports_to: false,
-        all_organizations: true,
         streams: [
           {
             stream: {
@@ -4116,7 +4099,6 @@ export class HealthCheckController {
       {
         id: 7,
         all_reports_to: false,
-        all_organizations: true,
         streams: [
           {
             stream: {
@@ -4387,7 +4369,6 @@ export class HealthCheckController {
       {
         id: 2,
         all_reports_to: false,
-        all_organizations: true,
         streams: [
           {
             stream: {
@@ -4626,7 +4607,6 @@ export class HealthCheckController {
       {
         id: 4,
         all_reports_to: false,
-        all_organizations: true,
         streams: [
           {
             stream: {
@@ -4839,7 +4819,6 @@ export class HealthCheckController {
       {
         id: 5,
         all_reports_to: false,
-        all_organizations: true,
         streams: [
           {
             stream: {
@@ -5091,7 +5070,6 @@ export class HealthCheckController {
       {
         id: 1,
         all_reports_to: false,
-        all_organizations: true,
         streams: [
           {
             stream: {
@@ -5300,7 +5278,6 @@ export class HealthCheckController {
       {
         id: 3,
         all_reports_to: false,
-        all_organizations: true,
         streams: [
           {
             stream: {
@@ -5529,7 +5506,6 @@ export class HealthCheckController {
       {
         id: 6,
         all_reports_to: false,
-        all_organizations: true,
         streams: [
           {
             stream: {
@@ -5781,7 +5757,6 @@ export class HealthCheckController {
       {
         id: 7,
         all_reports_to: false,
-        all_organizations: true,
         streams: [
           {
             stream: {
@@ -6052,7 +6027,6 @@ export class HealthCheckController {
       {
         id: 2,
         all_reports_to: false,
-        all_organizations: true,
         streams: [
           {
             stream: {
@@ -6291,7 +6265,6 @@ export class HealthCheckController {
       {
         id: 4,
         all_reports_to: false,
-        all_organizations: true,
         streams: [
           {
             stream: {
@@ -6504,7 +6477,6 @@ export class HealthCheckController {
       {
         id: 5,
         all_reports_to: false,
-        all_organizations: true,
         streams: [
           {
             stream: {

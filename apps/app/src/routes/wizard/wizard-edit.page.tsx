@@ -139,7 +139,6 @@ export const WizardEditPage: React.FC<WizardEditPageProps> = ({
       // originalData.security_screenings.filter(
       //   (screening: { text: string; isCustom?: boolean }) => !screening.isCustom || screening.text.trim() !== '',
       // ),
-      all_organizations: false,
       all_reports_to: false,
       owner: originalData.owner,
       created_at: originalData.created_at,

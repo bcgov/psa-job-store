@@ -396,7 +396,6 @@ export class JobProfileValidationModel {
   classificationReviewRequired: boolean;
   jobContext: string;
   all_reports_to: boolean;
-  all_organizations: boolean;
 }
 
 export const JobProfile: React.FC<JobProfileProps> = ({
@@ -691,13 +690,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
       label: <h3 tabIndex={0}>Ministries</h3>,
       children: (
         <span tabIndex={0}>
-          {effectiveDataExtra?.all_organizations ? (
-            'All'
-          ) : (
-            <ul>
-              {effectiveDataExtra?.organizations.map((org, index) => <li key={index}>{org.organization.name}</li>)}
-            </ul>
-          )}
+          <ul>{effectiveDataExtra?.organizations.map((org, index) => <li key={index}>{org.organization.name}</li>)}</ul>
         </span>
       ),
       span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
