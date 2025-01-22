@@ -297,7 +297,7 @@ export class JobProfileService {
       // Fetch all job profiles based on the search and where conditions
       const allJobProfiles = await this.getJobProfilesWithSearch(
         search,
-        this.transformWhereForAllOrgs(where),
+        where,
         {
           ...args,
           take: undefined,
@@ -333,46 +333,6 @@ export class JobProfileService {
     return -1;
   }
 
-  private transformWhereForAllOrgs(where: any) {
-    // example of where:
-    // {"AND":[{"reports_to":{"some":{"classification_id":{"in":["185005"]}}}},{"organizations":{"some":{"organization_id":{"in":["BC026","ALL"]}}}}]}
-    // Check if "ALL" is present in the organization_id array
-    const hasAllOrganization = where?.AND?.some((condition) =>
-      condition.organizations?.some?.organization_id?.in?.includes('ALL'),
-    );
-
-    // Modify the where query if "ALL" is present
-    // Transform above where statement by including all_organizations: true by transforming into this:
-    // {"AND":[{"reports_to":{"some":{"classification_id":{"in":["185005"]}}}},{"OR":[{"all_organizations":{"equals":true}},{"organizations":{"some":{"organization_id":{"in":["BC026"]}}}}]}]}
-    if (hasAllOrganization) {
-      where.AND = where.AND.map((condition) => {
-        if (condition.organizations?.some?.organization_id?.in?.includes('ALL')) {
-          const organizationIdIn = condition.organizations.some.organization_id.in.filter((id) => id !== 'ALL');
-          const updatedCondition = {
-            ...condition,
-            OR: [
-              { all_organizations: { equals: true } },
-              {
-                organizations: {
-                  some: {
-                    organization_id: {
-                      in: organizationIdIn,
-                    },
-                  },
-                },
-              },
-            ],
-          };
-          delete updatedCondition.organizations;
-          return updatedCondition;
-        }
-        return condition;
-      });
-    }
-
-    return where;
-  }
-
   async getJobProfiles({
     search,
     where,
@@ -385,8 +345,6 @@ export class JobProfileService {
     ...args
   }: FindManyJobProfileWithSearch) {
     let jobProfiles: any[];
-
-    where = this.transformWhereForAllOrgs(where);
 
     // if we are selecting a specific profile, we need to adjust page
     // used for when user presses back from the edit page and we need to select previously selected profile
@@ -733,7 +691,7 @@ export class JobProfileService {
         ...(searchResultIds != null && { id: { in: searchResultIds } }),
         // stream: { notIn: ['USER'] },
         state: 'PUBLISHED',
-        ...this.transformWhereForAllOrgs(where),
+        ...where,
         classifications:
           excludedDepartment !== undefined
             ? {
@@ -1074,7 +1032,6 @@ export class JobProfileService {
         willingness_statements: data.willingness_statements,
         security_screenings: data.security_screenings,
         all_reports_to: data.all_reports_to,
-        all_organizations: data.all_organizations,
         reports_to: {
           create: data.reports_to.create.map((item) => ({
             classification: {
@@ -1169,7 +1126,6 @@ export class JobProfileService {
         willingness_statements: data.willingness_statements,
         security_screenings: data.security_screenings,
         all_reports_to: data.all_reports_to,
-        all_organizations: data.all_organizations,
 
         // Update reports_to
         reports_to: {

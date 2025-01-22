@@ -7,6 +7,7 @@ const MinistriesSelect = ({ onChange, isMultiSelect, onBlur, value, setValue }: 
   // eslint-disable-next-line react-hooks/exhaustive-deps
   const ministriesData = data?.organizations.map((d) => ({ ...d, filterString: `${d.id} ${d.name}` })) || [];
   const handleSelectionChange = (selected: any) => {
+    // Validation gets triggered as a side effect of this setValue call, so it has to stick around until this is resolved
     setValue('all_organizations', false);
     onChange(selected);
   };

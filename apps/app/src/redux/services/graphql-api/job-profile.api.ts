@@ -62,7 +62,6 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
               ) {
                 id
                 all_reports_to
-                all_organizations
                 streams {
                   stream {
                     id
@@ -397,7 +396,6 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
                 state
                 security_screenings
                 all_reports_to
-                all_organizations
                 willingness_statements
                 knowledge_skills_abilities
                 professional_registration_requirements
@@ -501,7 +499,6 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
                 state
                 security_screenings
                 all_reports_to
-                all_organizations
                 willingness_statements
                 knowledge_skills_abilities
                 professional_registration_requirements

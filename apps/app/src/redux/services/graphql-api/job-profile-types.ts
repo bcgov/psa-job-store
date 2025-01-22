@@ -171,7 +171,6 @@ export interface JobProfileModel {
   knowledge_skills_abilities: TrackedFieldArrayItem[];
   willingness_statements: TrackedFieldArrayItem[];
   security_screenings: SecuritiyScreeningModel[];
-  all_organizations: boolean;
   all_reports_to: boolean;
   state?: string;
   is_archived?: boolean;
