@@ -2147,7 +2147,25 @@ export class JobProfileService {
     };
 
     function processMapToResult(map: Map<string, RequirementEntry>) {
-      return Array.from(map.values())
+      // Create a temporary map to store normalized texts
+      const normalizedMap = new Map<string, RequirementEntry>();
+
+      // First pass: normalize texts and combine duplicate entries
+      Array.from(map.values()).forEach((entry) => {
+        const normalizedText = entry.text.trim();
+        if (normalizedMap.has(normalizedText)) {
+          const existing = normalizedMap.get(normalizedText)!;
+          existing.jobFamilies.push(...entry.jobFamilies);
+          existing.streams.push(...entry.streams);
+        } else {
+          normalizedMap.set(normalizedText, {
+            ...entry,
+            text: normalizedText,
+          });
+        }
+      });
+
+      return Array.from(normalizedMap.values())
         .map((entry) => ({
           ...entry,
           jobFamilies: Array.from(new Set(entry.jobFamilies.map((jf) => jf.id)))
