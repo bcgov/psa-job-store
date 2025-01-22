@@ -12,6 +12,13 @@ export const NextRouteGuard = () => {
   const location = useLocation();
   const [isLoading, setIsLoading] = useState<boolean>(true);
 
+  const setRedirectPath = () => {
+    if (!sessionStorage.getItem('redirectPath')) {
+      const currentUrl = new URL(window.location.href);
+      const currentPath = currentUrl.pathname + currentUrl.search;
+      sessionStorage.setItem('redirectPath', encodeURIComponent(currentPath));
+    }
+  };
   useEffect(() => {
     if (!auth.isAuthenticated) {
       (async () => {
@@ -20,6 +27,7 @@ export const NextRouteGuard = () => {
           if (!response.ok) {
             setIsLoading(false);
             if (location.pathname !== '/auth/login') {
+              setRedirectPath();
               navigate('/auth/login');
             }
           } else {
@@ -30,6 +38,7 @@ export const NextRouteGuard = () => {
           }
         } catch (error) {
           setIsLoading(false);
+          setRedirectPath();
           navigate('/auth/login');
         }
       })();

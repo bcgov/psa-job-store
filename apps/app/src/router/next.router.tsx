@@ -80,15 +80,11 @@ export const nextRouter = createBrowserRouter([
             path: '/',
             element: <HomeRoute />,
             children: [
-              // Home
               {
                 index: true,
-                handle: {
-                  // breadcrumb: () => 'My tasks',
-                },
+                handle: {},
                 element: <HomePage />,
               },
-              // Org Chart
               {
                 path: 'my-departments',
                 element: <OrgChartRoute />,
@@ -132,27 +128,6 @@ export const nextRouter = createBrowserRouter([
                       icon: <FileTextOutlined />,
                     },
                   },
-
-                  // {
-                  //   path: 'saved',
-                  //   element: <JobProfilesRoute />,
-                  //   handle: {
-                  //     icon: <FileTextOutlined />,
-                  //   },
-                  //   children: [
-                  //     {
-                  //       index: true,
-                  //       element: <SavedJobProfilesPage />,
-                  //     },
-                  //     {
-                  //       path: ':number',
-                  //       element: <SavedJobProfilesPage />,
-                  //       handle: {
-                  //         icon: <FileTextOutlined />,
-                  //       },
-                  //     },
-                  //   ],
-                  // },
                   {
                     path: 'manage',
                     children: [
