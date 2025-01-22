@@ -1,5 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { useMemo } from 'react';
+import { useEffect, useMemo } from 'react';
+import { useNavigate } from 'react-router-dom';
 import PositionProfile from '../../../components/app/common/components/positionProfile';
 import { PositionProvider } from '../../../components/app/common/contexts/position.context';
 import { PageHeader } from '../../../components/app/page-header.component';
@@ -18,8 +19,6 @@ import { SuperAdminHomePage } from './super-admin-home-page.component';
 const NewHomePage = () => {
   const auth = useTypedSelector((state) => state.authReducer);
   const roles = getUserRoles(auth.user);
-
-  console.log('auth.user: ', auth.user);
 
   const { family_name, given_name, name } = (auth.user ?? {}) as Record<string, any>;
   const nameParts = useMemo(() => {
@@ -73,8 +72,16 @@ const NewHomePage = () => {
 export const HomePage = () => {
   const auth = useTypedSelector((state) => state.authReducer);
   const roles = getUserRoles(auth.user);
-
+  const navigate = useNavigate();
   // auth.user.profile.given_name/family_name
+
+  useEffect(() => {
+    const redirectPath = sessionStorage.getItem('redirectPath');
+    if (redirectPath) {
+      sessionStorage.removeItem('redirectPath');
+      navigate(decodeURIComponent(redirectPath), { replace: true });
+    }
+  }, []);
 
   if (roles.includes('super-admin')) {
     return <NewHomePage />;
