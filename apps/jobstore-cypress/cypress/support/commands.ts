@@ -7,7 +7,7 @@ Cypress.Commands.add('login', () => {
     () => {
       cy.request({
         method: 'GET',
-        url: 'http://localhost:4000/e2e-auth/generateSessionCookie',
+        url: `${Cypress.env('VITE_BACKEND_URL')}/e2e-auth/generateSessionCookie`,
         qs: {
           sessionId: 'iHcbWqNHyasCGNOEThqpyORKtLU-wR4r',
         },
