@@ -41,7 +41,7 @@ const DocumentForm: React.FC<DocumentFormProps> = ({ mode, initialData, onSubmit
   const { data: jobFamiliesData, isLoading: familiesIsLoading } = useGetJobFamiliesQuery();
   const { data: jobStreamsData, isFetching: streamsIsLoading } = useGetJobProfileStreamsQuery();
 
-  const [trigger, { data: urlDoc, isFetching: urlDocIsFetching }] = useLazyCheckDocumentURLQuery();
+  const [trigger, { data: urlDoc }] = useLazyCheckDocumentURLQuery();
 
   const [treeData, setTreeData] = useState<any[]>([]);
   const [allSelections, setAllSelections] = useState<Selection[]>([]);
