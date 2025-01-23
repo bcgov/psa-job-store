@@ -1,7 +1,7 @@
 import { Button, Col, Layout, Row, Tooltip } from 'antd';
 import { useEffect, useState } from 'react';
 import { PageHeader } from '../../components/app/page-header.component';
-import { useGetProfileQuery } from '../../redux/services/graphql-api/profile.api';
+import { useTypedSelector } from '../../redux/redux.hooks';
 import { OrgChart } from './components/org-chart';
 import { OrgChartHelpButton } from './components/org-chart-help-button.component';
 import { TreeChartSearchProvider } from './components/tree-org-chart/tree-org-chart-search-context';
@@ -12,17 +12,15 @@ import { OrgChartType } from './enums/org-chart-type.enum';
 const { Content } = Layout;
 
 export const OrgChartPage = () => {
+  const auth = useTypedSelector((state) => state.authReducer);
   const [departmentId, setDepartmentId] = useState<string | null | undefined>(undefined);
   const [currentView] = useState<'chart' | 'tree'>('chart');
   const [horizontal] = useState(false);
   const [searchTerm] = useState<string | undefined>(undefined);
-  const { data: profileData, isFetching: profileDataIsFetching } = useGetProfileQuery();
-
-  useEffect(() => {}, [profileDataIsFetching]);
 
   useEffect(() => {
-    setDepartmentId(profileData?.profile.department_id);
-  }, [profileData?.profile.department_id]);
+    setDepartmentId(auth.user?.metadata.peoplesoft.department_id);
+  }, [auth.user]);
 
   //  SEARCH
 
@@ -49,9 +47,9 @@ export const OrgChartPage = () => {
                   role="note"
                   type="link"
                   style={{ textDecoration: 'underline' }}
-                  aria-label="Why can't I make changes? Because the position might be in a different department ID. Please check Peoplesoft for the latest org structure."
+                  aria-label="Why can't I see all positions? Because the position might be in a different department ID. Please check Peoplesoft for the latest org structure."
                 >
-                  Why can't I make changes?
+                  Why can't I see all positions?
                 </Button>
               </Tooltip>
               <OrgChartHelpButton />
@@ -106,19 +104,13 @@ export const OrgChartPage = () => {
                 context={OrgChartContext.DEFAULT}
                 setDepartmentId={setDepartmentId}
                 departmentId={departmentId}
-                departmentIdIsLoading={profileDataIsFetching}
-                targetId={profileData?.profile.position_id}
+                targetId={auth.user?.metadata.peoplesoft.position_id}
                 wrapProvider={false}
               />
             </div>
             {
               currentView !== 'chart' && (
-                <TreeOrgChart
-                  departmentIdIsLoading={profileDataIsFetching}
-                  departmentId={departmentId ?? ''}
-                  isHorizontal={horizontal}
-                  searchTerm={searchTerm}
-                />
+                <TreeOrgChart departmentId={departmentId ?? ''} isHorizontal={horizontal} searchTerm={searchTerm} />
               )
               // 022-2801
             }

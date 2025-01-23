@@ -1,15 +1,14 @@
 import { FileTextOutlined, PartitionOutlined } from '@ant-design/icons';
+import ErrorBoundary from 'antd/es/alert/ErrorBoundary';
 import { createBrowserRouter } from 'react-router-dom';
 import { AppLayout } from '../components/app/app-layout.component';
 import RoleGuard from '../components/guards/role.guard';
-import { RouteGuard } from '../components/guards/route.guard';
 import { Redirect } from '../components/shared/redirect/redirect.component';
 import { AuthRoute } from '../routes/auth';
 import { LoginPage } from '../routes/auth/login.page';
 import { ClassificationTasksRoute } from '../routes/classification-tasks';
 import { ClassificationTaskPage } from '../routes/classification-tasks/classification-task.page';
 import { ClassificationTasksPage } from '../routes/classification-tasks/classification-tasks.page';
-import ErrorBoundary from '../routes/error-boundary/ErrorBoundary';
 import { HomeRoute } from '../routes/home';
 import { HomePage } from '../routes/home/components/home-page.component';
 import { JobProfilesRoute } from '../routes/job-profiles';
@@ -43,55 +42,49 @@ import UnauthorizedPage from '../routes/unauthorized/unauthorized.page';
 import { WizardRoute } from '../routes/wizard';
 import { PositionRequestPage } from '../routes/wizard/position-request.page';
 import { WizardOrgChartPage } from '../routes/wizard/wizard-org-chart.page';
+import { NextRouteGuard } from './next-route.guard';
 
-export const router = createBrowserRouter([
+export const nextRouter = createBrowserRouter([
   {
-    path: 'auth',
+    path: '/',
     element: (
       <ErrorBoundary>
-        <AuthRoute />
+        <NextRouteGuard />
       </ErrorBoundary>
     ),
     children: [
       {
-        element: <AppLayout />,
+        path: 'auth',
+        element: <AuthRoute />,
         children: [
           {
-            path: 'login',
-            element: <LoginPage />,
-          },
-          {
-            path: 'logout',
-            element: <LoginPage />,
+            element: <AppLayout />,
+            children: [
+              {
+                path: 'login',
+                element: <LoginPage />,
+              },
+              {
+                path: 'logout',
+                element: <LoginPage />,
+              },
+            ],
           },
         ],
       },
-    ],
-  },
-  {
-    element: (
-      <ErrorBoundary>
-        <RouteGuard />
-      </ErrorBoundary>
-    ),
-    children: [
       {
+        path: '/',
         element: <AppLayout />,
         children: [
           {
             path: '/',
             element: <HomeRoute />,
             children: [
-              // Home
               {
                 index: true,
-                handle: {
-                  // breadcrumb: () => 'My tasks',
-                },
+                handle: {},
                 element: <HomePage />,
               },
-
-              // Org Chart
               {
                 path: 'my-departments',
                 element: <OrgChartRoute />,
@@ -135,26 +128,6 @@ export const router = createBrowserRouter([
                       icon: <FileTextOutlined />,
                     },
                   },
-                  // {
-                  //   path: 'saved',
-                  //   element: <JobProfilesRoute />,
-                  //   handle: {
-                  //     icon: <FileTextOutlined />,
-                  //   },
-                  //   children: [
-                  //     {
-                  //       index: true,
-                  //       element: <SavedJobProfilesPage />,
-                  //     },
-                  //     {
-                  //       path: ':number',
-                  //       element: <SavedJobProfilesPage />,
-                  //       handle: {
-                  //         icon: <FileTextOutlined />,
-                  //       },
-                  //     },
-                  //   ],
-                  // },
                   {
                     path: 'manage',
                     children: [
@@ -315,6 +288,9 @@ export const router = createBrowserRouter([
                           {
                             index: true,
                             element: <PositionRequestPage />,
+                            handle: {
+                              icon: <FileTextOutlined />,
+                            },
                           },
                         ],
                       },
@@ -325,6 +301,9 @@ export const router = createBrowserRouter([
                           {
                             index: true,
                             element: <PositionRequestPage />,
+                            handle: {
+                              icon: <FileTextOutlined />,
+                            },
                           },
                         ],
                       },

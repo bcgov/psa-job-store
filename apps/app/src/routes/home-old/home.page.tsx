@@ -1,12 +1,11 @@
 import { Button, Card, Col, Divider, Radio, Row, Space, Typography } from 'antd';
 import { useCallback, useEffect, useState } from 'react';
-import { useAuth } from 'react-oidc-context';
 import { Link } from 'react-router-dom';
 import { ReactFlowProvider } from 'reactflow';
 import PositionProfile from '../../components/app/common/components/positionProfile';
 import ContentWrapper from '../../components/content-wrapper.component';
+import { useTypedSelector } from '../../redux/redux.hooks';
 import { useGetPositionRequestsCountQuery } from '../../redux/services/graphql-api/position-request.api';
-import { useGetProfileQuery } from '../../redux/services/graphql-api/profile.api';
 import MyPositionsTable from '../my-position-requests/components/my-position-requests-table.component';
 import { DepartmentFilter } from '../org-chart/components/department-filter.component';
 import { OrgChart } from '../org-chart/components/org-chart';
@@ -23,10 +22,9 @@ import './home.page.css';
 const { Text } = Typography;
 
 export const HomePage = () => {
-  const auth = useAuth();
+  const auth = useTypedSelector((state) => state.authReducer);
   const { data: positionsCountData } = useGetPositionRequestsCountQuery();
   const { total = 0, completed = 0, verification = 0 } = positionsCountData?.positionRequestsCount || {};
-  const { data: profileData, isFetching: profileDataIsFetching } = useGetProfileQuery();
   const [currentView] = useState<'chart' | 'tree'>('chart');
   const [horizontal, setHorizontal] = useState(false);
   const [searchTerm, setSearchTerm] = useState<string | undefined>(undefined);
@@ -34,8 +32,8 @@ export const HomePage = () => {
   const [departmentId, setDepartmentId] = useState<string | null | undefined>(undefined);
 
   useEffect(() => {
-    setDepartmentId(profileData?.profile.department_id);
-  }, [profileData?.profile]);
+    setDepartmentId(auth.user?.metadata.peoplesoft.department_id);
+  }, [auth.user]);
 
   const handleSearch = useCallback((value: string) => {
     setSearchTerm(value);
@@ -49,7 +47,11 @@ export const HomePage = () => {
             <Col>
               <Space direction="vertical">
                 <Space align="center">
-                  <InitialsAvatar name={auth.user?.profile.given_name + ' ' + auth.user?.profile.family_name} />
+                  {(auth.user?.roles ?? []).includes('bceid') ? (
+                    <InitialsAvatar name={auth.user?.name} />
+                  ) : (
+                    <InitialsAvatar name={auth.user?.given_name + ' ' + auth.user?.family_name} />
+                  )}
                   {/* <Avatar size={64} icon={<UserOutlined />} /> */}
                   <div>
                     <Text
@@ -61,17 +63,19 @@ export const HomePage = () => {
                         marginBottom: '0.5rem',
                       }}
                     >
-                      {auth.user?.profile.name}
+                      {auth.user?.name}
                     </Text>
-                    <div style={{ height: '19px' }}>
-                      <PositionProfile
-                        positionNumber={profileData?.profile.position_id}
-                        // positionNumber={'00121521'}
-                        mode="compact2"
-                        unOccupiedText=""
-                        loadingStyle={'skeleton'}
-                      />
-                    </div>
+                    {!(auth.user?.roles ?? []).includes('bceid') && (
+                      <div style={{ height: '19px' }}>
+                        <PositionProfile
+                          positionNumber={auth.user?.metadata.peoplesoft.position_id}
+                          // positionNumber={'00121521'}
+                          mode="compact2"
+                          unOccupiedText=""
+                          loadingStyle={'skeleton'}
+                        />
+                      </div>
+                    )}
                     {/* <Text type="secondary">HR Manager · Digital Talent & Capacity</Text> */}
                   </div>
                 </Space>
@@ -125,7 +129,6 @@ export const HomePage = () => {
           {/* Todo: pull in from actual user data */}
 
           <Card
-            loading={profileDataIsFetching}
             className="orgChartCard"
             style={{
               minHeight: '500px',
@@ -184,9 +187,8 @@ export const HomePage = () => {
                 context={OrgChartContext.DEFAULT}
                 setDepartmentId={setDepartmentId}
                 departmentId={departmentId}
-                departmentIdIsLoading={profileDataIsFetching}
                 showDepartmentFilter={false}
-                targetId={profileData?.profile.position_id}
+                targetId={auth.user?.metadata.peoplesoft.position_id}
                 wrapProvider={false}
               />
             </div>
@@ -204,7 +206,7 @@ export const HomePage = () => {
                         <TreeOrgChartSearch
                           setSearchTerm={setSearchTerm}
                           onSearch={handleSearch}
-                          disabled={departmentId == null || profileDataIsFetching}
+                          disabled={departmentId == null}
                           searchTerm={searchTerm}
                         />
                       )}
@@ -220,17 +222,12 @@ export const HomePage = () => {
                     <Col flex="auto"> {/* This empty column will create the gap */}</Col>
                     <Col flex="500px">
                       {currentView === 'tree' && (
-                        <DepartmentFilter
-                          setDepartmentId={setDepartmentId}
-                          departmentId={departmentId}
-                          loading={profileDataIsFetching}
-                        />
+                        <DepartmentFilter setDepartmentId={setDepartmentId} departmentId={departmentId} />
                       )}
                     </Col>
                   </Row>
                   <TreeOrgChart
                     source="home"
-                    departmentIdIsLoading={profileDataIsFetching}
                     departmentId={departmentId ?? ''}
                     isHorizontal={horizontal}
                     searchTerm={searchTerm}

@@ -1,18 +1,6 @@
-import axios, { AxiosRequestConfig } from 'axios';
-import { VITE_BACKEND_URL, VITE_KEYCLOAK_CLIENT_ID, VITE_KEYCLOAK_REALM_URL } from '../../envConfig';
-import { oidcConfig } from '../main';
-
-// eslint-disable-next-line @typescript-eslint/no-explicit-any
-function checkForExpiredSessionError(response: any) {
-  if (response.meta && response.meta.response && Array.isArray(response.meta.response.errors)) {
-    for (const error of response.meta.response.errors) {
-      if (error.message === 'Your session has expired. Please log in again.') {
-        return true;
-      }
-    }
-  }
-  return false;
-}
+import axios from 'axios';
+import { VITE_BACKEND_URL } from '../../envConfig';
+import { checkForExpiredSessionError } from '../redux/services/graphql-api';
 
 interface LogMessage {
   level: string;
@@ -32,18 +20,9 @@ export const sendLogToServer = async (error: Error): Promise<void> => {
     path: window.location.pathname,
   };
   // console.log(logMessage);
-  const storageString =
-    (await oidcConfig.userStore?.get(`user:${VITE_KEYCLOAK_REALM_URL}:${VITE_KEYCLOAK_CLIENT_ID}`)) ?? '{}';
 
-  const { access_token } = JSON.parse(storageString);
-
-  const config: AxiosRequestConfig = {
-    headers: {
-      Authorization: `Bearer ${access_token}`,
-    },
-  };
   try {
-    const result = await axios.post(VITE_BACKEND_URL + '/logs/log', logMessage, config);
+    const result = await axios.post(VITE_BACKEND_URL + '/logs/log', logMessage, { withCredentials: true });
     const isSessionExpired = checkForExpiredSessionError(result);
 
     if (isSessionExpired) {

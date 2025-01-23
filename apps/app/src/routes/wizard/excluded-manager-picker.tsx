@@ -62,9 +62,10 @@ export const ExcludedManagerPicker: React.FC<ExcludedManagerPickerProps> = ({
       console.log('debounce search text: ', searchText);
       setSearchText(searchText);
 
+      setSearchResults([]);
+      setTotalResults(0);
+
       if (!searchText) {
-        setSearchResults([]);
-        setTotalResults(0);
         return;
       }
 
@@ -202,6 +203,7 @@ export const ExcludedManagerPicker: React.FC<ExcludedManagerPickerProps> = ({
               return (
                 <Select
                   aria-label="Select the excluded manager who approved the use of the job profile."
+                  allowClear
                   showSearch
                   value={value}
                   onBlur={onBlur}

@@ -1,10 +1,14 @@
-import { IsEnum, IsNotEmpty, IsString } from 'class-validator';
+import { IsBoolean, IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { Environment } from '../enums/environment.enum';
 import { SSOEnvironment } from '../enums/sso-environment.enum';
 
 export class AppConfigDto {
   @IsEnum(Environment)
   NODE_ENV: Environment;
+
+  @IsNotEmpty()
+  @IsString()
+  REACT_APP_URL: string;
 
   @IsNotEmpty()
   @IsString()
@@ -52,17 +56,36 @@ export class AppConfigDto {
   @IsEnum(SSOEnvironment)
   SSO_ENVIRONMENT: SSOEnvironment;
 
-  @IsNotEmpty()
+  // NestJS
+  // @IsNumber()
+  // @IsNotEmpty()
+  // SERVER_PORT: number;
+
+  // Express Session
   @IsString()
+  @IsNotEmpty()
+  SESSION_SECRET: string;
+
+  Keycloak;
+  @IsString()
+  @IsNotEmpty()
   KEYCLOAK_REALM_URL: string;
 
-  @IsNotEmpty()
   @IsString()
-  KEYCLOAK_CLIENT_ID_PRIVATE: string;
+  @IsNotEmpty()
+  KEYCLOAK_CALLBACK_URL: string;
 
-  @IsNotEmpty()
   @IsString()
-  KEYCLOAK_CLIENT_ID_PUBLIC: string;
+  @IsNotEmpty()
+  KEYCLOAK_LOGOUT_REDIRECT_URL: string;
+
+  @IsString()
+  @IsNotEmpty()
+  KEYCLOAK_CLIENT_ID: string;
+
+  @IsString()
+  @IsNotEmpty()
+  KEYCLOAK_CLIENT_SECRET: string;
 
   @IsNotEmpty()
   @IsString()
@@ -78,6 +101,10 @@ export class AppConfigDto {
 
   @IsString()
   USE_MOCKS: string;
+
+  @IsBoolean()
+  @IsOptional()
+  TEST_ENV?: boolean;
 
   @IsString()
   E2E_TESTING: string;

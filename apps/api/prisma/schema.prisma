@@ -584,3 +584,20 @@ model Organization {
 
   @@map("organization")
 }
+
+model Session {
+  sid    String   @id
+  sess   Json     @db.JsonB
+  expire DateTime @db.Timestamptz(6)
+
+  @@index([expire])
+  @@map("_session")
+}
+
+model CronLock {
+  id        String   @id @default(uuid())
+  name      String   @unique
+  locked_at DateTime @default(now())
+
+  @@map("cron_locks")
+}

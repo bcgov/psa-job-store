@@ -388,3 +388,15 @@ Cleanup. Remove the pgupgrade object:
 Remove annotation:
 
 `oc annotate postgrescluster api-postgres-clone postgres-operator.crunchydata.com/allow-upgrade-`
+
+## Running load test
+
+Install K6, then in `apps\api\test`, run (PowerShell):
+
+`$env:K6_WEB_DASHBOARD="true"; $env:K6_WEB_DASHBOARD_EXPORT="report.html"; $env:SCENARIO="api"; $env:SECRET_KEY="INSERT_E2E_AUTH_KEY_HERE"; $env:TARGET="http://localhost:4000"; k6 run load-test.js`
+
+To load test the frontend:
+
+`$env:K6_WEB_DASHBOARD="true"; $env:K6_WEB_DASHBOARD_EXPORT="report.html"; $env:SCENARIO="frontend"; $env:SECRET_KEY="INSERT_E2E_AUTH_KEY_HERE"; $env:TARGET="http://localhost:5173"; k6 run load-test.js`
+
+You can view live results at `http://localhost:5665/`. After the test is finished, a report will be generated to `report.html` in the same folder

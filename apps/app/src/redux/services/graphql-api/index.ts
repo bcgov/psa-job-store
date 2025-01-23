@@ -2,8 +2,8 @@
 import { createApi } from '@reduxjs/toolkit/query/react';
 import { graphqlRequestBaseQuery } from '@rtk-query/graphql-request-base-query';
 import { notification } from 'antd';
-import { VITE_BACKEND_URL, VITE_KEYCLOAK_CLIENT_ID, VITE_KEYCLOAK_REALM_URL } from '../../../../envConfig';
-import { oidcConfig } from '../../../main';
+import { GraphQLClient } from 'graphql-request';
+import { VITE_BACKEND_URL } from '../../../../envConfig';
 
 interface GraphQLError {
   message: string;
@@ -23,37 +23,33 @@ interface GraphQLResponseMeta {
   };
 }
 
-const rawBaseQuery = graphqlRequestBaseQuery({
-  url: `${VITE_BACKEND_URL}/graphql`,
-  prepareHeaders: async (headers) => {
-    const storageString =
-      (await oidcConfig.userStore?.get(`user:${VITE_KEYCLOAK_REALM_URL}:${VITE_KEYCLOAK_CLIENT_ID}`)) ?? '{}';
+export const client = new GraphQLClient(`${VITE_BACKEND_URL}/graphql`, { credentials: 'include' });
 
-    const { access_token } = JSON.parse(storageString);
+const rawBaseQuery = graphqlRequestBaseQuery({ client: client as any });
 
-    if (access_token) {
-      headers.set('authorization', `Bearer ${access_token}`);
-    }
+export function checkForExpiredSessionError(response: any) {
+  // // Check if the errors array exists
+  // if (response.meta && response.meta.response && Array.isArray(response.meta.response.errors)) {
+  //   // Iterate over the errors array
+  //   for (const error of response.meta.response.errors) {
+  //     // Check if the error message matches the specific message
+  //     if (error.message === 'Your session has expired. Please log in again.') {
+  //       return true; // Specific error message found
+  //     }
+  //   }
+  // }
 
-    return headers;
-  },
-});
+  // if (response?.error?.message && response.error.message.includes('UNAUTHENTICATED')) {
+  //   return true;
+  // }
 
-function checkForExpiredSessionError(response: any) {
-  // Check if the errors array exists
-  if (response.meta && response.meta.response && Array.isArray(response.meta.response.errors)) {
-    // Iterate over the errors array
-    for (const error of response.meta.response.errors) {
-      // Check if the error message matches the specific message
-      if (error.message === 'Your session has expired. Please log in again.') {
-        return true; // Specific error message found
-      }
-    }
-  }
-
-  if (response?.error?.message && response.error.message.includes('UNAUTHENTICATED')) {
+  if (
+    response?.errors?.[0]?.message == 'UNAUTHENTICATED' ||
+    response?.errors?.[0]?.extensions?.code == 'UNAUTHENTICATED'
+  ) {
     return true;
   }
+
   return false; // Specific error message not found
 }
 
@@ -111,7 +107,19 @@ const baseQuery = async (args: any, api: any, extraOptions: any) => {
     }
 
     return result;
-  } catch (error) {
+  } catch (error: any) {
+    const isSessionExpired = checkForExpiredSessionError(error.response);
+
+    if (isSessionExpired) {
+      if (!sessionStorage.getItem('redirectPath')) {
+        const currentUrl = new URL(window.location.href);
+        const currentPath = currentUrl.pathname + currentUrl.search;
+        sessionStorage.setItem('redirectPath', encodeURIComponent(currentPath));
+      }
+      window.location.href = '/auth/login';
+      throw error;
+    }
+
     // Handle any other unexpected errors
     if (!errorToastShown && !isToastShown && !suppressErrorToast) {
       isToastShown = true;

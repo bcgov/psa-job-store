@@ -1,3 +1,4 @@
+import { OrGuard } from '@nest-lab/or-guard';
 import { ApolloDriver, ApolloDriverConfig } from '@nestjs/apollo';
 import { CacheModule } from '@nestjs/cache-manager';
 import { MiddlewareConsumer, Module, NestModule } from '@nestjs/common';
@@ -6,13 +7,12 @@ import { APP_GUARD } from '@nestjs/core';
 import { GraphQLModule } from '@nestjs/graphql';
 import { ScheduleModule } from '@nestjs/schedule';
 import { LoggerModule } from 'nestjs-pino';
-import { AppResolver } from './app.resolver';
 import { RequestIdMiddleware } from './middleware/request-id.middleware';
 import { AppLogModule } from './modules/app-log/app-log.module';
 import { AuthModule } from './modules/auth/auth.module';
 import { E2EAuthModule } from './modules/auth/e2e-auth.module';
-import { AuthGuard } from './modules/auth/guards/auth.guard';
-import { RoleGuard } from './modules/auth/guards/role.guard';
+import { PublicRouteBypassGuard } from './modules/auth/guards/public-route-bypass.guard';
+import { SessionAuthGuard } from './modules/auth/guards/session-auth.guard';
 import { BehaviouralComptencyModule } from './modules/behavioral-comptency/behavioural-comptency.module';
 import { ClassificationModule } from './modules/classification/classification.module';
 import { CommentModule } from './modules/comment/comment.module';
@@ -58,7 +58,6 @@ import { validateAppConfig } from './utils/validate-app-config.util';
     // EventModule,
     HealthCheckModule,
     ScheduleModule.forRoot(),
-    AuthModule,
     PositionRequestModule,
     JobProfileModule,
     ClassificationModule,
@@ -73,16 +72,27 @@ import { validateAppConfig } from './utils/validate-app-config.util';
     JobProfileScopeModule,
     JobProfileMinimumRequirementsModule,
     AppLogModule,
-    ScheduledTaskModule,
     SavedJobProfileModule,
     UserModule,
     KeycloakModule,
     SettingsModule,
     OrganizationModule,
+    AuthModule,
+    ScheduledTaskModule,
     E2EAuthModule,
   ],
   controllers: [],
-  providers: [{ provide: APP_GUARD, useClass: AuthGuard }, { provide: APP_GUARD, useClass: RoleGuard }, AppResolver],
+  providers: [
+    {
+      provide: APP_GUARD,
+      useClass: OrGuard([PublicRouteBypassGuard, SessionAuthGuard], {
+        // "a boolean to tell the OrGuard if the last error should be handled with return false or just thrown."
+        // this ensures that UnauthorizedException thrown by session-auth.guard is actually shown to the client
+        // otherwise it gets handled as return false and results in forbidden response
+        throwLastError: true,
+      }),
+    },
+  ],
 })
 export class AppModule implements NestModule {
   configure(consumer: MiddlewareConsumer) {

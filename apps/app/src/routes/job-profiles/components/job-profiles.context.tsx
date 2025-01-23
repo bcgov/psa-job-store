@@ -7,6 +7,8 @@ interface FetchContextType {
   setClearingFilters: (value: boolean) => void;
   clearingSearch: boolean;
   setClearingSearch: (value: boolean) => void;
+  setReselectOriginalWizardProfile: (value: boolean) => void;
+  reselectOriginalWizardProfile: boolean;
 }
 
 const FetchContext = createContext<FetchContextType | undefined>(undefined);
@@ -19,6 +21,7 @@ export function JobProfilesProvider({ children }: JobProfilesProviderProps) {
   const [shouldFetch, setShouldFetch] = useState<boolean>(false);
   const [clearingFilters, setClearingFilters] = useState<boolean>(false);
   const [clearingSearch, setClearingSearch] = useState<boolean>(false);
+  const [reselectOriginalWizardProfile, setReselectOriginalWizardProfile] = useState<boolean>(false);
 
   return (
     <FetchContext.Provider
@@ -29,6 +32,8 @@ export function JobProfilesProvider({ children }: JobProfilesProviderProps) {
         setClearingFilters,
         clearingSearch,
         setClearingSearch,
+        reselectOriginalWizardProfile,
+        setReselectOriginalWizardProfile,
       }}
     >
       {children}
