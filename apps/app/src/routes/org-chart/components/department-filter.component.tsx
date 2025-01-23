@@ -120,7 +120,7 @@ export const DepartmentFilter = ({
         disabledText={hasOnlyOneDepartment ? 'You only have access to one department' : ''}
         placeholderText={'Select a Department'}
         treeData={JSON.parse(JSON.stringify(treeData))}
-        value={departmentId ?? ''}
+        treeValue={departmentId ?? ''}
         onClear={() => setDepartmentId(undefined)}
         allowClear
         width={'100%'}
