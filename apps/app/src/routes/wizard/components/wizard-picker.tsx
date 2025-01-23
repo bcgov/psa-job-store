@@ -104,6 +104,7 @@ const WizardPicker: React.FC<WizardPickerProps> = ({
               return {
                 tc_is_readonly: tc_is_readonly,
                 is_significant: true,
+                nonEditable: false,
                 text,
               };
           }
