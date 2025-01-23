@@ -5,3 +5,4 @@ resources:
 - service.yml
 - route.yml
 - np.yml
+- pvc.yml

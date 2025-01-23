@@ -16,6 +16,7 @@ import { SessionAuthGuard } from './modules/auth/guards/session-auth.guard';
 import { BehaviouralComptencyModule } from './modules/behavioral-comptency/behavioural-comptency.module';
 import { ClassificationModule } from './modules/classification/classification.module';
 import { CommentModule } from './modules/comment/comment.module';
+import { DocumentModule } from './modules/documents/document.module';
 import { EmployeeGroupModule } from './modules/employee-group/employee-group.module';
 import { ExternalModule } from './modules/external/external.module';
 import { HealthCheckModule } from './modules/health-check/health-check.module';
@@ -80,6 +81,7 @@ import { validateAppConfig } from './utils/validate-app-config.util';
     AuthModule,
     ScheduledTaskModule,
     E2EAuthModule,
+    DocumentModule,
   ],
   controllers: [],
   providers: [

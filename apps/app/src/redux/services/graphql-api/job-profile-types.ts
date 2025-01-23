@@ -1,5 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 
+import { PageInfo } from '../dtos/page-info.dto';
+
 export interface NextAvailableJobProfileNumberResponse {
   nextAvailableJobProfileNumber: number;
 }
@@ -256,6 +258,19 @@ export interface SecuritiyScreeningModel {
   disabled?: boolean;
 }
 
+export interface DocumentModel {
+  id: string;
+  file_extension: string;
+  title: string;
+  description: string;
+  url: string;
+  category: string;
+  jobStreams: Stream[];
+  jobFamilies: JobFamily[];
+  created_at: string;
+  updated_at: string;
+}
+
 export class TrackedFieldArrayItem {
   text: string;
   disabled?: boolean;
@@ -451,4 +466,28 @@ export interface GetJobProfileMetaResponse {
 
 export interface GetJobProfileByNumberResponse {
   jobProfileByNumber: JobProfileModel;
+}
+
+export interface GetDocumentsResponse {
+  documentsWithCount: { data: DocumentModel[]; pageInfo: PageInfo };
+}
+
+export interface GetDocumentByIdResponse {
+  document: DocumentModel | null;
+}
+
+export interface CheckURLResponse {
+  checkURL: DocumentModel | null;
+}
+
+export class GetDocumentsArgs {
+  where?: {
+    AND: Record<string, unknown>[];
+  };
+  orderBy?:
+    | { name: { sort: 'asc' | 'desc' } }
+    | { email: { sort: 'asc' | 'desc' } }
+    | ({ name: { sort: 'asc' | 'desc' } } | { email: { sort: 'asc' | 'desc' } })[];
+  skip?: number;
+  take?: number;
 }
