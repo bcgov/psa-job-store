@@ -1512,7 +1512,6 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
     valid_to: undefined,
     version: 1,
     views: 1,
-    all_organizations: false,
   };
 
   const profile194: JobProfile = {
@@ -1625,7 +1624,6 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
     valid_to: undefined,
     version: 1,
     views: 1,
-    all_organizations: false,
   };
 
   const profile200: JobProfile = {
@@ -1768,7 +1766,6 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
     valid_to: undefined,
     version: 1,
     views: 10,
-    all_organizations: false,
   };
 
   const profile208: JobProfile = {
@@ -1896,7 +1893,6 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
     valid_to: undefined,
     version: 1,
     views: 74,
-    all_organizations: false,
   };
 
   const profile210: JobProfile = {
@@ -2039,7 +2035,6 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
     valid_to: undefined,
     version: 1,
     views: 474,
-    all_organizations: false,
   };
 
   const profile212: JobProfile = {
@@ -2186,7 +2181,6 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
     valid_to: undefined,
     version: 1,
     views: 747,
-    all_organizations: false,
   };
 
   const profile247: JobProfile = {
@@ -2363,7 +2357,6 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
     valid_to: undefined,
     version: 1,
     views: 0,
-    all_organizations: false,
   };
 
   let other_profiles: any[] = [] as any[];
