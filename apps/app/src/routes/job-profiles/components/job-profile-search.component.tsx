@@ -669,7 +669,7 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
                       width={'300px'}
                       placeholderText={'Profession and Discipline'}
                       treeData={JSON.parse(JSON.stringify(treeData))}
-                      value={treeSelectValues}
+                      treeValue={treeSelectValues}
                       onChange={(selectedItems) => {
                         // separate selectedItems into jobFamily and jobStream
                         const selectedJobFamilies: any[] = [];

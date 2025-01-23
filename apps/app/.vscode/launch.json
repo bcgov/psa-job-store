@@ -5,7 +5,7 @@
       "name": "Launch Edge",
       "request": "launch",
       "type": "msedge",
-      "url": "http://localhost:5173",
+      "url": "http://localhost:3000",
       "webRoot": "${workspaceFolder}"
     },
     {
@@ -19,8 +19,8 @@
       "name": "Vite: Chrome Launch",
       "type": "chrome",
       "request": "launch",
-      "port": 5173,
-      "url": "http://localhost:5173",
+      "port": 3000,
+      "url": "http://localhost:3000",
       "webRoot": "${workspaceFolder}/src",
       "sourceMaps": true,
       "skipFiles": ["node_modules/**"]

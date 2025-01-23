@@ -3,13 +3,13 @@ import Select, { ActionMeta, MultiValue, SingleValue } from 'react-select';
 import { FilterOperator } from '../../../lib/prisma-filter/common/filter-operator.enum';
 import { FilterBuilder } from '../../../lib/prisma-filter/common/filter.builder';
 
-export type SelectFilterOption = { label: string; value: string };
+export type SelectFilterOption = { label: string; value: string | number };
 
 type SingleSelectFilterProps = {
   mode: 'single-value';
   field: string;
   path?: string[];
-  operator: FilterOperator.StringEquals | FilterOperator.JsonEquals;
+  operator: FilterOperator.StringEquals | FilterOperator.JsonEquals | FilterOperator.EnumEquals;
   filterBuilder: FilterBuilder;
   loading?: boolean;
   options: SelectFilterOption[];
@@ -20,7 +20,7 @@ type MultiSelectFilterProps = {
   mode: 'multi-value';
   field: string;
   path?: string[];
-  operator: FilterOperator.StringIn | FilterOperator.StringListHasSome;
+  operator: FilterOperator.StringIn | FilterOperator.StringListHasSome | FilterOperator.EnumIn | FilterOperator.IntIn;
   filterBuilder: FilterBuilder;
   loading?: boolean;
   options: SelectFilterOption[];
@@ -63,7 +63,9 @@ export const SelectFilter = ({
                   field,
                   path,
                   operator,
-                  value: newValue.map((v) => v.value).join(','),
+                  value: operator.startsWith('i')
+                    ? newValue.map((v) => v.value)
+                    : newValue.map((v) => v.value).join(','),
                 });
               } else if (action === 'deselect-option') {
                 const matchingFilter = filter.filter?.find((f) => f.field === field && f.operator === operator);
