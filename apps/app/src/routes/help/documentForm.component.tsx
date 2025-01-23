@@ -46,7 +46,7 @@ const DocumentForm: React.FC<DocumentFormProps> = ({ mode, initialData, onSubmit
   const [treeData, setTreeData] = useState<any[]>([]);
   const [allSelections, setAllSelections] = useState<Selection[]>([]);
   const [fileList, setFileList] = useState<any[]>([]);
-  const [initialFileList, setInitialFileList] = useState<any[]>([]); // Store initial file list
+  // const [initialFileList, setInitialFileList] = useState<any[]>([]); // Store initial file list
   const [showPermalink, setShowPermalink] = useState(false);
 
   const selectedJobFamilyIds = allSelections.filter((sel) => sel.type === 'jobFamily').map((sel) => Number(sel.value));
@@ -110,10 +110,10 @@ const DocumentForm: React.FC<DocumentFormProps> = ({ mode, initialData, onSubmit
           url: initialData.file.url,
         };
         setFileList([initialFile]);
-        setInitialFileList([initialFile]); // Set the initialFileList
+        // setInitialFileList([initialFile]); // Set the initialFileList
       } else {
         setFileList([]);
-        setInitialFileList([]);
+        // setInitialFileList([]);
       }
     }
   }, [mode, initialData, form]);

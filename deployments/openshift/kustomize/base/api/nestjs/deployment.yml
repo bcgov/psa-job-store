@@ -34,6 +34,8 @@ spec:
           subPath: seed.ts
         - name: log-volume
           mountPath: /tmp/log
+        - name: documents-pvc
+          mountPath: /usr/src/apps/api/documents
         envFrom:
         # - configMapRef:
         #     name: api-configmap
@@ -68,6 +70,9 @@ spec:
             cpu: 10m 
             memory: 50Mi 
       volumes:
+      - name: documents-pvc
+        persistentVolumeClaim:
+          claimName: documents-pvc
       - name: log-volume
         emptyDir: {}
       - name: filebeat-config
