@@ -5,10 +5,10 @@ metadata:
 spec:
   shutdown: false
   instances:
-    - replicas: 2
+    - replicas: 3
       resources:
         requests:
-          cpu: '250m'
+          cpu: '125m'
           memory: '256Mi'
       dataVolumeClaimSpec:
         accessModes:

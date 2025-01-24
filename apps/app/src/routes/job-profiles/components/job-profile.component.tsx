@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ArrowLeftOutlined, ExclamationCircleFilled, InfoCircleOutlined } from '@ant-design/icons';
-import { Alert, Button, Col, Descriptions, DescriptionsProps, Divider, Grid, Row, Tooltip, Typography } from 'antd';
+import { ExclamationCircleFilled, InfoCircleOutlined } from '@ant-design/icons';
+import { Alert, Col, Descriptions, DescriptionsProps, Divider, Row, Tooltip, Typography } from 'antd';
 import { Type } from 'class-transformer';
 import {
   IsNotEmpty,
@@ -16,7 +16,7 @@ import dayjs from 'dayjs';
 import { diff_match_patch } from 'diff-match-patch';
 import DOMPurify from 'dompurify';
 import { CSSProperties, useEffect, useState } from 'react';
-import { Link, useParams, useSearchParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
 import LoadingSpinnerWithMessage from '../../../components/app/common/components/loading.component';
 import '../../../components/app/common/css/custom-descriptions.css';
 import { VersionSelect } from '../../../components/app/version-select.component';
@@ -38,12 +38,12 @@ import AccessibleDocumentFromDescriptions from './accessible-document-from-descr
 import './job-profile.component.css';
 
 const { Text } = Typography;
-const { useBreakpoint } = Grid;
+// const { useBreakpoint } = Grid;
 
 interface JobProfileProps {
   profileData?: any;
   onProfileLoad?: (profileData: JobProfileModel) => void;
-  showBackToResults?: boolean;
+  // showBackToResults?: boolean;
   showDiff?: boolean;
   parentJobProfileId?: number;
   parentJobProfileVersion?: number;
@@ -401,7 +401,7 @@ export class JobProfileValidationModel {
 export const JobProfile: React.FC<JobProfileProps> = ({
   profileData,
   onProfileLoad,
-  showBackToResults = true,
+  // showBackToResults = true,
   showDiff = false,
   parentJobProfileId,
   parentJobProfileVersion,
@@ -418,7 +418,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
   const id = searchParams.get('id');
   const version = searchParams.get('version');
   // console.log('resolvedId: ', resolvedId);
-  const screens = useBreakpoint();
+  // const screens = useBreakpoint();
 
   // If neither resolvedId nor profileData is present, throw an error
   // console.log('jobNumber: ', jobNumber);
@@ -656,7 +656,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
   };
 
   // Construct the back URL
-  const backUrl = `/job-profiles?${searchParams}`;
+  // const backUrl = `/job-profiles?${searchParams}`;
 
   if (isLoading) {
     return <LoadingSpinnerWithMessage />;
@@ -1316,7 +1316,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
     <NotFoundComponent entity="Profile" />
   ) : (
     <div data-testid="job-profile" style={{ ...style }}>
-      {screens.xl === false && showBackToResults ? (
+      {/* {screens.xl === false && showBackToResults ? (
         <nav aria-label="Breadcrumb">
           <Link to={backUrl}>
             <Button type="link" icon={<ArrowLeftOutlined aria-hidden="true" />} style={{ padding: 0 }}>
@@ -1326,7 +1326,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
         </nav>
       ) : (
         <div />
-      )}
+      )} */}
       {/* {onUseProfile ? (
         <WizardEditControlBar onNext={onUseProfile} nextText="Use Profile" style={{ marginBottom: '1rem' }} />
       ) :
