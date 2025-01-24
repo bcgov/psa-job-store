@@ -252,7 +252,7 @@ export const NavMenu = ({ collapsed }: NavMenuProps) => {
           ]
         : []),
 
-      ...(userCanAccess(auth.user, ['super-admin', 'hiring-manager'])
+      ...(userCanAccess(auth.user, ['super-admin'])
         ? [
             createMenuGroup({
               key: '/settings',
