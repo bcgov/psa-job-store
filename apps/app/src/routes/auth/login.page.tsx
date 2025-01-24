@@ -7,7 +7,7 @@ export const LoginPage = () => {
 
   return (
     <Row justify="center" align="middle" style={{ height: '100%', justifyContent: 'center', background: '#f5f5f5' }}>
-      <Col span={12}>
+      <Col xs={{ span: 18 }} sm={{ span: 18 }} md={{ span: 12 }}>
         <Space direction="vertical" style={{ width: '100%' }}>
           <div>
             <Title style={{ fontSize: '2rem' }}>Welcome to the Job Store</Title>
