@@ -1,4 +1,4 @@
-import { LogoutOutlined } from '@ant-design/icons';
+import { LogoutOutlined, MenuOutlined } from '@ant-design/icons';
 import { Alert, Button, Col, Layout, Menu, Row, Typography } from 'antd';
 import { Link } from 'react-router-dom';
 import { useTypedSelector } from '../../redux/redux.hooks';
@@ -10,7 +10,13 @@ import { HelpButton } from './help-button.component';
 const { Header } = Layout;
 const { Text } = Typography;
 
-export const AppHeader = () => {
+export interface AppHeaderProps {
+  collapsed: boolean;
+  setCollapsed: (collapsed: boolean) => void;
+  isMobile?: boolean;
+}
+
+export const AppHeader = ({ collapsed, setCollapsed, isMobile }: AppHeaderProps) => {
   const auth = useTypedSelector((state) => state.authReducer);
 
   const handleLogout = async () => {
@@ -50,9 +56,23 @@ export const AppHeader = () => {
           }}
         />
       )}
-      <Header className={styles.appHeader}>
+      <Header className={styles.appHeader} style={{ zIndex: 1001 }}>
         <Row align="middle" justify="space-between" style={{ width: '100%' }} role="navigation">
           <Col className={styles.left}>
+            {auth.isAuthenticated && isMobile && (
+              <Button
+                data-testid="menu-toggle-btn-mobile"
+                type="text"
+                icon={<MenuOutlined aria-hidden style={{ fontSize: '1.3rem' }} />}
+                onClick={() => setCollapsed(!collapsed)}
+                style={{
+                  marginRight: '16px',
+                  color: 'white',
+                }}
+                aria-label={collapsed ? 'Expand side navigation' : 'Collapse side navigation'}
+              />
+            )}
+
             <Link to="/" style={{ display: 'flex', alignItems: 'center' }} aria-label="Navigate to homepage">
               <img className={styles.bcLogo} src="/BC_logo.png" alt="BC Logo" />
               <div className={styles.titleContainer}>

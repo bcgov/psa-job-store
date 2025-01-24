@@ -1,11 +1,13 @@
 import { MenuFoldOutlined, MenuUnfoldOutlined } from '@ant-design/icons';
 import { Button, Layout } from 'antd';
+import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useLocalStorage } from 'usehooks-ts';
 import { useTypedSelector } from '../../redux/redux.hooks';
 import { ErrorBoundaryLayout } from '../../routes/not-found/error';
 import { AppHeader } from '../app/header.component';
 import { NavMenu } from './components/nav-menu.component';
+import styles from './sider.module.css';
 
 const { Content, Sider } = Layout;
 
@@ -21,35 +23,87 @@ const RenderOutlet = () => {
   );
 };
 
+const useWindowWidth = () => {
+  const [width, setWidth] = useState(window.innerWidth);
+
+  useEffect(() => {
+    const handleResize = () => setWidth(window.innerWidth);
+    window.addEventListener('resize', handleResize);
+    return () => window.removeEventListener('resize', handleResize);
+  }, []);
+
+  return width;
+};
+
+const useScrollPosition = () => {
+  const [scrollY, setScrollY] = useState(0);
+
+  useEffect(() => {
+    const handleScroll = () => {
+      setScrollY(window.scrollY);
+    };
+    window.addEventListener('scroll', handleScroll);
+    return () => window.removeEventListener('scroll', handleScroll);
+  }, []);
+
+  return scrollY;
+};
+
 export const AppLayout = () => {
   const auth = useTypedSelector((state) => state.authReducer);
-  const [collapsed, setCollapsed] = useLocalStorage('sider-collapsed', false);
+  const [desktopCollapsed, setDesktopCollapsed] = useLocalStorage('sider-collapsed', false);
+  const [mobileCollapsed, setMobileCollapsed] = useState(true);
+  const location = useLocation();
+
+  const windowWidth = useWindowWidth();
+  const isMobile = windowWidth <= 768;
+  const scrollY = useScrollPosition();
+
+  const collapsed = isMobile ? mobileCollapsed : desktopCollapsed;
+  const setCollapsed = isMobile ? setMobileCollapsed : setDesktopCollapsed;
+
+  const siderScrolledPastHeader = import.meta.env.VITE_ENV == 'production' ? scrollY > 61 : scrollY > 102;
+
+  useEffect(() => {
+    if (isMobile) {
+      setMobileCollapsed(true);
+    }
+  }, [location, isMobile]);
+
+  const handleOverlayClick = () => {
+    if (isMobile) {
+      setMobileCollapsed(true);
+    }
+  };
 
   return (
     <Layout style={{ minHeight: '100vh' }} id="layout">
-      <AppHeader />
+      <AppHeader collapsed={collapsed} setCollapsed={setCollapsed} isMobile={isMobile} />
       <Layout hasSider style={{ flex: '1' }} id="layout2">
+        {isMobile && !collapsed && <div className={styles.overlay} onClick={handleOverlayClick} role="presentation" />}
         {auth.isAuthenticated && (
           <Sider
             onCollapse={setCollapsed}
             collapsed={collapsed}
             collapsible
             role="navigation"
-            style={{ boxShadow: '2px 0 5px 0 #CCC', zIndex: 1000 }}
+            className={`${styles.sider} ${collapsed ? styles.collapsed : styles.expanded} ${import.meta.env.VITE_ENV != 'production' ? styles.siderdev : ''} ${siderScrolledPastHeader ? styles.scrolled : ''}`}
             theme="light"
             trigger={
-              <Button
-                data-testid="menu-toggle-btn"
-                aria-label={collapsed ? 'Expand side navigation' : 'Collapse side navigation'}
-                icon={collapsed ? <MenuUnfoldOutlined aria-hidden /> : <MenuFoldOutlined aria-hidden />}
-                onClick={() => setCollapsed(!collapsed)}
-                type="link"
-                style={{
-                  color: '#000',
-                  fontSize: '16px',
-                  margin: '0.5rem 0 0.5rem 0.75rem',
-                }}
-              />
+              !isMobile ? (
+                <Button
+                  data-testid="menu-toggle-btn"
+                  aria-label={collapsed ? 'Expand side navigation' : 'Collapse side navigation'}
+                  icon={collapsed ? <MenuUnfoldOutlined aria-hidden /> : <MenuFoldOutlined aria-hidden />}
+                  onClick={() => setCollapsed(!collapsed)}
+                  type="link"
+                  style={{
+                    color: '#000',
+                    fontSize: '16px',
+                    margin: '0.5rem 0 0.5rem 0.75rem',
+                  }}
+                />
+              ) : null
             }
           >
             <NavMenu collapsed={collapsed} />
