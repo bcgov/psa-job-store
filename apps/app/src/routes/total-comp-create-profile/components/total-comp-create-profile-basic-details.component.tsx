@@ -25,7 +25,7 @@ import {
   Typography,
   message,
 } from 'antd';
-import { CSSProperties, useCallback, useContext, useEffect, useMemo, useRef, useState } from 'react';
+import { CSSProperties, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { Controller, useFieldArray, useWatch } from 'react-hook-form';
 import { useParams } from 'react-router-dom';
 import LoadingSpinnerWithMessage from '../../../components/app/common/components/loading.component';
@@ -72,7 +72,7 @@ export const BasicDetails: React.FC<BasicDetailsProps> = ({}) => {
     isCurrentVersion,
     validationStatus,
     setValidationStatus,
-    professionsData,
+    // professionsData,
   } = useTCContext();
 
   const { id: urlId } = useParams();
@@ -83,10 +83,10 @@ export const BasicDetails: React.FC<BasicDetailsProps> = ({}) => {
   if (!context) {
     throw new Error('Form context must be used within FormContext.Provider');
   }
-  const { basicUseFormReturn, jobProfileUseFormReturn, professionalRegistrationRequirementsFieldArray } = context;
+  const { basicUseFormReturn, jobProfileUseFormReturn } = context; //professionalRegistrationRequirementsFieldArray
 
   const {
-    setValue: profileSetValue,
+    // setValue: profileSetValue,
     trigger: triggerProfileValidation,
     reset: resetProfileForm,
   } = jobProfileUseFormReturn;
@@ -107,11 +107,11 @@ export const BasicDetails: React.FC<BasicDetailsProps> = ({}) => {
     formState: basicFormState,
   } = basicUseFormReturn; //useFormContext<BasicDetailsValidationModel>();
 
-  const {
-    fields: professionalRegistrationRequirementsFields,
-    append: appendProfessionalRegistrationRequirement,
-    remove: removeProfessionalRegistrationRequirement,
-  } = professionalRegistrationRequirementsFieldArray;
+  // const {
+  //   fields: professionalRegistrationRequirementsFields,
+  //   append: appendProfessionalRegistrationRequirement,
+  //   remove: removeProfessionalRegistrationRequirement,
+  // } = professionalRegistrationRequirementsFieldArray;
 
   const transformToTreeData = useCallback((groupedClassifications: any) => {
     const transformItem = (item: any) => {
@@ -265,7 +265,7 @@ export const BasicDetails: React.FC<BasicDetailsProps> = ({}) => {
     border: '0',
   };
 
-  const prevProfessionsData = useRef(professionsData);
+  // const prevProfessionsData = useRef(professionsData);
 
   const [fetchingNextNumber, setFetchingNextNumber] = useState(false);
   const [checkNumberAvailability] = useLazyIsJobProfileNumberAvailableQuery();
@@ -608,7 +608,7 @@ export const BasicDetails: React.FC<BasicDetailsProps> = ({}) => {
       !findFilterClassifications(otherIndex)?.length && removeEmployeeGroup(otherIndex);
     }
 
-    updateMinimumRequirementsAndProfRegs(classification);
+    updateMinimumRequirementsAndProfRegs();
   };
 
   // Tree-select for report-to relationship
@@ -642,13 +642,13 @@ export const BasicDetails: React.FC<BasicDetailsProps> = ({}) => {
       //   'refetching with: ',
       //   selectedProfession.map((p) => p.jobFamily),
       // );
-      refetchPickerData().then((r) => {
+      refetchPickerData().then(() => {
         // console.log(
         //   'refetched, updateProfessionalRegistrationrequirements, professionalRequirementsPickerData now: ',
         //   professionalRequirementsPickerData,
         //   r,
         // );
-        updateProfessionalRegistrationrequirements(r.data);
+        // updateProfessionalRegistrationrequirements(r.data);
       });
     }, 0);
   };
@@ -660,118 +660,118 @@ export const BasicDetails: React.FC<BasicDetailsProps> = ({}) => {
       //   'refetching with: ',
       //   selectedProfession.map((p) => p.jobFamily),
       // );
-      refetchPickerData().then((r) => {
+      refetchPickerData().then(() => {
         // console.log(
         //   'refetched, updateProfessionalRegistrationrequirements, professionalRequirementsPickerData now: ',
         //   r.data,
         // );
-        updateProfessionalRegistrationrequirements(r.data);
+        // updateProfessionalRegistrationrequirements(r.data);
       });
     }, 0);
   };
 
-  const updateMinimumRequirementsAndProfRegs = (classification: string) => {
-    updateMinimumRequirementsFromClassification(classification);
+  const updateMinimumRequirementsAndProfRegs = () => {
+    // updateMinimumRequirementsFromClassification(classification);
 
     setTimeout(() => {
-      refetchPickerData().then((r) => {
-        updateProfessionalRegistrationrequirements(r.data);
+      refetchPickerData().then(() => {
+        // updateProfessionalRegistrationrequirements(r.data);
       });
     }, 0);
   };
 
-  const updateMinimumRequirementsFromClassification = (classification: string) => {
-    const [id, employee_group_id, peoplesoft_id] = classification.split('.');
-    if (classification) {
-      const selectedClassification = classificationsData?.classifications.find(
-        (c) => id === c.id && employee_group_id === c.employee_group_id && peoplesoft_id === c.peoplesoft_id,
-      );
+  // const updateMinimumRequirementsFromClassification = (classification: string) => {
+  //   const [id, employee_group_id, peoplesoft_id] = classification.split('.');
+  //   if (classification) {
+  //     const selectedClassification = classificationsData?.classifications.find(
+  //       (c) => id === c.id && employee_group_id === c.employee_group_id && peoplesoft_id === c.peoplesoft_id,
+  //     );
 
-      if (jobProfileMinimumRequirements && selectedClassification) {
-        const filteredRequirements = jobProfileMinimumRequirements.jobProfileMinimumRequirements
-          .filter((req: any) => req.grade === selectedClassification.grade)
-          .map((req: any) => ({
-            text: req.requirement,
-            nonEditable: false,
-            is_significant: true,
-            tc_is_readonly: true,
-          }));
+  //     if (jobProfileMinimumRequirements && selectedClassification) {
+  //       const filteredRequirements = jobProfileMinimumRequirements.jobProfileMinimumRequirements
+  //         .filter((req: any) => req.grade === selectedClassification.grade)
+  //         .map((req: any) => ({
+  //           text: req.requirement,
+  //           nonEditable: false,
+  //           is_significant: true,
+  //           tc_is_readonly: true,
+  //         }));
 
-        // console.log('filteredRequirements: ', filteredRequirements);
-        // Update the educationAndWorkExperiences field array
-        profileSetValue('education', filteredRequirements);
-      }
-    }
-  };
+  //       // console.log('filteredRequirements: ', filteredRequirements);
+  //       // Update the educationAndWorkExperiences field array
+  //       profileSetValue('education', filteredRequirements);
+  //     }
+  //   }
+  // };
 
   const showWarningModal = (onOk: any, onCancel: any) => {
     Modal.confirm({
       title: 'Warning',
       content:
-        "Changing 'Classification' would result in updates to some of the system generated fields in the 'Job Profile' page. Report-to relationship may also get updated to exclude this classification. Are you sure you want to continue?",
+        "Changing 'Classification' may result in report-to relationship getting updated to exclude this classification. Are you sure you want to continue?",
       onOk,
       onCancel,
     });
   };
 
   // user changed classificaiton or job family - update the professional requirements based on the new selection
-  const updateProfessionalRegistrationrequirements = (professionalRequirementsPickerDataIn?: any) => {
-    const useProfessionalRequirementsPickerData = professionalRequirementsPickerDataIn || pickerData;
+  // const updateProfessionalRegistrationrequirements = (professionalRequirementsPickerDataIn?: any) => {
+  //   const useProfessionalRequirementsPickerData = professionalRequirementsPickerDataIn || pickerData;
 
-    if (!useProfessionalRequirementsPickerData) return;
+  //   if (!useProfessionalRequirementsPickerData) return;
 
-    // NEW
+  //   // NEW
 
-    // console.log('NEW - adding professional registrations automatically');
+  //   // console.log('NEW - adding professional registrations automatically');
 
-    // Find items with non-null classification - these should be added automatically based on classification selection
-    const itemsWithClassification =
-      useProfessionalRequirementsPickerData.requirementsWithoutReadOnly.professionalRegistrationRequirements.filter(
-        (comp: any) => comp.classification !== null,
-      );
+  //   // Find items with non-null classification - these should be added automatically based on classification selection
+  //   const itemsWithClassification =
+  //     useProfessionalRequirementsPickerData.requirementsWithoutReadOnly.professionalRegistrationRequirements.filter(
+  //       (comp: any) => comp.classification !== null,
+  //     );
 
-    // console.log(
-    //   'data.requirementsWithoutReadOnly: ',
-    //   useProfessionalRequirementsPickerData.requirementsWithoutReadOnly,
-    // );
-    // console.log('itemsWithClassification: ', itemsWithClassification);
+  //   // console.log(
+  //   //   'data.requirementsWithoutReadOnly: ',
+  //   //   useProfessionalRequirementsPickerData.requirementsWithoutReadOnly,
+  //   // );
+  //   // console.log('itemsWithClassification: ', itemsWithClassification);
 
-    // Add items with non-null classification to the fields array
-    const newFields = itemsWithClassification.map((item: any) => ({
-      tc_is_readonly: true,
-      // ensure newly added items are set as non-editable and significant
-      // ('nonEditable' gets converted to is_readonly when sent to the server)
-      nonEditable: true,
-      is_significant: true,
-      text: item.text,
-    }));
+  //   // Add items with non-null classification to the fields array
+  //   const newFields = itemsWithClassification.map((item: any) => ({
+  //     tc_is_readonly: true,
+  //     // ensure newly added items are set as non-editable and significant
+  //     // ('nonEditable' gets converted to is_readonly when sent to the server)
+  //     nonEditable: true,
+  //     is_significant: true,
+  //     text: item.text,
+  //   }));
 
-    // console.log('newFields: ', newFields);
+  //   // console.log('newFields: ', newFields);
 
-    // console.log('filtering new fields over fields: ', professionalRegistrationRequirementsFields);
-    // Filter out items that already exist in the fields array
-    const uniqueNewFields = newFields.filter(
-      (newField: any) =>
-        !professionalRegistrationRequirementsFields.some(
-          (field: any) => field.text === newField.text && field.tc_is_readonly === true,
-        ),
-    );
-    // console.log('addAction: ', uniqueNewFields);
+  //   // console.log('filtering new fields over fields: ', professionalRegistrationRequirementsFields);
+  //   // Filter out items that already exist in the fields array
+  //   const uniqueNewFields = newFields.filter(
+  //     (newField: any) =>
+  //       !professionalRegistrationRequirementsFields.some(
+  //         (field: any) => field.text === newField.text && field.tc_is_readonly === true,
+  //       ),
+  //   );
+  //   // console.log('addAction: ', uniqueNewFields);
 
-    // Add the unique new fields to the existing fields array
+  //   // Add the unique new fields to the existing fields array
 
-    const timeoutId = setTimeout(() => {
-      // console.log('append: ', uniqueNewFields);
-      appendProfessionalRegistrationRequirement(uniqueNewFields);
-      triggerProfileValidation();
-    }, 0);
-    return () => {
-      clearTimeout(timeoutId);
-    };
+  //   const timeoutId = setTimeout(() => {
+  //     // console.log('append: ', uniqueNewFields);
+  //     appendProfessionalRegistrationRequirement(uniqueNewFields);
+  //     triggerProfileValidation();
+  //   }, 0);
+  //   return () => {
+  //     clearTimeout(timeoutId);
+  //   };
 
-    // END NEW
-    // eslint-disable-next-line react-hooks/exhaustive-deps
-  };
+  //   // END NEW
+  //   // eslint-disable-next-line react-hooks/exhaustive-deps
+  // };
 
   const filterTreeData = (data: any) => {
     // Filter out the selected classifications from the tree data
@@ -801,161 +801,161 @@ export const BasicDetails: React.FC<BasicDetailsProps> = ({}) => {
   };
 
   // user removed family or stream - remove the professional requirements that no longer apply
-  const handleStreamOrFamilyRemoval = useCallback(() => {
-    if (!pickerData) return;
+  // const handleStreamOrFamilyRemoval = useCallback(() => {
+  //   if (!pickerData) return;
 
-    // console.log('==REMOVAL handleStreamOrFamilyRemoval');
+  //   // console.log('==REMOVAL handleStreamOrFamilyRemoval');
 
-    // // Get the updated list of professional registrations that would appear in the pick list
-    // console.log('professionalRequirementsPickerData:', professionalRequirementsPickerData);
-    // console.log('professionalRegistrationRequirementsFields: ', professionalRegistrationRequirementsFields);
+  //   // // Get the updated list of professional registrations that would appear in the pick list
+  //   // console.log('professionalRequirementsPickerData:', professionalRequirementsPickerData);
+  //   // console.log('professionalRegistrationRequirementsFields: ', professionalRegistrationRequirementsFields);
 
-    // console.log('professionsFields??:', professionsFields);
+  //   // console.log('professionsFields??:', professionsFields);
 
-    const jobFamilyIds = selectedProfession.map((p: any) => p.jobFamily);
-    const jobFamilyStreamIds = selectedProfession.map((p: any) => p.jobStreams).flat();
+  //   const jobFamilyIds = selectedProfession.map((p: any) => p.jobFamily);
+  //   const jobFamilyStreamIds = selectedProfession.map((p: any) => p.jobStreams).flat();
 
-    // console.log('jobFamilyIds: ', jobFamilyIds);
-    // console.log('jobFamilyStreamIds: ', jobFamilyStreamIds);
+  //   // console.log('jobFamilyIds: ', jobFamilyIds);
+  //   // console.log('jobFamilyStreamIds: ', jobFamilyStreamIds);
 
-    // console.log('calculating idsToRemove');
-    const idsToRemove = professionalRegistrationRequirementsFields
-      .filter((field: any) => {
-        // console.log('checking field: ', field);
-        if (field.tc_is_readonly) {
-          // console.log('is readonly');
-          const item = pickerData.requirementsWithoutReadOnly.professionalRegistrationRequirements.find(
-            (data: any) => data.text === field.text,
-          );
+  //   // console.log('calculating idsToRemove');
+  //   const idsToRemove = professionalRegistrationRequirementsFields
+  //     .filter((field: any) => {
+  //       // console.log('checking field: ', field);
+  //       if (field.tc_is_readonly) {
+  //         // console.log('is readonly');
+  //         const item = pickerData.requirementsWithoutReadOnly.professionalRegistrationRequirements.find(
+  //           (data: any) => data.text === field.text,
+  //         );
 
-          // console.log('found item by text: ', item);
+  //         // console.log('found item by text: ', item);
 
-          if (item) {
-            const itemJobFamilies = item.jobFamilies.map((jf: any) => jf.id);
-            const itemStreams = item.streams.map((s: any) => s.id);
+  //         if (item) {
+  //           const itemJobFamilies = item.jobFamilies.map((jf: any) => jf.id);
+  //           const itemStreams = item.streams.map((s: any) => s.id);
 
-            // console.log('itemJobFamilies: ', itemJobFamilies, jobFamilyIds);
-            // console.log('itemStreams: ', itemStreams, jobFamilyStreamIds);
+  //           // console.log('itemJobFamilies: ', itemJobFamilies, jobFamilyIds);
+  //           // console.log('itemStreams: ', itemStreams, jobFamilyStreamIds);
 
-            const jobFamilyWithNoStream = selectedProfession
-              .filter((p: any) => p.jobStreams.length === 0)
-              .map((p: any) => p.jobFamily);
-            // console.log('jobFamilyWithNoStream: ', jobFamilyWithNoStream);
+  //           const jobFamilyWithNoStream = selectedProfession
+  //             .filter((p: any) => p.jobStreams.length === 0)
+  //             .map((p: any) => p.jobFamily);
+  //           // console.log('jobFamilyWithNoStream: ', jobFamilyWithNoStream);
 
-            const isJobFamilyAllowed = itemJobFamilies.some((jf: any) => jobFamilyIds.includes(jf));
-            let isStreamAllowed = itemStreams.some((s: any) => jobFamilyStreamIds.includes(s));
+  //           const isJobFamilyAllowed = itemJobFamilies.some((jf: any) => jobFamilyIds.includes(jf));
+  //           let isStreamAllowed = itemStreams.some((s: any) => jobFamilyStreamIds.includes(s));
 
-            // console.log('isJobFamilyAllowed: ', isJobFamilyAllowed);
-            // console.log('isStreamAllowed: ', isStreamAllowed);
+  //           // console.log('isJobFamilyAllowed: ', isJobFamilyAllowed);
+  //           // console.log('isStreamAllowed: ', isStreamAllowed);
 
-            // make an exception for job family with no stream
-            if (!isStreamAllowed) {
-              // console.log('checking jobFamilyWithNoStream');
-              isStreamAllowed = jobFamilyWithNoStream.some((jf: any) => itemJobFamilies.includes(jf));
-              // console.log('isStreamAllowed now: ', isStreamAllowed);
-            }
+  //           // make an exception for job family with no stream
+  //           if (!isStreamAllowed) {
+  //             // console.log('checking jobFamilyWithNoStream');
+  //             isStreamAllowed = jobFamilyWithNoStream.some((jf: any) => itemJobFamilies.includes(jf));
+  //             // console.log('isStreamAllowed now: ', isStreamAllowed);
+  //           }
 
-            // if this item has classification set, then it was auto-added
-            // check separately if classification matches
-            // additionally, if the item also has job family set, ensure that matches as well
+  //           // if this item has classification set, then it was auto-added
+  //           // check separately if classification matches
+  //           // additionally, if the item also has job family set, ensure that matches as well
 
-            if (item.classification) {
-              // console.log('classificaiton present');
-              const itemClassificationId = item.classification.id;
-              const itemClassificationEmployeeGroup = item.classification.employee_group_id;
-              const itemJobFamilies = item.jobFamilies;
+  //           if (item.classification) {
+  //             // console.log('classificaiton present');
+  //             const itemClassificationId = item.classification.id;
+  //             const itemClassificationEmployeeGroup = item.classification.employee_group_id;
+  //             const itemJobFamilies = item.jobFamilies;
 
-              // const selectedClassification = selectedClassificationId?.split('.')[0];
-              // const selectedEmployeeGroup = selectedClassificationId?.split('.')[1];
+  //             // const selectedClassification = selectedClassificationId?.split('.')[0];
+  //             // const selectedEmployeeGroup = selectedClassificationId?.split('.')[1];
 
-              // console.log('itemClassificationId: ', itemClassificationId);
-              // console.log('selectedClassification: ', selectedClassification);
+  //             // console.log('itemClassificationId: ', itemClassificationId);
+  //             // console.log('selectedClassification: ', selectedClassification);
 
-              const isClassificationAllowed = selectedEmployeeClassificationGroups.find(
-                (ecg: any) => ecg.classification?.split('.')[0] == itemClassificationId,
-              )
-                ? true
-                : false; //itemClassificationId === selectedClassification;
-              const isEmployeeGroupAllowed = selectedEmployeeClassificationGroups.find(
-                (ecg: any) => ecg.employeeGroup == itemClassificationEmployeeGroup,
-              )
-                ? true
-                : false;
+  //             const isClassificationAllowed = selectedEmployeeClassificationGroups.find(
+  //               (ecg: any) => ecg.classification?.split('.')[0] == itemClassificationId,
+  //             )
+  //               ? true
+  //               : false; //itemClassificationId === selectedClassification;
+  //             const isEmployeeGroupAllowed = selectedEmployeeClassificationGroups.find(
+  //               (ecg: any) => ecg.employeeGroup == itemClassificationEmployeeGroup,
+  //             )
+  //               ? true
+  //               : false;
 
-              // if job families are present, check that
-              const isJobFamilyAllowed =
-                itemJobFamilies.length === 0 || itemJobFamilies.some((jf: any) => jobFamilyIds.includes(jf.id));
+  //             // if job families are present, check that
+  //             const isJobFamilyAllowed =
+  //               itemJobFamilies.length === 0 || itemJobFamilies.some((jf: any) => jobFamilyIds.includes(jf.id));
 
-              // console.log('isClassificationAllowed: ', isClassificationAllowed);
-              // console.log('isEmployeeGroupAllowed: ', isEmployeeGroupAllowed);
-              // console.log('isJobFamilyAllowed: ', isJobFamilyAllowed);
+  //             // console.log('isClassificationAllowed: ', isClassificationAllowed);
+  //             // console.log('isEmployeeGroupAllowed: ', isEmployeeGroupAllowed);
+  //             // console.log('isJobFamilyAllowed: ', isJobFamilyAllowed);
 
-              return !(isClassificationAllowed && isEmployeeGroupAllowed && isJobFamilyAllowed);
-            }
+  //             return !(isClassificationAllowed && isEmployeeGroupAllowed && isJobFamilyAllowed);
+  //           }
 
-            return !(isJobFamilyAllowed && isStreamAllowed);
-          } else {
-            // console.log('item not found');
-            // item was not found - likely because we re-fetched the picklist data and it's no longer in the list
-            return true;
-          }
-        }
-        return false;
-      })
-      .map((field: any) => field.text);
+  //           return !(isJobFamilyAllowed && isStreamAllowed);
+  //         } else {
+  //           // console.log('item not found');
+  //           // item was not found - likely because we re-fetched the picklist data and it's no longer in the list
+  //           return true;
+  //         }
+  //       }
+  //       return false;
+  //     })
+  //     .map((field: any) => field.text);
 
-    // console.log('idsToRemove: ', idsToRemove);
+  //   // console.log('idsToRemove: ', idsToRemove);
 
-    const indexesToRemove = idsToRemove.map((text: any) =>
-      professionalRegistrationRequirementsFields.findIndex((field: any) => field.tc_is_readonly && field.text === text),
-    );
+  //   const indexesToRemove = idsToRemove.map((text: any) =>
+  //     professionalRegistrationRequirementsFields.findIndex((field: any) => field.tc_is_readonly && field.text === text),
+  //   );
 
-    // console.log('REMOVING indexesToRemove: ', indexesToRemove);
-    // Remove the professional registrations that no longer apply
-    // per documentaion this should work without timeout, however for some reason it doesn't
-    // delay removal
-    if (indexesToRemove.length > 0) {
-      const timeoutId = setTimeout(() => {
-        removeProfessionalRegistrationRequirement(indexesToRemove);
-        triggerProfileValidation();
-      }, 0);
-      return () => {
-        clearTimeout(timeoutId);
-      };
-    }
-    // refetchProfessionalRequirementsPickerData();
-  }, [
-    pickerData,
-    selectedProfession,
-    professionalRegistrationRequirementsFields,
-    selectedEmployeeClassificationGroups,
-    removeProfessionalRegistrationRequirement,
-    triggerProfileValidation,
-  ]);
+  //   // console.log('REMOVING indexesToRemove: ', indexesToRemove);
+  //   // Remove the professional registrations that no longer apply
+  //   // per documentaion this should work without timeout, however for some reason it doesn't
+  //   // delay removal
+  //   if (indexesToRemove.length > 0) {
+  //     const timeoutId = setTimeout(() => {
+  //       removeProfessionalRegistrationRequirement(indexesToRemove);
+  //       triggerProfileValidation();
+  //     }, 0);
+  //     return () => {
+  //       clearTimeout(timeoutId);
+  //     };
+  //   }
+  //   // refetchProfessionalRequirementsPickerData();
+  // }, [
+  //   pickerData,
+  //   selectedProfession,
+  //   professionalRegistrationRequirementsFields,
+  //   selectedEmployeeClassificationGroups,
+  //   removeProfessionalRegistrationRequirement,
+  //   triggerProfileValidation,
+  // ]);
 
-  useEffect(() => {
-    // console.log('selectedProfession change');
-    const hasRemoval = (prev: any, current: any) => {
-      if (!prev || !current) return false;
-      if (prev.length > current.length) return true;
-      return prev.some((prevItem: any, index: any) => {
-        const currentItem = current[index];
-        if (!currentItem) return true;
-        if (prevItem.jobFamily !== currentItem.jobFamily) return true;
-        return prevItem.jobStreams.length > currentItem.jobStreams.length;
-      });
-    };
+  // useEffect(() => {
+  // console.log('selectedProfession change');
+  // const hasRemoval = (prev: any, current: any) => {
+  //   if (!prev || !current) return false;
+  //   if (prev.length > current.length) return true;
+  //   return prev.some((prevItem: any, index: any) => {
+  //     const currentItem = current[index];
+  //     if (!currentItem) return true;
+  //     if (prevItem.jobFamily !== currentItem.jobFamily) return true;
+  //     return prevItem.jobStreams.length > currentItem.jobStreams.length;
+  //   });
+  // };
 
-    const removed = hasRemoval(prevProfessionsData.current, selectedProfession);
-    // console.log('removed: ', prevProfessionsData.current, selectedProfession, removed);
-    if (removed) {
-      handleStreamOrFamilyRemoval();
-    }
+  // const removed = hasRemoval(prevProfessionsData.current, selectedProfession);
+  // console.log('removed: ', prevProfessionsData.current, selectedProfession, removed);
+  // if (removed) {
+  //   handleStreamOrFamilyRemoval();
+  // }
 
-    // Update the ref with the new value
-    // console.log('SET: ', prevProfessionsData.current, selectedProfession);
-    prevProfessionsData.current = JSON.parse(JSON.stringify(selectedProfession));
-  }, [selectedProfession, handleStreamOrFamilyRemoval]);
+  // Update the ref with the new value
+  // console.log('SET: ', prevProfessionsData.current, selectedProfession);
+  //   prevProfessionsData.current = JSON.parse(JSON.stringify(selectedProfession));
+  // }, [selectedProfession, handleStreamOrFamilyRemoval]);
 
   const [basicFormErrors, setBasicFormErrors] = useState<any>({});
 
@@ -1228,17 +1228,17 @@ export const BasicDetails: React.FC<BasicDetailsProps> = ({}) => {
                                         <Col>
                                           <Button
                                             onClick={() => {
-                                              Modal.confirm({
-                                                title: 'Confirmation',
-                                                content:
-                                                  "Removing classification may result in updates to some of the system generated fields in the 'Job Profile' page. Are you sure you want to continue?",
-                                                onOk: () => {
-                                                  removeEmployeeGroup(index);
+                                              // Modal.confirm({
+                                              //   title: 'Confirmation',
+                                              //   content:
+                                              //     "Removing classification may result in updates to some of the system generated fields in the 'Job Profile' page. Are you sure you want to continue?",
+                                              //   onOk: () => {
+                                              removeEmployeeGroup(index);
 
-                                                  handleClassificationChange(null, index);
-                                                  triggerBasicDetailsValidation();
-                                                },
-                                              });
+                                              handleClassificationChange(null, index);
+                                              triggerBasicDetailsValidation();
+                                              //   },
+                                              // });
                                             }}
                                             icon={<DeleteOutlined />}
                                           ></Button>
@@ -1289,9 +1289,9 @@ export const BasicDetails: React.FC<BasicDetailsProps> = ({}) => {
                                             // selecting classification for the first time
                                             // - ensure that the minimum requirements and professional registrations are updated
                                             onChange(newValue);
-                                            const [id, employee_group_id, peoplesoft_id] = (newValue ?? '').split('.');
-                                            const classification = `${id}.${employee_group_id}.${peoplesoft_id}`;
-                                            updateMinimumRequirementsAndProfRegs(classification);
+                                            // const [id, employee_group_id, peoplesoft_id] = (newValue ?? '').split('.');
+                                            // const classification = `${id}.${employee_group_id}.${peoplesoft_id}`;
+                                            updateMinimumRequirementsAndProfRegs();
                                           }
                                           triggerBasicDetailsValidation();
                                         }}
@@ -1490,20 +1490,20 @@ export const BasicDetails: React.FC<BasicDetailsProps> = ({}) => {
                                     <Button
                                       disabled={index === 0 && selectedProfession?.[index]?.jobFamily === -1}
                                       onClick={() => {
-                                        Modal.confirm({
-                                          title: 'Confirmation',
-                                          content:
-                                            'Removing job family or stream may result in removal of some of the fields selected from pick lists in the Job Profile page. Are you sure you want to continue?',
-                                          onOk: () => {
-                                            remove(index);
-                                            // removing last one - append blank
-                                            if (selectedProfession?.length === 1) {
-                                              append({ jobFamily: -1, jobStreams: [] });
-                                            }
-                                            handleJobFamilyChange();
-                                            triggerBasicDetailsValidation();
-                                          },
-                                        });
+                                        // Modal.confirm({
+                                        //   title: 'Confirmation',
+                                        //   content:
+                                        //     'Removing job family or stream may result in removal of some of the fields selected from pick lists in the Job Profile page. Are you sure you want to continue?',
+                                        //   onOk: () => {
+                                        remove(index);
+                                        // removing last one - append blank
+                                        if (selectedProfession?.length === 1) {
+                                          append({ jobFamily: -1, jobStreams: [] });
+                                        }
+                                        handleJobFamilyChange();
+                                        triggerBasicDetailsValidation();
+                                        //   },
+                                        // });
                                       }}
                                       icon={<DeleteOutlined />}
                                     ></Button>
