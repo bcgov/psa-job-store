@@ -73,6 +73,9 @@ export enum FilterOperator {
   DecimalListHasSome = 'dcl.hs',
   DecimalListIsEmpty = 'dcl.mte',
 
+  //Enum
+  EnumEquals = 'e.eq',
+  EnumIn = 'e.in',
   // Float
   FloatEquals = 'f.eq',
   FloatIn = 'f.in',

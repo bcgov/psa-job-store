@@ -1,5 +1,5 @@
-/* eslint-disable @typescript-eslint/no-explicit-any */
 import {
+  BookOutlined,
   FileAddOutlined,
   FileDoneOutlined,
   FileOutlined,
@@ -11,7 +11,7 @@ import {
   PartitionOutlined,
   SettingOutlined,
 } from '@ant-design/icons';
-import { Flex, Menu } from 'antd';
+import { Divider, Flex, Menu } from 'antd';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation, useParams } from 'react-router-dom';
 import { useTypedSelector } from '../../../redux/redux.hooks';
@@ -33,6 +33,7 @@ export interface NavMenuProps {
 export const NavMenu = ({ collapsed }: NavMenuProps) => {
   const auth = useTypedSelector((state) => state.authReducer);
   const location = useLocation();
+  const params = useParams<Record<string, string>>();
 
   // Function to get all parent keys of a menu item
   const getParentKeys = useCallback((key: string, items: any[]): string[] => {
@@ -62,6 +63,20 @@ export const NavMenu = ({ collapsed }: NavMenuProps) => {
     return result || [];
   }, []);
 
+  // Extract the Help and Docs menu item
+  const helpMenuItem = useMemo(() => {
+    if (userCanAccess(auth.user, ['bceid', 'idir'])) {
+      return createMenuItem({
+        key: '/help',
+        icon: <BookOutlined aria-hidden />,
+        label: 'Help and Docs',
+        title: 'Help and Docs',
+      });
+    }
+    return null;
+  }, [auth.user]);
+
+  // Main menu items without the Help and Docs item
   const menuItems = useMemo(
     () => [
       ...(userCanAccess(auth.user, ['hiring-manager']) || userCanAccess(auth.user, ['total-compensation'])
@@ -101,7 +116,7 @@ export const NavMenu = ({ collapsed }: NavMenuProps) => {
               }),
             ]
           : [
-              // this is used to render create button only when one option is available
+              // This is used to render create button only when one option is available
               // (total-comp OR hiring-manager)
               {
                 key: 'create-button',
@@ -156,15 +171,6 @@ export const NavMenu = ({ collapsed }: NavMenuProps) => {
                       }),
                     ]
                   : []),
-                // ...(userCanAccess(auth.user, ['idir'])
-                //   ? [
-                //       createMenuItem({
-                //         key: '/job-profiles/saved',
-                //         icon: <FileDoneOutlined aria-hidden />,
-                //         label: 'Saved Profiles',
-                //       }),
-                //     ]
-                //   : []),
                 ...(userCanAccess(auth.user, ['total-compensation'])
                   ? [
                       createSubMenu({
@@ -245,6 +251,7 @@ export const NavMenu = ({ collapsed }: NavMenuProps) => {
             }),
           ]
         : []),
+
       ...(userCanAccess(auth.user, ['super-admin'])
         ? [
             createMenuGroup({
@@ -267,6 +274,7 @@ export const NavMenu = ({ collapsed }: NavMenuProps) => {
             }),
           ]
         : []),
+      // Removed the Help and Docs menu item from here
     ],
     [auth.user, collapsed],
   );
@@ -284,42 +292,31 @@ export const NavMenu = ({ collapsed }: NavMenuProps) => {
   }, []);
 
   const [openKeys, setOpenKeys] = useState<string[]>(() => {
-    // if side-menu is collapsed, do not expand any sub-menus, otherwise they just float, breaking the UI
-
+    // If side-menu is collapsed, do not expand any sub-menus, otherwise they just float, breaking the UI
     if (collapsed) {
-      // console.log('collapsed, initialize openKeys to empty array');
       return [];
     }
 
-    // attach parent keys of current path to openKeys
-    // this way the submenu of the current path will alwys be expanded
+    // Attach parent keys of current path to openKeys
+    // This way the submenu of the current path will always be expanded
     const parentKeys = getParentKeys(location.pathname, menuItems);
-    // console.log('parentKeys: ', parentKeys);
-
     const savedOpenKeys = localStorage.getItem('navMenuOpenKeys');
 
     if (savedOpenKeys) {
-      // console.log('initializing openKeys from localStorage: ', [...JSON.parse(savedOpenKeys), ...parentKeys]);
       return [...JSON.parse(savedOpenKeys), ...parentKeys];
     } else {
-      // console.log('initializing openKeys getKeysWithChildren: ', getKeysWithChildren(menuItems));
       return [...getKeysWithChildren(menuItems), ...parentKeys];
     }
   });
 
-  // store expanded sub-menus in separate state for when side-menu is expanded
+  // Store expanded sub-menus in separate state for when side-menu is expanded
   const [expandedOpenKeys, setExpandedOpenKeys] = useState<string[]>(() => {
     const savedOpenKeys = localStorage.getItem('navMenuOpenKeys');
-
-    // attach parent keys of current path to openKeys
-    // this way the submenu of the current path will alwys be expanded
     const parentKeys = getParentKeys(location.pathname, menuItems);
 
     if (savedOpenKeys) {
-      // console.log('initializing openKeys from localStorage: ', [...JSON.parse(savedOpenKeys), ...parentKeys]);
       return [...JSON.parse(savedOpenKeys), ...parentKeys];
     } else {
-      // console.log('initializing openKeys getKeysWithChildren: ', getKeysWithChildren(menuItems));
       return [...getKeysWithChildren(menuItems), ...parentKeys];
     }
   });
@@ -327,75 +324,77 @@ export const NavMenu = ({ collapsed }: NavMenuProps) => {
   // Effect to set initial localStorage openKeys
   useEffect(() => {
     if (!localStorage.getItem('navMenuOpenKeys')) {
-      // console.log('== navMenuOpenKeys not in localStorage, setting..');
       const allKeys = getKeysWithChildren(menuItems);
-      // console.log('allKeys: ', allKeys);
       localStorage.setItem('navMenuOpenKeys', JSON.stringify(allKeys));
 
-      // if side menu is visible, expand all items initially
+      // If side menu is visible, expand all items initially
       if (!collapsed) {
-        // console.log('not collapsed, setOpenKeys: ', allKeys);
         setOpenKeys(allKeys);
       }
     }
   }, [menuItems, collapsed, getKeysWithChildren]);
 
   const onOpenChange = (keys: string[]) => {
-    // console.log('onOpenChange: ', ', collapsed: ', collapsed, 'setOpenKeys');
     setOpenKeys(keys);
 
-    // this callback gets triggered when side menu is collapsed and expanded,
-    // so update localStorage for expanded keys only in response to user expanding the sub-menus
-    // otherwise will clear localStorage when side-menu is collapsed
+    // Update localStorage for expanded keys only in response to user expanding the sub-menus
     if (!collapsed) {
-      // console.log('not collapsed, setting expandedOpenKeys: ', keys);
       localStorage.setItem('navMenuOpenKeys', JSON.stringify(keys));
       setExpandedOpenKeys(keys);
     }
   };
 
   useEffect(() => {
-    // if user expands the side menu, recover expanded sub-menu keys
-    // without this the sub-menus will be collapsed when user expands the side menu
+    // If user expands the side menu, recover expanded sub-menu keys
     if (!collapsed) {
-      // console.log('not collapsed, setOpenKeys from expandedOpenKeys: ', expandedOpenKeys);
       setOpenKeys(expandedOpenKeys);
     }
   }, [setOpenKeys, expandedOpenKeys, collapsed]);
-  const params = useParams<Record<string, string>>();
+
+  // Combine the selected keys for both menus
+  const selectedKeys = useMemo(() => {
+    if (location.pathname === '/requests/positions/create' || location.pathname === '/job-profiles/manage/create') {
+      return [];
+    }
+    return [Object.values(params).reduce((path, param) => path?.replace('/' + param, ''), location.pathname) ?? '/'];
+  }, [location.pathname, params]);
+
   return (
     <Flex
       vertical
-      style={{ paddingTop: 0, width: '100%' }}
+      style={{ paddingTop: 0, width: '100%', height: '100%', display: 'flex', flexDirection: 'column' }}
       className={`${collapsed ? 'collapsed' : 'expanded'} jobstore-side-menu`}
       data-testid="menu-options"
     >
-      {/* {userCanAccess(auth.user, ['hiring-manager', 'total-compensation']) && <CreateButton collapsed={collapsed} />} */}
+      {/* Main Menu */}
       <Menu
         aria-label="Main menu - use arrow keys to navigate"
         rootClassName="jobstore-side-menu-popup"
         inlineIndent={16}
         mode="inline"
-        // Do not highlight active state of these two menu items
-        // as they are action buttons
-        selectedKeys={
-          location.pathname == '/requests/positions/create' || location.pathname == '/job-profiles/manage/create'
-            ? []
-            : [Object.values(params).reduce((path, param) => path?.replace('/' + param, ''), location.pathname) ?? '/']
-        }
+        selectedKeys={selectedKeys}
         theme="light"
         items={menuItems}
         openKeys={openKeys}
         onOpenChange={onOpenChange}
-        // onFocus={(e) => {
-        //   console.log('onFocus menu: ', e);
-        //   // if the focused element is not a menu item, focus on the first menu item
-        //   // if (!e.target.classList.contains('ant-menu-item')) {
-        //   //   const firstMenuItem = document.querySelector('.ant-menu-item');
-        //   //   (firstMenuItem as HTMLElement)?.focus();
-        //   // }
-        // }}
+        style={{ flex: '1 1 auto' }} // Make the main menu take available space
       />
+      {/* Help and Docs Menu Item */}
+      {helpMenuItem && (
+        <>
+          <Divider />
+          <Menu
+            aria-label="Help and Docs menu - use arrow keys to navigate"
+            inlineIndent={16}
+            mode="inline"
+            selectedKeys={selectedKeys}
+            theme="light"
+            items={[helpMenuItem]}
+            openKeys={[]}
+            style={{ flex: '0 0 auto' }} // Ensure it doesn't grow
+          />
+        </>
+      )}
     </Flex>
   );
 };

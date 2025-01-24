@@ -230,19 +230,10 @@ export const BasicDetails: React.FC<BasicDetailsProps> = ({}) => {
         );
       }
 
-      const allOrganizationsValue = jobProfileData.jobProfile.all_organizations;
-      if (allOrganizationsValue) {
-        // If 'all_organizations' is true, set 'ministries' to all possible values
-        const allValues = allMinistriesData?.organizations?.map((m) => m?.id?.toString() ?? '') || [];
-        setValue('ministries', allValues);
-      } else {
-        // If 'all_organizations' is false, set 'ministries' to specific values
-        setValue(
-          'ministries',
-          jobProfileData.jobProfile.organizations.map((org: any) => org.organization.id),
-        );
-      }
-      setValue('all_organizations', allOrganizationsValue);
+      setValue(
+        'ministries',
+        jobProfileData.jobProfile.organizations.map((org: any) => org.organization.id),
+      );
 
       triggerBasicDetailsValidation();
     } else {
@@ -530,8 +521,6 @@ export const BasicDetails: React.FC<BasicDetailsProps> = ({}) => {
 
   // END BASIC DETAILS FORM
 
-  const allOrganizations = watch('all_organizations');
-
   const { data: classificationsData } = useGetFilteredClassificationsQuery();
 
   // PICKER DATA
@@ -545,7 +534,7 @@ export const BasicDetails: React.FC<BasicDetailsProps> = ({}) => {
           selectedEmployeeClassificationGroups.at(0)?.classification?.split('.')[1] == cl.employee_group_id &&
           selectedEmployeeClassificationGroups.at(0)?.classification?.split('.')[2] == cl.peoplesoft_id,
       ) as ClassificationModel[],
-      ministryIds: !allOrganizations ? selectedMinistry : undefined,
+      ministryIds: selectedMinistry,
       jobFamilyWithNoStream: selectedProfession
         .filter((p: any) => p.jobStreams.length === 0)
         .map((p: any) => p.jobFamily),
@@ -1755,7 +1744,6 @@ export const BasicDetails: React.FC<BasicDetailsProps> = ({}) => {
                                   setValue(a, b);
                                   triggerBasicDetailsValidation();
                                 }}
-                                allOrganizations={allOrganizations}
                               />
                             </>
                           )}
@@ -1763,13 +1751,7 @@ export const BasicDetails: React.FC<BasicDetailsProps> = ({}) => {
                         <WizardValidationError formErrors={basicFormErrors} fieldName="ministries" />
                       </>
                     ) : (
-                      <>
-                        {allOrganizations ? (
-                          <Tag>All Organizations</Tag>
-                        ) : (
-                          jobProfileData?.jobProfile.organizations.map((o: any) => <Tag>{o.organization.name}</Tag>)
-                        )}
-                      </>
+                      <>{jobProfileData?.jobProfile.organizations.map((o: any) => <Tag>{o.organization.name}</Tag>)}</>
                     )}
                   </Form.Item>
                 </Col>

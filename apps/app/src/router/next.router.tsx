@@ -9,6 +9,11 @@ import { LoginPage } from '../routes/auth/login.page';
 import { ClassificationTasksRoute } from '../routes/classification-tasks';
 import { ClassificationTaskPage } from '../routes/classification-tasks/classification-task.page';
 import { ClassificationTasksPage } from '../routes/classification-tasks/classification-tasks.page';
+import { HelpRoute } from '../routes/help';
+import DocumentRedirect from '../routes/help/documentRedirect.component';
+import { EditDocumentPage } from '../routes/help/edit.page';
+import { HelpPage } from '../routes/help/help.page';
+import { UploadHelpDocPage } from '../routes/help/upload.page';
 import { HomeRoute } from '../routes/home';
 import { HomePage } from '../routes/home/components/home-page.component';
 import { JobProfilesRoute } from '../routes/job-profiles';
@@ -85,6 +90,40 @@ export const nextRouter = createBrowserRouter([
                 handle: {},
                 element: <HomePage />,
               },
+              {
+                path: 'help',
+                handle: {
+                  breadcrumb: () => 'Help and Documentation',
+                },
+                element: <HelpRoute />,
+                children: [
+                  {
+                    index: true,
+                    element: <HelpPage />,
+                  },
+                  {
+                    path: 'upload',
+                    element: <UploadHelpDocPage />,
+                    handle: {
+                      breadcrumb: () => 'Upload',
+                    },
+                  },
+                  {
+                    path: 'edit/:id',
+                    element: <EditDocumentPage />,
+                    handle: {
+                      breadcrumb: () => 'Edit',
+                    },
+                  },
+                  // In your router configuration
+                  {
+                    path: 'url/:url/file',
+                    element: <DocumentRedirect />,
+                  },
+                ],
+              },
+
+              // Org Chart
               {
                 path: 'my-departments',
                 element: <OrgChartRoute />,

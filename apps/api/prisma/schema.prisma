@@ -170,7 +170,6 @@ model JobProfile {
   behavioural_competencies Json?                      @db.JsonB
   classifications          JobProfileClassification[]
   organizations            JobProfileOrganization[]
-  all_organizations        Boolean                    @default(true)
   all_reports_to           Boolean                    @default(false)
 
   context         String?
@@ -230,7 +229,6 @@ view CurrentJobProfile {
   behavioural_competencies               Json?                      @db.JsonB
   classifications                        JobProfileClassification[] @relation("currentJobProfileClassifications")
   organizations                          JobProfileOrganization[]   @relation("currentJobProfileOrganizations")
-  all_organizations                      Boolean
   all_reports_to                         Boolean
   context                                String?
   role                                   JobProfileRole?            @relation(fields: [role_id], references: [id])
@@ -425,6 +423,7 @@ model JobProfileJobFamily {
   JobProfileStream                    JobProfileStream[]
   ProfessionalRegistrationRequirement ProfessionalRegistrationRequirement[]
   SecurityScreening                   SecurityScreening[]
+  DocumentJobFamilyLink               DocumentJobFamilyLink[]
 
   @@map("job_profile_job_family")
 }
@@ -474,12 +473,13 @@ model JobProfileRoleType {
 }
 
 model JobProfileStream {
-  id            Int                    @id @default(autoincrement())
-  job_family    JobProfileJobFamily    @relation(fields: [job_family_id], references: [id])
-  job_family_id Int
-  name          String
-  jobProfiles   JobProfileStreamLink[]
+  id                    Int                     @id @default(autoincrement())
+  job_family            JobProfileJobFamily     @relation(fields: [job_family_id], references: [id])
+  job_family_id         Int
+  name                  String
+  jobProfiles           JobProfileStreamLink[]
   // job_profiles  JobProfile[]
+  DocumentJobStreamLink DocumentJobStreamLink[]
 
   @@map("job_profile_stream")
 }
@@ -600,4 +600,47 @@ model CronLock {
   locked_at DateTime @default(now())
 
   @@map("cron_locks")
+}
+
+model Document {
+  id             String                  @id @default(uuid())
+  file_extension String
+  title          String
+  description    String?
+  url            String?                 @unique
+  category       DocumentCategory
+  jobFamilies    DocumentJobFamilyLink[]
+  streams        DocumentJobStreamLink[]
+  created_at     DateTime                @default(now())
+  updated_at     DateTime                @default(now()) @updatedAt
+
+  @@map("document")
+}
+
+model DocumentJobFamilyLink {
+  documentId  String
+  jobFamilyId Int
+  jobFamily   JobProfileJobFamily @relation(fields: [jobFamilyId], references: [id])
+
+  Document Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@id([documentId, jobFamilyId])
+  @@map("document_job_family_link")
+}
+
+model DocumentJobStreamLink {
+  documentId  String
+  jobStreamId Int
+  jobStream   JobProfileStream @relation(fields: [jobStreamId], references: [id])
+
+  Document Document @relation(fields: [documentId], references: [id], onDelete: Cascade)
+
+  @@id([documentId, jobStreamId])
+  @@map("document_job_stream_link")
+}
+
+enum DocumentCategory {
+  CAREER_MAP
+  REFERENCE_GUIDE
+  RESOURCES
 }

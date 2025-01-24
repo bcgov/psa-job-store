@@ -4,7 +4,6 @@ import { useNavigate } from 'react-router-dom';
 import {
   ClassificationConnectInput,
   CreateJobProfileInput,
-  OrganizationConnectInput,
 } from '../../../redux/services/graphql-api/job-profile-types';
 import {
   useCreateOrUpdateJobProfileMutation,
@@ -150,7 +149,6 @@ function transformFormDataToApiSchema({ formData, id, jobProfileData }: any): Cr
         }))
         .filter((acc: { text: string }) => acc.text?.trim() !== ''),
       all_reports_to: formData.all_reports_to,
-      all_organizations: formData.all_organizations,
       total_comp_create_form_misc: {
         markAllNonEditable: formData.markAllNonEditable,
         markAllSignificant: formData.markAllSignificant,
@@ -190,13 +188,11 @@ function transformFormDataToApiSchema({ formData, id, jobProfileData }: any): Cr
             })),
           },
         }),
-      organizations: formData.all_organizations
-        ? { create: [] as OrganizationConnectInput[] }
-        : {
-            create: formData.ministries.map((orgId: any) => ({
-              organization: { connect: { id: orgId } },
-            })),
-          },
+      organizations: {
+        create: formData.ministries.map((orgId: any) => ({
+          organization: { connect: { id: orgId } },
+        })),
+      },
       context: formData.jobContext,
       ...(formData.jobRole && {
         role: { connect: { id: formData.jobRole } },

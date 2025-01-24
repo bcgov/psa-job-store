@@ -235,7 +235,6 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
       classificationReviewRequired: false,
       jobContext: '',
       all_reports_to: false,
-      all_organizations: true,
     },
   });
 

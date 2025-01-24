@@ -61,7 +61,6 @@ export class PGLitePrismaService extends ExtendedPrismaClient implements OnModul
         CREATE OR REPLACE VIEW public.current_job_profiles
      AS
      SELECT jp.id,
-        jp.all_organizations,
         jp.all_reports_to,
         jp.role_id,
         jp.role_type_id,

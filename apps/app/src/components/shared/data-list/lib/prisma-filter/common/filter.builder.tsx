@@ -40,13 +40,16 @@ export class FilterBuilder<T = Record<string, unknown>> {
       parts.forEach((part) => {
         const { field, path, operator, value: rawValue } = re.exec(part)?.groups ?? Object.create(null);
 
-        const value = decodeURIComponent(rawValue);
-
+        let value: any = decodeURIComponent(rawValue);
+        const numberPattern = /^[0-9]+(?:,[0-9]+)*$/;
+        if (numberPattern.test(value)) {
+          value = value.split(',').map((val: string) => Number(val)); // not in the correct format
+        }
         this.addFilter({
           field: field as keyof T & string,
           path: typeof path === 'string' && path.length > 0 ? path.split('.') : undefined,
           operator: operator as FilterOperator,
-          value,
+          value: value,
         });
       });
     }
@@ -286,6 +289,9 @@ export class FilterBuilder<T = Record<string, unknown>> {
           mode: operator.endsWith('.i') ? 'insensitive' : 'default',
         };
       case FilterOperator.StringListHasSome:
+      case FilterOperator.EnumEquals:
+      case FilterOperator.EnumIn:
+      case FilterOperator.IntIn:
         return {
           [this.normalizeFilterOperator(operator)]: normalizedValue,
         };
@@ -305,9 +311,14 @@ export class FilterBuilder<T = Record<string, unknown>> {
         return 'equals';
       case FilterOperator.StringIn:
       case FilterOperator.StringIIn:
+      case FilterOperator.EnumIn:
+      case FilterOperator.IntIn:
         return 'in';
       case FilterOperator.StringListHasSome:
         return 'hasSome';
+      // ---> NEW CASE FOR ENUM EQUALS <---
+      case FilterOperator.EnumEquals:
+        return 'equals';
       default:
         throw new Error(`normalizeFilterOperator: ${operator} is not a valid filter operator`);
     }
@@ -320,9 +331,13 @@ export class FilterBuilder<T = Record<string, unknown>> {
   ): string | number | boolean | string[] | number[] | boolean[] | (string | number | boolean)[] | null {
     if (Array.isArray(value)) {
       if (
-        [FilterOperator.StringIn, FilterOperator.StringIIn, FilterOperator.StringListHasSome].includes(
-          operator as FilterOperator,
-        )
+        [
+          FilterOperator.StringIn,
+          FilterOperator.StringIIn,
+          FilterOperator.StringListHasSome,
+          FilterOperator.EnumIn,
+          FilterOperator.IntIn,
+        ].includes(operator as FilterOperator)
       ) {
         return value;
       }
@@ -337,11 +352,15 @@ export class FilterBuilder<T = Record<string, unknown>> {
     }
 
     if (
-      [FilterOperator.StringIn, FilterOperator.StringIIn, FilterOperator.StringListHasSome].includes(
-        operator as FilterOperator,
-      )
+      [
+        FilterOperator.StringIn,
+        FilterOperator.StringIIn,
+        FilterOperator.StringListHasSome,
+        FilterOperator.EnumIn,
+        FilterOperator.IntIn,
+      ].includes(operator as FilterOperator)
     ) {
-      return (value as string).split(',');
+      return operator.startsWith('i') ? value : (value as string).split(',');
     }
 
     return !isNaN(+value) ? +value : value;
