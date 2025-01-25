@@ -1,11 +1,11 @@
-import { MenuFoldOutlined, MenuUnfoldOutlined } from '@ant-design/icons';
-import { Button, Layout } from 'antd';
+import { Layout } from 'antd';
 import { useEffect, useState } from 'react';
 import { useLocation } from 'react-router-dom';
 import { useLocalStorage } from 'usehooks-ts';
 import { useTypedSelector } from '../../redux/redux.hooks';
 import { ErrorBoundaryLayout } from '../../routes/not-found/error';
 import { AppHeader } from '../app/header.component';
+import { useWindowWidth } from './common/hooks/use-window-width';
 import { NavMenu } from './components/nav-menu.component';
 import styles from './sider.module.css';
 
@@ -21,18 +21,6 @@ const RenderOutlet = () => {
   ) : (
     <></>
   );
-};
-
-const useWindowWidth = () => {
-  const [width, setWidth] = useState(window.innerWidth);
-
-  useEffect(() => {
-    const handleResize = () => setWidth(window.innerWidth);
-    window.addEventListener('resize', handleResize);
-    return () => window.removeEventListener('resize', handleResize);
-  }, []);
-
-  return width;
 };
 
 const useScrollPosition = () => {
@@ -78,7 +66,7 @@ export const AppLayout = () => {
 
   return (
     <Layout style={{ minHeight: '100vh' }} id="layout">
-      <AppHeader collapsed={collapsed} setCollapsed={setCollapsed} isMobile={isMobile} />
+      <AppHeader collapsed={collapsed} setCollapsed={setCollapsed} />
       <Layout hasSider style={{ flex: '1' }} id="layout2">
         {isMobile && !collapsed && <div className={styles.overlay} onClick={handleOverlayClick} role="presentation" />}
         {auth.isAuthenticated && (
@@ -89,22 +77,23 @@ export const AppLayout = () => {
             role="navigation"
             className={`${styles.sider} ${collapsed ? styles.collapsed : styles.expanded} ${import.meta.env.VITE_ENV != 'production' ? styles.siderdev : ''} ${siderScrolledPastHeader ? styles.scrolled : ''}`}
             theme="light"
-            trigger={
-              !isMobile ? (
-                <Button
-                  data-testid="menu-toggle-btn"
-                  aria-label={collapsed ? 'Expand side navigation' : 'Collapse side navigation'}
-                  icon={collapsed ? <MenuUnfoldOutlined aria-hidden /> : <MenuFoldOutlined aria-hidden />}
-                  onClick={() => setCollapsed(!collapsed)}
-                  type="link"
-                  style={{
-                    color: '#000',
-                    fontSize: '16px',
-                    margin: '0.5rem 0 0.5rem 0.75rem',
-                  }}
-                />
-              ) : null
-            }
+            trigger={<></>}
+            // trigger={
+            //   !isMobile ? (
+            //     <Button
+            //       data-testid="menu-toggle-btn"
+            //       aria-label={collapsed ? 'Expand side navigation' : 'Collapse side navigation'}
+            //       icon={collapsed ? <MenuUnfoldOutlined aria-hidden /> : <MenuFoldOutlined aria-hidden />}
+            //       onClick={() => setCollapsed(!collapsed)}
+            //       type="link"
+            //       style={{
+            //         color: '#000',
+            //         fontSize: '16px',
+            //         margin: '0.5rem 0 0.5rem 0.75rem',
+            //       }}
+            //     />
+            //   ) : null
+            // }
           >
             <NavMenu collapsed={collapsed} />
           </Sider>

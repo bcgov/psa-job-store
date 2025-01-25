@@ -5,6 +5,7 @@ import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import Select, { components } from 'react-select';
 import AccessibleTreeSelect from '../../../components/app/common/components/accessible-tree-select';
+import { useWindowWidth } from '../../../components/app/common/hooks/use-window-width';
 import { useGetJobFamiliesQuery } from '../../../redux/services/graphql-api/job-family.api';
 import {
   JobProfileStreamModel,
@@ -573,6 +574,10 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
   const treeSelectValues = [...selectedJobFamilyValues, ...selectedJobStreamValues];
   // console.log('treeSelectValues: ', treeSelectValues);
 
+  const windowWidth = useWindowWidth();
+  const hasMinistryFilter = ministriesFilterData.length > 1;
+  const isMobile = hasMinistryFilter ? windowWidth <= 1545 : windowWidth <= 1360;
+
   return (
     <Row
       justify="center"
@@ -585,7 +590,7 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
         <Col sm={24} md={24} lg={24} xl={24} xxl={fullWidth ? 24 : 22}>
           <Card style={{ marginTop: '1rem', marginBottom: '1rem', borderColor: '#D9D9D9' }} bordered={true}>
             <Row gutter={24}>
-              <Col xl={6} lg={8} md={12} sm={24}>
+              <Col span={isMobile ? 24 : hasMinistryFilter ? 6 : 9}>
                 <Search
                   // defaultValue={searchParams.get('search') ?? undefined}
                   enterButton="Find job profiles"
@@ -620,10 +625,10 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
                 />
               </Col>
 
-              <Col xl={18} lg={16} md={12} sm={24}>
-                <Row gutter={8} justify="end">
-                  {ministriesFilterData.length > 1 && (
-                    <Col data-testid="Ministry-filter" data-cy="Ministry-filter">
+              <Col span={isMobile ? 24 : hasMinistryFilter ? 18 : 15}>
+                <Row gutter={8} justify="end" style={{ marginTop: isMobile ? '0.5rem' : '0' }}>
+                  {hasMinistryFilter && (
+                    <Col data-testid="Ministry-filter" data-cy="Ministry-filter" span={isMobile ? 6 : undefined}>
                       {/* dragon naturally speaking doesn't pick up on aria-label alone */}
                       <Form.Item label="Ministries" className="sr-only-label" style={{ marginBottom: '0' }}>
                         <Select
@@ -638,7 +643,7 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
                               .includes(jf.value),
                           )}
                           styles={{
-                            container: (css) => ({ ...css, width: '200px' }),
+                            container: (css) => ({ ...css, width: isMobile ? 'auto' : '200px' }),
                             menu: (styles) => ({ ...styles, width: 'max-content', minWidth: '100%' }),
                           }}
                           components={{
@@ -664,9 +669,13 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
                       </Form.Item>
                     </Col>
                   )}
-                  <Col data-testid="Job Family-filter" data-cy="Job Family-filter">
+                  <Col
+                    data-testid="Job Family-filter"
+                    data-cy="Job Family-filter"
+                    span={isMobile ? (hasMinistryFilter ? 6 : 8) : undefined}
+                  >
                     <AccessibleTreeSelect
-                      width={'300px'}
+                      width={isMobile ? '100%' : '300px'}
                       placeholderText={'Profession and Discipline'}
                       treeData={JSON.parse(JSON.stringify(treeData))}
                       treeValue={treeSelectValues}
@@ -720,7 +729,11 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
                       }}
                     />
                   </Col>
-                  <Col data-testid="Job role type-filter" data-cy="Job role type-filter">
+                  <Col
+                    data-testid="Job role type-filter"
+                    data-cy="Job role type-filter"
+                    span={isMobile ? (hasMinistryFilter ? 6 : 8) : undefined}
+                  >
                     {/* dragon naturally speaking doesn't pick up on aria-label alone */}
                     <Form.Item label="Role" className="sr-only-label" style={{ marginBottom: '0' }}>
                       <Select
@@ -735,7 +748,7 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
                             .includes(jf.value),
                         )}
                         styles={{
-                          container: (css) => ({ ...css, width: '200px' }),
+                          container: (css) => ({ ...css, width: isMobile ? 'auto' : '200px' }),
                           menu: (styles) => ({ ...styles, width: 'max-content', minWidth: '100%' }),
                         }}
                         components={{
@@ -760,7 +773,11 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
                       ></Select>
                     </Form.Item>
                   </Col>
-                  <Col data-testid="Classification-filter" data-cy="Classification-filter">
+                  <Col
+                    data-testid="Classification-filter"
+                    data-cy="Classification-filter"
+                    span={isMobile ? (hasMinistryFilter ? 6 : 8) : undefined}
+                  >
                     {/* dragon naturally speaking doesn't pick up on aria-label alone */}
                     <Form.Item label="Classification" className="sr-only-label" style={{ marginBottom: '0' }}>
                       <Select
@@ -775,7 +792,7 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
                             .includes(jf.value),
                         )}
                         styles={{
-                          container: (css) => ({ ...css, width: '200px' }),
+                          container: (css) => ({ ...css, width: isMobile ? 'auto' : '200px' }),
                           menu: (base) => ({
                             ...base,
                             width: 'max-content',
@@ -827,46 +844,6 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
                       ></Select>
                     </Form.Item>
                   </Col>
-
-                  {/* if filters contains careerGroup, then render it */}
-                  {/* {additionalFilters && (
-                  <Col data-testid="Career-group-filter" data-cy="Career-group-filter">
-                    <Select
-                      closeMenuOnSelect={false}
-                      isClearable={false}
-                      backspaceRemovesValue={false}
-                      hideSelectedOptions={false}
-                      value={careerGroupFilterData.filter((jf) =>
-                        allSelections
-                          .filter((selection) => selection.type === 'careerGroup')
-                          .map((selection) => selection.value)
-                          .includes(jf.value),
-                      )}
-                      styles={{
-                        container: (css) => ({ ...css, width: '200px' }),
-                        menu: (styles) => ({ ...styles, width: 'max-content', minWidth: '100%' }),
-                      }}
-                      components={{
-                        ValueContainer: CustomValueContainer,
-                      }}
-                      classNamePrefix="react-select"
-                      isMulti
-                      placeholder="Career Group"
-                      options={careerGroupFilterData}
-                      onChange={(selectedItems) => {
-                        const newValues = selectedItems.map((item) => item.value);
-                        if (newValues == null) return;
-
-                        newValues.forEach((val: any) => {
-                          if (!selectedCareerGroup.includes(val)) addSelection(val, 'careerGroup');
-                        });
-                        selectedCareerGroup.forEach((val) => {
-                          if (!newValues.includes(val)) removeSelection(val, 'careerGroup');
-                        });
-                      }}
-                    ></Select>
-                  </Col>
-                )} */}
                 </Row>
               </Col>
               {allSelections.length > 0 && (

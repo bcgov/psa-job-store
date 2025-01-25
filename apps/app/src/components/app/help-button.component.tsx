@@ -38,7 +38,11 @@ export const HelpButton = () => {
       }}
       trigger={['click']}
     >
-      <Button type="link" icon={<QuestionCircleOutlined aria-hidden />} style={{ color: 'white' }} />
+      <Button
+        type="link"
+        icon={<QuestionCircleOutlined style={{ fontSize: '1.3rem' }} aria-hidden />}
+        style={{ color: 'white' }}
+      />
     </Dropdown>
   );
 };
