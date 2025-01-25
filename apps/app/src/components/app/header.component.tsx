@@ -13,10 +13,9 @@ const { Text } = Typography;
 export interface AppHeaderProps {
   collapsed: boolean;
   setCollapsed: (collapsed: boolean) => void;
-  isMobile?: boolean;
 }
 
-export const AppHeader = ({ collapsed, setCollapsed, isMobile }: AppHeaderProps) => {
+export const AppHeader = ({ collapsed, setCollapsed }: AppHeaderProps) => {
   const auth = useTypedSelector((state) => state.authReducer);
 
   const handleLogout = async () => {
@@ -59,14 +58,13 @@ export const AppHeader = ({ collapsed, setCollapsed, isMobile }: AppHeaderProps)
       <Header className={styles.appHeader} style={{ zIndex: 1001 }}>
         <Row align="middle" justify="space-between" style={{ width: '100%' }} role="navigation">
           <Col className={styles.left}>
-            {auth.isAuthenticated && isMobile && (
+            {auth.isAuthenticated && (
               <Button
                 data-testid="menu-toggle-btn-mobile"
                 type="text"
                 icon={<MenuOutlined aria-hidden style={{ fontSize: '1.3rem' }} />}
                 onClick={() => setCollapsed(!collapsed)}
                 style={{
-                  marginRight: '16px',
                   color: 'white',
                 }}
                 aria-label={collapsed ? 'Expand side navigation' : 'Collapse side navigation'}
@@ -85,7 +83,7 @@ export const AppHeader = ({ collapsed, setCollapsed, isMobile }: AppHeaderProps)
           <Col className={styles.right}>
             {auth.isAuthenticated && (
               <div className={styles.headerToolbar}>
-                <div className={styles.iconWrapper} style={{ marginTop: '7px' }}>
+                <div className={styles.iconWrapper}>
                   <HelpButton />
                 </div>
 
@@ -108,7 +106,9 @@ export const AppHeader = ({ collapsed, setCollapsed, isMobile }: AppHeaderProps)
                         // <UserOutlined style={{ color: 'white' }} aria-hidden />
                       }
                     >
-                      <Text style={{ color: 'white' }}>{auth.user ? (auth.user.name as string) : ''}</Text>
+                      <Text className={styles.username} style={{ color: 'white' }}>
+                        {auth.user ? (auth.user.name as string) : ''}
+                      </Text>
                     </Button>
                   }
                   content={content}

@@ -19,6 +19,7 @@ import { CSSProperties, useEffect, useState } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import LoadingSpinnerWithMessage from '../../../components/app/common/components/loading.component';
 import '../../../components/app/common/css/custom-descriptions.css';
+import { useWindowWidth } from '../../../components/app/common/hooks/use-window-width';
 import { VersionSelect } from '../../../components/app/version-select.component';
 import { DownloadJobProfileComponent } from '../../../components/shared/download-job-profile/download-job-profile.component';
 import { useTypedSelector } from '../../../redux/redux.hooks';
@@ -656,6 +657,10 @@ export const JobProfile: React.FC<JobProfileProps> = ({
     return comparisonResult;
   };
 
+  const windowWidth = useWindowWidth();
+  const singleColumnJobProfile = windowWidth <= 1286;
+  // const compactBasicInfo = windowWidth <= 1600;
+
   // Construct the back URL
   // const backUrl = `/job-profiles?${searchParams}`;
 
@@ -670,7 +675,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
       key: 'number',
       label: <h3 tabIndex={0}>Job Store #</h3>,
       children: <span tabIndex={0}>{effectiveData?.number}</span>,
-      span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
+      span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24, xxl: 12 },
     },
     {
       key: 'profileversion',
@@ -683,7 +688,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
           </Typography.Text>
         </div>
       ),
-      span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
+      span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24, xxl: 12 },
     },
 
     {
@@ -700,13 +705,13 @@ export const JobProfile: React.FC<JobProfileProps> = ({
           )}
         </span>
       ),
-      span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
+      span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24, xxl: 12 },
     },
     {
       key: 'Jobrole',
       label: <h3 tabIndex={0}>Job role</h3>,
       children: <span tabIndex={0}>{effectiveDataExtra?.role?.name}</span>,
-      span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
+      span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24, xxl: 12 },
     },
     {
       key: 'Roletype',
@@ -716,7 +721,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
           {effectiveDataExtra?.role_type?.name ? effectiveDataExtra?.role_type?.name : 'Unknown'}
         </span>
       ),
-      span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
+      span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24, xxl: 12 },
     },
     {
       key: 'Scopeofresponsibility',
@@ -737,7 +742,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
               .join(', ')}
         </span>
       ),
-      span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
+      span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24, xxl: 12 },
     },
     {
       key: 'Professionsanddisciplines',
@@ -759,7 +764,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
           })}
         </div>
       ),
-      span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
+      span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24, xxl: 12 },
     },
   ];
 
@@ -779,7 +784,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
               : effectiveData?.title?.text}
         </span>
       ),
-      span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
+      span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 12 },
     },
 
     {
@@ -797,7 +802,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
       ),
 
       // children: <div tabIndex={0}>{originalData?.classifications?.map((c) => c.classification?.code).join(', ')}</div>,
-      span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
+      span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 12 },
     },
     ...(effectiveData?.program_overview &&
     (effectiveData?.program_overview as any).text && // if program overview field is present AND it's not empty
@@ -1385,6 +1390,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
       </div>
 
       <Descriptions
+        layout={singleColumnJobProfile ? 'vertical' : 'horizontal'}
         aria-hidden
         className="customDescriptions"
         title={

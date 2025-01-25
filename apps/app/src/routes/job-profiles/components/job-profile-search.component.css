@@ -75,3 +75,17 @@ the input box renders at the beginning of the box, instead of after placeholder
 .sr-only-label label{
     width:0;
 }
+
+@media (max-width: 1023px) {
+    .card-context, .card-overview, .card-see-details{
+        display:none;
+    }
+
+    .card-actions{
+        position:static !important;
+        margin-left: -8px;
+    }
+    .card-save-button-space{
+        display:none;
+    }
+}
