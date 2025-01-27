@@ -179,6 +179,10 @@ const TreeViewDropdown = ({
                     style={{ display: 'inline-flex', alignItems: 'center' }}
                   >
                     <CheckBoxIcon
+                      onClick={(e: any) => {
+                        handleSelect(e);
+                        e.stopPropagation();
+                      }}
                       tabIndex={0}
                       className="checkbox-icon"
                       variant={isHalfSelected ? 'some' : isSelected ? 'all' : 'none'}
@@ -397,6 +401,7 @@ const AccessibleTreeSelect = ({
           style={{ width: width ?? 250, height: '38px' }}
           placeholder={placeholderText}
           open={open}
+          popupMatchSelectWidth={false}
           onDropdownVisibleChange={handleDropdownVisibleChange}
           showSearch
           onSearch={handleSearch}

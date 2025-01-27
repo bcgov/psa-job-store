@@ -9,6 +9,7 @@ interface DecodedToken {
 
 export const loggerFactory = () => {
   const NODE_ENV = process.env.NODE_ENV;
+  const SKIP_LOGGING = process.env.SKIP_LOGGING;
 
   return {
     // formatters doesn't work when using multiple transport targets,
@@ -51,7 +52,7 @@ export const loggerFactory = () => {
           },
           level: NODE_ENV !== 'production' ? 'debug' : 'info',
         },
-        ...(NODE_ENV == 'production'
+        ...(NODE_ENV == 'production' && SKIP_LOGGING !== 'true'
           ? [
               {
                 target: 'pino/file',
