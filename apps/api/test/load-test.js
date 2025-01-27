@@ -1,6 +1,5 @@
 /* eslint-disable import/no-unresolved -- k6 imports are resolved at runtime by the k6 engine */
 import { check, group, sleep } from 'k6';
-import { test } from 'k6/execution';
 import http from 'k6/http';
 
 const scenarios = {
@@ -19,14 +18,21 @@ const scenarios = {
   //   tags: { test_type: 'api' },
   // },
   api: {
-    executor: 'ramping-vus',
-    startVUs: 0,
-    stages: [
-      { duration: '10s', target: 5 },
-      { duration: '20s', target: 5 },
-      { duration: '10s', target: 0 },
-    ],
+    // executor: 'ramping-vus',
+    // startVUs: 0,
+    // stages: [
+    //   // eslint-disable-next-line no-undef -- k6 uses __ENV to access environment variables
+    //   { duration: '30s', target: __ENV.VUS },
+    //   // eslint-disable-next-line no-undef -- k6 uses __ENV to access environment variables
+    //   { duration: '60s', target: __ENV.VUS },
+    //   { duration: '30s', target: 0 },
+    // ],
+    executor: 'constant-vus',
+    // eslint-disable-next-line no-undef -- k6 uses __ENV to access environment variables
+    vus: __ENV.VUS,
+    duration: '220s',
     tags: { test_type: 'api' },
+    startTime: '10s',
   },
 };
 
@@ -69,19 +75,19 @@ export function apiTest() {
     };
 
     // eslint-disable-next-line no-undef -- k6 uses __ENV to access environment variables
-    const response = http.get(`${__ENV.TARGET}/health/testLoad`, { headers });
+    const response = http.get(`${__ENV.TARGET}/health/${__ENV.ENDPOINT}`, { headers });
     check(response, {
       'api status is 200': (r) => r.status === 200,
       'api response has data': (r) => JSON.parse(r.body).data !== null,
       'api response time < 200ms': (r) => r.timings.duration < 200,
-      'api response has 20 items': (r) => {
-        const body = JSON.parse(r.body);
-        const hasCorrectLength = body?.length === 20;
-        if (!hasCorrectLength) {
-          test.abort(`Expected 20 items but got ${body?.length}`);
-        }
-        return hasCorrectLength;
-      },
+      // 'api response has 20 items': (r) => {
+      //   const body = JSON.parse(r.body);
+      //   const hasCorrectLength = body?.length === 20;
+      //   if (!hasCorrectLength) {
+      //     test.abort(`Expected 20 items but got ${body?.length}`);
+      //   }
+      //   return hasCorrectLength;
+      // },
     });
   });
 }
