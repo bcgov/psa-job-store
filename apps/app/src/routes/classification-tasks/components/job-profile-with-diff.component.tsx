@@ -41,7 +41,7 @@ export const JobProfileWithDiff = ({
         <JobProfile
           style={{ marginTop: '1rem' }}
           profileData={positionRequestData?.positionRequest?.profile_json}
-          showBackToResults={false}
+          // showBackToResults={false}
           showBasicInfo={showBasicInfo}
           showDiff={showDiff}
           parentJobProfileId={positionRequestData?.positionRequest?.parent_job_profile_id}
