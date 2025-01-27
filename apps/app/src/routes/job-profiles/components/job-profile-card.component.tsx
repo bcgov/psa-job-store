@@ -64,7 +64,7 @@ export const JobProfileCard = ({ data, onSavedCallback }: JobProfileCardProps) =
     <Space
       direction="vertical"
       data-testid="job-profile-card"
-      className={data.number === +number ? 'testid-selectedProfile' : ''}
+      className={`${data.number === +number ? 'testid-selectedProfile' : ''} job-profile-card`}
       style={{
         width: '100%',
         cursor: 'pointer',
@@ -73,22 +73,27 @@ export const JobProfileCard = ({ data, onSavedCallback }: JobProfileCardProps) =
         padding: '1rem',
         position: 'relative',
       }}
+      size={0}
     >
-      <Row gutter={8} align="top" style={{ display: 'flex', flexWrap: 'nowrap', alignItems: 'flex-start' }}>
+      <Row
+        gutter={8}
+        align="top"
+        style={{ display: 'flex', flexWrap: 'nowrap', alignItems: 'flex-start', marginBottom: '10px' }}
+      >
         <Col flex="1 1 calc(100% - 64px)">
           <Title level={3} style={{ fontSize: '1.25rem', lineHeight: '1.25rem' }} data-cy="card-title">
             {typeof data?.title === 'string' ? data?.title : data?.title?.text}
           </Title>
         </Col>
         {/* This is for absolutely positioned save button so it appears in correct tab order */}
-        <Col flex="0 0 64px">
+        <Col flex="0 0 64px" className={'card-save-button-space'}>
           <div style={{ width: '64px', height: '32px' }}></div>
         </Col>
       </Row>
 
       <div>
         <Text type="secondary" data-cy="card-classification">
-          <b style={{ marginTop: '-0.8rem', marginBottom: '0.7rem', display: 'block' }}>
+          <b style={{ marginTop: '-0.8rem', marginBottom: '10px', display: 'block' }}>
             {data.classifications?.map((c) => c.classification.name)[0]}
           </b>
         </Text>
@@ -108,7 +113,7 @@ export const JobProfileCard = ({ data, onSavedCallback }: JobProfileCardProps) =
           {data.role_type && <>| {data.role_type.name}</>}
         </Text>
       </div>
-      <div>
+      <div className="card-context">
         <Text strong>Context: </Text>
 
         <Paragraph ellipsis={{ rows: 3 }}>
@@ -119,7 +124,7 @@ export const JobProfileCard = ({ data, onSavedCallback }: JobProfileCardProps) =
           ></span>
         </Paragraph>
       </div>
-      <div>
+      <div className="card-overview">
         <Text strong>Overview:</Text>
         <Paragraph ellipsis={{ rows: 3 }}>
           {typeof data?.overview === 'string' ? data?.overview : data?.overview?.text}
@@ -131,6 +136,7 @@ export const JobProfileCard = ({ data, onSavedCallback }: JobProfileCardProps) =
           ?.map((c) => c.classification.name)
           .join(', ')}`}
         style={{ padding: '0' }}
+        className={'card-see-details'}
       >
         See details
       </Button>

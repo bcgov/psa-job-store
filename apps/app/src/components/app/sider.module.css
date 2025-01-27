@@ -1,0 +1,39 @@
+.sider {
+    box-shadow: 2px 0 5px 0 #CCC;
+    z-index: 1000;
+  }
+
+  .overlay {
+    position: fixed;
+    top: 0;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    background-color: rgba(0, 0, 0, 0.45);
+    z-index: 999;
+    transition: opacity 0.3s;
+  }
+  
+  @media (max-width: 768px) {
+    .sider {
+      position: absolute;
+      height: 100%;
+      
+    }
+
+    .sider.collapsed {
+        position: fixed;
+      left: -200px;
+    }
+
+    .sider.expanded.scrolled{
+        position:relative;
+        height: auto;
+        margin-right:-200px;
+        transition: none !important;
+    }
+  
+    .sider.expanded {
+      left: 0;
+    }
+  }
