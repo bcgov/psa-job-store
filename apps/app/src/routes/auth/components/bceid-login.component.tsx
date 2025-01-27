@@ -1,5 +1,5 @@
 import { LoginOutlined } from '@ant-design/icons';
-import { Button, Space, Typography } from 'antd';
+import { Button, Space, Tooltip, Typography } from 'antd';
 import { useState } from 'react';
 
 const { Text, Title } = Typography;
@@ -17,18 +17,21 @@ export const BCeIDLogin = () => {
         </a>{' '}
         to sign in to the Job Store.
       </Text>
-      <Button
-        onClick={() => {
-          setIsLoading(true);
-          window.location.href = `${import.meta.env.VITE_BACKEND_URL}/auth/login/bceid`;
-        }}
-        icon={<LoginOutlined />}
-        loading={isLoading}
-        style={{ marginTop: '0.5rem' }}
-        type="default"
-      >
-        Log In Using BCeID
-      </Button>
+      <Tooltip placement="right" title="Coming soon!">
+        <Button
+          onClick={() => {
+            setIsLoading(true);
+            window.location.href = `${import.meta.env.VITE_BACKEND_URL}/auth/login/bceid`;
+          }}
+          disabled
+          icon={<LoginOutlined />}
+          loading={isLoading}
+          style={{ marginTop: '0.5rem' }}
+          type="default"
+        >
+          Log In Using BCeID
+        </Button>
+      </Tooltip>
     </Space>
   );
 };
