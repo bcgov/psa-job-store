@@ -60,7 +60,7 @@ export const AppHeader = ({ collapsed, setCollapsed }: AppHeaderProps) => {
           <Col className={styles.left}>
             {auth.isAuthenticated && (
               <Button
-                data-testid="menu-toggle-btn-mobile"
+                data-testid="menu-toggle-btn"
                 type="text"
                 icon={<MenuOutlined aria-hidden style={{ fontSize: '1.3rem' }} />}
                 onClick={() => setCollapsed(!collapsed)}
