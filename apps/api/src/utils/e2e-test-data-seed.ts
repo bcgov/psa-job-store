@@ -1420,7 +1420,6 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
     security_screenings: [],
     total_comp_create_form_misc: { employeeGroup: 'GEU' },
     all_reports_to: false,
-    all_organizations: true,
     is_archived: false,
     role_id: 1,
     role_type_id: null,
@@ -1528,7 +1527,6 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
     security_screenings: [],
     total_comp_create_form_misc: { employeeGroup: 'GEU' },
     all_reports_to: false,
-    all_organizations: true,
     is_archived: false,
     role_id: 1,
     role_type_id: null,
@@ -1641,7 +1639,6 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
     security_screenings: [],
     total_comp_create_form_misc: { employeeGroup: 'GEU' },
     all_reports_to: false,
-    all_organizations: true,
     is_archived: false,
     role_id: 1,
     role_type_id: null,
@@ -1784,7 +1781,6 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
     security_screenings: [],
     total_comp_create_form_misc: { employeeGroup: 'GEU' },
     all_reports_to: false,
-    all_organizations: true,
     is_archived: false,
     role_id: 1,
     role_type_id: null,
@@ -1912,7 +1908,6 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
     security_screenings: [],
     total_comp_create_form_misc: { employeeGroup: 'GEU' },
     all_reports_to: false,
-    all_organizations: true,
     is_archived: false,
     role_id: 1,
     role_type_id: null,
@@ -2055,7 +2050,6 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
     security_screenings: [],
     total_comp_create_form_misc: { employeeGroup: 'GEU' },
     all_reports_to: false,
-    all_organizations: true,
     is_archived: false,
     role_id: 1,
     role_type_id: null,
@@ -2196,7 +2190,6 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
     program_overview: '',
     total_comp_create_form_misc: { employeeGroup: 'GEU' },
     all_reports_to: false,
-    all_organizations: true,
     role_id: 1,
     role_type_id: null,
     state: 'PUBLISHED',
@@ -3276,19 +3269,53 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
     // Use the imported data
   } catch (error) {
     // console.error('Error importing other job_profile_org: ', error);
-  }
 
-  // await prisma.jobProfileOrganization.createMany({
-  //   data: [
-  //     { job_profile_id: profile194.id, organization_id: 'BC000' },
-  //     { job_profile_id: profile200.id, organization_id: 'BC002' },
-  //     { job_profile_id: profile208.id, organization_id: 'BC003' },
-  //     { job_profile_id: profile210.id, organization_id: 'BC004' },
-  //     { job_profile_id: profile212.id, organization_id: 'BC000' },
-  //     { job_profile_id: profile247.id, organization_id: 'BC002' },
-  //     { job_profile_id: profile247.id, organization_id: 'BC003' },
-  //   ],
-  // });
+    await prisma.jobProfileOrganization.createMany({
+      data: [
+        { job_profile_id: profile189.id, job_profile_version: profile189.version, organization_id: 'BC000' },
+        { job_profile_id: profile189.id, job_profile_version: profile189.version, organization_id: 'BC002' },
+        { job_profile_id: profile189.id, job_profile_version: profile189.version, organization_id: 'BC003' },
+        { job_profile_id: profile189.id, job_profile_version: profile189.version, organization_id: 'BC004' },
+        { job_profile_id: profile189.id, job_profile_version: profile189.version, organization_id: 'BC112' },
+
+        { job_profile_id: profile194.id, job_profile_version: profile194.version, organization_id: 'BC000' },
+        { job_profile_id: profile194.id, job_profile_version: profile194.version, organization_id: 'BC002' },
+        { job_profile_id: profile194.id, job_profile_version: profile194.version, organization_id: 'BC003' },
+        { job_profile_id: profile194.id, job_profile_version: profile194.version, organization_id: 'BC004' },
+        { job_profile_id: profile194.id, job_profile_version: profile194.version, organization_id: 'BC112' },
+
+        { job_profile_id: profile200.id, job_profile_version: profile200.version, organization_id: 'BC000' },
+        { job_profile_id: profile200.id, job_profile_version: profile200.version, organization_id: 'BC002' },
+        { job_profile_id: profile200.id, job_profile_version: profile200.version, organization_id: 'BC003' },
+        { job_profile_id: profile200.id, job_profile_version: profile200.version, organization_id: 'BC004' },
+        { job_profile_id: profile200.id, job_profile_version: profile200.version, organization_id: 'BC112' },
+
+        { job_profile_id: profile208.id, job_profile_version: profile208.version, organization_id: 'BC000' },
+        { job_profile_id: profile208.id, job_profile_version: profile208.version, organization_id: 'BC002' },
+        { job_profile_id: profile208.id, job_profile_version: profile208.version, organization_id: 'BC003' },
+        { job_profile_id: profile208.id, job_profile_version: profile208.version, organization_id: 'BC004' },
+        { job_profile_id: profile208.id, job_profile_version: profile208.version, organization_id: 'BC112' },
+
+        { job_profile_id: profile210.id, job_profile_version: profile210.version, organization_id: 'BC000' },
+        { job_profile_id: profile210.id, job_profile_version: profile210.version, organization_id: 'BC002' },
+        { job_profile_id: profile210.id, job_profile_version: profile210.version, organization_id: 'BC003' },
+        { job_profile_id: profile210.id, job_profile_version: profile210.version, organization_id: 'BC004' },
+        { job_profile_id: profile210.id, job_profile_version: profile210.version, organization_id: 'BC112' },
+
+        { job_profile_id: profile212.id, job_profile_version: profile212.version, organization_id: 'BC000' },
+        { job_profile_id: profile212.id, job_profile_version: profile212.version, organization_id: 'BC002' },
+        { job_profile_id: profile212.id, job_profile_version: profile212.version, organization_id: 'BC003' },
+        { job_profile_id: profile212.id, job_profile_version: profile212.version, organization_id: 'BC004' },
+        { job_profile_id: profile212.id, job_profile_version: profile212.version, organization_id: 'BC112' },
+
+        { job_profile_id: profile247.id, job_profile_version: profile247.version, organization_id: 'BC000' },
+        { job_profile_id: profile247.id, job_profile_version: profile247.version, organization_id: 'BC002' },
+        { job_profile_id: profile247.id, job_profile_version: profile247.version, organization_id: 'BC003' },
+        { job_profile_id: profile247.id, job_profile_version: profile247.version, organization_id: 'BC004' },
+        { job_profile_id: profile247.id, job_profile_version: profile247.version, organization_id: 'BC112' },
+      ],
+    });
+  }
 
   await prisma.location.createMany({
     data: [
@@ -3755,7 +3782,6 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
       //     },
       //   ],
       //   program_overview: { value: '', disabled: false, isCustom: false },
-      //   all_organizations: true,
       //   security_screenings: [],
       //   optional_requirements: [],
       //   willingness_statements: [],
@@ -4168,7 +4194,6 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
           },
         ],
         program_overview: { value: '', disabled: false, isCustom: false },
-        all_organizations: true,
         security_screenings: [],
         optional_requirements: [],
         willingness_statements: [],
@@ -4575,7 +4600,6 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
           },
         ],
         program_overview: { value: '', disabled: false, isCustom: false },
-        all_organizations: true,
         security_screenings: [],
         optional_requirements: [],
         willingness_statements: [],
@@ -4911,7 +4935,6 @@ export async function seed(prismaInp?: ExtendedPrismaClientType) {
         review_required: false,
         accountabilities: profile208.accountabilities,
         program_overview: profile208.program_overview,
-        all_organizations: true,
         security_screenings: profile208.security_screenings,
         optional_requirements: profile208.optional_requirements,
         willingness_statements: profile208.willingness_statements,

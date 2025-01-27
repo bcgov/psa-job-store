@@ -55,7 +55,6 @@ describe('JobProfile card tests', () => {
 //   role_type: {
 //     name: 'Test Role Type',
 //   },
-//   all_organizations: false,
 // } as JobProfileModel;
 
 // describe('JobProfileCard', () => {
@@ -145,21 +144,6 @@ describe('JobProfile card tests', () => {
 //   //   );
 
 //   //   expect(screen.getByText('2 Ministries')).toBeInTheDocument();
-//   // });
-
-//   // it('displays "All ministries" when all_organizations is true', () => {
-//   //   const allOrgProfile = {
-//   //     ...mockJobProfile,
-//   //     all_organizations: true,
-//   //   };
-
-//   //   render(
-//   //     <MemoryRouter>
-//   //       <JobProfileCard data={allOrgProfile} />
-//   //     </MemoryRouter>,
-//   //   );
-
-//   //   expect(screen.getByText('All ministries')).toBeInTheDocument();
 //   // });
 
 //   // it('applies selected styling when profile is selected', () => {

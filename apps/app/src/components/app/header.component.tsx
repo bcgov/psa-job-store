@@ -1,4 +1,4 @@
-import { LogoutOutlined } from '@ant-design/icons';
+import { LogoutOutlined, MenuOutlined } from '@ant-design/icons';
 import { Alert, Button, Col, Layout, Menu, Row, Typography } from 'antd';
 import { Link } from 'react-router-dom';
 import { useTypedSelector } from '../../redux/redux.hooks';
@@ -10,7 +10,12 @@ import { HelpButton } from './help-button.component';
 const { Header } = Layout;
 const { Text } = Typography;
 
-export const AppHeader = () => {
+export interface AppHeaderProps {
+  collapsed: boolean;
+  setCollapsed: (collapsed: boolean) => void;
+}
+
+export const AppHeader = ({ collapsed, setCollapsed }: AppHeaderProps) => {
   const auth = useTypedSelector((state) => state.authReducer);
 
   const handleLogout = async () => {
@@ -50,9 +55,22 @@ export const AppHeader = () => {
           }}
         />
       )}
-      <Header className={styles.appHeader}>
+      <Header className={styles.appHeader} style={{ zIndex: 1001 }}>
         <Row align="middle" justify="space-between" style={{ width: '100%' }} role="navigation">
           <Col className={styles.left}>
+            {auth.isAuthenticated && (
+              <Button
+                data-testid="menu-toggle-btn"
+                type="text"
+                icon={<MenuOutlined aria-hidden style={{ fontSize: '1.3rem' }} />}
+                onClick={() => setCollapsed(!collapsed)}
+                style={{
+                  color: 'white',
+                }}
+                aria-label={collapsed ? 'Expand side navigation' : 'Collapse side navigation'}
+              />
+            )}
+
             <Link to="/" style={{ display: 'flex', alignItems: 'center' }} aria-label="Navigate to homepage">
               <img className={styles.bcLogo} src="/BC_logo.png" alt="BC Logo" />
               <div className={styles.titleContainer}>
@@ -65,7 +83,7 @@ export const AppHeader = () => {
           <Col className={styles.right}>
             {auth.isAuthenticated && (
               <div className={styles.headerToolbar}>
-                <div className={styles.iconWrapper} style={{ marginTop: '7px' }}>
+                <div className={styles.iconWrapper}>
                   <HelpButton />
                 </div>
 
@@ -88,7 +106,9 @@ export const AppHeader = () => {
                         // <UserOutlined style={{ color: 'white' }} aria-hidden />
                       }
                     >
-                      <Text style={{ color: 'white' }}>{auth.user ? (auth.user.name as string) : ''}</Text>
+                      <Text className={styles.username} style={{ color: 'white' }}>
+                        {auth.user ? (auth.user.name as string) : ''}
+                      </Text>
                     </Button>
                   }
                   content={content}

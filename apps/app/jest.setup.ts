@@ -185,7 +185,6 @@ const mockProfiles = {
     {
       id: 1,
       all_reports_to: false,
-      all_organizations: true,
       streams: [
         {
           stream: {
@@ -402,7 +401,6 @@ const mockProfiles = {
     {
       id: 3,
       all_reports_to: false,
-      all_organizations: true,
       streams: [
         {
           stream: {
@@ -631,7 +629,6 @@ const mockProfiles = {
     {
       id: 6,
       all_reports_to: false,
-      all_organizations: true,
       streams: [
         {
           stream: {
@@ -883,7 +880,6 @@ const mockProfiles = {
     {
       id: 7,
       all_reports_to: false,
-      all_organizations: true,
       streams: [
         {
           stream: {
@@ -1154,7 +1150,6 @@ const mockProfiles = {
     {
       id: 2,
       all_reports_to: false,
-      all_organizations: true,
       streams: [
         {
           stream: {
@@ -1393,7 +1388,6 @@ const mockProfiles = {
     {
       id: 4,
       all_reports_to: false,
-      all_organizations: true,
       streams: [
         {
           stream: {
@@ -1606,7 +1600,6 @@ const mockProfiles = {
     {
       id: 5,
       all_reports_to: false,
-      all_organizations: true,
       streams: [
         {
           stream: {
@@ -1903,7 +1896,6 @@ jest.mock('./src/redux/services/graphql-api/job-profile.api', () => ({
             },
           ],
           all_reports_to: false,
-          all_organizations: true,
           willingness_statements: [],
           knowledge_skills_abilities: [
             {
@@ -2188,7 +2180,6 @@ jest.mock('./src/redux/services/graphql-api/job-profile.api', () => ({
             },
           ],
           all_reports_to: false,
-          all_organizations: true,
           willingness_statements: [],
           knowledge_skills_abilities: [
             {

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 /* eslint-disable @typescript-eslint/no-explicit-any */
-import { ArrowLeftOutlined, ExclamationCircleFilled, InfoCircleOutlined } from '@ant-design/icons';
-import { Alert, Button, Col, Descriptions, DescriptionsProps, Divider, Grid, Row, Tooltip, Typography } from 'antd';
+import { ExclamationCircleFilled, InfoCircleOutlined } from '@ant-design/icons';
+import { Alert, Col, Descriptions, DescriptionsProps, Divider, Row, Tooltip, Typography } from 'antd';
 import { Type } from 'class-transformer';
 import {
   IsNotEmpty,
@@ -16,9 +16,10 @@ import dayjs from 'dayjs';
 import { diff_match_patch } from 'diff-match-patch';
 import DOMPurify from 'dompurify';
 import { CSSProperties, useEffect, useState } from 'react';
-import { Link, useParams, useSearchParams } from 'react-router-dom';
+import { useParams, useSearchParams } from 'react-router-dom';
 import LoadingSpinnerWithMessage from '../../../components/app/common/components/loading.component';
 import '../../../components/app/common/css/custom-descriptions.css';
+import { useWindowWidth } from '../../../components/app/common/hooks/use-window-width';
 import { VersionSelect } from '../../../components/app/version-select.component';
 import { DownloadJobProfileComponent } from '../../../components/shared/download-job-profile/download-job-profile.component';
 import { useTypedSelector } from '../../../redux/redux.hooks';
@@ -38,12 +39,12 @@ import AccessibleDocumentFromDescriptions from './accessible-document-from-descr
 import './job-profile.component.css';
 
 const { Text } = Typography;
-const { useBreakpoint } = Grid;
+// const { useBreakpoint } = Grid;
 
 interface JobProfileProps {
   profileData?: any;
   onProfileLoad?: (profileData: JobProfileModel) => void;
-  showBackToResults?: boolean;
+  // showBackToResults?: boolean;
   showDiff?: boolean;
   parentJobProfileId?: number;
   parentJobProfileVersion?: number;
@@ -396,13 +397,12 @@ export class JobProfileValidationModel {
   classificationReviewRequired: boolean;
   jobContext: string;
   all_reports_to: boolean;
-  all_organizations: boolean;
 }
 
 export const JobProfile: React.FC<JobProfileProps> = ({
   profileData,
   onProfileLoad,
-  showBackToResults = true,
+  // showBackToResults = true,
   showDiff = false,
   parentJobProfileId,
   parentJobProfileVersion,
@@ -419,7 +419,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
   const id = searchParams.get('id');
   const version = searchParams.get('version');
   // console.log('resolvedId: ', resolvedId);
-  const screens = useBreakpoint();
+  // const screens = useBreakpoint();
 
   // If neither resolvedId nor profileData is present, throw an error
   // console.log('jobNumber: ', jobNumber);
@@ -656,8 +656,12 @@ export const JobProfile: React.FC<JobProfileProps> = ({
     return comparisonResult;
   };
 
+  const windowWidth = useWindowWidth();
+  const singleColumnJobProfile = windowWidth <= 1286;
+  // const compactBasicInfo = windowWidth <= 1600;
+
   // Construct the back URL
-  const backUrl = `/job-profiles?${searchParams}`;
+  // const backUrl = `/job-profiles?${searchParams}`;
 
   if (isLoading) {
     return <LoadingSpinnerWithMessage />;
@@ -670,7 +674,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
       key: 'number',
       label: <h3 tabIndex={0}>Job Store #</h3>,
       children: <span tabIndex={0}>{effectiveData?.number}</span>,
-      span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
+      span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24, xxl: 12 },
     },
     {
       key: 'profileversion',
@@ -683,7 +687,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
           </Typography.Text>
         </div>
       ),
-      span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
+      span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24, xxl: 12 },
     },
 
     {
@@ -691,22 +695,16 @@ export const JobProfile: React.FC<JobProfileProps> = ({
       label: <h3 tabIndex={0}>Ministries</h3>,
       children: (
         <span tabIndex={0}>
-          {effectiveDataExtra?.all_organizations ? (
-            'All'
-          ) : (
-            <ul>
-              {effectiveDataExtra?.organizations.map((org, index) => <li key={index}>{org.organization.name}</li>)}
-            </ul>
-          )}
+          <ul>{effectiveDataExtra?.organizations.map((org, index) => <li key={index}>{org.organization.name}</li>)}</ul>
         </span>
       ),
-      span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
+      span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24, xxl: 12 },
     },
     {
       key: 'Jobrole',
       label: <h3 tabIndex={0}>Job role</h3>,
       children: <span tabIndex={0}>{effectiveDataExtra?.role?.name}</span>,
-      span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
+      span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24, xxl: 12 },
     },
     {
       key: 'Roletype',
@@ -716,7 +714,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
           {effectiveDataExtra?.role_type?.name ? effectiveDataExtra?.role_type?.name : 'Unknown'}
         </span>
       ),
-      span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
+      span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24, xxl: 12 },
     },
     {
       key: 'Scopeofresponsibility',
@@ -737,7 +735,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
               .join(', ')}
         </span>
       ),
-      span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
+      span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24, xxl: 12 },
     },
     {
       key: 'Professionsanddisciplines',
@@ -759,7 +757,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
           })}
         </div>
       ),
-      span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
+      span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24, xxl: 12 },
     },
   ];
 
@@ -779,7 +777,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
               : effectiveData?.title?.text}
         </span>
       ),
-      span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
+      span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 12 },
     },
 
     {
@@ -797,7 +795,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
       ),
 
       // children: <div tabIndex={0}>{originalData?.classifications?.map((c) => c.classification?.code).join(', ')}</div>,
-      span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
+      span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 12 },
     },
     ...(effectiveData?.program_overview &&
     (effectiveData?.program_overview as any).text && // if program overview field is present AND it's not empty
@@ -1323,7 +1321,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
     <NotFoundComponent entity="Profile" />
   ) : (
     <div data-testid="job-profile" style={{ ...style }}>
-      {screens.xl === false && showBackToResults ? (
+      {/* {screens.xl === false && showBackToResults ? (
         <nav aria-label="Breadcrumb">
           <Link to={backUrl}>
             <Button type="link" icon={<ArrowLeftOutlined aria-hidden="true" />} style={{ padding: 0 }}>
@@ -1333,7 +1331,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
         </nav>
       ) : (
         <div />
-      )}
+      )} */}
       {/* {onUseProfile ? (
         <WizardEditControlBar onNext={onUseProfile} nextText="Use Profile" style={{ marginBottom: '1rem' }} />
       ) :
@@ -1385,6 +1383,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
       </div>
 
       <Descriptions
+        layout={singleColumnJobProfile ? 'vertical' : 'horizontal'}
         aria-hidden
         className="customDescriptions"
         title={

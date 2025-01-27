@@ -5,6 +5,7 @@ import { Alert, Col, Empty, Pagination, Row, Skeleton, Space, Tabs, Typography }
 import { MutableRefObject, forwardRef, useCallback, useEffect, useImperativeHandle, useRef, useState } from 'react';
 import { Link, useLocation, useNavigate, useParams, useSearchParams } from 'react-router-dom';
 import useAnnounce from '../../../components/app/common/hooks/announce';
+import { useWindowWidth } from '../../../components/app/common/hooks/use-window-width';
 import { useAppDispatch } from '../../../redux/redux.store';
 import { graphqlApi } from '../../../redux/services/graphql-api';
 import { GetJobProfilesResponse, JobProfileModel } from '../../../redux/services/graphql-api/job-profile-types';
@@ -18,6 +19,7 @@ import styles from './job-profile-search-results.module.css';
 import { JobProfileSearch } from './job-profile-search.component';
 import JobProfileViewCounter from './job-profile-view-counter.component';
 import { JobProfile } from './job-profile.component';
+import './job-profile.component.css';
 import { useJobProfilesProvider } from './job-profiles.context';
 const { Text, Title } = Typography;
 
@@ -355,11 +357,11 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
       // if we are doing organization filtering because user is creating a new position request
       // in that organization, apply this filter in addition to user applied organization filter
       //
-      // if no user filters applied, we need to return all profiles for this organization AND profiles for all orgs
+      // if no user filters applied, we need to return all profiles for this organization
       // if user did apply filters, then apply those filters only
       let applyOrgFilter = '';
       if (!organizationFilter && organizationFilterExtra) {
-        applyOrgFilter = organizationFilterExtra.id + ',ALL';
+        applyOrgFilter = organizationFilterExtra.id?.toString() ?? '';
       } else if (organizationFilter) {
         applyOrgFilter = organizationFilter;
       }
@@ -828,9 +830,13 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
           onChange={handlePageChange}
           showSizeChanger={false}
           style={{ textAlign: 'center', margin: '1rem' }}
+          showLessItems={isMobile}
         />
       </>
     );
+
+    const windowWidth = useWindowWidth();
+    const isMobile = windowWidth <= 1545;
 
     return (
       <>

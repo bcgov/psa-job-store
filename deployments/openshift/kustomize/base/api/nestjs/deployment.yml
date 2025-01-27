@@ -34,6 +34,8 @@ spec:
           subPath: seed.ts
         - name: log-volume
           mountPath: /tmp/log
+        - name: documents-pvc
+          mountPath: /usr/src/apps/api/documents
         envFrom:
         # - configMapRef:
         #     name: api-configmap
@@ -41,7 +43,7 @@ spec:
             name: secrets
         resources:
           requests:
-            cpu: 200m 
+            cpu: 100m 
             memory: 600Mi 
       - name: filebeat
         image: docker.elastic.co/beats/filebeat:8.16.1
@@ -68,6 +70,9 @@ spec:
             cpu: 10m 
             memory: 50Mi 
       volumes:
+      - name: documents-pvc
+        persistentVolumeClaim:
+          claimName: documents-pvc
       - name: log-volume
         emptyDir: {}
       - name: filebeat-config

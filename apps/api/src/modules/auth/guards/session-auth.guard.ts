@@ -21,7 +21,7 @@ export class SessionAuthGuard extends AuthGuard('oidc') {
   };
 
   private userHasRoles = (request: Request, requiredRoles: string[]) => {
-    if (this.configService.get('TEST_ENV') === true || !requiredRoles) {
+    if (this.configService.get('TEST_ENV') === 'true' || !requiredRoles) {
       return true;
     }
 

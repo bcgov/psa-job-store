@@ -8,9 +8,11 @@ export class AppLogService {
 
   constructor() {
     const NODE_ENV = process.env.NODE_ENV;
+    const SKIP_LOGGING = process.env.SKIP_LOGGING;
+
     let transport;
 
-    if (NODE_ENV !== 'production') {
+    if (NODE_ENV !== 'production' || SKIP_LOGGING === 'true') {
       // In development, log to the console
       transport = {
         target: 'pino-pretty',

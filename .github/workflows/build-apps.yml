@@ -91,6 +91,7 @@ jobs:
             CSS_API_CLIENT_ID=${{ secrets.CSS_API_CLIENT_ID }}
             CSS_API_CLIENT_SECRET=${{ secrets.CSS_API_CLIENT_SECRET }}
             SESSION_SECRET=${{ secrets.SESSION_SECRET }}
+            REACT_APP_URL=${{ secrets.REACT_APP_URL }}
             KEYCLOAK_REALM_URL=${{ secrets.KEYCLOAK_ISSUER }}
             KEYCLOAK_CALLBACK_URL=${{ secrets.KEYCLOAK_CALLBACK_URL }}
             KEYCLOAK_LOGOUT_REDIRECT_URL=${{ secrets.KEYCLOAK_LOGOUT_REDIRECT_URL }}

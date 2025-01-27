@@ -1,0 +1,9 @@
+@media (max-width: 1458px) {
+.ant-pagination-prev, .ant-pagination-jump-prev, .ant-pagination-item{
+     margin-inline-end: 0px !important;
+}
+.ant-pagination{
+    margin-left:0 !important; 
+    margin-right:0 !important;
+}
+}

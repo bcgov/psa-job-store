@@ -179,6 +179,10 @@ const TreeViewDropdown = ({
                     style={{ display: 'inline-flex', alignItems: 'center' }}
                   >
                     <CheckBoxIcon
+                      onClick={(e: any) => {
+                        handleSelect(e);
+                        e.stopPropagation();
+                      }}
                       tabIndex={0}
                       className="checkbox-icon"
                       variant={isHalfSelected ? 'some' : isSelected ? 'all' : 'none'}
@@ -258,7 +262,7 @@ function sortStructure(node: any) {
 
 const AccessibleTreeSelect = ({
   treeData,
-  value,
+  treeValue,
   onChange,
   placeholderText,
   onClear,
@@ -273,7 +277,7 @@ const AccessibleTreeSelect = ({
 }: {
   // eslint-disable-next-line @typescript-eslint/no-explicit-any
   treeData: any;
-  value: string[] | string;
+  treeValue: string[] | string;
   onChange?: (inp: string[]) => void;
   placeholderText?: string;
   onClear?: () => void;
@@ -288,7 +292,6 @@ const AccessibleTreeSelect = ({
 }) => {
   // console.log('treeData: ', treeData);
   // console.log('value: ', value);
-
   const [open, setOpen] = useState(false);
   const [filterText, setFilterText] = useState('');
   const [finalTreeData, setFinalTreeData] = useState([] as INode<IFlatMetadata>[]);
@@ -375,12 +378,12 @@ const AccessibleTreeSelect = ({
     // in mode where we select a single item at a time, initialize selectedNode to the "value"
     if (onSelect && treeData.length !== 0) {
       // if value is a string
-      if (typeof value === 'string') {
-        const node = finalTreeData.find((node) => node.metadata?.value === value);
+      if (typeof treeValue === 'string') {
+        const node = finalTreeData.find((node) => node.metadata?.value === treeValue);
         if (node) setSelectedNode(node);
       }
     }
-  }, [value, onSelect, finalTreeData, treeData]);
+  }, [treeValue, onSelect, finalTreeData, treeData]);
 
   // console.log('finalTreeData: ', finalTreeData);
   if (treeData.length === 0) return <></>;
@@ -398,6 +401,7 @@ const AccessibleTreeSelect = ({
           style={{ width: width ?? 250, height: '38px' }}
           placeholder={placeholderText}
           open={open}
+          popupMatchSelectWidth={false}
           onDropdownVisibleChange={handleDropdownVisibleChange}
           showSearch
           onSearch={handleSearch}
@@ -429,7 +433,7 @@ const AccessibleTreeSelect = ({
             return (
               <div ref={selectContentsRef} key={dropdownKey}>
                 <TreeViewDropdown
-                  value={value}
+                  value={treeValue}
                   onChange={onChange}
                   onClose={handleClose}
                   data={finalTreeData}

@@ -27,7 +27,12 @@ When('the results have loaded', () => {
 });
 
 When('the user enters "multiple programs" into the search field', () => {
-  cy.get('[aria-label="Search by job title or keyword"]').type('multiple programs');
+  cy.get('[aria-label="Search by job title or keyword"]').scrollIntoView();
+  cy.get('[aria-label="Search by job title or keyword"]').click();
+  cy.get('[aria-label="Search by job title or keyword"]').focus();
+  // wait for 200ms
+  cy.wait(200);
+  cy.get('[aria-label="Search by job title or keyword"]').type('multiple programs', { delay: 0 });
 });
 
 Then('only job profiles containing "multiple programs" and matching the selected filters should be displayed', () => {

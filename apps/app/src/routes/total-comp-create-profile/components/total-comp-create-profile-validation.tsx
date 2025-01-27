@@ -112,7 +112,6 @@ export class BasicDetailsValidationModel {
   role: number;
   classificationReviewRequired: boolean;
   all_reports_to: boolean;
-  all_organizations: boolean;
   overview: OverviewField | string;
   program_overview: ProgramOverviewField | string;
 }
