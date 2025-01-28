@@ -29,6 +29,9 @@ export class AppConfigDto {
   @IsString()
   DATABASE_URL: string; // can be empty when doing e2e testing
 
+  @IsString()
+  DATABASE_READ_URL: string;
+
   @IsNotEmpty()
   @IsString()
   ELASTIC_NODE: string;
