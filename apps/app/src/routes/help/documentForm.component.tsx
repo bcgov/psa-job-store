@@ -18,7 +18,6 @@ import {
 } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import { VITE_BACKEND_URL } from '../../../envConfig';
 import AccessibleTreeSelect from '../../components/app/common/components/accessible-tree-select';
 import { useLazyCheckDocumentURLQuery } from '../../redux/services/graphql-api/document.api';
 import { useGetJobFamiliesQuery } from '../../redux/services/graphql-api/job-family.api';
@@ -351,7 +350,7 @@ const DocumentForm: React.FC<DocumentFormProps> = ({ mode, initialData, onSubmit
               <>
                 <Form.Item name="permalink" noStyle>
                   <Input
-                    addonBefore={VITE_BACKEND_URL + '/document/'}
+                    addonBefore={window.location.origin + '/document/'}
                     onBlur={validateURL}
                     addonAfter={
                       <>

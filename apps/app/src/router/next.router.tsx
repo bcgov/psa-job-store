@@ -102,7 +102,7 @@ export const nextRouter = createBrowserRouter([
                     element: <HelpPage />,
                   },
                   {
-                    path: 'upload',
+                    path: 'create',
                     element: <UploadHelpDocPage />,
                     handle: {
                       breadcrumb: () => 'Upload',
@@ -117,7 +117,7 @@ export const nextRouter = createBrowserRouter([
                   },
                   // In your router configuration
                   {
-                    path: 'url/:url/file',
+                    path: ':url',
                     element: <DocumentRedirect />,
                   },
                 ],
