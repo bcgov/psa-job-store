@@ -8,7 +8,7 @@ const DocumentRedirect = () => {
 
   useEffect(() => {
     const encodedUrl = encodeURIComponent(url ?? '');
-    const backendUrl = `${VITE_BACKEND_URL}/document/url/${encodedUrl}/file`;
+    const backendUrl = `${VITE_BACKEND_URL}/document/${encodedUrl}/file`;
 
     // Redirect to the backend endpoint
     window.location.href = backendUrl;
