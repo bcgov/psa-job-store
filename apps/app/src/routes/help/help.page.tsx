@@ -1,4 +1,14 @@
-import { FilePdfOutlined, FileWordOutlined, InfoCircleOutlined, SettingOutlined } from '@ant-design/icons';
+import {
+  DeleteOutlined,
+  DownloadOutlined,
+  EditOutlined,
+  EyeOutlined,
+  FilePdfOutlined,
+  FileWordOutlined,
+  InfoCircleOutlined,
+  LinkOutlined,
+  SettingOutlined,
+} from '@ant-design/icons';
 import { Button, Dropdown, MenuProps, message, Modal, Tag, Tooltip, Typography } from 'antd';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
@@ -212,12 +222,13 @@ export const HelpPage = () => {
                   const isPdf = record.file_extension === '.pdf';
                   const inlineUrl = `${baseUrl}/file/${record.id}?mode=inline`;
                   const downloadUrl = `${baseUrl}/file/${record.id}?mode=download`;
-                  const copyUrl = record.url ? `${baseUrl}/${record.url}` : undefined;
+                  const copyUrl = record.url ? `${baseUrl}/${record.url}` : '';
 
                   const downloadItems: MenuProps['items'] = isPdf
                     ? [
                         {
                           key: 'open',
+                          icon: <EyeOutlined />,
                           label: (
                             <a href={inlineUrl} target="_blank" rel="noopener noreferrer">
                               Open
@@ -226,6 +237,7 @@ export const HelpPage = () => {
                         },
                         {
                           key: 'download',
+                          icon: <DownloadOutlined />,
                           label: (
                             <a href={downloadUrl} rel="noopener noreferrer">
                               Download
@@ -236,6 +248,7 @@ export const HelpPage = () => {
                     : [
                         {
                           key: 'download',
+                          icon: <DownloadOutlined />,
                           label: (
                             <a href={downloadUrl} rel="noopener noreferrer">
                               Download
@@ -246,6 +259,7 @@ export const HelpPage = () => {
 
                   const copyItem = {
                     key: 'copy',
+                    icon: <LinkOutlined />,
                     label: (
                       <a
                         onClick={() => {
@@ -253,12 +267,14 @@ export const HelpPage = () => {
                           message.success('Link copied to clipboard');
                         }}
                       >
-                        Copy Link{' '}
+                        Copy Link
                       </a>
                     ),
                   };
+
                   const editItem = {
                     key: 'edit',
+                    icon: <EditOutlined />,
                     label: 'Edit',
                     onClick: () => {
                       navigate(`/help/edit/${record.id}`);
@@ -267,6 +283,7 @@ export const HelpPage = () => {
 
                   const deleteItem = {
                     key: 'delete',
+                    icon: <DeleteOutlined />,
                     label: 'Delete',
                     onClick: () => {
                       Modal.confirm({
@@ -279,8 +296,16 @@ export const HelpPage = () => {
                   // Build the menu items conditionally based on the user's roles
                   let menuItems: MenuProps['items'] = copyUrl ? [copyItem] : [];
                   menuItems = roles.includes('super-admin')
-                    ? [...menuItems, ...downloadItems, editItem, deleteItem]
-                    : [...menuItems, ...downloadItems];
+                    ? [
+                        ...downloadItems,
+                        ...menuItems,
+                        {
+                          type: 'divider',
+                        },
+                        editItem,
+                        deleteItem,
+                      ]
+                    : [...downloadItems, ...menuItems];
 
                   return (
                     <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
