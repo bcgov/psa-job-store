@@ -1298,7 +1298,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
           <ul data-testid="behavioural-competencies">
             {showDiff && originalData
               ? compareCompetencies(
-                  originalData.behavioural_competencies,
+                  originalData.behavioural_competencies ?? [],
                   effectiveData?.behavioural_competencies ?? [],
                 )
               : (effectiveData?.behavioural_competencies ?? []).map(({ name, description }, index) => {

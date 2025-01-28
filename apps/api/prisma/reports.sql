@@ -39,6 +39,23 @@ ORDER BY
     jps.name,
     TRIM(TRAILING FROM pref->>'text');
 
+-- Get all accountabilities with profiles that use them:
+
+SELECT
+    TRIM(TRAILING FROM pref->>'text') AS accountability,
+    STRING_AGG(DISTINCT jp.id::TEXT, ', ') AS profile_ids,
+    STRING_AGG(DISTINCT CONCAT(jp.number, ' - ', jp.title), ', ') AS profile_details
+FROM
+    job_profile jp,
+    JSONB_ARRAY_ELEMENTS(jp.accountabilities) AS pref
+WHERE
+    jp.accountabilities IS NOT NULL
+    AND pref->>'text' IS NOT NULL
+GROUP BY
+    pref->>'text'
+ORDER BY
+    TRIM(TRAILING FROM pref->>'text')
+
 -- Willingness statements grouped by text grouped by text
 
 WITH job_family_streams AS (
