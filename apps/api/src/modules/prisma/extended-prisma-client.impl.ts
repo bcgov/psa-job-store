@@ -5,19 +5,16 @@ import { findManyAndCountExtension } from './extensions/find-many-with-count.ext
 function extendClient(base: PrismaClient) {
   let client = base.$extends(findManyAndCountExtension);
 
-  if (process.env.NODE_ENV !== 'development' && process.env.E2E_TESTING !== 'true') {
-    const replicaClient = new PrismaClient({
-      datasourceUrl: process.env.DATABASE_READ_URL,
-      // log: [{ level: 'query', emit: 'event' }],
-    });
+  const replicaClient = new PrismaClient({
+    datasourceUrl: process.env.DATABASE_READ_URL,
+    // log: [{ level: 'query', emit: 'event' }],
+  });
 
-    return client.$extends(
-      readReplicas({
-        replicas: [replicaClient],
-      }),
-    );
-  }
-  return client;
+  return client.$extends(
+    readReplicas({
+      replicas: [replicaClient],
+    }),
+  );
 }
 
 class UntypedExtendedClient extends PrismaClient {
