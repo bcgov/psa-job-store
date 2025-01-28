@@ -8,7 +8,7 @@ import { PaginatedDocumentsResponse } from './paginated-documents-response.outpu
 export class DocumentResolver {
   constructor(private readonly documentService: DocumentService) {}
 
-  @Roles('super-admin')
+  @Roles('classification', 'hiring-manager', 'total-compensation')
   @Query(() => PaginatedDocumentsResponse, { name: 'documentsWithCount' })
   getDocumentsWithCount(@Args() args?: FindManyDocumentArgs) {
     return this.documentService.getDocumentsWithCount(args);

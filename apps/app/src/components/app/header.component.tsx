@@ -55,7 +55,7 @@ export const AppHeader = ({ collapsed, setCollapsed }: AppHeaderProps) => {
           }}
         />
       )}
-      <Header className={styles.appHeader} style={{ zIndex: 1001 }}>
+      <Header className={styles.appHeader}>
         <Row align="middle" justify="space-between" style={{ width: '100%' }} role="navigation">
           <Col className={styles.left}>
             {auth.isAuthenticated && (

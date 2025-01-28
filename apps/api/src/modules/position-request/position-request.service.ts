@@ -708,7 +708,7 @@ export class PositionRequestApiService {
       };
     }
 
-    const positionRequest = await this.prisma.positionRequest.findUnique({
+    const positionRequest = await this.prisma.$primary().positionRequest.findUnique({
       where: whereCondition,
       include: {
         parent_job_profile: true,
