@@ -77,23 +77,7 @@ export const AppLayout = () => {
             role="navigation"
             className={`${styles.sider} ${collapsed ? styles.collapsed : styles.expanded} ${import.meta.env.VITE_ENV != 'production' ? styles.siderdev : ''} ${siderScrolledPastHeader ? styles.scrolled : ''}`}
             theme="light"
-            trigger={<></>}
-            // trigger={
-            //   !isMobile ? (
-            //     <Button
-            //       data-testid="menu-toggle-btn"
-            //       aria-label={collapsed ? 'Expand side navigation' : 'Collapse side navigation'}
-            //       icon={collapsed ? <MenuUnfoldOutlined aria-hidden /> : <MenuFoldOutlined aria-hidden />}
-            //       onClick={() => setCollapsed(!collapsed)}
-            //       type="link"
-            //       style={{
-            //         color: '#000',
-            //         fontSize: '16px',
-            //         margin: '0.5rem 0 0.5rem 0.75rem',
-            //       }}
-            //     />
-            //   ) : null
-            // }
+            trigger={null}
           >
             <NavMenu collapsed={collapsed} />
           </Sider>
