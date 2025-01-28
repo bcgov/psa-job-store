@@ -32,7 +32,7 @@ export const EditDocumentPage = () => {
         console.log(`${pair[0]}: ${pair[1]}`);
       }
 
-      await axios.put(`${VITE_BACKEND_URL}/document/${id}`, formData, {
+      await axios.put(`${VITE_BACKEND_URL}/document/update/${id}`, formData, {
         withCredentials: true,
         headers: { 'Content-Type': 'multipart/form-data' },
       });
@@ -45,7 +45,7 @@ export const EditDocumentPage = () => {
   };
   const deleteDocument = async () => {
     try {
-      await axios.delete(`${VITE_BACKEND_URL}/document/${documentData?.document?.id}`);
+      await axios.delete(`${VITE_BACKEND_URL}/document/delete/${documentData?.document?.id}`);
       message.success('Document deleted successfully');
       navigate('/help');
     } catch (error) {

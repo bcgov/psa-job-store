@@ -1,5 +1,5 @@
 import { FilePdfOutlined, FileWordOutlined, InfoCircleOutlined, SettingOutlined } from '@ant-design/icons';
-import { Button, Dropdown, Menu, message, Modal, Tag, Tooltip, Typography } from 'antd';
+import { Button, Dropdown, MenuProps, message, Modal, Tag, Tooltip, Typography } from 'antd';
 import axios from 'axios';
 import { useNavigate } from 'react-router-dom';
 import { VITE_BACKEND_URL } from '../../../envConfig';
@@ -22,7 +22,7 @@ export const HelpPage = () => {
 
   const deleteDocument = async (documentId: string) => {
     try {
-      await axios.delete(`${VITE_BACKEND_URL}/document/${documentId}`, {
+      await axios.delete(`${VITE_BACKEND_URL}/document/delete/${documentId}`, {
         withCredentials: true,
       });
       message.success('Document deleted successfully');
@@ -40,7 +40,7 @@ export const HelpPage = () => {
         showButton2={roles.includes('super-admin')}
         button2Text="Upload"
         button2Callback={async () => {
-          navigate('/help/upload');
+          navigate('/help/create');
         }}
       />
       <ContentWrapper>
@@ -208,12 +208,13 @@ export const HelpPage = () => {
                 align: 'center',
                 title: 'Actions',
                 render: (_: any, record: any) => {
-                  const baseUrl = 'http://localhost:4000/document';
+                  const baseUrl = `${VITE_BACKEND_URL}/document`;
                   const isPdf = record.file_extension === '.pdf';
-                  const inlineUrl = `${baseUrl}/${record.id}/file?mode=inline`;
-                  const downloadUrl = `${baseUrl}/${record.id}/file?mode=download`;
+                  const inlineUrl = `${baseUrl}/file/${record.id}?mode=inline`;
+                  const downloadUrl = `${baseUrl}/file/${record.id}?mode=download`;
+                  const copyUrl = record.url ? `${baseUrl}/${record.url}` : undefined;
 
-                  const downloadItems = isPdf
+                  const downloadItems: MenuProps['items'] = isPdf
                     ? [
                         {
                           key: 'open',
@@ -243,6 +244,19 @@ export const HelpPage = () => {
                         },
                       ];
 
+                  const copyItem = {
+                    key: 'copy',
+                    label: (
+                      <a
+                        onClick={() => {
+                          navigator.clipboard.writeText(copyUrl);
+                          message.success('Link copied to clipboard');
+                        }}
+                      >
+                        Copy Link{' '}
+                      </a>
+                    ),
+                  };
                   const editItem = {
                     key: 'edit',
                     label: 'Edit',
@@ -250,6 +264,7 @@ export const HelpPage = () => {
                       navigate(`/help/edit/${record.id}`);
                     },
                   };
+
                   const deleteItem = {
                     key: 'delete',
                     label: 'Delete',
@@ -261,13 +276,15 @@ export const HelpPage = () => {
                     },
                   };
 
-                  const menuItems = [...downloadItems, editItem, deleteItem];
-
-                  const menu = <Menu items={menuItems} />;
+                  // Build the menu items conditionally based on the user's roles
+                  let menuItems: MenuProps['items'] = copyUrl ? [copyItem] : [];
+                  menuItems = roles.includes('super-admin')
+                    ? [...menuItems, ...downloadItems, editItem, deleteItem]
+                    : [...menuItems, ...downloadItems];
 
                   return (
                     <div style={{ display: 'flex', gap: 8, justifyContent: 'center' }}>
-                      <Dropdown overlay={menu} trigger={['click']} placement="bottomRight">
+                      <Dropdown menu={{ items: menuItems }} trigger={['click']} placement="bottomRight">
                         <Tooltip title="Actions">
                           <Button icon={<SettingOutlined />} />
                         </Tooltip>
