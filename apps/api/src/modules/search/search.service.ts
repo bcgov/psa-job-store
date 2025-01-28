@@ -95,6 +95,7 @@ export class SearchService {
     // console.log('search is a number: ', isNumber);
     const results = await this.elasticService.search({
       index: SearchIndex.JobProfile,
+      size: 1000,
       query: {
         bool: {
           should: [
