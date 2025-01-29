@@ -75,7 +75,6 @@ export const AppHeader = ({ collapsed, setCollapsed }: AppHeaderProps) => {
               <img className={styles.bcLogo} src="/BC_logo.png" alt="BC Logo" />
               <div className={styles.titleContainer}>
                 <Text className={styles.titleContent}>Job Store</Text>
-                <Text className={styles.titleContentBeta}>βeta</Text>
               </div>
             </Link>
           </Col>

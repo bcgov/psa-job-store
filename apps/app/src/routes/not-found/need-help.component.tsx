@@ -24,7 +24,7 @@ export const NeedHelpComponent: React.FC<NeedHelpComponentProperties> = ({ noCar
           href="https://teams.microsoft.com/l/channel/19%3Aa135658fced7487185d182b6374cf778%40thread.tacv2/Feedback%20and%20Support?groupId=30d29524-d012-4340-a28e-ce8fe4aaea43&tenantId=6fdb5200-3d0d-4a8a-b036-d3685e359adc"
           target="_blank"
         >
-          Job Store Beta Support
+          Job Store Support
         </Link>
       </Text>
     </Space>
