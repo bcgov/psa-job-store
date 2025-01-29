@@ -12,10 +12,12 @@ import { nextRouter } from './router/next.router';
 import { WizardProvider } from './routes/wizard/components/wizard.provider';
 import { sendLogToServer } from './utils/logger-service.util';
 
-window.onerror = function (_message, _source, _lineno, _colno, error) {
-  console.error('Caught by window.onerror:', error);
-  if (error) sendLogToServer(error);
-};
+// this don't work in production because of how bundling works
+// window.onerror = function (_message, _source, _lineno, _colno, error) {
+//   console.error('Caught by window.onerror:', error);
+//   alert('windo on error');
+//   if (error) sendLogToServer(error);
+// };
 
 window.addEventListener('unhandledrejection', function (event) {
   console.error('Unhandled promise rejection:', event.reason);
