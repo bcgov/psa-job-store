@@ -22,7 +22,6 @@ export class AppLogService {
       };
     } else {
       // In production, log to a file
-      console.log('will log app errors to file');
       transport = {
         target: 'pino/file',
         options: { destination: '/tmp/log/app.log' },
