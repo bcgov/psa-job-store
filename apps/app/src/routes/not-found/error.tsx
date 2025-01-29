@@ -2,6 +2,7 @@ import { Button, Card, Col, Divider, message, Result, Row } from 'antd';
 import React, { useEffect, useRef } from 'react';
 import { ErrorBoundary, FallbackProps } from 'react-error-boundary';
 import { Outlet, useLocation } from 'react-router-dom';
+import { sendLogToServer } from '../../utils/logger-service.util';
 import { NeedHelpComponent } from './need-help.component';
 
 // eslint-disable-next-line react-hooks/rules-of-hooks
@@ -25,6 +26,12 @@ const GlobalError: React.FC<FallbackProps> = ({ error, resetErrorBoundary }) => 
       resetErrorBoundary();
     }
   }, [location.pathname, resetErrorBoundary]);
+
+  useEffect(() => {
+    // Send error to server when ErrorBoundary catches an error
+    sendLogToServer(error);
+  }, [location.pathname, resetErrorBoundary, error]);
+
   return (
     <Row justify="center" align="middle" style={{ height: '100%', justifyContent: 'center', background: '#f5f5f5' }}>
       <Col span={12}>

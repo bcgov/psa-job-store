@@ -40,14 +40,14 @@ export default defineConfig({
       gitSha: process.env.GITHUB_SHA || 'development',
     }),
   },
-  build: {
-    sourcemap: true,
-    rollupOptions: {
-      output: {
-        sourcemapExcludeSources: true,
-      },
-    },
-  },
+  // build: {
+  //   sourcemap: true,
+  //   rollupOptions: {
+  //     output: {
+  //       sourcemapExcludeSources: true,
+  //     },
+  //   },
+  // },
   server: {
     host: true,
     port: 3000,
