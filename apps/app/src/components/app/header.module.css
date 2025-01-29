@@ -78,22 +78,6 @@
     flex-grow: 0;
 }
 
-/* βeta */
-.titleContentBeta {
-    width: 28px;
-    height: 11px;
-
-    font-family: 'BC Sans';
-    font-style: normal;
-    font-weight: 700;
-    font-size: 12px;
-    line-height: 11px;
-    color: #FCBA19;
-    flex: none;
-    order: 1;
-    flex-grow: 0;
-}
-
 
 .right {
     display: flex;
