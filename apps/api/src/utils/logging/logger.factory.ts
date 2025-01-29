@@ -1,11 +1,5 @@
-import * as jwt from 'jsonwebtoken';
 import pino from 'pino';
 import { v4 as uuidv4 } from 'uuid';
-import { guidToUuid } from '../guid-to-uuid.util';
-
-interface DecodedToken {
-  idir_user_guid: string;
-}
 
 export const loggerFactory = () => {
   const NODE_ENV = process.env.NODE_ENV;
@@ -65,76 +59,12 @@ export const loggerFactory = () => {
     },
     serializers: {
       req: (req) => {
-        // Authentication runs after this block, so we can't use req.user here
-        // Instead, we'll extract the user from the Authorization header by decoding the JWT without verification
-        // and pass it to the logger as user_unverified
-        // related issue: https://github.com/iamolegga/nestjs-pino/issues/433
-        //
-        // if necessary, you can use the authService to verify the JWT
-        // we can't have async code here, so would need to create a sync version of
-        // getKeycloakPublicKey function and replace globalLogger functionality
-
         let uuid = null;
-
         try {
-          const authHeader = req.headers.authorization;
-          if (authHeader && typeof authHeader === 'string') {
-            const token = authHeader.split(' ')[1];
-            if (token && typeof token === 'string') {
-              const decoded = jwt.decode(token);
-
-              if (decoded && typeof decoded === 'object') {
-                const decodedToken = decoded as DecodedToken;
-
-                if (decodedToken.idir_user_guid && typeof decodedToken.idir_user_guid === 'string') {
-                  // Validate the GUID format before conversion
-                  const guidPattern = /^[a-fA-F0-9]{32}$/;
-                  if (guidPattern.test(decodedToken.idir_user_guid)) {
-                    const convertedUuid = guidToUuid(decodedToken.idir_user_guid);
-                    const formatPattern =
-                      /^([a-f0-9]{8})-?([a-f0-9]{4})-?([a-f0-9]{4})-?([a-f0-9]{4})-?([a-f0-9]{12})$/i;
-                    uuid = formatPattern.test(convertedUuid) ? convertedUuid : 'invalid-guid-format-1';
-                  } else {
-                    // Log invalid GUID format
-                    uuid = 'invalid-guid-format-2';
-                  }
-                }
-              }
-            }
-          }
+          uuid = req?.raw?.user?.id;
         } catch (error) {
           uuid = null;
         }
-
-        // Verification code if needed
-
-        // if (authHeader) {
-        //   const payload = authHeader.split(' ')[1];
-
-        //   // Start the async operation
-        //   authService
-        //     .getKeycloakPublicKey()
-        //     .then((publicKey) => {
-        //       const expectedAudiences = authService.getExpectedKeyCloakClientIds();
-        //       const expectedIssuer = authService.getExpectedKeyCloakIssuer();
-
-        //       try {
-        //         decodedToken = verifyJwt(payload, publicKey, {
-        //           complete: false,
-        //           ignoreExpiration: false,
-        //           audience: expectedAudiences,
-        //           issuer: expectedIssuer,
-        //           algorithms: ['RS256'],
-        //         }) as JwtPayload;
-        //         console.log('decodedToken: ', decodedToken);
-        //       } catch (error) {
-        //         console.error('Error verifying JWT:', error);
-        //       }
-        //     })
-        //     .catch((error) => {
-        //       console.error('Error getting Keycloak public key:', error);
-        //     });
-        // }
 
         return {
           id: req.id,
