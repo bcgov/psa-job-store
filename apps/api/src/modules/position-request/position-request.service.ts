@@ -1582,7 +1582,7 @@ export class PositionRequestApiService {
       const pngFileName = `Organization Chart ${zeroFilledPositionNumber} ${positionRequest.title} ${formattedDate}.png`;
 
       const data: IncidentCreateUpdateInput = {
-        subject: `Job Store Beta - Position Number Request - ${classification.code}`,
+        subject: `Job Store - Position Number Request - ${classification.code}`,
         primaryContact: { id: contactId },
         assignedTo: {
           staffGroup: {
