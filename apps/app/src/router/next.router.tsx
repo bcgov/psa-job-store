@@ -1,5 +1,4 @@
 import { FileTextOutlined, PartitionOutlined } from '@ant-design/icons';
-import ErrorBoundary from 'antd/es/alert/ErrorBoundary';
 import { createBrowserRouter } from 'react-router-dom';
 import { AppLayout } from '../components/app/app-layout.component';
 import RoleGuard from '../components/guards/role.guard';
@@ -53,9 +52,9 @@ export const nextRouter = createBrowserRouter([
   {
     path: '/',
     element: (
-      <ErrorBoundary>
-        <NextRouteGuard />
-      </ErrorBoundary>
+      // <ErrorBoundary>
+      <NextRouteGuard />
+      // </ErrorBoundary>
     ),
     children: [
       {
