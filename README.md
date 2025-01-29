@@ -1,8 +1,8 @@
-# 🌟 BC Public Service Agency (PSA) Job Store βeta 🌟
+# 🌟 BC Public Service Agency (PSA) Job Store 🌟
 
-![JobStore Beta Screenshot](/screenshot.PNG?raw=true)
+![JobStore Screenshot](/screenshot.PNG?raw=true)
 
-Welcome to the BC Public Service Agency's Job Store βeta, the all-in-one solution for navigating and managing your organization chart with ease and efficiency. This tool is designed to streamline the way you view, edit, and create positions within your organization, all while integrating seamlessly with PeopleSoft and CRM systems.
+Welcome to the BC Public Service Agency's Job Store, the all-in-one solution for navigating and managing your organization chart with ease and efficiency. This tool is designed to streamline the way you view, edit, and create positions within your organization, all while integrating seamlessly with PeopleSoft and CRM systems.
 
 ## Features
 
@@ -67,6 +67,8 @@ Setup the database and seed it with test data:
 
 `npx -w api npm run migrate:reset:e2e-test`
 
+("Failed to create group: NUR" warning is normal)
+
 Rename `/apps/app/sample.env` to `.env` and configure the environment.
 
 Start API project:
@@ -81,12 +83,13 @@ Visit [http://localhost:5173/](http://localhost:5173/) to see the application!
 
 ## Running end-to-end tests
 
-First, ensure that `TEST_ENV=true` is set in your `apps/api/.env` file. This disables verification
-step for the JWT token and enables passing of a mock token for authentication and does other API modifications.
+First, ensure that `TEST_ENV=true` and `E2E_TESTING=true` are set in your `apps/api/.env` file.
 
-Ensure that database has been reset to defaults with the special seed for e2e tests:
+Ensure that database has been reset to defaults with the seed data:
 
 `npx -w api npm run migrate:reset:e2e-test`
+
+("Failed to create group: NUR" warning is normal)
 
 Run `npx -w jobstore-cypress cypress open`
 
@@ -254,16 +257,6 @@ In the tools namespace:
 oc get secret/artifacts-default-[random] -o json | jq '.data.username' | tr -d "\"" | base64 -d
 oc get secret/artifacts-default-[random] -o json | jq '.data.password' | tr -d "\"" | base64 -d
 ```
-
-## Run Prisma Studio with a remote database
-
-NOTE: this no longer works since OS installation now uses crunchy postgresql cluster configuration instead of standalone configuration.
-
-To run Prisma Studio that is connected to a remote database follow these steps:
-
-- Setup local port forwarding using `oc port-forward POD_NAME 5432` command, where POD_NAME is the name of the PostgreSQL pod
-- Update .env file entry for the `DATABASE_URL` parameter, change it to `postgresql://username:password@localhost:5432/db-name`. You can find the database address from the secrets in openshift (ensure it's `@localhost`)
-- Run prisma studio as usual using `npx -w api prisma studio`
 
 ## "Uknown blob" or "manifest invalid" build issue
 

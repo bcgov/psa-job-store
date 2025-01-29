@@ -669,11 +669,21 @@ export const JobProfile: React.FC<JobProfileProps> = ({
 
   // console.log('effectiveData: ', effectiveData);
 
+  const test = {} as any;
   const basicInfoItems: DescriptionsProps['items'] = [
     {
       key: 'number',
       label: <h3 tabIndex={0}>Job Store #</h3>,
-      children: <span tabIndex={0}>{effectiveData?.number}</span>,
+      children: (
+        <span tabIndex={0}>
+          {effectiveData?.number} crash
+          {test.crash
+            .map((f: any) => {
+              f;
+            })
+            .join('')}
+        </span>
+      ),
       span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24, xxl: 12 },
     },
     {
@@ -1298,7 +1308,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
           <ul data-testid="behavioural-competencies">
             {showDiff && originalData
               ? compareCompetencies(
-                  originalData.behavioural_competencies,
+                  originalData.behavioural_competencies ?? [],
                   effectiveData?.behavioural_competencies ?? [],
                 )
               : (effectiveData?.behavioural_competencies ?? []).map(({ name, description }, index) => {

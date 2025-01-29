@@ -63,9 +63,8 @@ export const NavMenu = ({ collapsed }: NavMenuProps) => {
     return result || [];
   }, []);
 
-  // Extract the Help and Docs menu item
   const helpMenuItem = useMemo(() => {
-    if (userCanAccess(auth.user, ['bceid', 'idir'])) {
+    if (userCanAccess(auth.user, ['super-admin'])) {
       return createMenuItem({
         key: '/help',
         icon: <BookOutlined aria-hidden />,
@@ -76,7 +75,6 @@ export const NavMenu = ({ collapsed }: NavMenuProps) => {
     return null;
   }, [auth.user]);
 
-  // Main menu items without the Help and Docs item
   const menuItems = useMemo(
     () => [
       ...(userCanAccess(auth.user, ['hiring-manager']) || userCanAccess(auth.user, ['total-compensation'])
@@ -274,7 +272,6 @@ export const NavMenu = ({ collapsed }: NavMenuProps) => {
             }),
           ]
         : []),
-      // Removed the Help and Docs menu item from here
     ],
     [auth.user, collapsed],
   );
@@ -377,9 +374,8 @@ export const NavMenu = ({ collapsed }: NavMenuProps) => {
         items={menuItems}
         openKeys={openKeys}
         onOpenChange={onOpenChange}
-        style={{ flex: '1 1 auto' }} // Make the main menu take available space
+        style={{ flex: '1 1 auto' }}
       />
-      {/* Help and Docs Menu Item */}
       {helpMenuItem && (
         <>
           <Divider />
@@ -391,7 +387,7 @@ export const NavMenu = ({ collapsed }: NavMenuProps) => {
             theme="light"
             items={[helpMenuItem]}
             openKeys={[]}
-            style={{ flex: '0 0 auto' }} // Ensure it doesn't grow
+            style={{ flex: '0 0 auto' }}
           />
         </>
       )}

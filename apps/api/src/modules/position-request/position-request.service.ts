@@ -708,7 +708,7 @@ export class PositionRequestApiService {
       };
     }
 
-    const positionRequest = await this.prisma.positionRequest.findUnique({
+    const positionRequest = await this.prisma.$primary().positionRequest.findUnique({
       where: whereCondition,
       include: {
         parent_job_profile: true,
@@ -1582,7 +1582,7 @@ export class PositionRequestApiService {
       const pngFileName = `Organization Chart ${zeroFilledPositionNumber} ${positionRequest.title} ${formattedDate}.png`;
 
       const data: IncidentCreateUpdateInput = {
-        subject: `Job Store Beta - Position Number Request - ${classification.code}`,
+        subject: `Job Store - Position Number Request - ${classification.code}`,
         primaryContact: { id: contactId },
         assignedTo: {
           staffGroup: {

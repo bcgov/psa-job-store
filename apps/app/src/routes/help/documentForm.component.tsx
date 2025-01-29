@@ -350,7 +350,7 @@ const DocumentForm: React.FC<DocumentFormProps> = ({ mode, initialData, onSubmit
               <>
                 <Form.Item name="permalink" noStyle>
                   <Input
-                    addonBefore="https://jobstore.gov.bc.ca/document/"
+                    addonBefore={window.location.origin + '/document/'}
                     onBlur={validateURL}
                     addonAfter={
                       <>

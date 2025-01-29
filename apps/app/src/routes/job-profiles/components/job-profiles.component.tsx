@@ -357,11 +357,11 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
       // if we are doing organization filtering because user is creating a new position request
       // in that organization, apply this filter in addition to user applied organization filter
       //
-      // if no user filters applied, we need to return all profiles for this organization AND profiles for all orgs
+      // if no user filters applied, we need to return all profiles for this organization
       // if user did apply filters, then apply those filters only
       let applyOrgFilter = '';
       if (!organizationFilter && organizationFilterExtra) {
-        applyOrgFilter = organizationFilterExtra.id + ',ALL';
+        applyOrgFilter = organizationFilterExtra.id?.toString() ?? '';
       } else if (organizationFilter) {
         applyOrgFilter = organizationFilter;
       }

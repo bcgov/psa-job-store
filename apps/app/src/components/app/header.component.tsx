@@ -60,7 +60,7 @@ export const AppHeader = ({ collapsed, setCollapsed }: AppHeaderProps) => {
           <Col className={styles.left}>
             {auth.isAuthenticated && (
               <Button
-                data-testid="menu-toggle-btn-mobile"
+                data-testid="menu-toggle-btn"
                 type="text"
                 icon={<MenuOutlined aria-hidden style={{ fontSize: '1.3rem' }} />}
                 onClick={() => setCollapsed(!collapsed)}
@@ -75,7 +75,6 @@ export const AppHeader = ({ collapsed, setCollapsed }: AppHeaderProps) => {
               <img className={styles.bcLogo} src="/BC_logo.png" alt="BC Logo" />
               <div className={styles.titleContainer}>
                 <Text className={styles.titleContent}>Job Store</Text>
-                <Text className={styles.titleContentBeta}>βeta</Text>
               </div>
             </Link>
           </Col>

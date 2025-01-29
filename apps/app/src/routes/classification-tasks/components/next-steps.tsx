@@ -72,7 +72,7 @@ export const NextSteps = () => {
                       <List.Item.Meta
                         avatar={<Avatar shape="square" src={OracleServiceCloudGraphic} />}
                         title={'CRM: Contact the client via CRM'}
-                        description="Add Job Store Beta submission link (from the original service request) for the reference."
+                        description="Add Job Store submission link (from the original service request) for the reference."
                       />
                     </List.Item>
                     <List.Item>
@@ -390,7 +390,7 @@ Learn More
                         style={{ marginBottom: '1rem' }}
                         message={
                           <span>
-                            For Job Store Beta clients, they <b>do not</b> need to submit another form to request a
+                            For Job Store clients, they <b>do not</b> need to submit another form to request a
                             Classification Review.
                           </span>
                         }
@@ -473,7 +473,7 @@ Learn More
                   </List>
                   <Alert
                     style={{ marginBottom: '1rem' }}
-                    message={<span>No actions required in Job Store Beta.</span>}
+                    message={<span>No actions required in Job Store.</span>}
                     type="info"
                     showIcon
                   />
@@ -526,7 +526,7 @@ Learn More
                       <List.Item.Meta
                         avatar={<Avatar shape="square" src={OracleServiceCloudGraphic} />}
                         title={'CRM: Contact the client via CRM'}
-                        description="Add Job Store Beta submission link (from the original service request) for the reference."
+                        description="Add Job Store submission link (from the original service request) for the reference."
                       />
                     </List.Item>
                     <List.Item>
@@ -934,9 +934,9 @@ Learn More
                     style={{ marginBottom: '1rem' }}
                     message={
                       <div className="alert-with-link">
-                        For Job Store Beta clients, ECLASS will not include a Classification Review request form.
-                        Specialists can access the original submission in Job Store Beta but are not required to perform
-                        any actions in Job Store Beta.
+                        For Job Store clients, ECLASS will not include a Classification Review request form. Specialists
+                        can access the original submission in Job Store but are not required to perform any actions in
+                        Job Store.
                       </div>
                     }
                     type="info"

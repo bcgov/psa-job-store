@@ -576,7 +576,7 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
 
   const windowWidth = useWindowWidth();
   const hasMinistryFilter = ministriesFilterData.length > 1;
-  const isMobile = hasMinistryFilter ? windowWidth <= 1545 : windowWidth <= 1360;
+  const isMobile = hasMinistryFilter ? windowWidth <= 1545 : windowWidth <= 1463;
 
   return (
     <Row
@@ -847,7 +847,7 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
                 </Row>
               </Col>
               {allSelections.length > 0 && (
-                <Row>
+                <Row style={{ paddingLeft: '12px' }}>
                   <Col span={24} style={{ marginTop: '10px' }}>
                     <span
                       style={{
@@ -874,7 +874,7 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
               )}
             </Row>
             <Row data-testid="filters-tags-section">
-              <Col lg={15} xs={24}>
+              <Col lg={24} xl={15}>
                 {allSelections.map((selection) => (
                   <Tag
                     closeIcon={

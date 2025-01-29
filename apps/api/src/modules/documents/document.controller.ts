@@ -29,7 +29,7 @@ export class DocumentController {
   constructor(private readonly documentService: DocumentService) {}
 
   @Roles('super-admin')
-  @Post('upload')
+  @Post('create')
   @UseInterceptors(
     FileInterceptor('file', {
       storage: diskStorage({
@@ -83,7 +83,7 @@ export class DocumentController {
   }
 
   @Roles('super-admin')
-  @Put(':id')
+  @Put('/update/:id')
   @UseInterceptors(
     FileInterceptor('file', {
       storage: diskStorage({
@@ -151,7 +151,7 @@ export class DocumentController {
   }
 
   @Roles('classification', 'hiring-manager', 'total-compensation')
-  @Get(':id/file')
+  @Get('file/:id')
   async serveFile(
     @Param('id') id: string,
     @Query('mode') mode: 'inline' | 'download' = 'download',
@@ -190,7 +190,7 @@ export class DocumentController {
   }
 
   @Roles('super-admin')
-  @Delete(':id')
+  @Delete('delete/:id')
   async deleteDocument(@Param('id') id: string) {
     const document = await this.documentService.getDocument(id);
     if (!document) {
@@ -224,7 +224,7 @@ export class DocumentController {
   }
 
   @Roles('classification', 'hiring-manager', 'total-compensation')
-  @Get('url/:url/file')
+  @Get(':url')
   async serveFileByUrl(
     @Param('url') url: string,
     @Query('mode') mode: 'inline' | 'download' = 'download',

@@ -34,6 +34,7 @@ CRM_PASSWORD=
 # Database Settings
 CLUSTER_NAME=
 DATABASE_URL=
+DATABASE_READ_URL=
 
 # Elasticsearch & Kibana Settings
 ELASTIC_NODE=
