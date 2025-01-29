@@ -17,7 +17,7 @@ export const GetStartedCard = () => {
         <div>🎬</div>
         <Title>Get Started</Title>
         <Paragraph>Learn more about the Job Store and it's features.</Paragraph>
-        <Link to="#">View documentation</Link>
+        <Link to="https://youtu.be/M9Gk14Xv-aQ">View video</Link>
       </Space>
     </Card>
   );
