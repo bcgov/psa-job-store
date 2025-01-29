@@ -20,7 +20,7 @@ export const UploadHelpDocPage = () => {
     formData.append('job_family_ids', JSON.stringify(values.job_family_ids));
     formData.append('job_stream_ids', JSON.stringify(values.job_stream_ids));
     // Add additional form data as needed
-    const response = await axios.post(`${VITE_BACKEND_URL}/document/upload`, formData, {
+    const response = await axios.post(`${VITE_BACKEND_URL}/document/create`, formData, {
       withCredentials: true,
       headers: { 'Content-Type': 'multipart/form-data' },
     });
