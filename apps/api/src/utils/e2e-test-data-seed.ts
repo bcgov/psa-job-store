@@ -7,6 +7,7 @@ import {
   PrismaClient,
 } from '@prisma/client';
 import { ExtendedPrismaClientType } from '../modules/prisma/extended-prisma-client.impl';
+import { ExtendedPrismaClientTypePgLite } from '../modules/prisma/extended-prisma-client.impl.pglite';
 import { getSessionStore } from './session.utils';
 
 const prismaBlank = new PrismaClient();
@@ -15,7 +16,7 @@ const SYSTEM_USER_ID = 'f1851282-d875-4f22-9590-6c0405d3bc78';
 const TEST_USER_ID = '88bd8bb6-c449-4c13-8204-d91539f548d4';
 const TEST_USER_ID2 = '88bd8bb6-c449-4c13-8204-d91539f548d5';
 
-export async function seed(prismaInp?: ExtendedPrismaClientType) {
+export async function seed(prismaInp?: ExtendedPrismaClientType | ExtendedPrismaClientTypePgLite) {
   const prisma = prismaInp || prismaBlank;
 
   // console.log('Creating system user...');
