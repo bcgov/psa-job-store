@@ -95,4 +95,26 @@ export class E2EAuthController {
       },
     };
   }
+
+  @PublicRoute()
+  @Get('dumpSessions')
+  @UseGuards(TestEnvironmentGuard, E2EAuthGuard)
+  dumpSessions() {
+    return new Promise((resolve, reject) => {
+      getSessionStore().all((error, sessions) => {
+        if (error) {
+          reject({
+            status: 'error',
+            message: 'Failed to retrieve sessions',
+            error: error.message,
+          });
+        } else {
+          resolve({
+            status: 'ok',
+            sessions: sessions || [],
+          });
+        }
+      });
+    });
+  }
 }
