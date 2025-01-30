@@ -35,8 +35,11 @@ function loadRecipientConfig(): Array<{
     console.log(`Reading recipient file: ${email}`);
     const content = fs.readFileSync(path.join(recipientsDir, file), 'utf-8');
     const { reports, organizations } = JSON.parse(content);
-    console.log(`Reports for ${email}: ${reports.join(', ')}`);
-    console.log(`Organizations for ${email}: ${organizations.join(', ')}`);
+    console.log(`config for ${email}: ${content}`);
+    console.log(`Reports for ${email}: ${reports}`);
+    console.log(`Organizations for ${email}: ${organizations}`);
+    console.log(`Reports for ${email}: ${reports?.join(', ')}`);
+    console.log(`Organizations for ${email}: ${organizations?.join(', ')}`);
     recipients.push({ email, reports, organizations });
   }
   return recipients;
@@ -180,7 +183,9 @@ async function sendEmails(
         from: emailFrom,
         to: toEmail,
         subject: `JobStore ${moment(startDate).format('MMMM')} Monthly Report`,
-        text: `Please find the attached report(s) for the period from ${startDate} to ${endDate}.`,
+        text: `Please find the attached report(s) for the period from ${startDate} to ${endDate}.
+              \n\nThese reports are filtered by the organizations you are associated with. If you would like to inquire about changing your access, you can reply to this email.
+              \nIf a report you normally see is missing, it may be because there was no data for that report during the period.`,
         attachments,
       };
 
