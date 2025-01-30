@@ -25,6 +25,7 @@ export class AppLogService {
       transport = {
         target: 'pino/file',
         options: { destination: '/tmp/log/app.log' },
+        level: 'info',
       };
     }
 
