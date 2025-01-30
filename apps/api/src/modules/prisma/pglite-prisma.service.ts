@@ -44,7 +44,7 @@ export class PGLitePrismaService extends ExtendedPrismaClientPgLite implements O
 
     // // END TEST
 
-    console.log('connecting to database...');
+    console.log('connecting to database..');
     await this.$connect();
 
     console.log('reading schema file..');
