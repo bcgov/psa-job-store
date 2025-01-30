@@ -69,7 +69,6 @@ export class E2EAuthController {
     }
 
     const sessionStoreValue = await getSession(sessionId);
-    console.log('sessionStoreValue: ', sessionStoreValue);
 
     if (!sessionStoreValue) {
       return {
@@ -83,8 +82,11 @@ export class E2EAuthController {
     hmac.update(sessionId);
     const signature = hmac.digest('base64url');
 
+    // Custom encode the signature, replacing underscore with %2F, which is actually a "/", but for some reason that's the way it is...
+    const encodedSignature = encodeURIComponent(signature).replace(/_/g, '%2F');
+
     // Generate cookie string
-    const cookieValue = `s%3A${sessionId}.${signature}`;
+    const cookieValue = `s%3A${sessionId}.${encodedSignature}`;
 
     return {
       status: 'ok',
