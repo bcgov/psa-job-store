@@ -2,9 +2,19 @@ import { Controller, Get, Query, UseGuards } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import * as crypto from 'crypto';
 import { AppConfigDto } from '../../dtos/app-config.dto';
+import { getSessionStore } from '../../utils/session.utils';
 import { PublicRoute } from './decorators/public-route.decorator';
 import { E2EAuthGuard } from './guards/e2e-auth.guard';
 import { TestEnvironmentGuard } from './guards/test-environment.guard';
+
+const getSession = (sessionId: string) => {
+  return new Promise((resolve, reject) => {
+    getSessionStore().get(sessionId, (error, session) => {
+      if (error) reject(error);
+      else resolve(session);
+    });
+  });
+};
 
 @Controller('e2e-auth')
 export class E2EAuthController {
@@ -49,12 +59,22 @@ export class E2EAuthController {
   @PublicRoute()
   @Get('generateSessionCookie')
   @UseGuards(TestEnvironmentGuard, E2EAuthGuard)
-  generateSessionCookie(@Query('sessionId') sessionId: string) {
+  async generateSessionCookie(@Query('sessionId') sessionId: string) {
     const secret = this.configService.get('SESSION_SECRET');
     if (!sessionId || !secret) {
       return {
         status: 'error',
         message: 'Both sessionId and secret are required',
+      };
+    }
+
+    const sessionStoreValue = await getSession(sessionId);
+    console.log('sessionStoreValue: ', sessionStoreValue);
+
+    if (!sessionStoreValue) {
+      return {
+        status: 'error',
+        message: 'Session not found',
       };
     }
 
