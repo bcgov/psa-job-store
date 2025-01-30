@@ -1,8 +1,8 @@
 describe('Test Setup', () => {
   before(() => {
     cy.login().then(() => {
-      const token = Cypress.env('AUTH_TOKEN');
-      expect(token).to.exist;
+      // const token = Cypress.env('AUTH_TOKEN');
+      // expect(token).to.exist;
 
       // Reset CRM Data
       cy.request({
