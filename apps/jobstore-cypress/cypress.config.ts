@@ -48,6 +48,7 @@ module.exports = defineConfig({
   env: {
     VITE_BACKEND_URL: process.env.VITE_BACKEND_URL,
     VITE_E2E_AUTH_KEY: process.env.VITE_E2E_AUTH_KEY,
+    CYPRESS_DOMAIN: process.env.CYPRESS_DOMAIN,
   },
   e2e: {
     viewportWidth: 1920,
