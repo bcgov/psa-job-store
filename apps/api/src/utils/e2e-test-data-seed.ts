@@ -100,6 +100,8 @@ export async function seed(prismaInp?: ExtendedPrismaClientType | ExtendedPrisma
   const now = new Date();
   const oneDayFromNow = new Date(now.getTime() + 24 * 60 * 60 * 1000);
 
+  console.log('SETTING SESSION FOR TEST USER');
+
   getSessionStore().set('iHcbWqNHyasCGNOEThqpyORKtLU-wR4r', {
     cookie: {
       path: '/',
