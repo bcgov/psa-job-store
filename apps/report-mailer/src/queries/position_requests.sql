@@ -1,5 +1,4 @@
--- requires_parameters: true
-
+-- requires_parameters: startDate, endDate, organizations
 SELECT
     pr.title,
     pr.position_number,
@@ -28,4 +27,5 @@ LEFT JOIN organization o ON
 WHERE
     pr.status = 'COMPLETED' AND
     pr.submitted_at >= $1 AND
-    pr.submitted_at < $2;
+    pr.submitted_at < $2 AND
+    o.id = ANY ($3);
