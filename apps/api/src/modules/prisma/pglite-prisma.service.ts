@@ -2,10 +2,10 @@ import { PGlite } from '@electric-sql/pglite';
 import { Injectable, OnModuleInit } from '@nestjs/common';
 import { PrismaPGlite } from 'pglite-prisma-adapter';
 import { seed } from '../../utils/e2e-test-data-seed';
-import { ExtendedPrismaClient } from './extended-prisma-client.impl';
+import { ExtendedPrismaClientPgLite } from './extended-prisma-client.impl.pglite';
 
 @Injectable()
-export class PGLitePrismaService extends ExtendedPrismaClient implements OnModuleInit {
+export class PGLitePrismaService extends ExtendedPrismaClientPgLite implements OnModuleInit {
   private static instance: PGLitePrismaService;
   private pglite: PGlite;
 
