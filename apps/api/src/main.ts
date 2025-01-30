@@ -16,7 +16,9 @@ async function bootstrap() {
   const configService = app.get<ConfigService<AppConfigDto, true>>(ConfigService);
   app.enableCors({
     credentials: true,
-    origin: '*', //configService.get('REACT_APP_URL'),
+    origin: (origin, callback) => {
+      callback(null, true); // allow all origins with credentials
+    }, //configService.get('REACT_APP_URL'),
   });
 
   app.use(
