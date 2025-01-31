@@ -1,17 +1,21 @@
 -- requires_parameters: startDate, endDate, organizations
 SELECT
-    pr.title,
-    pr.position_number,
-    c.name AS classification,
-    pr.submitted_at,
-    pr.approved_at,
-    COALESCE(
+    pr.title AS "Title",
+    pr.position_number AS "Position number",
+    c.name AS "Classification",
+    -- Convert 'submitted_at' to PST and format it
+	pr.submitted_at ,
+   -- Convert 'submitted_at' from UTC to PST and format it
+    TO_CHAR(pr.submitted_at AT TIME ZONE 'UTC' AT TIME ZONE 'America/Los_Angeles', 'YYYY-MM-DD HH24:MI:SS') AS submitted_at_pst,
+    -- Convert 'approved_at' from UTC to PST and format it
+    TO_CHAR(pr.approved_at AT TIME ZONE 'UTC' AT TIME ZONE 'America/Los_Angeles', 'YYYY-MM-DD HH24:MI:SS') AS approved_at_pst,
+       COALESCE(
         ROUND(pr.time_to_approve / 86400),
         ROUND(EXTRACT(EPOCH FROM (pr.approved_at - pr.submitted_at)) / 86400)
-    ) AS time_to_approve_days,
-    u.name AS user_name,
-    d.name AS department_name,
-    o.name AS organization_name
+    ) AS "Days to apprive",
+    u.name AS  "Username",
+    d.name AS  "Department name",
+    o.name AS  "Organization name"
 FROM
     position_request pr
 LEFT JOIN classification c ON
@@ -26,6 +30,6 @@ LEFT JOIN organization o ON
     d.organization_id = o.id
 WHERE
     pr.status = 'COMPLETED' AND
-    pr.submitted_at >= $1 AND
-    pr.submitted_at < $2 AND
-    o.id = ANY ($3);
+    TO_CHAR(pr.submitted_at AT TIME ZONE 'UTC' AT TIME ZONE 'America/Los_Angeles', 'YYYY-MM-DD HH24:MI:SS') >= $1 AND
+    TO_CHAR(pr.approved_at AT TIME ZONE 'UTC' AT TIME ZONE 'America/Los_Angeles', 'YYYY-MM-DD HH24:MI:SS') < $2 AND
+	o.id = ANY($3)
