@@ -20,6 +20,7 @@ console.log(`Recipients Directory: ${recipientsDir}`);
 function loadRecipientConfig(): Array<{
   email: string;
   reports: string[];
+  organizations: string[];
 }> {
   console.log('Loading recipient configurations...');
   const recipients = [];
@@ -32,33 +33,28 @@ function loadRecipientConfig(): Array<{
     // }
     const email = file;
     console.log(`Reading recipient file: ${email}`);
-    const reportsContent = fs.readFileSync(path.join(recipientsDir, file), 'utf-8');
-    const reports = JSON.parse(reportsContent);
-    console.log(`Reports for ${email}: ${reports.join(', ')}`);
-    recipients.push({ email, reports });
+    const content = fs.readFileSync(path.join(recipientsDir, file), 'utf-8');
+    const { reports, organizations } = JSON.parse(content);
+    console.log(`config for ${email}: ${content}`);
+    console.log(`Reports for ${email}: ${reports}`);
+    console.log(`Organizations for ${email}: ${organizations}`);
+    console.log(`Reports for ${email}: ${reports?.join(', ')}`);
+    console.log(`Organizations for ${email}: ${organizations?.join(', ')}`);
+    recipients.push({ email, reports, organizations });
   }
   return recipients;
 }
 
-// Function to load queries from files
-// function loadQueries(): Map<string, string> {
-//   console.log('Loading SQL queries...');
-//   const queryMap = new Map<string, string>();
-//   const files = fs.readdirSync(queriesDir).filter((file) => file.endsWith('.sql'));
-//   console.log(`Query files found: ${files.join(', ')}`);
-//   for (const file of files) {
-//     const query = fs.readFileSync(path.join(queriesDir, file), 'utf-8');
-//     console.log(`Loaded query file: ${file}`);
-//     queryMap.set(file, query);
-//   }
-//   return queryMap;
-// }
-
-async function executeQueriesAndWriteCSVs(client: Client, queries: Set<string>, startDate: string, endDate: string) {
-  console.log('Executing queries and writing CSVs...');
+async function executeQueriesAndWriteCSVs(
+  client: Client,
+  recipient: { email: string; reports: string[]; organizations: string[] },
+  startDate: string,
+  endDate: string,
+) {
+  console.log(`Executing queries for recipient: ${recipient.email}`);
   const executedQueries = new Map<string, string>(); // Map of query file name to output path
 
-  for (const queryFile of queries) {
+  for (const queryFile of recipient.reports) {
     console.log(`Processing query file: ${queryFile}`);
     const queryPath = path.join(queriesDir, queryFile);
     if (!fs.existsSync(queryPath)) {
@@ -66,20 +62,25 @@ async function executeQueriesAndWriteCSVs(client: Client, queries: Set<string>, 
       continue;
     }
     const queryText = fs.readFileSync(queryPath, 'utf-8');
-    const outputFileName = `${path.basename(queryFile, '.sql')}.csv`;
+    // Modify the output file name to include the recipient's email
+    const outputFileName = `${path.basename(queryFile, '.sql')}_${recipient.email.replace('@', '_at_')}.csv`;
     const outputPath = path.join('/tmp', outputFileName);
 
     try {
       console.log(`Executing query: ${queryFile}`);
 
-      // Determine if the query requires parameters
-      let requiresParams = false;
+      // Parse required parameters from the SQL file
+      let requiredParams: string[] = [];
       const lines = queryText.split('\n');
       for (const line of lines) {
-        const trimmedLine = line.trim().toLowerCase();
+        const trimmedLine = line.trim();
         if (trimmedLine.startsWith('--')) {
-          if (trimmedLine.includes('requires_parameters: true')) {
-            requiresParams = true;
+          const paramMatch = trimmedLine.match(/^--\s*requires_parameters:\s*(.*)$/i);
+          if (paramMatch) {
+            requiredParams = paramMatch[1]
+              .split(',')
+              .map((param) => param.trim())
+              .filter((param) => param.length > 0);
             break;
           }
         } else if (trimmedLine === '') {
@@ -91,19 +92,34 @@ async function executeQueriesAndWriteCSVs(client: Client, queries: Set<string>, 
         }
       }
 
-      let res;
-      if (requiresParams) {
-        // Query requires parameters
-        res = await client.query(queryText, [startDate, endDate]);
-      } else {
-        // Query does not require parameters
-        res = await client.query(queryText);
+      // Build parameters array based on required parameters
+      const parameters = requiredParams.map((paramName) => {
+        switch (paramName) {
+          case 'startDate':
+            return startDate;
+          case 'endDate':
+            return endDate;
+          case 'organizations':
+            return recipient.organizations;
+          default:
+            throw new Error(`Unknown parameter '${paramName}' required by query '${queryFile}'`);
+        }
+      });
+
+      // Ensure correct number of placeholders in query
+      const parameterPlaceholderCount = (queryText.match(/\$\d+/g) || []).length;
+      if (parameters.length !== parameterPlaceholderCount) {
+        throw new Error(
+          `Mismatch between number of parameters (${parameters.length}) and placeholders (${parameterPlaceholderCount}) in query '${queryFile}'`,
+        );
       }
+
+      // Execute the query
+      const res = await client.query(queryText, parameters);
 
       const records = res.rows;
 
       if (records.length > 0) {
-        // Create CSV Writer
         const csvWriter = createObjectCsvWriter({
           path: outputPath,
           header: Object.keys(records[0]).map((key) => ({ id: key, title: key })),
@@ -125,15 +141,14 @@ async function executeQueriesAndWriteCSVs(client: Client, queries: Set<string>, 
 }
 
 async function sendEmails(
-  recipientConfigs: Array<{ email: string; reports: string[] }>,
+  recipients: Array<{ email: string; reports: string[]; organizations: string[] }>,
   executedQueries: Map<string, string>,
   startDate: string,
   endDate: string,
 ) {
   console.log('Preparing to send emails...');
-  console.log(`host ${process.env.SMTP_HOST}`);
-  const emailFrom = 'JobStore@gov.bc.ca'; //process.env.EMAIL_FROM ?? 'JobStore@gov.bc.ca';
-  // Create transporter
+  const emailFrom = 'JobStore@gov.bc.ca';
+
   const transporter = nodemailer.createTransport({
     host: process.env.SMTP_HOST,
     port: Number(process.env.SMTP_PORT),
@@ -144,17 +159,18 @@ async function sendEmails(
     },
   });
 
-  for (const { email, reports } of recipientConfigs) {
-    const toEmail = `${email}@gov.bc.ca`;
+  for (const recipient of recipients) {
+    const toEmail = `${recipient.email}@gov.bc.ca`;
     console.log(`Preparing email for: ${toEmail}`);
     const attachments = [];
 
-    for (const report of reports) {
-      const outputPath = executedQueries.get(report);
-      if (outputPath && fs.existsSync(outputPath)) {
+    for (const report of recipient.reports) {
+      const outputFileName = `${path.basename(report, '.sql')}_${recipient.email.replace('@', '_at_')}.csv`;
+      const outputPath = path.join('/tmp', outputFileName);
+      if (fs.existsSync(outputPath)) {
         console.log(`Attaching report ${report} for ${toEmail}`);
         attachments.push({
-          filename: path.basename(outputPath),
+          filename: `${path.basename(report, '.sql')}.csv`,
           path: outputPath,
         });
       } else {
@@ -167,15 +183,16 @@ async function sendEmails(
         from: emailFrom,
         to: toEmail,
         subject: `JobStore ${moment(startDate).format('MMMM')} Monthly Report`,
-        text: `Please find the attached report(s) for the period from ${startDate} to ${endDate}.`,
+        text: `Please find the attached report(s) for the period from ${startDate} to ${endDate}.
+              \n\nThese reports are filtered by the organizations you are associated with. If you would like to inquire about changing your access, you can reply to this email.
+              \nIf a report you normally see is missing, it may be because there was no data for that report during the period.`,
         attachments,
       };
 
       try {
         console.log(`Sending reports to ${toEmail} from ${emailFrom}`);
-        // eslint-disable-next-line no-await-in-loop
-        const info = await transporter.sendMail(mailOptions);
-        console.log(`Email sent to ${toEmail}:`, info.messageId);
+        await transporter.sendMail(mailOptions);
+        console.log(`Email sent to ${toEmail}`);
       } catch (error) {
         console.error(`Error sending email to ${toEmail}:`, error);
         throw error;
@@ -234,7 +251,7 @@ async function main() {
       connectionString: process.env.DATABASE_URL,
       ssl: !isLocal
         ? {
-            rejectUnauthorized: false, // Adjust based on your SSL requirements
+            rejectUnauthorized: false,
           }
         : undefined,
     });
@@ -242,27 +259,30 @@ async function main() {
     await client.connect();
     console.log('Connected to the database');
 
-    // Execute queries and write CSVs
-    const executedQueries = await executeQueriesAndWriteCSVs(client, queriesNeeded, startDate, endDate);
+    // For each recipient, execute their queries
+    for (const recipient of recipientConfigs) {
+      console.log(`Processing recipient: ${recipient.email}`);
 
-    // Send emails with attachments
-    await sendEmails(recipientConfigs, executedQueries, startDate, endDate);
+      // Execute queries and write CSVs for this recipient
+      const executedQueries = await executeQueriesAndWriteCSVs(client, recipient, startDate, endDate);
 
-    // Clean up CSV files
-    console.log('Cleaning up CSV files...');
-    for (const outputPath of executedQueries.values()) {
-      if (fs.existsSync(outputPath)) {
-        fs.unlinkSync(outputPath);
-        console.log(`Deleted ${outputPath}`);
+      // Send email with attachments
+      await sendEmails([recipient], executedQueries, startDate, endDate);
+
+      // Clean up CSV files for this recipient
+      for (const outputPath of executedQueries.values()) {
+        if (fs.existsSync(outputPath)) {
+          fs.unlinkSync(outputPath);
+          console.log(`Deleted ${outputPath}`);
+        }
       }
     }
-
     console.log('Report mailer application completed successfully.');
     await client.end();
     console.log('Disconnected from the database');
   } catch (error) {
     console.error('Error in main function:', error);
-    process.exit(1); // Exit with failure
+    process.exit(1);
   }
 }
 
