@@ -19,6 +19,6 @@ LEFT JOIN department d ON
 LEFT JOIN organization o ON
     d.organization_id = o.id
 WHERE
-    pr.submitted_at >= $1 AND
-    pr.submitted_at < $2  AND
+    TO_CHAR(pr.submitted_at AT TIME ZONE 'UTC' AT TIME ZONE 'America/Los_Angeles', 'YYYY-MM-DD HH24:MI:SS') >= $1 AND
+    TO_CHAR(pr.approved_at AT TIME ZONE 'UTC' AT TIME ZONE 'America/Los_Angeles', 'YYYY-MM-DD HH24:MI:SS') < $2 AND
     o.id = ANY ($3);
