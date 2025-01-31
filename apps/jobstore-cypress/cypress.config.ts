@@ -48,11 +48,12 @@ module.exports = defineConfig({
   env: {
     VITE_BACKEND_URL: process.env.VITE_BACKEND_URL,
     VITE_E2E_AUTH_KEY: process.env.VITE_E2E_AUTH_KEY,
+    CYPRESS_DOMAIN: process.env.CYPRESS_DOMAIN,
   },
   e2e: {
     viewportWidth: 1920,
     viewportHeight: 1080,
-    baseUrl: 'http://localhost:3000/',
+    baseUrl: process.env.CYPRESS_BASE_URL,
     specPattern: ['cypress/support/setup.cy.js', '**/*.feature'],
     // specPattern: '**/*.spec.js',
     setupNodeEvents,

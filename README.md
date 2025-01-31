@@ -262,6 +262,11 @@ oc get secret/artifacts-default-[random] -o json | jq '.data.password' | tr -d "
 
 If you get an "Unknown blob" or "manifest invalid" error message during build process, this is likely caused by artifactory being full. To resolve, delete old images from the artifactory repository to free up space and retry the action.
 
+Login to artifactory at https://artifacts.developer.gov.bc.ca/ui/admin and select the tools-alexandria project. On the left, select Artifactory->Artifacts
+to show the list of builds.
+
+Under api and app projects, delete old versions, for example "0.0.0" or "0.1.0" to free up space.
+
 ## DB Troubleshooting
 
 _Note_ Below is for high availbility configuration. For MVP, configuraiton is using single database pod

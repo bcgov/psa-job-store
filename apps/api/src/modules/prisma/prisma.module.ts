@@ -10,9 +10,12 @@ import { PrismaService } from './prisma.service';
       provide: PrismaService,
       useFactory: () => {
         // eventsService: EventsService
-        if (process.env.E2E_TESTING === 'true' && process.env.NODE_ENV != 'development')
+        if (process.env.E2E_TESTING === 'true' && process.env.NODE_ENV != 'development') {
+          console.log('using pglite prisma service');
           return new PGLitePrismaService(); //eventsService
-        else return new PrismaService(); // eventsService
+        } else {
+          return new PrismaService(); // eventsService
+        }
       },
       // inject: [EventsService],
     },

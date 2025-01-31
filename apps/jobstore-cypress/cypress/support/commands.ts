@@ -15,7 +15,12 @@ Cypress.Commands.add('login', () => {
           'X-E2E-Key': Cypress.env('VITE_E2E_AUTH_KEY'),
         },
       }).then(({ body }) => {
-        cy.setCookie('connect.sid', body.cookie.raw);
+        // cy.setCookie('connect.sid', body.cookie.raw);
+        cy.setCookie('connect.sid', body.cookie.raw, {
+          domain: Cypress.env('CYPRESS_DOMAIN'),
+          secure: true,
+          httpOnly: true,
+        });
       });
     },
     {

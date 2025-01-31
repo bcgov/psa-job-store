@@ -299,6 +299,7 @@ jobs:
           install: false
           config: 'video=true'
         env:
+          CYPRESS_DOMAIN: ${{ secrets.CYPRESS_DOMAIN }}
           CYPRESS_BASE_URL: ${{ secrets.CYPRESS_BASE_URL }}
           CYPRESS_VITE_BACKEND_URL: ${{ secrets.CYPRESS_VITE_BACKEND_URL }}
           CYPRESS_VITE_E2E_AUTH_KEY: ${{ secrets.CYPRESS_VITE_E2E_AUTH_KEY }}

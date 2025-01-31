@@ -17,6 +17,9 @@ async function bootstrap() {
   app.enableCors({
     credentials: true,
     origin: configService.get('REACT_APP_URL'),
+    // origin: (origin, callback) => {
+    //   callback(null, true); // allow all origins with credentials
+    // },
   });
 
   app.use(
