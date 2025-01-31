@@ -107,7 +107,7 @@ async function executeQueriesAndWriteCSVs(
       });
 
       // Ensure correct number of placeholders in query
-      const parameterPlaceholderCount = (queryText.match(/\$\d+/g) || []).length;
+      const parameterPlaceholderCount = Array.from(new Set(queryText.match(/\$\d+/g) || [])).length;
       if (parameters.length !== parameterPlaceholderCount) {
         throw new Error(
           `Mismatch between number of parameters (${parameters.length}) and placeholders (${parameterPlaceholderCount}) in query '${queryFile}'`,
