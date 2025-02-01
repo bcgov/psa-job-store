@@ -32,4 +32,6 @@ WHERE
     pr.status = 'COMPLETED' AND
     TO_CHAR(pr.submitted_at AT TIME ZONE 'UTC' AT TIME ZONE 'America/Los_Angeles', 'YYYY-MM-DD HH24:MI:SS') >= $1 AND
     TO_CHAR(pr.approved_at AT TIME ZONE 'UTC' AT TIME ZONE 'America/Los_Angeles', 'YYYY-MM-DD HH24:MI:SS') < $2 AND
-	o.id = ANY($3)
+     (
+        COALESCE(array_length($3::text[], 1), 0) = 0 OR o.id = ANY($3::text[])
+    );
