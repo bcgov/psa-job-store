@@ -1,7 +1,8 @@
-import { Button, Card, Col, Divider, Radio, Row, Space, Typography } from 'antd';
+import { Card, Col, Divider, Radio, Row, Space, Typography } from 'antd';
 import { useCallback, useEffect, useState } from 'react';
-import { Link } from 'react-router-dom';
+import { useNavigate } from 'react-router-dom';
 import { ReactFlowProvider } from 'reactflow';
+import { LinkButton } from '../../components/app/common/components/button-link.component';
 import PositionProfile from '../../components/app/common/components/positionProfile';
 import ContentWrapper from '../../components/content-wrapper.component';
 import { useTypedSelector } from '../../redux/redux.hooks';
@@ -28,6 +29,9 @@ export const HomePage = () => {
   const [currentView] = useState<'chart' | 'tree'>('chart');
   const [horizontal, setHorizontal] = useState(false);
   const [searchTerm, setSearchTerm] = useState<string | undefined>(undefined);
+
+  // get navigate
+  const navigate = useNavigate();
 
   const [departmentId, setDepartmentId] = useState<string | null | undefined>(undefined);
 
@@ -118,13 +122,7 @@ export const HomePage = () => {
             showFooter={false}
             itemsPerPage={5}
             tableTitle="My recent positions"
-            topRightComponent={
-              <Link to="/requests/positions">
-                <Button type="link" style={{ padding: '0' }}>
-                  View all positions
-                </Button>
-              </Link>
-            }
+            topRightComponent={<LinkButton to="/requests/positions/create">View all positions</LinkButton>}
           ></MyPositionsTable>
           {/* Todo: pull in from actual user data */}
 
@@ -164,11 +162,7 @@ export const HomePage = () => {
             }
             extra={
               <Space direction="horizontal">
-                <Link to="/my-departments">
-                  <Button type="link" style={{ padding: '0' }}>
-                    View all departments
-                  </Button>
-                </Link>
+                <LinkButton to="/my-departments">View all departments</LinkButton>
                 <OrgChartHelpButton />
               </Space>
             }

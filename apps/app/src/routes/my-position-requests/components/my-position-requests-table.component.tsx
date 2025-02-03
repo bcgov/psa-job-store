@@ -19,6 +19,7 @@ import ErrorGraphic from '../../../assets/empty_error.svg';
 import EmptyJobPositionGraphic from '../../../assets/empty_jobPosition.svg';
 import TasksCompleteGraphic from '../../../assets/task_complete.svg';
 import AccessiblePopoverMenu from '../../../components/app/common/components/accessible-popover-menu';
+import { LinkButton } from '../../../components/app/common/components/button-link.component';
 import LoadingSpinnerWithMessage from '../../../components/app/common/components/loading.component';
 import '../../../components/app/common/css/filtered-table.component.css';
 import { DownloadJobProfileComponent } from '../../../components/shared/download-job-profile/download-job-profile.component';
@@ -1003,11 +1004,9 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
                     <img src={EmptyJobPositionGraphic} alt="No positions" />
                     <div>New to the JobStore?</div>
                     {/* Link button to the orgchart page */}
-                    <Link to={'/requests/positions/create'}>
-                      <Button type="primary" style={{ marginTop: '1rem' }}>
-                        Create new position
-                      </Button>
-                    </Link>
+                    <LinkButton type="primary" style={{ marginTop: '1rem' }} to="/requests/positions/create">
+                      Create new position
+                    </LinkButton>
                   </div>
                 </>
               )}

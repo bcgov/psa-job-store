@@ -11,6 +11,7 @@ import { userCanAccess } from '../utils/user-has-roles.util';
 export type CreateButtonProps = { collapsed: boolean };
 
 export const CreateButton = ({ collapsed }: CreateButtonProps) => {
+  // const createMenuItem = useCreateMenuItem();
   const auth = useTypedSelector((state) => state.authReducer);
 
   const menuItems: MenuItemType[] = useMemo(
@@ -45,10 +46,10 @@ export const CreateButton = ({ collapsed }: CreateButtonProps) => {
         data-testid="create-new-btn"
         justify={collapsed ? 'left' : 'center'}
         style={{ width: '100%' }}
-        role="button"
+        // role="button"
         aria-label={menuItems.length === 1 ? `Create ${menuItems[0]?.title}` : 'Create'}
         title={menuItems.length === 1 ? `Create ${menuItems[0]?.title}` : 'Create'}
-        tabIndex={0}
+        // tabIndex={0}
       >
         <FileAddOutlined aria-hidden />
         <span>{menuItems.length === 1 ? `Create ${menuItems[0]?.title}` : 'Create'}</span>

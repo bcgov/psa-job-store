@@ -726,7 +726,11 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
             items={[
               {
                 key: '1',
-                label: `All (${origTotalResults == -1 ? 0 : origTotalResults})`,
+                label: (
+                  <span aria-label={`All profiles (${origTotalResults == -1 ? 0 : origTotalResults})`}>
+                    All ({origTotalResults == -1 ? 0 : origTotalResults})
+                  </span>
+                ),
                 children:
                   isLoadingCalcualted || tabSwitchedLoading ? (
                     <div data-testid="skeleton-loading" style={{ height: '669px' }}>
@@ -740,7 +744,12 @@ const JobProfiles = forwardRef<JobProfilesRef, JobProfilesContentProps>(
               },
               {
                 key: '2',
-                label: `Saved (${savedJobProfileIds?.getSavedJobProfileIds.length ?? 0})`,
+                label: (
+                  <span aria-label={`Saved (${savedJobProfileIds?.getSavedJobProfileIds.length ?? 0})`}>
+                    Saved ({savedJobProfileIds?.getSavedJobProfileIds.length ?? 0})
+                  </span>
+                ),
+
                 children:
                   isLoadingCalcualted || tabSwitchedLoading ? (
                     <div data-testid="skeleton-loading" style={{ height: '669px' }}>

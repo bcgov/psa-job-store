@@ -196,7 +196,7 @@ export const DynamicOrgChart = ({
 
   // this function handles selection of an item in search results
   const handleSelectResult = useCallback(
-    (id: string) => {
+    (id: string, focus: boolean = true) => {
       console.log('== handleSelectResult: ', id);
       setSelectedNodeIds([id]);
       renderSelectedNodes([id]);
@@ -211,7 +211,7 @@ export const DynamicOrgChart = ({
           const nodeElement = document.getElementById(`node-${id}`);
           console.log('handleSelectResult nodeElement focus: ', nodeElement);
           if (nodeElement) {
-            nodeElement.focus();
+            focus && nodeElement.focus();
           } else {
             console.log('handleSelectResult nodeElement not found: ', id);
           }
@@ -236,7 +236,7 @@ export const DynamicOrgChart = ({
         return;
       }
       setTimeout(() => {
-        handleSelectResult(targetId);
+        handleSelectResult(targetId, false);
       }, 0);
       setSelectedInitial(true);
     }
