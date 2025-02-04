@@ -21,6 +21,7 @@ import {
   UuidFilter,
 } from '../../@generated/prisma-nestjs-graphql';
 import { AlexandriaError, AlexandriaErrorClass } from '../../utils/alexandria-error';
+import { globalLogger } from '../../utils/logging/logger.factory';
 import { ClassificationService } from '../external/classification.service';
 import { CrmService } from '../external/crm.service';
 import {
@@ -403,6 +404,37 @@ export class PositionRequestApiService {
       // if status is completed, update approved_at date
       const status = incomingPositionRequestStatus as PositionRequestStatus;
       const approved_at = status === 'COMPLETED' ? dayjs().toDate() : null;
+
+      try {
+        globalLogger.info(
+          {
+            log_data: {
+              id: positionRequest.id,
+              type: 'ps_status_change',
+              source: 'automatic',
+              from_status: positionRequest.status,
+              to_status: incomingPositionRequestStatus,
+              crm_id: crm_id,
+              crm_lookup_name: crm_lookup_name,
+              crm_status: crm_status,
+              crm_category: crm_category,
+              ps_status: positionObj['A.POSN_STATUS'],
+              ps_effective_status: positionObj['A.EFF_STATUS'],
+            },
+          },
+          'Position request status changed',
+        );
+      } catch (error) {
+        globalLogger.error(
+          {
+            log_data: {
+              error: error instanceof Error ? error.message : String(error),
+            },
+          },
+          'Error during validateIDIRUserinfo',
+        );
+      }
+
       return await this.prisma.positionRequest.update({
         where: { id },
         data: {

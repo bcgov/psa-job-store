@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { updatedDiff } from 'deep-object-diff';
 import { User } from '../../../@generated/prisma-nestjs-graphql';
 import { guidToUuid } from '../../../utils/guid-to-uuid.util';
+import { globalLogger } from '../../../utils/logging/logger.factory';
 import { CrmService } from '../../external/crm.service';
 import { PeoplesoftV2Service } from '../../external/peoplesoft-v2.service';
 import { KeycloakService } from '../../keycloak/keycloak.service';
@@ -207,6 +208,36 @@ export class AuthService {
         });
       }
     } else {
+      try {
+        if (existingUser) {
+          const existingDepartmentIds = (existingUser as User).metadata.org_chart.department_ids ?? [];
+
+          if (JSON.stringify(existingDepartmentIds) !== JSON.stringify(metadata.org_chart.department_ids)) {
+            globalLogger.info(
+              {
+                log_data: {
+                  userId: id,
+                  source: 'validateIDIRUserinfo',
+                  oldDepartmentIds: existingDepartmentIds,
+                  newDepartmentIds: metadata.org_chart.department_ids,
+                },
+              },
+              'User department access changed',
+            );
+          }
+        }
+      } catch (error) {
+        globalLogger.error(
+          {
+            log_data: {
+              userId: id,
+              error: error instanceof Error ? error.message : String(error),
+            },
+          },
+          'Error during validateIDIRUserinfo',
+        );
+      }
+
       await this.prisma.user.upsert({
         where: { id },
         create: {

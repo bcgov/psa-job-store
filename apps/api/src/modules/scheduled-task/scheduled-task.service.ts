@@ -5,6 +5,7 @@ import { PositionRequestStatus } from '@prisma/client';
 import { Cache } from 'cache-manager';
 import { getALStatus } from 'common-kit';
 import dayjs from 'dayjs';
+import { globalLogger } from '../../utils/logging/logger.factory';
 import { CrmService } from '../external/crm.service';
 import { PeoplesoftService } from '../external/peoplesoft.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -236,6 +237,36 @@ export class ScheduledTaskService {
                     crm status:  ${crm_status}, crm category: ${crm_category}, 
                     ps status: ${positionObj['A.POSN_STATUS']}, ps effective status: ${positionObj['A.EFF_STATUS']}`,
                 );
+
+                try {
+                  globalLogger.info(
+                    {
+                      log_data: {
+                        id: positionRequest.id,
+                        type: 'ps_status_change',
+                        source: 'automatic',
+                        from_status: positionRequest.status,
+                        to_status: incomingPositionRequestStatus,
+                        crm_id: crm_id,
+                        crm_lookup_name: crm_lookup_name,
+                        crm_status: crm_status,
+                        crm_category: crm_category,
+                        ps_status: positionObj['A.POSN_STATUS'],
+                        ps_effective_status: positionObj['A.EFF_STATUS'],
+                      },
+                    },
+                    'Position request status changed',
+                  );
+                } catch (error) {
+                  globalLogger.error(
+                    {
+                      log_data: {
+                        error: error instanceof Error ? error.message : String(error),
+                      },
+                    },
+                    'Error during validateIDIRUserinfo',
+                  );
+                }
 
                 const status = incomingPositionRequestStatus as PositionRequestStatus;
                 // if status is completed, update approved_at date
