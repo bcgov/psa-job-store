@@ -1,7 +1,5 @@
-name: Database In-Place PITR
+name: Database Restore
 on:
-  # push:
-  #   branches: ['stage', 'development']
   workflow_dispatch:
     inputs:
       cluster_name:
@@ -10,29 +8,23 @@ on:
         default: 'api-postgres-clone'
         type: string
       environment:
-        description: 'Environment to backup'
+        description: 'Environment to restore'
         required: true
         default: 'development'
         type: choice
         options:
-          - development
-          - stage
-          - main
-
-  # workflow_call:
-  #   inputs:
-  #     # restore_timestamp:
-  #     #   required: true
-  #     #   type: string
-  #     environment:
-  #       required: true
-  #       type: string
-  #     cluster_name:
-  #       required: true
-  #       type: string
-  #     backup_id:
-  #       required: true
-  #       type: string
+          - dev
+          - test
+          - prod
+      restore_timestamp:
+        description: 'Restore timestamp (e.g. 2024-11-25 18:30:04+00) OR'
+        required: false
+        type: string
+      backup_id:
+        description: 'Restore annotation id'
+        required: false
+        type: string
+        default: 'manual_backup'
 
 jobs:
   restore:
@@ -42,11 +34,18 @@ jobs:
     env:
       ENVIRONMENT: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.environment || (github.ref_name == 'main' && 'prod' || github.ref_name == 'stage' && 'test' || 'dev') }}
       BACKUP_ANNOTATION: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.backup_id }}
-      RESTORE_TIMESTAMP: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.restore_timestamp || '2024-11-25 18:30:04+00' }}
+      RESTORE_TIMESTAMP: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.restore_timestamp }}
 
     steps:
       - name: Checkout repository
         uses: actions/checkout@v4
+
+      - name: Validate Inputs
+        run: |
+          if [[ -z "${{ github.event.inputs.restore_timestamp }}" && -z "${{ github.event.inputs.backup_id }}" ]]; then
+            echo "Error: Either restore_timestamp or backup_id must be provided"
+            exit 1
+          fi
 
       - name: Set environment variables
         run: |
@@ -55,7 +54,7 @@ jobs:
       - name: Set Cluster Name
         id: set-cluster
         run: |
-          CLUSTER_NAME=${{ github.event.inputs.cluster_name || 'api-postgres-clone' }}
+          CLUSTER_NAME='${{ github.event.inputs.cluster_name || 'api-postgres-clone' }}'
           echo "cluster_name=$CLUSTER_NAME" >> $GITHUB_OUTPUT
 
       - name: Debug - Show Environment Variables
@@ -116,7 +115,7 @@ jobs:
           }' deployments/openshift/kustomize/overlays/crunchy/${{ env.ENVIRONMENT }}/patch.yml
 
       - name: Update cluster names and patch (PITR)
-        if: github.event_name == 'workflow_dispatch' && github.event.inputs.timestamp != ''
+        if: github.event_name == 'workflow_dispatch' && github.event.inputs.restore_timestamp != ''
         run: |
           # Update only metadata.name in base postgrescluster.yml
           sed -i '0,/name:/{s/name: .*/name: '"${{ steps.set-cluster.outputs.cluster_name }}"'/}' \
@@ -162,19 +161,19 @@ jobs:
 
       - name: Wait for specific restore completion
         run: |
-          timeout=900 # 15 minutes timeout
+          timeout=1200
           while [ $timeout -gt 0 ]; do
             status=$(oc get postgrescluster ${{ steps.set-cluster.outputs.cluster_name }} \
               -n ${{ env.NAMESPACE }} \
               -o jsonpath='{.status.pgbackrest.restore}')
-            
+
             if [ -n "$status" ]; then
               echo "Current restore status: $status"
-              
+
               # Parse JSON and check ID
               restore_id=$(echo "$status" | jq -r '.id')
               finished=$(echo "$status" | jq -r '.finished')
-              
+
               if [ "$restore_id" = "${{ steps.set-restore-id.outputs.id }}" ]; then
                 if [ "$finished" = "true" ]; then
                   echo "Restore completed successfully"
@@ -182,7 +181,7 @@ jobs:
                 fi
               fi
             fi
-            
+
             echo "Restore in progress..."
             sleep 10
             timeout=$((timeout-10))
