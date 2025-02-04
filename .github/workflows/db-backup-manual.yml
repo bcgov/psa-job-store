@@ -1,8 +1,6 @@
 name: Database Backup
 
 on:
-  # push:
-  #   branches: ['stage', 'development']
   workflow_dispatch:
     inputs:
       cluster_name:
@@ -16,15 +14,19 @@ on:
         default: 'development'
         type: choice
         options:
-          - development
-          - stage
-          - main
+          - dev
+          - test
+          - prod
+      backup_annotation:
+        description: 'Backup annotation'
+        required: true
+        type: string
+        default: 'manual_backup'
 
 jobs:
   backup-database:
     runs-on: ubuntu-latest
     environment:
-      # name: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.environment || github.ref_name }}
       name: ${{ github.event_name == 'workflow_dispatch' && github.event.inputs.environment || (github.ref_name == 'main' && 'prod' || github.ref_name == 'stage' && 'test' || 'dev') }}
     outputs:
       backup-id: ${{ steps.set-backup-id.outputs.id }}
@@ -38,7 +40,7 @@ jobs:
       - name: Set Cluster Name
         id: set-cluster
         run: |
-          CLUSTER_NAME=${{ github.event.inputs.cluster_name || 'api-postgres-clone' }}
+          CLUSTER_NAME='${{ github.event.inputs.cluster_name || 'api-postgres-clone' }}'
           echo "cluster_name=$CLUSTER_NAME" >> $GITHUB_OUTPUT
 
       - name: Set Test Start Time
@@ -66,7 +68,7 @@ jobs:
       - name: Configure Manual Backup
         run: |
           oc patch postgrescluster ${{ steps.set-cluster.outputs.cluster_name }} --type merge \
-            -p '{"spec":{"backups":{"pgbackrest":{"manual":{"repoName":"repo1","options":["--type=full","--annotation=source=${{ steps.set-backup-id.outputs.id }}"]}}}}}'
+            -p '{"spec":{"backups":{"pgbackrest":{"manual":{"repoName":"repo1","options":["--type=full","--annotation=source=${{ github.event.inputs.backup_annotation }}"]}}}}}'
 
       - name: Trigger Backup
         run: |
@@ -82,7 +84,6 @@ jobs:
               -o jsonpath='{.status.pgbackrest.manualBackup}')
 
             if [ -n "$status" ]; then
-              # Check if this is our backup
               echo "Current status: $status"
               if echo "$status" | grep -q "${{ steps.set-backup-id.outputs.id }}"; then
                 if echo "$status" | grep -q '"finished":true'; then
