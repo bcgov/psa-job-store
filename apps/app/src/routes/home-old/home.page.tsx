@@ -1,6 +1,5 @@
 import { Card, Col, Divider, Radio, Row, Space, Typography } from 'antd';
 import { useCallback, useEffect, useState } from 'react';
-import { useNavigate } from 'react-router-dom';
 import { ReactFlowProvider } from 'reactflow';
 import { LinkButton } from '../../components/app/common/components/button-link.component';
 import PositionProfile from '../../components/app/common/components/positionProfile';
@@ -29,10 +28,6 @@ export const HomePage = () => {
   const [currentView] = useState<'chart' | 'tree'>('chart');
   const [horizontal, setHorizontal] = useState(false);
   const [searchTerm, setSearchTerm] = useState<string | undefined>(undefined);
-
-  // get navigate
-  const navigate = useNavigate();
-
   const [departmentId, setDepartmentId] = useState<string | null | undefined>(undefined);
 
   useEffect(() => {
