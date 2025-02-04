@@ -273,7 +273,8 @@ const OrgChartFlow: React.FC<OrgChartFlowProps> = ({
       const { key, shiftKey } = event;
       switch (key) {
         case 'Escape':
-          setSelectedNodeIds([]);
+          // if this runs it deselects the node and user can't create the profile with keyboard only
+          // setSelectedNodeIds([]);
           setIsButtonFocused(false);
           document.getElementById('org-chart-search-input')?.focus();
           break;

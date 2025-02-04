@@ -9,6 +9,7 @@ export class IDIRLoginGuard extends AuthGuard('idir') {
   }
 
   async canActivate(context: ExecutionContext) {
+    // console.log('canActivate context: ', context);
     const result = (await super.canActivate(context)) as boolean;
     const request = context.switchToHttp().getRequest();
     await super.logIn(request);

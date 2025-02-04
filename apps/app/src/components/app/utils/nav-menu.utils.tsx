@@ -66,7 +66,7 @@ type NavSubMenuProps = {
 export const createMenuItem = ({ key, icon, label, style, title }: NavMenuItemProps): MenuItemType => ({
   key,
   label: (
-    <Link to={key} style={{}} tabIndex={-1} aria-label={label}>
+    <Link to={key} style={{}} aria-label={label}>
       {icon} <span className="link-label">{label}</span>
     </Link>
   ),

@@ -425,9 +425,13 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
                                 role="note"
                                 type="link"
                                 style={{ textDecoration: 'underline' }}
-                                aria-label="Why can't I select another department ID? You must have access to department IDs in which you wish to create a new position."
+                                aria-label="Why can't I select another department ID?"
                               >
                                 Why can't I select another department ID?
+                                <span className="sr-only">
+                                  Because you must have access to department IDs in which you wish to create a new
+                                  position.
+                                </span>
                               </Button>
                             </Tooltip>
                           </div>

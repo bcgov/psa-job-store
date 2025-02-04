@@ -146,7 +146,7 @@ export const JobProfileCard = ({ data, onSavedCallback }: JobProfileCardProps) =
           {/* Button to copy link to profile */}
           <Tooltip title="Copy link to profile">
             <Button
-              aria-label="Copy link to profile"
+              aria-label={`Copy link to profile ${data.title}`}
               type="link"
               icon={<LinkOutlined aria-hidden />}
               onClick={(event) => {
@@ -168,7 +168,7 @@ export const JobProfileCard = ({ data, onSavedCallback }: JobProfileCardProps) =
             (isSaved ? (
               <Tooltip title="Remove from saved profiles">
                 <Button
-                  aria-label="Remove from saved profiles"
+                  aria-label={`Remove from saved profiles ${data.title}`}
                   type="link"
                   icon={<TagFilled aria-hidden />}
                   onClick={handleRemoveSavedJobProfile}
@@ -177,7 +177,7 @@ export const JobProfileCard = ({ data, onSavedCallback }: JobProfileCardProps) =
             ) : (
               <Tooltip title="Save profile">
                 <Button
-                  aria-label="Save profile"
+                  aria-label={`Save profile ${data.title}`}
                   type="link"
                   icon={<TagOutlined aria-hidden />}
                   onClick={handleSaveJobProfile}

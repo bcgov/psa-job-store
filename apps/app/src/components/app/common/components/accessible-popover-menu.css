@@ -25,3 +25,9 @@
 .accessible-popover a:focus-visible{
     outline: 4px solid #66a8d4;
 }
+
+.popover-trigger:focus-visible{
+    outline: 3px solid #66a8d4;
+    outline-offset: 0px;
+    transition: outline-offset 0s, outline 0s;
+}
