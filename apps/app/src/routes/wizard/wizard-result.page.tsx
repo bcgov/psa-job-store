@@ -455,7 +455,11 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
                       showIcon
                     />
 
-                    <Card title="Get position number" bordered={false} style={{ marginTop: '1rem' }}>
+                    <Card
+                      title={<h3 style={{ margin: 0, fontWeight: 600, fontSize: '16px' }}>Get position number</h3>}
+                      bordered={false}
+                      style={{ marginTop: '1rem' }}
+                    >
                       <Form layout="vertical">
                         <Form.Item name="jobTitle" labelCol={{ className: 'card-label' }} colon={false}>
                           <div style={{ margin: 0 }}>

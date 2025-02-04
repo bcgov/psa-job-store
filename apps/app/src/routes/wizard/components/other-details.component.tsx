@@ -25,14 +25,11 @@ const OtherDetails: React.FC<OtherDetailsProps> = ({ wizardData, positionRequest
             trigger={['hover', 'click']}
             title="Information shown here is dependent on the values that you selected in the previous steps."
           >
-            <Button
-              id="changes"
-              role="note"
-              type="link"
-              style={{ textDecoration: 'underline' }}
-              aria-label="Why can't I make changes? Because information shown here is dependent on the values that you selected in the previous steps."
-            >
-              Why can't I make changes?
+            <Button id="changes" role="note" type="link" style={{ textDecoration: 'underline' }}>
+              Why can't I make changes?{' '}
+              <span className="sr-only">
+                Because information shown here is dependent on the values that you selected in the previous steps.
+              </span>
             </Button>
           </Tooltip>
         </div>
