@@ -1,5 +1,4 @@
--- requires_parameters: true
-
+-- requires_parameters: startDate, endDate
 SELECT
     u.name,
     u.roles,
