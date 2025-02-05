@@ -4,6 +4,7 @@ import { Prisma } from '@prisma/client';
 import { Cache } from 'cache-manager';
 import { diff } from 'fast-array-diff';
 import { FindManyUserArgs, FindUniqueUserArgs, User, UserUpdateInput } from '../../@generated/prisma-nestjs-graphql';
+import { globalLogger } from '../../utils/logging/logger.factory';
 import { CACHE_USER_PREFIX } from '../auth/auth.constants';
 import { CrmService } from '../external/crm.service';
 import { PeoplesoftV2Service } from '../external/peoplesoft-v2.service';
@@ -195,6 +196,37 @@ export class UserService {
   }
 
   async setUserOrgChartAccess({ id, department_ids }: SetUserOrgChartAccessInput) {
+    let currentDepartmentIds: string[] | null = null;
+
+    try {
+      const currentUser: User = await this.getUser({ where: { id } });
+      currentDepartmentIds = currentUser.metadata?.org_chart?.department_ids ?? [];
+
+      if (JSON.stringify(currentDepartmentIds) != JSON.stringify(department_ids)) {
+        globalLogger.info(
+          {
+            log_data: {
+              userId: id,
+              source: 'setUserOrgChartAccess',
+              oldDepartmentIds: currentDepartmentIds,
+              newDepartmentIds: department_ids,
+            },
+          },
+          'User department access changed',
+        );
+      }
+    } catch (error) {
+      globalLogger.error(
+        {
+          log_data: {
+            userId: id,
+            error: error instanceof Error ? error.message : String(error),
+          },
+        },
+        'Error during setUserOrgChartAccess',
+      );
+    }
+
     await this.prisma.$queryRaw(Prisma.sql`
       UPDATE
         "user"
@@ -238,8 +270,22 @@ export class UserService {
       // console.log(`[syncUser] Checking for existing user in local DB with ID: ${id}`);
       const existingUser: User | null = await this.getUser({ where: { id } });
       // console.log('[syncUser] Existing user found:', !!existingUser);
-      if (existingUser) {
-        // console.log('[syncUser] Existing user metadata:', existingUser.metadata);
+      let existingDepartmentIds: string[] | null = null;
+      try {
+        if (existingUser) {
+          // console.log('[syncUser] Existing user metadata:', existingUser.metadata);
+          existingDepartmentIds = existingUser.metadata?.org_chart?.department_ids ?? [];
+        }
+      } catch (error) {
+        globalLogger.error(
+          {
+            log_data: {
+              userId: id,
+              error: error instanceof Error ? error.message : String(error),
+            },
+          },
+          'Error during user sync 1',
+        );
       }
 
       // Determine org chart assignments
@@ -256,6 +302,35 @@ export class UserService {
         peoplesoft: peoplesoftMetadata,
       };
       // console.log('[syncUser] Combined metadata:', metadata);
+
+      try {
+        if (
+          existingDepartmentIds &&
+          JSON.stringify(existingDepartmentIds) !== JSON.stringify(orgChartMetadata.department_ids)
+        ) {
+          globalLogger.info(
+            {
+              log_data: {
+                userId: id,
+                source: 'syncUser',
+                oldDepartmentIds: existingDepartmentIds,
+                newDepartmentIds: orgChartMetadata.department_ids,
+              },
+            },
+            'User department access changed',
+          );
+        }
+      } catch (error) {
+        globalLogger.error(
+          {
+            log_data: {
+              userId: id,
+              error: error instanceof Error ? error.message : String(error),
+            },
+          },
+          'Error during user sync 2',
+        );
+      }
 
       // Update or create the user
       // console.log('[syncUser] Performing upsert operation');

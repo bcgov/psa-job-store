@@ -44,7 +44,15 @@ export const ContextOptions: React.FC<ContextOptionsProps> = ({
   confirmRemoveModal,
   focusFallback,
 }) => {
-  const tooltipTitle = isReadonly ? 'Required' : isCustom ? 'Remove' : 'Delete';
+  const tooltipTitle = isReadonly
+    ? 'Required'
+    : isCustom
+      ? isDisabled
+        ? 'Add'
+        : 'Remove'
+      : isDisabled
+        ? 'Add'
+        : 'Delete';
 
   const focusOnInput = () => {
     // normally when popover closes we focus back on the button that openned it
