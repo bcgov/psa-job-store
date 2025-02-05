@@ -218,7 +218,7 @@ export class ScheduledTaskService {
                 );
 
                 try {
-                  globalLogger.info(
+                  globalLogger.error(
                     {
                       log_data: {
                         id: positionRequest.id,
