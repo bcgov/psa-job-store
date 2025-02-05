@@ -1,7 +1,7 @@
 import { createObjectCsvWriter } from 'csv-writer';
 import dotenv from 'dotenv';
 import fs from 'fs';
-import moment from 'moment';
+import moment from 'moment-timezone';
 import nodemailer from 'nodemailer';
 import path from 'path';
 import { Client } from 'pg';
@@ -107,7 +107,7 @@ async function executeQueriesAndWriteCSVs(
       });
 
       // Ensure correct number of placeholders in query
-      const parameterPlaceholderCount = (queryText.match(/\$\d+/g) || []).length;
+      const parameterPlaceholderCount = Array.from(new Set(queryText.match(/\$\d+/g) || [])).length;
       if (parameters.length !== parameterPlaceholderCount) {
         throw new Error(
           `Mismatch between number of parameters (${parameters.length}) and placeholders (${parameterPlaceholderCount}) in query '${queryFile}'`,
@@ -237,8 +237,10 @@ async function main() {
       console.log(`Using provided start and end dates from environment variables.`);
     } else {
       // Calculate start and end dates for the previous month
-      startDate = moment().startOf('month').subtract(1, 'month').format('YYYY-MM-DD');
-      endDate = moment().startOf('month').format('YYYY-MM-DD');
+      const now = moment().tz('America/Vancouver'); // Set to your desired timezone
+      console.log(`today is: ${now.format('YYYY-MM-DD')}`);
+      endDate = now.startOf('month').format('YYYY-MM-DD');
+      startDate = now.startOf('month').subtract(1, 'month').format('YYYY-MM-DD');
       console.log(`No start/end dates provided. Using default values for previous month.`);
     }
 

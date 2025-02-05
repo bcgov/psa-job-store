@@ -46,38 +46,27 @@ const transitions: Transition[] = [
   {
     condition: (context) =>
       context.CRM_status === 'Solved' &&
-      (context.CRM_category === 'New Position' || context.CRM_category.includes('Classification')) &&
+      (context.CRM_category === 'New Position' ||
+        context.CRM_category.includes('Classification') ||
+        context.CRM_category.includes('Included/Schedule A') ||
+        context.CRM_category.includes('Management Role Recommendation')) &&
       context.PS_status === 'Approved',
     nextState: 'COMPLETED',
-  },
-  {
-    condition: (context) =>
-      context.CRM_status === 'Waiting - Client' &&
-      (context.CRM_category === 'New Position' || context.CRM_category.includes('Classification')) &&
-      context.PS_status === 'Proposed',
-    nextState: 'ACTION_REQUIRED',
   },
   {
     condition: (context) =>
       (context.CRM_status === 'Unresolved' ||
         context.CRM_status === 'Updated' ||
         context.CRM_status === 'Waiting - Internal') &&
-      context.CRM_category.includes('Classification') &&
+      (context.CRM_category.includes('Classification') ||
+        context.CRM_category.includes('Included/Schedule A') ||
+        context.CRM_category.includes('Management Role Recommendation')) &&
       context.PS_status === 'Proposed',
     nextState: 'REVIEW',
   },
   {
     condition: (context) => context.CRM_status === 'Waiting - Client' && context.PS_status === 'Proposed',
     nextState: 'ACTION_REQUIRED',
-  },
-  {
-    condition: (context) =>
-      (context.CRM_status === 'Unresolved' ||
-        context.CRM_status === 'Updated' ||
-        context.CRM_status === 'Waiting - Internal') &&
-      context.CRM_category.includes('Classification') &&
-      context.PS_status === 'Proposed',
-    nextState: 'REVIEW',
   },
 ];
 

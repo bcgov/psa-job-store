@@ -202,7 +202,7 @@ export const ExcludedManagerPicker: React.FC<ExcludedManagerPickerProps> = ({
             render={({ field: { value, onChange, onBlur } }) => {
               return (
                 <Select
-                  aria-label="Select the excluded manager who approved the use of the job profile."
+                  aria-label="Select the excluded manager who approved the use of the job profile. For more options, search by name or position number."
                   allowClear
                   showSearch
                   value={value}

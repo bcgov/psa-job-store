@@ -20,7 +20,7 @@ export const OrgChartHelpButton = () => {
     <>
       <AccessiblePopoverMenu
         padding={'0px'}
-        triggerButton={<Button type="link" icon={<SettingOutlined />} />}
+        triggerButton={<Button tabIndex={-1} type="link" icon={<SettingOutlined />} />}
         content={
           <Menu selectedKeys={[]} className="org-chart-help-button" style={{ width: '400px' }}>
             <Menu.Item
@@ -81,10 +81,12 @@ export const OrgChartHelpButton = () => {
                 lineHeight: '1.5',
               }}
             >
-              <div>
-                <b>Organization Chart help</b>
-              </div>
-              View keyboard shortcuts
+              <a href="#">
+                <div>
+                  <b>Organization Chart help</b>
+                </div>
+                View keyboard shortcuts
+              </a>
             </Menu.Item>
           </Menu>
         }

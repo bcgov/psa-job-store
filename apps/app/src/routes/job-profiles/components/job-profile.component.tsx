@@ -1376,6 +1376,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
         style={{ marginBottom: '24px' }}
       />
 
+      {/* Hidden semantic version for screen readers, since table view is difficult to navigate*/}
       <div className="sr-only">
         <h2 style={{ margin: '0' }}>Job profile</h2>
 
@@ -1432,6 +1433,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
 
       {showBasicInfo && (
         <>
+          {/* Hidden semantic version for screen readers, since table view is difficult to navigate*/}
           <div className="sr-only">
             <h2 style={{ margin: '0' }}>Basic information</h2>
             <AccessibleDocumentFromDescriptions items={basicInfoItems} />

@@ -13,15 +13,15 @@ import { IDIRLoginGuard } from '../guards/idir-login.guard';
 export class AuthController {
   constructor(private readonly configService: ConfigService<AppConfigDto, true>) {}
 
-  @PublicRoute()
-  @Get()
-  getHello(@Req() req: Request): string {
-    if (req.user) {
-      return 'Hello, ' + (req.user ?? ({} as any)).userinfo.display_name + '! <a href="/auth/logout">Logout</a>';
-    } else {
-      return ' <a href="/auth/login">Login</a>';
-    }
-  }
+  // @PublicRoute()
+  // @Get()
+  // getHello(@Req() req: Request): string {
+  //   if (req.user) {
+  //     return 'Hello, ' + (req.user ?? ({} as any)).userinfo.display_name + '! <a href="/auth/logout">Logout</a>';
+  //   } else {
+  //     return ' <a href="/auth/login">Login</a>';
+  //   }
+  // }
 
   @PublicRoute()
   @UseGuards(BCeIDLoginGuard)
@@ -53,6 +53,7 @@ export class AuthController {
   @UseGuards(IDIRLoginGuard)
   @Get('callback/idir')
   callbackIDIR(@Res() res: Response) {
+    // locally takes you to http://localhost:3000/auth/login
     res.redirect(this.configService.get('KEYCLOAK_LOGOUT_REDIRECT_URL'));
   }
 
