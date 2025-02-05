@@ -442,7 +442,7 @@ export class PositionRequestApiService {
             log_data: {
               id: positionRequest.id,
               type: 'ps_status_change',
-              source: 'automatic',
+              source: 'manual',
               from_status: positionRequest.status,
               to_status: incomingPositionRequestStatus,
               crm_id: crm_id,
