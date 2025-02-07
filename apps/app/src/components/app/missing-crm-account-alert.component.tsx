@@ -8,6 +8,7 @@ export const MissingCRMAccountAlert = () => {
 
   return (
     auth.isAuthenticated &&
+    (auth.user?.roles ?? []).includes('hiring-manager') &&
     (auth.user?.metadata?.crm?.contact_id || null) == null && (
       <Alert
         message={
