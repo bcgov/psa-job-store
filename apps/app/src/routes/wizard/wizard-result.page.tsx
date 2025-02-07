@@ -7,7 +7,22 @@ import {
   MailOutlined,
   WarningFilled,
 } from '@ant-design/icons';
-import { Alert, Button, Card, Col, Form, Input, Modal, Result, Row, Typography, message, notification } from 'antd';
+import {
+  Alert,
+  Button,
+  Card,
+  Col,
+  Form,
+  Input,
+  Modal,
+  Result,
+  Row,
+  Space,
+  Tooltip,
+  Typography,
+  message,
+  notification,
+} from 'antd';
 import Paragraph from 'antd/es/typography/Paragraph';
 import Title from 'antd/es/typography/Title';
 import { Divider } from 'antd/lib';
@@ -15,7 +30,9 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useReactFlow } from 'reactflow';
 import LoadingSpinnerWithMessage from '../../components/app/common/components/loading.component';
+import { MissingCRMAccountAlert } from '../../components/app/missing-crm-account-alert.component';
 import ContentWrapper from '../../components/content-wrapper.component';
+import { useTypedSelector } from '../../redux/redux.hooks';
 import { useLazyGetJobProfileQuery } from '../../redux/services/graphql-api/job-profile.api';
 import {
   GetPositionRequestResponseContent,
@@ -65,7 +82,7 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
   // mode = 'readyToCreatePositionNumber';
 
   // use a state for "mode"
-
+  const auth = useTypedSelector((state) => state.authReducer);
   const [mode, setMode] = useState('');
   const [verificationNeededReasons, setVerificationNeededReasons] = useState<string[]>([]);
   // todo: move this to a context
@@ -81,6 +98,8 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
   //   record_id: positionRequestId ?? -1,
   //   record_type: 'PositionRequest',
   // });
+
+  const isCrmAccountNull = (auth.user?.metadata?.crm?.contact_id || null) == null;
 
   useEffect(() => {
     triggerGetJobProfile({
@@ -401,13 +420,17 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
             <Button onClick={back} key="back" data-testid="back-button">
               Back
             </Button>,
-            <>
+            <Tooltip
+              open={isCrmAccountNull}
+              title={isCrmAccountNull ? 'Please resolve the above error by contacting the 7-7000 Service Desk' : null}
+            >
               {mode === 'readyToCreatePositionNumber' && (
                 <Button
                   onClick={showModal}
                   key="back"
                   type="primary"
                   loading={submitPositionRequestIsLoading || isLoading}
+                  disabled={isCrmAccountNull}
                 >
                   Generate position number
                 </Button>
@@ -418,11 +441,12 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
                   type="primary"
                   onClick={doSubmit}
                   loading={submitPositionRequestIsLoading || isLoading}
+                  disabled={isCrmAccountNull}
                 >
                   Submit for verification
                 </Button>
               )}
-            </>,
+            </Tooltip>,
           ]}
         >
           <WizardSteps
@@ -463,14 +487,18 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
                             irreversable).
                           </div>
                         </Form.Item>
-                        <Button
-                          type="primary"
-                          onClick={showModal}
-                          loading={submitPositionRequestIsLoading || isLoading}
-                          data-testid="generate-position-button"
-                        >
-                          Generate position number
-                        </Button>
+                        <Space direction="vertical" size="middle">
+                          <MissingCRMAccountAlert />
+                          <Button
+                            type="primary"
+                            onClick={showModal}
+                            loading={submitPositionRequestIsLoading || isLoading}
+                            data-testid="generate-position-button"
+                            disabled={isCrmAccountNull}
+                          >
+                            Generate position number
+                          </Button>
+                        </Space>
                       </Form>
                     </Card>
 

@@ -7,6 +7,7 @@ import { ErrorBoundaryLayout } from '../../routes/not-found/error';
 import { AppHeader } from '../app/header.component';
 import { useWindowWidth } from './common/hooks/use-window-width';
 import { NavMenu } from './components/nav-menu.component';
+import { MissingCRMAccountAlert } from './missing-crm-account-alert.component';
 import styles from './sider.module.css';
 
 const { Content, Sider } = Layout;
@@ -67,6 +68,8 @@ export const AppLayout = () => {
   return (
     <Layout style={{ minHeight: '100vh' }} id="layout">
       <AppHeader collapsed={collapsed} setCollapsed={setCollapsed} />
+      {/* Show a warning banner for users without a CRM contact record */}
+      <MissingCRMAccountAlert />
       <Layout hasSider style={{ flex: '1' }} id="layout2">
         {isMobile && !collapsed && <div className={styles.overlay} onClick={handleOverlayClick} role="presentation" />}
         {auth.isAuthenticated && (
