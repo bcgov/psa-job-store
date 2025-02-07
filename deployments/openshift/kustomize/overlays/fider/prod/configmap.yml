@@ -1,0 +1,9 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: fider-config
+data:
+  SITE_URL: "https://jobstore-feedback.apps.silver.devops.gov.bc.ca"
+  BASE_URL: "https://jobstore-feedback.apps.silver.devops.gov.bc.ca"
+  # SITE_URL: "https://pjs-test.apps.silver.devops.gov.bc.ca/fider"
+  # BASE_URL: "https://pjs-test.apps.silver.devops.gov.bc.ca/fider"

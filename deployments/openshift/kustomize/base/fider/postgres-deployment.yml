@@ -1,0 +1,59 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fider-postgres
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fider-postgres
+  template:
+    metadata:
+      labels:
+        app: fider-postgres
+    spec:
+      containers:
+        - name: fider-postgres
+          image: registry.redhat.io/rhel8/postgresql-12:latest
+          env:
+            - name: POSTGRESQL_USER
+              valueFrom:
+                configMapKeyRef:
+                  name: fider-config
+                  key: POSTGRESQL_USER
+            - name: POSTGRESQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: fider-secrets
+                  key: POSTGRESQL_PASSWORD
+            - name: POSTGRESQL_DATABASE
+              valueFrom:
+                configMapKeyRef:
+                  name: fider-config
+                  key: POSTGRESQL_DATABASE
+            - name: POSTGRESQL_ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: fider-secrets
+                  key: POSTGRESQL_ADMIN_PASSWORD
+          ports:
+            - containerPort: 5432
+          volumeMounts:
+            - name: fider-postgres-data
+              mountPath: /var/lib/pgsql/data
+            - name: initdb-scripts
+              mountPath: /docker-entrypoint-initdb.d
+          resources:
+            requests:
+              memory: "512Mi"
+              cpu: "200m"
+      volumes:
+        - name: initdb-scripts
+          configMap:
+            name: fider-postgres-initdb
+            items:
+              - key: init-extension.sh
+                path: init-extension.sh
+        - name: fider-postgres-data
+          persistentVolumeClaim:
+            claimName: fider-postgres-pvc
