@@ -462,7 +462,7 @@ export class PositionRequestApiService {
               error: error instanceof Error ? error.message : String(error),
             },
           },
-          'Error during validateIDIRUserinfo',
+          'Error during submitPositionRequest_afterCreatePosition',
         );
       }
 
