@@ -99,7 +99,10 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
   //   record_type: 'PositionRequest',
   // });
 
-  const isCrmAccountNull = auth.isAuthenticated && (auth.user?.metadata?.crm?.contact_id || null) == null;
+  const isCrmAccountNull =
+    auth.isAuthenticated &&
+    (auth.user?.roles ?? []).includes('hiring-manager') &&
+    (auth.user?.metadata?.crm?.contact_id || null) == null;
 
   useEffect(() => {
     triggerGetJobProfile({
