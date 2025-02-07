@@ -1,4 +1,4 @@
-import { Form } from 'antd';
+import { Form, message } from 'antd';
 import axios from 'axios';
 import { VITE_BACKEND_URL } from '../../../envConfig';
 import { PageHeader } from '../../components/app/page-header.component';
@@ -20,12 +20,12 @@ export const UploadHelpDocPage = () => {
     formData.append('job_family_ids', JSON.stringify(values.job_family_ids));
     formData.append('job_stream_ids', JSON.stringify(values.job_stream_ids));
     // Add additional form data as needed
-    const response = await axios.post(`${VITE_BACKEND_URL}/document/create`, formData, {
+    await axios.post(`${VITE_BACKEND_URL}/document/create`, formData, {
       withCredentials: true,
       headers: { 'Content-Type': 'multipart/form-data' },
     });
 
-    // message.success('Form submitted successfully!');
+    message.success('Form submitted successfully!');
     // console.log(response.data);
   };
 
