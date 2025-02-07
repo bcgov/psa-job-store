@@ -1,0 +1,14 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: fider-route
+spec:
+  host: jobstore-feedback.apps.silver.devops.gov.bc.ca
+  port:
+    targetPort: 3000
+  to:
+    kind: Service
+    name: fider
+  tls:
+    termination: edge
+  wildcardPolicy: None

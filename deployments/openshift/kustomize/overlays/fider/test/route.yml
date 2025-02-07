@@ -1,0 +1,17 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: fider
+  annotations:
+    haproxy.router.openshift.io/rewrite-target: /
+spec:
+  host: jobstore.gov.bc.ca
+  path: /fider
+  port:
+    targetPort: 3000
+  to:
+    kind: Service
+    name: fider
+  tls:
+    termination: edge
+  wildcardPolicy: None

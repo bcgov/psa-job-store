@@ -1,0 +1,11 @@
+apiVersion: route.openshift.io/v1
+kind: Route
+metadata:
+  name: fider
+spec:
+  path: /fider
+  to:
+    kind: Service
+    name: fider
+  tls:
+    termination: edge

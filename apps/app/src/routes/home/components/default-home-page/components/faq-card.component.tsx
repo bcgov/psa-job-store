@@ -21,6 +21,7 @@ export const FAQCard = () => {
         <Link to="https://teams.microsoft.com/l/team/19%3ASWgLLYIHsUHnY2qVQsU6MS3coD7pfkE0oL4S7cFyfSM1%40thread.tacv2/conversations?groupId=30d29524-d012-4340-a28e-ce8fe4aaea43&tenantId=6fdb5200-3d0d-4a8a-b036-d3685e359adc">
           Go to helpdesk
         </Link>
+        <Link to="https://jobstore-feedback.apps.silver.devops.gov.bc.ca/">Share feedback</Link>
       </Space>
     </Card>
   );
