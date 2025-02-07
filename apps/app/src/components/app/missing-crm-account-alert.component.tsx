@@ -7,6 +7,7 @@ export const MissingCRMAccountAlert = () => {
   const auth = useTypedSelector((state) => state.authReducer);
 
   return (
+    auth.isAuthenticated &&
     (auth.user?.metadata?.crm?.contact_id || null) == null && (
       <Alert
         message={
