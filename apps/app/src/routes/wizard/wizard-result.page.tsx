@@ -898,7 +898,7 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
                   <b>By clicking “Generate position number” I affirm that:</b>
                   <ul>
                     <li>
-                      I confirm this Statement of Job Responsibilities accurately reflects the actual work to be
+                      I confirm that this Statement of Job Responsibilities accurately reflects the actual work to be
                       performed of the position(s) as outlined in{' '}
                       <a
                         target="_blank"
@@ -909,15 +909,16 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
                       , and
                     </li>
                     <li>
-                      I confirm the accountabilities are not similar to the supervisor, peer, or management positions
-                      within the work unit, and
+                      I confirm that the accountabilities are distinct from the supervisory or management positions
+                      within the work unit, and, where the role is considered specialized or non-generic, I confirm that
+                      work to be performed is clearly delineated among peers, and
                     </li>
                     <li>
-                      As the excluded manager or delegate, I confirm the job role, accountabilities, and scope of
-                      responsibility are true and accurate, and in establishing this position (s), I confirm the content
-                      I assume all risks related to this decision.{' '}
+                      I confirm the job role, accountabilities, and scope of responsibility are true and accurate, and
+                      in establishing the position(s) as the excluded manager or delegate, I assume all risks related to
+                      this decision, and
                     </li>
-                    <li>I will respond to audits in a timely manner.</li>
+                    <li>I will respond to Job Profile audits in a timely manner, and</li>
                     <li>
                       I will abide by the Public Service Act and all Human Resources policies for hiring decisions
                       related to this position.
