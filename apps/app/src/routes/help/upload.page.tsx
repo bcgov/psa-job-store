@@ -1,4 +1,4 @@
-import { Form, message } from 'antd';
+import { Form } from 'antd';
 import axios from 'axios';
 import { VITE_BACKEND_URL } from '../../../envConfig';
 import { PageHeader } from '../../components/app/page-header.component';
@@ -25,8 +25,8 @@ export const UploadHelpDocPage = () => {
       headers: { 'Content-Type': 'multipart/form-data' },
     });
 
-    message.success('Form submitted successfully!');
-    console.log(response.data);
+    // message.success('Form submitted successfully!');
+    // console.log(response.data);
   };
 
   const handleButtonClick = () => {
