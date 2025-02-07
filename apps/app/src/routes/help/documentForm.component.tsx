@@ -125,7 +125,7 @@ const DocumentForm: React.FC<DocumentFormProps> = ({ mode, initialData, onSubmit
   const proceedSubmission = async (submissionData: any) => {
     try {
       await onSubmit(submissionData, fileList);
-      message.success(`${mode === 'upload' ? 'Document uploaded' : 'Document updated'} successfully!`);
+      // message.success(`${mode === 'upload' ? 'Document uploaded' : 'Document updated'} successfully!`);
       navigate('/help');
     } catch (error) {
       console.error(error);
