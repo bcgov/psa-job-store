@@ -1,0 +1,15 @@
+apiVersion: v1
+kind: ConfigMap
+metadata:
+  name: fider-config
+data:
+  ADMIN_USERNAME: "admin"
+  ADMIN_EMAIL: "admin@example.com"
+  POSTGRESQL_USER: "postgres"
+  POSTGRESQL_DATABASE: "fiderdb"
+  SITE_URL: "https://fider-route-f3c07a-dev.apps.silver.devops.gov.bc.ca"
+  APP_SUB_URL: "/fider"
+  EMAIL_NOREPLY: "JobStore@gov.bc.ca"
+  BASE_URL: "https://fider-route-f3c07a-dev.apps.silver.devops.gov.bc.ca"
+  EMAIL_SMTP_HOST: apps.smtp.gov.bc.ca
+  EMAIL_SMTP_PORT: "25"

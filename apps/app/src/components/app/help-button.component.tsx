@@ -34,6 +34,19 @@ export const HelpButton = () => {
               </a>
             ),
           },
+          {
+            key: '3',
+            icon: <TeamOutlined aria-hidden />,
+            label: (
+              <a
+                target="_blank"
+                rel="noopener noreferrer"
+                href="https://jobstore-feedback.apps.silver.devops.gov.bc.ca/"
+              >
+                Share feedback <QuestionCircleOutlined aria-hidden style={{ cursor: 'pointer', float: 'right' }} />
+              </a>
+            ),
+          },
         ],
       }}
       trigger={['click']}
