@@ -238,6 +238,38 @@ export class AuthService {
         );
       }
 
+      // log role changes
+
+      try {
+        if (existingUser) {
+          const existingRoles = (existingUser as User).roles ?? [];
+
+          if (JSON.stringify(existingRoles) !== JSON.stringify(roles)) {
+            globalLogger.info(
+              {
+                log_data: {
+                  userId: id,
+                  source: 'validateIDIRUserinfo',
+                  oldRoles: existingRoles,
+                  newRoles: roles,
+                },
+              },
+              'User roles changed',
+            );
+          }
+        }
+      } catch (error) {
+        globalLogger.error(
+          {
+            log_data: {
+              userId: id,
+              error: error instanceof Error ? error.message : String(error),
+            },
+          },
+          'Error during validateIDIRUserinfo 2',
+        );
+      }
+
       await this.prisma.user.upsert({
         where: { id },
         create: {

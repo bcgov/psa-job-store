@@ -142,7 +142,7 @@ export class UserService {
     return psDeptId != null ? [psDeptId] : [];
   }
 
-  async assignUserRoles(id: string, roles: string[]) {
+  async assignUserRoles(id: string, roles: string[], assigningUserId: string) {
     let existing = await this.getUser({ where: { id } });
     if (!existing) {
       await this.syncUser(id);
@@ -162,6 +162,35 @@ export class UserService {
     await this.prisma.user.update({ where: { id }, data: { roles: roles } });
 
     const user = await this.getUser({ where: { id } });
+
+    try {
+      const existingRoles = (existing as User).roles ?? [];
+
+      if (JSON.stringify(existingRoles) !== JSON.stringify(roles)) {
+        globalLogger.info(
+          {
+            log_data: {
+              adminUserId: assigningUserId,
+              userId: id,
+              source: 'assignUserRoles',
+              oldRoles: existingRoles,
+              newRoles: roles,
+            },
+          },
+          'User roles changed',
+        );
+      }
+    } catch (error) {
+      globalLogger.error(
+        {
+          log_data: {
+            userId: id,
+            error: error instanceof Error ? error.message : String(error),
+          },
+        },
+        'Error during assignUserRoles',
+      );
+    }
     return user;
   }
 
