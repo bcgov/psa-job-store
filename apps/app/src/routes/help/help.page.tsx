@@ -35,6 +35,7 @@ export const HelpPage = () => {
       await axios.delete(`${VITE_BACKEND_URL}/document/delete/${documentId}`, {
         withCredentials: true,
       });
+      trigger({});
       message.success('Document deleted successfully');
       // Update your state or refetch the documents list
     } catch (error) {
@@ -121,7 +122,17 @@ export const HelpPage = () => {
               {
                 key: 'title',
                 dataIndex: 'title',
-                render: (value: string) => <Text strong>{value}</Text>,
+                render: (value: string, record: any) => {
+                  const baseUrl = `${VITE_BACKEND_URL}/document`;
+                  const downloadUrl = `${baseUrl}/file/${record.id}?mode=download`;
+                  return (
+                    <Text strong>
+                      <a href={downloadUrl} rel="noopener noreferrer">
+                        {value}
+                      </a>
+                    </Text>
+                  );
+                },
                 sorter: true,
                 title: 'Title',
               },
