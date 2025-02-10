@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 export const loggerFactory = () => {
   const NODE_ENV = process.env.NODE_ENV;
   const SKIP_LOGGING = process.env.SKIP_LOGGING;
+  const POD_NAME = process.env.HOSTNAME ?? 'local';
 
   return {
     // formatters doesn't work when using multiple transport targets,
@@ -76,6 +77,7 @@ export const loggerFactory = () => {
           params: req.params,
           origin: req.headers.origin,
           user_unverified: uuid,
+          pod_name: POD_NAME,
         };
       },
       res: (res) => {
