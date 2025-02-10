@@ -164,9 +164,29 @@ export class ScheduledTaskService {
       await this.updateMetadata(task, config.frequency);
       await execution();
       this.logger.log(`Completed ${task} @ ${new Date()}`);
+      globalLogger.info(
+        {
+          log_data: {
+            taskname: task,
+            result: 'success',
+          },
+        },
+        'Completed scheduled task',
+      );
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       this.logger.error(`Error in ${task}: ${errorMessage}`);
+
+      globalLogger.info(
+        {
+          log_data: {
+            taskname: task,
+            result: 'fail',
+            error: errorMessage,
+          },
+        },
+        'Completed scheduled task',
+      );
     } finally {
       await this.releaseLock(task);
     }
