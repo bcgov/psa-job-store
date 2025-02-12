@@ -924,13 +924,16 @@ export class PositionRequestApiService {
     return users;
   }
 
-  async getPositionRequestClassifications() {
+  async getPositionRequestClassifications(requestingFeature?: RequestingFeature | null) {
     const classifications = await this.prisma.classification.findMany({
       where: {
         PositionRequest: {
-          some: {
-            status: 'COMPLETED',
-          },
+          some:
+            requestingFeature == 'totalCompApprovedRequests'
+              ? {
+                  status: 'COMPLETED',
+                }
+              : {},
         },
       },
       select: {
@@ -940,6 +943,9 @@ export class PositionRequestApiService {
         code: true,
       },
       distinct: ['id', 'employee_group_id', 'peoplesoft_id'],
+      orderBy: {
+        code: 'asc',
+      },
     });
 
     return classifications;

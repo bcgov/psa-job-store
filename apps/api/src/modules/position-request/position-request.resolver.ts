@@ -248,8 +248,10 @@ export class PositionRequestApiResolver {
 
   @Roles('total-compensation', 'classification')
   @Query(() => [PositionRequestUserClassification], { name: 'positionRequestClassifications' })
-  async getPositionRequestClassifications() {
-    return this.positionRequestService.getPositionRequestClassifications();
+  async getPositionRequestClassifications(
+    @Args('requestingFeature', { type: () => RequestingFeature, nullable: true }) requestingFeature?: RequestingFeature,
+  ) {
+    return this.positionRequestService.getPositionRequestClassifications(requestingFeature);
   }
 
   @Roles('total-compensation', 'classification')
