@@ -1,0 +1,94 @@
+apiVersion: apps/v1
+kind: Deployment
+metadata:
+  name: fider
+spec:
+  replicas: 1
+  selector:
+    matchLabels:
+      app: fider
+  template:
+    metadata:
+      labels:
+        app: fider
+    spec:
+      containers:
+        - name: fider
+          image: getfider/fider:main
+          env:
+            - name: EMAIL_SMTP_HOST
+              valueFrom:
+                configMapKeyRef:
+                  name: fider-config
+                  key: EMAIL_SMTP_HOST
+            - name: EMAIL_SMTP_PORT
+              valueFrom:
+                configMapKeyRef:
+                  name: fider-config
+                  key: EMAIL_SMTP_PORT
+            - name: JWT_SECRET
+              valueFrom:
+                secretKeyRef:
+                  name: fider-secrets
+                  key: JWT_SECRET
+            - name: EMAIL_NOREPLY
+              valueFrom:
+                configMapKeyRef:
+                  name: fider-config
+                  key: EMAIL_NOREPLY
+            - name: BASE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: fider-config
+                  key: BASE_URL
+            - name: ADMIN_USERNAME
+              valueFrom:
+                configMapKeyRef:
+                  name: fider-config
+                  key: ADMIN_USERNAME
+            - name: ADMIN_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: fider-secrets
+                  key: ADMIN_PASSWORD
+            - name: ADMIN_EMAIL
+              valueFrom:
+                configMapKeyRef:
+                  name: fider-config
+                  key: ADMIN_EMAIL
+             # Define database parameters first
+            - name: POSTGRESQL_USER
+              value: "postgres"
+              # valueFrom:
+              #   configMapKeyRef:
+              #     name: fider-config
+              #     key: POSTGRESQL_USER
+            - name: POSTGRESQL_PASSWORD
+              valueFrom:
+                secretKeyRef:
+                  name: fider-secrets
+                  key: POSTGRESQL_ADMIN_PASSWORD
+            - name: POSTGRESQL_DATABASE
+              valueFrom:
+                configMapKeyRef:
+                  name: fider-config
+                  key: POSTGRESQL_DATABASE
+            # Now define DATABASE_URL that uses the above variables
+            - name: DATABASE_URL
+              value: "postgres://$(POSTGRESQL_USER):$(POSTGRESQL_PASSWORD)@fider-postgres:5432/$(POSTGRESQL_DATABASE)?sslmode=disable"
+            - name: SITE_URL
+              valueFrom:
+                configMapKeyRef:
+                  name: fider-config
+                  key: SITE_URL
+            # - name: APP_SUB_URL
+            #   valueFrom:
+            #     configMapKeyRef:
+            #       name: fider-config
+            #       key: APP_SUB_URL
+          ports:
+            - containerPort: 3000
+          resources:
+            requests:
+              memory: "256Mi"
+              cpu: "160m"

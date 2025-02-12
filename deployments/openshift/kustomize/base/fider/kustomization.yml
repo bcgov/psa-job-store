@@ -1,0 +1,15 @@
+apiVersion: kustomize.config.k8s.io/v1beta1
+kind: Kustomization
+
+resources:
+  - fider-deployment.yml
+  - fider-service.yml
+  - postgres-deployment.yml
+  - postgres-pvc.yml
+  - postgres-service.yml
+  - postgres-init-configmap.yml
+  - secrets.yml
+  - configmap.yml
+  - route.yml
+  - np.yml
+  - fider-route.yml

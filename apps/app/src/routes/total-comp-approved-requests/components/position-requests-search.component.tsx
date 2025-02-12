@@ -77,7 +77,8 @@ export const PositionRequestsSearch: React.FC<JobProfileSearchProps> = ({
   // const isPositionRequestRoute = location.pathname.includes('/position-request/');
 
   // get unique classifications for approved position requests
-  const classificationData = useGetPositionRequestClassificationsQuery().data?.positionRequestClassifications;
+  const classificationData = useGetPositionRequestClassificationsQuery({ requestingFeature: requestingFeature }).data
+    ?.positionRequestClassifications;
 
   // get unique job store numbers for approved position requests
   const jobStoreNumbersData = useGetPositionRequestJobStoreNumbersQuery().data?.positionRequestJobStoreNumbers;

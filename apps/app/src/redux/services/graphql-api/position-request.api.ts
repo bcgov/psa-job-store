@@ -645,17 +645,23 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
         };
       },
     }),
-    getPositionRequestClassifications: build.query<GetPositionRequestClassificationsResponse, void>({
-      query: () => {
+    getPositionRequestClassifications: build.query<
+      GetPositionRequestClassificationsResponse,
+      GetPositionRequestsArgs | void
+    >({
+      query: (args: GetPositionRequestsArgs = {}) => {
         return {
           document: gql`
-            query PositionRequestClassifications {
-              positionRequestClassifications {
+            query PositionRequestClassifications($requestingFeature: RequestingFeature) {
+              positionRequestClassifications(requestingFeature: $requestingFeature) {
                 id
                 code
               }
             }
           `,
+          variables: {
+            requestingFeature: args.requestingFeature,
+          },
         };
       },
     }),
