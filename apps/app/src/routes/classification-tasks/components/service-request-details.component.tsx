@@ -3,8 +3,13 @@ import { CopyOutlined, ExportOutlined } from '@ant-design/icons';
 import { Card, Col, Descriptions, Row, Typography, message } from 'antd';
 import { Link } from 'react-router-dom';
 import PositionProfile from '../../../components/app/common/components/positionProfile';
+import { useTypedSelector } from '../../../redux/redux.hooks';
 import { useGetJobProfileMetaQuery } from '../../../redux/services/graphql-api/job-profile.api';
-import { GetPositionRequestResponse } from '../../../redux/services/graphql-api/position-request.api';
+import {
+  GetPositionRequestResponse,
+  GetPositionRequestResponseContent,
+} from '../../../redux/services/graphql-api/position-request.api';
+import { getUserRoles } from '../../../utils/get-user-roles.util';
 import { formatDateTime } from '../../../utils/Utils';
 import CommentsList from '../../wizard/components/comments-list.component';
 
@@ -12,7 +17,54 @@ type ServiceRequestDetailsProps = {
   positionRequestData: GetPositionRequestResponse;
 };
 
+const renderPositionNumber = (roles: string[], positionRequest: GetPositionRequestResponseContent) => {
+  // For new positions that are created manually in org chart for display purposes
+  // show as "proposed". These don't actually exist in PS.
+  if (positionRequest?.position_number?.toString().padStart(8, '0') === '000000') {
+    return <em>Proposed</em>;
+  }
+
+  if (roles.includes('classification') || roles.includes('total-compensation')) {
+    return (
+      <div>
+        {positionRequest?.position_number}
+        <CopyOutlined
+          onClick={() => {
+            navigator.clipboard.writeText(positionRequest?.position_number + '' || '');
+            message.success('Position number copied to clipboard');
+          }}
+          style={{ cursor: 'pointer' }}
+        />
+      </div>
+    );
+  } else if (roles.includes('hiring-manager') || roles.includes('idir')) {
+    // Approved is the PeopleSoft status, for positions which were created outside the Job Store
+    // COMPLETED is the Job Store status, for positions which were created inside the Job Store (PS === Active, CRM === Completed)
+    // todo - currently the status is always "Approved" - need to do more complex logic involving PR
+    // e.g. if PS status is approved, but PR is in review, then don't show the position number
+    if (['Approved', 'COMPLETED'].includes(positionRequest?.status ?? '')) {
+      return (
+        <div>
+          {positionRequest?.position_number}
+          <CopyOutlined
+            onClick={() => {
+              navigator.clipboard.writeText(positionRequest?.position_number + '' || '');
+              message.success('Position number copied to clipboard');
+            }}
+            style={{ cursor: 'pointer' }}
+          />
+        </div>
+      );
+    } else {
+      return <em>Pending approval</em>;
+    }
+  }
+};
+
 export const ServiceRequestDetails: React.FC<ServiceRequestDetailsProps> = ({ positionRequestData }) => {
+  const auth = useTypedSelector((state) => state.authReducer);
+  const roles: string[] = getUserRoles(auth.user);
+
   const { data: jobProfileMeta } = useGetJobProfileMetaQuery(
     positionRequestData?.positionRequest?.parent_job_profile_id ?? -1,
 
@@ -73,19 +125,10 @@ export const ServiceRequestDetails: React.FC<ServiceRequestDetailsProps> = ({ po
     // },
     {
       key: 'positionNumber',
-      label: 'Position Number',
-      children: positionRequestData?.positionRequest?.position_number && (
-        <div>
-          {positionRequestData?.positionRequest?.position_number}
-          <CopyOutlined
-            onClick={() => {
-              navigator.clipboard.writeText(positionRequestData?.positionRequest?.position_number + '' || '');
-              message.success('Position number copied to clipboard');
-            }}
-            style={{ cursor: 'pointer' }}
-          />
-        </div>
-      ),
+      label: 'Position number',
+      children:
+        positionRequestData?.positionRequest?.position_number &&
+        renderPositionNumber(roles, positionRequestData?.positionRequest),
       span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
     },
     {
