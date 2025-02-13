@@ -23,6 +23,7 @@ import { SendSettingOutlined } from '../../icons/send-setting-outlined';
 import { UserGroupSettingOutlined } from '../../icons/user-group-setting-outlined';
 import { createMenuGroup, createMenuItem, createSubMenu } from '../utils/nav-menu.utils';
 import { userCanAccess } from '../utils/user-has-roles.util';
+import { ClassificationNewPositionLabel } from './classification-new-position-label.component';
 import { CreateButton } from './create-button.component';
 import './nav-menu.component.css';
 
@@ -229,7 +230,7 @@ export const NavMenu = ({ collapsed }: NavMenuProps) => {
                                 createMenuItem({
                                   key: '/requests/positions/manage',
                                   icon: <PositionRequestSettingOutlined aria-hidden />,
-                                  label: 'New position',
+                                  label: <ClassificationNewPositionLabel />,
                                 }),
                               ]
                             : []),

@@ -1,7 +1,7 @@
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
-import { PositionRequestStatus } from '@prisma/client';
+import { PositionRequestStatus, Prisma } from '@prisma/client';
 import { Cache } from 'cache-manager';
 import { getALStatus } from 'common-kit';
 import dayjs from 'dayjs';
@@ -238,6 +238,24 @@ export class ScheduledTaskService {
                 );
 
                 try {
+                  // update the pr record and set unknownStateSince to current time
+                  await this.prisma.positionRequest.update({
+                    where: { id: positionRequest.id },
+                    data: {
+                      ...(positionRequest.unknownStateSince === null && {
+                        unknownStateSince: dayjs().toDate(),
+                      }),
+                      unknownStateMetadata: {
+                        crm_id,
+                        crm_lookup_name,
+                        crm_status,
+                        crm_category,
+                        ps_status: positionObj['A.POSN_STATUS'],
+                        ps_effective_status: positionObj['A.EFF_STATUS'],
+                      },
+                    },
+                  });
+
                   globalLogger.error(
                     {
                       log_data: {
@@ -332,6 +350,8 @@ export class ScheduledTaskService {
                       ? {}
                       : { approved_at, time_to_approve: dayjs().diff(positionRequest.submitted_at, 'second') }),
                     ...(reviewed === null ? {} : { approval_type: 'REVIEWED' }),
+                    unknownStateSince: null, // Reset the unknown state in case it was previously set, since now the status is known
+                    unknownStateMetadata: Prisma.DbNull,
                   },
                 });
               }
