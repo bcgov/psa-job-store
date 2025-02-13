@@ -257,6 +257,7 @@ interface UnknownStateMetadata {
 
 export interface PositionRequestWithUnknownState {
   id: number;
+  title: string;
   unknownStateMetadata: UnknownStateMetadata | null;
 }
 
@@ -799,6 +800,7 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
         document: gql`
           query StaleUnknownPositionRequests {
             staleUnknownPositionRequests {
+              title
               id
               unknownStateMetadata
             }

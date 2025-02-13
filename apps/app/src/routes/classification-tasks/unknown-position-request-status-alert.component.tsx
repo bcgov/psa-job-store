@@ -1,4 +1,4 @@
-import { Alert, Collapse } from 'antd';
+import { Alert, Collapse, Typography } from 'antd';
 import { useEffect, useState } from 'react';
 import { Link } from 'react-router-dom';
 import {
@@ -7,6 +7,7 @@ import {
 } from '../../redux/services/graphql-api/position-request.api';
 import './unknown-position-request-status-alert.component.css';
 const { Panel } = Collapse;
+const { Link: Tlink } = Typography;
 
 const StaleUnknownPositionRequestsAlert = () => {
   const { data, isLoading } = useGetStaleUnknownPositionRequestsQuery();
@@ -34,7 +35,9 @@ const StaleUnknownPositionRequestsAlert = () => {
                 <span>
                   {`${staleRequests.length} position request${staleRequests.length > 1 ? 's' : ''} with unknown status detected. Please verify that the CRM and PeopleSoft status combination is valid.`}{' '}
                 </span>
-                <span style={{ marginLeft: '8px', fontWeight: 'bold' }}>Click to view details</span>
+                <Tlink onClick={(e) => e.preventDefault()} style={{ marginLeft: '8px' }}>
+                  View details
+                </Tlink>
               </div>
             }
             type="error"
@@ -55,7 +58,7 @@ const StaleUnknownPositionRequestsAlert = () => {
               >
                 <div style={{ marginBottom: '8px' }}>
                   <Link to={`/requests/positions/manage/${request.id}`}>
-                    <strong>Request #{request.id}</strong>
+                    <strong>{request.title}</strong>
                   </Link>
                 </div>
                 {metadata && (
@@ -84,7 +87,7 @@ const StaleUnknownPositionRequestsAlert = () => {
                       <strong>CRM ID:</strong> <span>{metadata.crm_id || 'N/A'}</span>
                     </div>
                     <div>
-                      <strong>CRM Lookup:</strong> <span>{metadata.crm_lookup_name || 'N/A'}</span>
+                      <strong>CRM service request:</strong> <span>{metadata.crm_lookup_name || 'N/A'}</span>
                     </div>
                   </div>
                 )}

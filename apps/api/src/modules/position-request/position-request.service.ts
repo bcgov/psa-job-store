@@ -2011,6 +2011,7 @@ export class PositionRequestApiService {
       },
       select: {
         id: true,
+        title: true,
         unknownStateMetadata: true,
       },
       orderBy: {
