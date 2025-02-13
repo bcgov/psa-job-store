@@ -246,6 +246,24 @@ export interface PositionRequestUserClassification {
   code: string;
 }
 
+interface UnknownStateMetadata {
+  crm_id: number | null;
+  crm_lookup_name: string | null;
+  crm_status: string | null;
+  crm_category: string | null;
+  ps_status: string | null;
+  ps_effective_status: string | null;
+}
+
+export interface PositionRequestWithUnknownState {
+  id: number;
+  unknownStateMetadata: UnknownStateMetadata | null;
+}
+
+interface GetStaleUnknownPositionRequestsResponse {
+  staleUnknownPositionRequests: PositionRequestWithUnknownState[];
+}
+
 export const positionRequestApi = graphqlApi.injectEndpoints({
   endpoints: (build) => ({
     getPositionRequests: build.query<GetPositionsRequestResponse, GetPositionRequestsArgs | undefined>({
@@ -776,6 +794,18 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
         };
       },
     }),
+    getStaleUnknownPositionRequests: build.query<GetStaleUnknownPositionRequestsResponse, void>({
+      query: () => ({
+        document: gql`
+          query StaleUnknownPositionRequests {
+            staleUnknownPositionRequests {
+              id
+              unknownStateMetadata
+            }
+          }
+        `,
+      }),
+    }),
   }),
 });
 
@@ -802,4 +832,5 @@ export const {
   useLazyGetSharedPositionRequestQuery,
   useGetSuggestedManagersQuery,
   useLazyGetPositionRequestByPositionNumberQuery,
+  useGetStaleUnknownPositionRequestsQuery,
 } = positionRequestApi;

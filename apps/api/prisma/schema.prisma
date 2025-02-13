@@ -82,6 +82,12 @@ model PositionRequest {
   status                           PositionRequestStatus?
   updated_at                       DateTime               @default(now()) @updatedAt
   shareUUID                        String?                @default(uuid()) @db.Uuid
+  // keeps track of PRs that are in an unknown state due to bad CRM/PS status combination
+  // exposed in UI to classification users in an alert above PR table
+  unknownStateSince                DateTime?
+  // Contains information about the state of the PR when it was in an unknown state
+  // (e.g. CRM status, PS status, etc.)
+  unknownStateMetadata             Json?                  @db.JsonB
 
   additional_info Json? @db.JsonB
 
