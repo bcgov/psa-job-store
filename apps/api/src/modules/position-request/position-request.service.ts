@@ -398,6 +398,23 @@ export class PositionRequestApiService {
         );
 
         try {
+          await this.prisma.positionRequest.update({
+            where: { id: positionRequest.id },
+            data: {
+              ...(positionRequest.unknownStateSince === null && {
+                unknownStateSince: dayjs().toDate(),
+              }),
+              unknownStateMetadata: {
+                crm_id,
+                crm_lookup_name,
+                crm_status,
+                crm_category,
+                ps_status: positionObj['A.POSN_STATUS'],
+                ps_effective_status: positionObj['A.EFF_STATUS'],
+              },
+            },
+          });
+
           globalLogger.error(
             {
               log_data: {
@@ -471,6 +488,8 @@ export class PositionRequestApiService {
         data: {
           status: status,
           ...(approved_at === null ? {} : { approved_at }),
+          unknownStateSince: null, // Reset the unknown state in case it was previously set, since now the status is known
+          unknownStateMetadata: Prisma.DbNull,
         },
       });
     } catch (error) {
@@ -1978,5 +1997,26 @@ export class PositionRequestApiService {
     }
 
     return managers;
+  }
+
+  async getStaleUnknownPositionRequests() {
+    const oneDayAgo = dayjs().subtract(1, 'day').toDate();
+
+    return this.prisma.positionRequest.findMany({
+      where: {
+        unknownStateSince: {
+          not: null,
+          lte: oneDayAgo,
+        },
+      },
+      select: {
+        id: true,
+        title: true,
+        unknownStateMetadata: true,
+      },
+      orderBy: {
+        unknownStateSince: 'asc',
+      },
+    });
   }
 }

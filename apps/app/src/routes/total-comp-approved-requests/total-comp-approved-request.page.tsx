@@ -79,7 +79,7 @@ export const TotalCompApprovedRequestPage = () => {
     },
     {
       key: 'positionNumber',
-      label: 'Position Number',
+      label: 'Position number',
       children: <div>{data?.positionRequest?.parent_job_profile?.number}</div>,
       span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
     },

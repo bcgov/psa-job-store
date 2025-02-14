@@ -306,4 +306,10 @@ export class PositionRequestApiResolver {
   ) {
     return await this.positionRequestService.getSuggestedManagers(positionNumber, positionRequestId);
   }
+
+  @Roles('classification')
+  @Query(() => [PositionRequest], { name: 'staleUnknownPositionRequests' })
+  async getStaleUnknownPositionRequests() {
+    return this.positionRequestService.getStaleUnknownPositionRequests();
+  }
 }

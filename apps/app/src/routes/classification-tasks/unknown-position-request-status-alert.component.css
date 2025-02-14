@@ -1,0 +1,7 @@
+.unknown_prs_panel .ant-collapse-header{
+    padding:0 !important;
+}
+
+.unknown_prs_collapse .ant-collapse-content{
+    border:0;
+}
