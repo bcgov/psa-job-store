@@ -1915,7 +1915,6 @@ export class PositionRequestApiService {
 
     let position;
     try {
-      console.log('creating with data: ', data);
       position = await this.peoplesoftService.createPosition(data as PositionCreateInput);
       if (position.positionNbr == null || position.positionNbr === '') {
         this.logger.error('Failed to create position in PeopleSoft: ' + position.errMessage);
