@@ -1672,11 +1672,6 @@ export class PositionRequestApiService {
       const data: IncidentCreateUpdateInput = {
         subject: `Job Store - Position Number Request - ${classification.code}`,
         primaryContact: { id: contactId },
-        assignedTo: {
-          staffGroup: {
-            lookupName: 'HRSC - Classification',
-          },
-        },
         statusWithType: {
           status: {
             // if user is re-submitting, set crm status to updated, always
@@ -1689,12 +1684,24 @@ export class PositionRequestApiService {
                   : IncidentStatus.Solved,
           },
         },
-        // Need to determine usage of this block
+        // If user is re-submitting, then do not reset the assignedTo and severity
+        // As these may have been changed by CS user and we don't want to revert them back
+        ...(positionRequest.status !== PositionRequestStatus.ACTION_REQUIRED && {
+          assignedTo: {
+            staffGroup: {
+              lookupName: 'HRSC - Classification',
+            },
+          },
+          severity: {
+            lookupName: '4 - Routine',
+          },
+        }),
+        // Even if re-submitting, we expect the category to always be "New Position"
+        // The only time it would be in different category ("Classification"/"Included/Schedule A"/"Management Role Recommendation")
+        // Is if it's in review or completed
+        // E.g. we don't allow back-and-forth if PR is in a different category (would cause unknown state)
         category: {
           id: 1930,
-        },
-        severity: {
-          lookupName: '4 - Routine',
         },
         threads: [
           {

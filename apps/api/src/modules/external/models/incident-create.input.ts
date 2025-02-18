@@ -25,7 +25,7 @@ export enum IncidentThreadEntryType {
 export interface IncidentCreateUpdateInput {
   subject: string;
   primaryContact: { id: number };
-  assignedTo: {
+  assignedTo?: {
     staffGroup: {
       lookupName: string;
     };
@@ -38,7 +38,7 @@ export interface IncidentCreateUpdateInput {
       id: IncidentStatus;
     };
   };
-  severity: {
+  severity?: {
     lookupName: string;
   };
   threads: {
