@@ -44,6 +44,7 @@ interface JobProfileSearchProps {
   ministriesData?: any;
   classificationData?: ClassificationModel[] | undefined;
   positionRequestId?: number;
+  wideSearch?: boolean;
 }
 
 // Unified state for all selections
@@ -78,6 +79,7 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
   fullWidth = false,
   ministriesData = null,
   classificationData = undefined,
+  wideSearch = false,
 }) => {
   const [searchParams, setSearchParams] = useSearchParams();
   const navigate = useNavigate();
@@ -576,7 +578,7 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
 
   const windowWidth = useWindowWidth();
   const hasMinistryFilter = ministriesFilterData.length > 1;
-  const isMobile = hasMinistryFilter ? windowWidth <= 1545 : windowWidth <= 1463;
+  const isMobile = hasMinistryFilter ? (wideSearch ? windowWidth <= 1696 : windowWidth <= 1545) : windowWidth <= 1463;
 
   return (
     <Row
@@ -590,7 +592,7 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
         <Col sm={24} md={24} lg={24} xl={24} xxl={fullWidth ? 24 : 22}>
           <Card style={{ marginTop: '1rem', marginBottom: '1rem', borderColor: '#D9D9D9' }} bordered={true}>
             <Row gutter={24}>
-              <Col span={isMobile ? 24 : hasMinistryFilter ? 6 : 9}>
+              <Col span={isMobile ? 24 : hasMinistryFilter ? (wideSearch ? 8 : 6) : 9}>
                 <Search
                   // defaultValue={searchParams.get('search') ?? undefined}
                   enterButton="Find job profiles"
@@ -625,7 +627,7 @@ export const JobProfileSearch: React.FC<JobProfileSearchProps> = ({
                 />
               </Col>
 
-              <Col span={isMobile ? 24 : hasMinistryFilter ? 18 : 15}>
+              <Col span={isMobile ? 24 : hasMinistryFilter ? (wideSearch ? 16 : 18) : 15}>
                 <Row gutter={8} justify="end" style={{ marginTop: isMobile ? '0.5rem' : '0' }}>
                   {hasMinistryFilter && (
                     <Col data-testid="Ministry-filter" data-cy="Ministry-filter" span={isMobile ? 6 : undefined}>

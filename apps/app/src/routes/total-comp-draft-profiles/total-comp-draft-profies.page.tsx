@@ -33,9 +33,10 @@ export const TotalCompDraftProfilesPage = () => {
         {hasData && (
           <JobProfilesProvider>
             <JobProfileSearch
-              searchPlaceHolderText={'Search by job title or job store number'}
+              searchPlaceHolderText={'Search by job title, keyword or job store number'}
               // additionalFilters={true}
               fullWidth={true}
+              wideSearch={true}
               ministriesData={ministriesData}
               classificationData={classificationData}
             />
