@@ -26,6 +26,7 @@ export class JobProfileService {
     searchConditions?: any,
     include_archived = false,
     excludedDepartment?: boolean,
+    slice = true,
   ) {
     // if searchConditions were provided, do a "dumb" search instead of elastic search
     let searchResultIds = null;
@@ -65,7 +66,7 @@ export class JobProfileService {
     // );
 
     const { take, skip, ...restArgs } = args;
-    const ret = await this.prisma.jobProfile.findMany({
+    const queryObj = {
       where: {
         is_archived: include_archived,
         ...(orderedProfiles && {
@@ -133,7 +134,8 @@ export class JobProfileService {
         },
         role_type: true,
       },
-    });
+    };
+    const ret = await this.prisma.jobProfile.findMany(queryObj);
 
     // console.log(
     //   'ret profile ids: ',
@@ -141,7 +143,8 @@ export class JobProfileService {
     // );
 
     // Sort according to search order
-    if (orderedProfiles) {
+    // If user is sorting the profiles manually (e.g. in a table), then do not apply this sort
+    if (orderedProfiles && !args.orderBy) {
       const searchOrder = new Map(orderedProfiles.map((profile, index) => [profile.id, index]));
       ret.sort((a, b) => (searchOrder.get(a.id) as unknown as any) - (searchOrder.get(b.id) as unknown as any));
     }
@@ -150,6 +153,8 @@ export class JobProfileService {
     //   'ret profile ids sorted: ',
     //   ret.map((profile) => profile.id),
     // );
+
+    if (!slice) return ret;
 
     const sliced = typeof skip === 'number' && typeof take === 'number' ? ret.slice(skip, skip + take) : ret;
 
@@ -209,7 +214,7 @@ export class JobProfileService {
     }: FindManyJobProfileWithSearch,
     userId: string,
   ) {
-    const jobProfiles = await this.getJobProfilesWithSearch(
+    const allJobProfiles = await this.getJobProfilesWithSearch(
       search,
       where,
       args,
@@ -217,19 +222,24 @@ export class JobProfileService {
       // userId,
       // null,
       this.getDraftSearchConditions(search),
+      false,
+      false,
+      false,
     );
 
-    if (sortByClassificationName) {
-      return this.sortJobProfilesByClassification(jobProfiles, sortOrder);
-    }
+    const { take, skip } = args;
 
-    if (sortByJobFamily) {
-      return this.sortJobProfilesByJobFamily(jobProfiles, sortOrder);
-    }
+    // Sort the job profiles based on the provided sorting parameters
+    const sortedProfiles = await this.sortJobProfiles(
+      allJobProfiles,
+      sortByClassificationName,
+      sortByJobFamily,
+      sortByOrganization,
+      sortOrder,
+    );
 
-    if (sortByOrganization) {
-      return this.sortJobProfilesByOrganization(jobProfiles, sortOrder);
-    }
+    const jobProfiles =
+      typeof skip === 'number' && typeof take === 'number' ? sortedProfiles.slice(skip, skip + take) : sortedProfiles;
 
     return jobProfiles;
   }
@@ -416,7 +426,7 @@ export class JobProfileService {
       }
     } else {
       // If selectProfile is not provided, fetch profiles based on the search and where conditions
-      jobProfiles = await this.getJobProfilesWithSearch(
+      const allJobProfiles = await this.getJobProfilesWithSearch(
         search,
         where,
         args,
@@ -424,7 +434,22 @@ export class JobProfileService {
         undefined,
         undefined,
         department?.metadata.is_statutorily_excluded,
+        false, // do not slice
       );
+
+      const { take, skip } = args;
+
+      // Sort the job profiles based on the provided sorting parameters
+      const sortedProfiles = await this.sortJobProfiles(
+        allJobProfiles,
+        sortByClassificationName,
+        sortByJobFamily,
+        sortByOrganization,
+        sortOrder,
+      );
+
+      jobProfiles =
+        typeof skip === 'number' && typeof take === 'number' ? sortedProfiles.slice(skip, skip + take) : sortedProfiles;
     }
 
     return jobProfiles;
