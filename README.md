@@ -398,3 +398,113 @@ To load test the frontend:
 `$env:K6_WEB_DASHBOARD="true"; $env:K6_WEB_DASHBOARD_EXPORT="report.html"; $env:SCENARIO="frontend"; $env:SECRET_KEY="INSERT_E2E_AUTH_KEY_HERE"; $env:TARGET="http://localhost:5173"; k6 run load-test.js`
 
 You can view live results at `http://localhost:5665/`. After the test is finished, a report will be generated to `report.html` in the same folder
+
+## Special mode for video recordings
+
+Set `DATABASE_URL` to blank by setting this in the api deployment:
+
+```
+name: api
+          env:
+            - name: DATABASE_URL
+          ports:
+            - containerPort: 4000
+```
+
+In secrets, set:
+
+`E2E_TESTING` to `true`
+`USE_MOCKS` to `true`
+
+Load js files containing extra seed data to `api-POD:/tmp/log`. Follow script like below. Note you may need to manually adjust the data if you get errors:
+
+```
+// In db pod:
+
+COPY (
+SELECT json_agg(row_to_json(t))::text
+FROM job_profile t
+) TO '/pgdata/other-profiles.json';
+
+COPY (
+SELECT json_agg(row_to_json(t))::text
+FROM job_profile_classification t
+) TO '/pgdata/job_profiles_classification.json';
+
+
+COPY (
+SELECT json_agg(row_to_json(t))::text
+FROM job_profile_job_family_link t
+) TO '/pgdata/job_profile_job_family_link.json';
+
+COPY (
+SELECT json_agg(row_to_json(t))::text
+FROM job_profile_stream_link t
+) TO '/pgdata/job_profile_stream_link.json';
+
+
+COPY (
+SELECT json_agg(row_to_json(t))::text
+FROM job_profile_behavioural_competency t
+) TO '/pgdata/job_profile_behavioural_competency.json';
+
+COPY (
+SELECT json_agg(row_to_json(t))::text
+FROM job_profile_reports_to t
+) TO '/pgdata/job_profile_reports_to.json';
+
+COPY (
+SELECT json_agg(row_to_json(t))::text
+FROM classification t
+) TO '/pgdata/classifications.json';
+
+
+COPY (
+SELECT json_agg(row_to_json(t))::text
+FROM job_profile_organization t
+) TO '/pgdata/job_profile_organization.json';
+
+COPY (
+SELECT json_agg(row_to_json(t))::text
+FROM organization t
+) TO '/pgdata/organization.json';
+
+
+COPY (
+SELECT json_agg(row_to_json(t))::text
+FROM job_profile_organization t
+) TO '/pgdata/job_profile_organization.json';
+
+// pull dump files to local space
+oc cp --retries=-1 db_pod:pgdata/other-profiles.json ~/other-profiles.json
+oc cp --retries=-1 db_pod:pgdata/job_profiles_classification.json ~/job_profiles_classification.json
+oc cp --retries=-1 db_pod:pgdata/job_profile_job_family_link.json ~/job_profile_job_family_link.json
+oc cp --retries=-1 db_pod:pgdata/job_profile_stream_link.json ~/job_profile_stream_link.json
+oc cp --retries=-1 db_pod:pgdata/job_profile_reports_to.json ~/job_profile_reports_to.json
+oc cp --retries=-1 db_pod:pgdata/classifications.json ~/classifications.json
+oc cp --retries=-1 db_pod:pgdata/job_profile_organization.json ~/job_profile_organization.json
+oc cp --retries=-1 db_pod:pgdata/organization.json ~/organization.json
+
+// Generate ts files with this format
+// export const otherProfileClassifications = [{"classification_id":"5..}]
+
+tsc other-profiles.ts
+tsc other-job-profile-classifications.ts
+tsc other-job-profile-family-link.ts
+tsc other-job-profile-stream-link.ts
+tsc job-profile-reports-to.ts
+tsc other-classifications.ts
+tsc job_profile_organization.ts
+tsc organization.ts
+
+// upload to api pod
+
+oc cp ~/job-profile-reports-to.js api-POD:/tmp/log
+oc cp ~/other-classifications.js api-POD:/tmp/log
+oc cp ~/other-job-profile-classifications.js api-POD:/tmp/log
+oc cp ~/other-job-profile-family-link.js api-POD:/tmp/log
+oc cp ~/other-job-profile-stream-link.js api-POD:/tmp/log
+oc cp ~/other-profiles.js api-POD:/tmp/log
+oc cp ~/organization.js api-POD:/tmp/log
+oc cp ~/job_profile_organization.js api-POD:/tmp/log
+```

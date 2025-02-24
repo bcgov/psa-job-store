@@ -146,9 +146,13 @@ export class AuthService {
           Object.keys(metadataUpdates).includes('department_id')
         ) {
           sessionUser.metadata.org_chart.department_ids = Array.from(
-            new Set(sessionUser.metadata.org_chart.department_ids).add(metadataUpdates.deparment_id),
+            new Set(sessionUser.metadata.org_chart.department_ids).add(metadataUpdates.department_id),
           );
         }
+
+        // ensure we update metadata.peoplesoft with the latest values as well
+        // without this if user's default department changes, the org chart will continue to select old department
+        sessionUser.metadata.peoplesoft = peoplesoftMetadata;
 
         // Implement once 'strategic-hr' role is conceptualized
         //
@@ -181,7 +185,7 @@ export class AuthService {
         // ) {
         //   if (sessionUser.roles.includes('hiring-manager')) {
         //     sessionUser.metadata.org_chart.department_ids = Array.from(
-        //       new Set(sessionUser.metadata.org_chart.department_ids).add(metadataUpdates.deparment_id),
+        //       new Set(sessionUser.metadata.org_chart.department_ids).add(metadataUpdates.department_id),
         //     );
         //   } else {
         //     sessionUser.metadata.org_chart.department_ids = [metadataUpdates.department_id];
