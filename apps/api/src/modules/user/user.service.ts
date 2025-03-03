@@ -510,4 +510,15 @@ export class UserService {
   //   const user = await this.getUser({ where: { id } });
   //   return user;
   // }
+
+  async getUserByEmployeeId(employeeId: string) {
+    return this.prisma.user.findFirst({
+      where: {
+        metadata: {
+          path: ['peoplesoft', 'employee_id'],
+          equals: employeeId,
+        },
+      },
+    });
+  }
 }

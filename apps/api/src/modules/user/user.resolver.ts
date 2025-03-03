@@ -79,4 +79,10 @@ export class UserResolver {
   searchUsers(@Args('search') search: string) {
     return this.userService.searchUsers(search);
   }
+
+  @Roles('super-admin')
+  @Query(() => User, { name: 'userByEmployeeId', nullable: true })
+  getUserByEmployeeId(@Args('employeeId', { type: () => String, nullable: false }) employeeId: string) {
+    return this.userService.getUserByEmployeeId(employeeId);
+  }
 }

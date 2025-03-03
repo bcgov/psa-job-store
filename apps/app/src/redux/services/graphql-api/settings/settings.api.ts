@@ -18,6 +18,7 @@ import { GetOrganizationsPicklistResponse } from './dtos/get-organizations-pickl
 import { GetOrganizationsResponse } from './dtos/get-organizations-response.dto';
 import { GetRolesResponse } from './dtos/get-roles-response.dto';
 import { GetUserPositionResponse } from './dtos/get-user-position-response.dto';
+import { GetUserResponseByEmployeeid } from './dtos/get-user-response-by-employee-id.dto';
 import { GetUserResponse } from './dtos/get-user-response.dto';
 import { GetUsersForSettingsArgs } from './dtos/get-users-for-settings-args.dto';
 import { GetUsersForSettingsResponse } from './dtos/get-users-for-settings-response.dto';
@@ -329,6 +330,31 @@ export const settingsApi = graphqlApi.injectEndpoints({
         return [{ type: 'settingsDepartment', id: arg.department_id }];
       },
     }),
+    getUserByEmployeeId: build.query<GetUserResponseByEmployeeid, string>({
+      providesTags: (_result, _err, arg) => {
+        return [{ type: 'settingsUser', id: arg as string }];
+      },
+      query: (employeeId: string) => ({
+        document: gql`
+          query UserByEmployeeId($employeeId: String!) {
+            userByEmployeeId(employeeId: $employeeId) {
+              id
+              name
+              email
+              username
+              roles
+              metadata
+              created_at
+              updated_at
+              deleted_at
+            }
+          }
+        `,
+        variables: {
+          employeeId,
+        },
+      }),
+    }),
   }),
 });
 
@@ -353,4 +379,5 @@ export const {
   useImportUserMutation,
   useSetUserOrgChartAccessMutation,
   useUpdateDepartmentMetadataMutation,
+  useLazyGetUserByEmployeeIdQuery,
 } = settingsApi;
