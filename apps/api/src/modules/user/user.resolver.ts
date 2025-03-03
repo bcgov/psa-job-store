@@ -82,7 +82,7 @@ export class UserResolver {
 
   @Roles('super-admin')
   @Query(() => User, { name: 'userByEmployeeId', nullable: true })
-  getUserByEmployeeId(@Args('employeeId', { type: () => String, nullable: false }) employeeId: string) {
+  getUserByEmployeeId(@Args('employeeId') employeeId: string) {
     return this.userService.getUserByEmployeeId(employeeId);
   }
 }
