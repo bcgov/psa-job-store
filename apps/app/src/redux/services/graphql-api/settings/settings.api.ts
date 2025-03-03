@@ -258,9 +258,7 @@ export const settingsApi = graphqlApi.injectEndpoints({
           data: input,
         },
       }),
-      invalidatesTags: (_result, _err, arg) => {
-        return [{ type: 'settingsUser', id: arg.id }];
-      },
+      invalidatesTags: ['settingsUser'],
     }),
     importUser: build.mutation<ImportUserResponse, ImportUserInput>({
       query: (input: ImportUserInput) => ({
@@ -332,7 +330,7 @@ export const settingsApi = graphqlApi.injectEndpoints({
     }),
     getUserByEmployeeId: build.query<GetUserResponseByEmployeeid, string>({
       providesTags: (_result, _err, arg) => {
-        return [{ type: 'settingsUser', id: arg as string }];
+        return [{ type: 'settingsUser', employeeId: arg as string }];
       },
       query: (employeeId: string) => ({
         document: gql`
