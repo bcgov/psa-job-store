@@ -1,12 +1,22 @@
-# Digital Talent Deployments
+# PSA Job Store Deployments
 
 ## Overview
 
-The `Job Store` project currently consists of two applications and one service: the app and api, and elasticsearch.
+The `PSA Job Store` project consists of two main applications and several supporting services:
+
+- Frontend application (app)
+- Backend API service (api)
+- Database (PostgreSQL via Crunchy operator)
+- Elasticsearch for search functionality
+- Kibana for data visualization
+- Nginx reverse proxy for Kibana access authentication
+- Log rotation service
+- Report mailer service
+- Secrets backup service
 
 ## Environment Variables
 
-The `Job Store` is configured using environment variables. The implementation of environment variables depends on the environment.
+The `PSA Job Store` is configured using environment variables. The implementation of environment variables depends on the environment.
 
 ### Local Development
 
@@ -19,10 +29,9 @@ When developing locally, pass in environment variables using the following `.env
 NODE_ENV=
 
 # E2E Settings
-USE_MOCKS=
-E2E_TESTING=
-E2E_AUTH_KEY=
-E2E_JWT_SECRET=
+USE_MOCKS=  # true/false. When true will use mock services for PeopleSoft, CRM as well as KeyCloak instead of using actual API connections
+E2E_TESTING= # true/false. Set this flag when running e2e tests
+E2E_AUTH_KEY= # arbitrary string, used by cypress to access certain protected endpoints
 SEED_FILE=./prisma/run-e2e-seed.ts
 
 # CRM Settings
@@ -66,7 +75,21 @@ SSO_INTEGRATION_ID=
 
 #React App Settings
 REACT_APP_URL=
+
+# Debug (see below)
+TEST_ENV=
 ```
+
+#### TEST_ENV flag
+
+Setting `TEST_ENV` flag to `true` will:
+
+- Circumvent any role checks, allowing users to access any API endpoint
+- Limit loading or employee data to a specific list of position numbers for accelerated org chart loading (to configure which positions, modify the source code by searching for instances of this flag usage)
+- Allows users to go through the position request process without actually creating the position in PeopleSoft to avoid polluting the org chart (since we don't have the ability to delete positions out of PeopleSoft). It will still create an entry in the CRM
+- Uses a hard-coded value for CRM contactId if it's not available in User model
+
+Use this flag in development environment if you find that org chart take a long time to load or if you would like to go through the position creation process without actually creating a position in PeopleSoft. This flag is also helpful if you need to test API with Postman while disregarding role checks.
 
 `apps/app/.env`
 
@@ -104,175 +127,216 @@ VITE_SUPPORT_EMAIL=
 
 ### OpenShift
 
-See `Deployment` for instructions how to deploy environment variables to OpenShift.
+See `Deployment` section for instructions on how to deploy environment variables to OpenShift.
 
 ## Deployment
 
-The deployment of the projects is controlled through kustomize, to deploy to our namespace in OpenShift. The configurations can be found under openshift/kustomize.
+The deployment of the project is controlled through Kustomize for OpenShift. The configurations can be found under `deployments/openshift/kustomize`.
 
-To deploy the entire application, you must deploy at least the frontend and backend applications, and elasticsearch:
+### Deployment Components
 
-```
-oc apply -k deployments/openshift/kustomize/base/api/crunchy
+To deploy the entire application, you must deploy at least the following components:
+
+1. **Database (Crunchy PostgreSQL)**
+2. **Elasticsearch**
+3. **API Service**
+4. **Frontend Application**
+
+Optional components include:
+
+- Kibana for Elasticsearch visualization
+- Nginx reverse proxy for Kibana authentication
+- Report Mailer service
+- Secrets Backup service
+- Log rotation service
+
+### Deployment Commands
+
+Deploy the components in the following order:
+
+```bash
+# Deploy the database
+oc apply -k deployments/openshift/kustomize/overlays/crunchy/$ENV
+
+# Deploy Elasticsearch
 oc apply -k deployments/openshift/kustomize/base/elasticsearch
+
+# Deploy the API service
 oc apply -k deployments/openshift/kustomize/overlays/api/$ENV
+
+# Deploy the frontend application
 oc apply -k deployments/openshift/kustomize/overlays/app/$ENV
-```
 
-where $ENV is either dev test or prod. (please only deploy to prod if your sure of what you're doing!)
-
-Once the new postgrescluster is up and running, we simply need to change the URI used by the backend to point to the new cluster. Find the openshift secret "<new-cluster-name>-pguser-admin" and copy the value for the key "uri". Update the "secrets" secret with this value, overwriting the existing value for the key "DATABASE_URL". Find the nestjs-app deployment config and start a rollout; the new pod should pick up the updated secret value and be pointing to the new cluster database.
-
-Optionaly you can also deploy Kibana:
-
-```
+# Optional: Deploy Kibana
 oc apply -k deployments/openshift/kustomize/base/kibana
+
+# Optional: Deploy Report Mailer
+oc apply -k deployments/openshift/kustomize/base/report-mailer
+
+# Optional: Deploy Secrets Backup
+oc apply -k deployments/openshift/kustomize/base/secrets-backup
 ```
 
-These deployments may also depend on secrets; Openshift Templates generally handles secrets and configmaps better, so these can be found under the openshift/templates folder.
+Where `$ENV` is either `dev`, `test`, or `prod`. (Please only deploy to prod if you're sure of what you're doing!)
 
-Currently there is one secret that must be set up for the api project. To run, log into openshift and run the command:
+Once the new postgrescluster is up and running, we simply need to change the URI used by the backend to point to the new cluster. Find the
+openshift secret "<new-cluster-name>-pguser-admin" and copy the value for the key "uri". Update the "secrets" secret with this value, overwriting
+the existing value for the key "DATABASE_URL". Find the nestjs-app deployment config and start a rollout; the new pod should pick up the updated
+secret value and be pointing to the new cluster database.
 
+### Secrets Configuration
+
+These deployments depend on secrets. OpenShift Templates handle secrets and configmaps better than Kustomize, so these can be found under the `deployments/openshift/templates` folder.
+
+To set up the required secrets for the API project, log into OpenShift and run:
+
+```bash
+oc process -f deployments/openshift/templates/secrets/secrets.yml | oc create -f -
 ```
-oc process -f templates/secrets/secrets.yml
--p PROJECT_NAMESPACE=
--p ENV_NAME=
--p NODE_ENV=
--p EVENT_STORE_URL=
--p KEYCLOAK_REALM_URL=
-| oc create -f -
+
+For the Nginx reverse proxy, set up the required secrets:
+
+```bash
+oc process -f deployments/openshift/templates/secrets/nginx_secrets.yml | oc create -f -
 ```
 
-Additionally, if you would like to seed the database, create a secret using a seed.ts file
+### Database Seeding
 
-```
+If you would like to seed the database, create a secret using a seed.ts file:
+
+```bash
 oc create secret generic seed-secret --from-file=seed.ts=./seed.ts
 ```
 
-If you are running the seed on a fresh database, uou can then remote into the nestjs pod and run
+The seed file is located at `apps/api/src/utils/seed.ts`
 
-```
+If you are running the seed on a fresh database, you can then remote into the nestjs pod and run:
+
+```bash
 npx -w api prisma db seed
 ```
 
-to apply the seeds to the database. If the database has been previously seeded, you should instead run:
+If the database has been previously seeded, you should instead run:
 
-```
+```bash
 npx -w api prisma migrate reset
 ```
 
-The above will delete all data, re-apply migrations and run the seed command
+The above will delete all data, re-apply migrations, and run the seed command.
 
-The elasticsearch cluster may also need to be restarted.
-and then restart the nestjs container. This will trigger data population from PeopleSoft, such as departments info. If the nestjs container cannot connect to the elasticsearch service (and elasticsearch has finished initializing), delete the elasticsearch statefulset and recreate it.
+The elasticsearch cluster may also need to be restarted. And then restart the nestjs container. This will trigger data population from PeopleSoft, such as departments info. If the nestjs container cannot connect to the elasticsearch service (and elasticsearch has finished initializing), delete the elasticsearch statefulset and recreate it.
 
-Image streams are deployed seperately. This should only have to be done once (for all enviroments), as the image streams are linked to artifactory and will automatically be updated when an image is updated there. Image streams can be deployed as kustomize objects:
+### Image Streams
 
-```
-oc apply -k deployments/openshift/images
+Image streams are deployed separately. This should only have to be done once (for all environments), as the image streams are linked to artifactory and will automatically be updated when an image is updated there. Image streams can be deployed as Kustomize objects:
+
+```bash
+oc apply -k deployments/openshift/kustomize/images
 ```
 
 In order for deployments to be able to pull these images, a docker pull secret must be created in each (dev/test/prod) namespace, and linked to the default service account:
 
-```
+```bash
 oc create secret docker-registry artifacts-pull-default-hucvei \
     --docker-server=artifacts.developer.gov.bc.ca \
     --docker-username=******** \
-    --docker-password==******** \
-    --docker-email==********
+    --docker-password=******** \
+    --docker-email=********
 
 oc secrets link default artifacts-pull-default-hucvei --for=pull
 ```
 
-It is important to note that the imagestreams only refresh from artifactory every 15 minutes, meaning you will have to wait a period of time before it is actually deployed. A way to circumvent this waiting period is to delete and recreate the imagestreams, like so:
+Note that imagestreams only refresh from artifactory every 15 minutes. To circumvent this waiting period, you can delete and recreate the imagestreams:
 
-```
+```bash
 oc project f3c07a-tools
 oc delete -k deployments/openshift/kustomize/images/image-streams/
 oc apply -k deployments/openshift/kustomize/images/image-streams/
 ```
 
-## Backups:
+## Database Management
 
-Backups are scheduled by the postgres operator using pgbackrest. The schedule is under
-spec.backups.pgbackrest.global.repos.schedules. The current schedule is full backups at 2AM and incrementals every 15 minutes.
+### Backups
+
+Backups are scheduled by the PostgreSQL operator using pgbackrest. The schedule is under `spec.backups.pgbackrest.global.repos.schedules`. The current schedule is full backups at 2AM and incrementals every 15 minutes.
 
 You can also perform a one-off backup by changing:
 
-```
+```yaml
 spec:
   backups:
     pgbackrest:
       manual:
         repoName: repo1
         options:
-         - --type=full
+          - --type=full
 ```
 
 and then applying the annotation to trigger it:
 
-```
+```bash
 kubectl annotate -n <namespace> postgrescluster <postgres-cluster-name> \
   postgres-operator.crunchydata.com/pgbackrest-backup="$(date)"
 ```
 
-## Restores:
+### Restores
 
-Before running the restore, verify that only one, primary, cluster instance is running by checking the stateful sets view in OpenShift.
+Before running the restore, verify that only one primary cluster instance is running by checking the stateful sets view in OpenShift.
 There should be 3 objects - 2 for each of horizontally scaled pods and one for the backup/restore process. In order to remove an instance,
 update `metadata.name` in `deployments/openshift/kustomize/overlays/crunchy/<ENV>/patch.yml` and
-`deployments/openshift/kustomize/base/crunchy/postgrescluster.yml` to match the name of the instance you'd like to remove. Then run
-`oc delete -k deployments/openshift/kustomize/overlays/crunchy/<ENV>`
+`deployments/openshift/kustomize/base/crunchy/postgrescluster.yml` to match the name of the instance you'd like to remove. Then run:
 
-To perform a restore apply the following changes to the `deployments/openshift/kustomize/overlays/crunchy/<ENV>/patch.yml` file:
+```bash
+oc delete -k deployments/openshift/kustomize/overlays/crunchy/<ENV>
+```
 
-1. Change the metadata.name to the new cluster name that will become the restored database. Ensure it is different from the current
-   live cluster name (ON OPENSHIFT).
+To perform a restore, apply the following changes to the `deployments/openshift/kustomize/overlays/crunchy/<ENV>/patch.yml` file:
+
+1. Change the `metadata.name` to the new cluster name that will become the restored database. Ensure it is different from the current live cluster name (ON OPENSHIFT).
 2. Add `dataSource` block under `spec` as below.
-3. Change the spec.dataSource.postgresCluster.clusterName to the existing database.
+3. Change the `spec.dataSource.postgresCluster.clusterName` to the existing database.
 4. Specify under options the exact time you would like to restore from. The restore will happen precisely to that point in time.
 
 Example:
 
-```
+```yaml
 metadata:
- name: api-postgres-clone
+  name: api-postgres-clone
 spec:
- dataSource:
-   postgresCluster:
-     clusterName: api-postgres-alpha
-     repoName: repo1
-     options:
-     - --type=time
-     - --target="2024-02-06 19:50:11 PST"
+  dataSource:
+    postgresCluster:
+      clusterName: api-postgres-alpha
+      repoName: repo1
+      options:
+        - --type=time
+        - --target="2024-02-06 19:50:11 PST"
 ```
 
-And also change the metadata.name in the base file (`deployments/openshift/kustomize/base/crunchy/postgrescluster.yml`),
+Also change the `metadata.name` in the base file (`deployments/openshift/kustomize/base/crunchy/postgrescluster.yml`),
 so the patch can identify the base.
 
-Then run
+Then run:
 
-```
+```bash
 oc apply -k deployments/openshift/kustomize/overlays/crunchy/<ENV>
 ```
 
-To start up the restored cluster. You can then run
+To start up the restored cluster. You can check the status with:
 
-```
+```bash
 oc describe postgrescluster.postgres-operator.crunchydata.com/<new-cluster-name>
 ```
 
-to check the status of the new cluster. To definitively check that restore is complete and database is ready, check the
-pod log for the database.
+To definitively check that restore is complete and database is ready, check the pod log for the database.
 
-Once the new cluster is up and running, we simply need to change the URI used by the backend to point to the new cluster:
+Once the new cluster is up and running, change the URI used by the backend to point to the new cluster:
 
-1. Find the openshift secret "<new-cluster-name>-pguser-admin" and copy the value for the key "uri".
+1. Find the OpenShift secret "<new-cluster-name>-pguser-admin" and copy the value for the key "uri".
 2. Update the "secrets" secret with this value, overwriting the existing value for the key "DATABASE_URL".
 3. Find the nestjs-app deployment config and start a rollout; the new pod should pick up the updated secret value and be pointing to the new cluster database. Note it may appear like the action had no effect, be patient or monitor the progress in the ReplicationControllers window.
 
 If the restored database is sufficiently old not to include latest migrations, you may need to roll back API and App images to older versions
-So that the application is compatible with the database.
+so that the application is compatible with the database.
 
 To do so:
 
@@ -288,12 +352,10 @@ subsequent migrations.
 
 Once the new cluster is connected, verify the application is working. You can then delete the old cluster (although a waiting period of a few days might not be a bad idea!). Before deleting, RECORD THE NAME OF THE PERSISTANT VOLUME (PV) ATTACHED TO THE BACKUP PVC BELOW, AND ENSURE THAT YOU ARE REFERENCING THE CORRECT CLUSTER. In the metadata section of the postgrescluster.yml file, it must be set to the resource name you want to delete (Similarily, if you testing out backup and restore, make sure this is set to your cloned cluster's name when cleaning up!):
 
-```
+```yaml
 metadata:
- name: api-postgres-old
+  name: api-postgres-old
 ```
-
-Record the new name of the PV here:
 
 ### PV NAME
 
@@ -305,7 +367,7 @@ PVCs should be marked with a custom finalizer, to prevent them from being accide
 
 If you have indeed swapped over to a new cluster, you should mark the new PVCs with a finalizer, which prevents PVCs from automatically being deleted. There should be an exisiting finalizer; you can add 'kubernetes' as an additional finalizer, like so:
 
-```
+```yaml
 finalizers:
   - kubernetes.io/pvc-protection
   - kubernetes
@@ -313,11 +375,12 @@ finalizers:
 
 In the event that the postgrescluster is totally lost and a restore process is not possible, it is still possible to recover the backup files as they are stored in netapp-file-backup storage. You can contact the platforms team and ask them to restore it to another PVC by referencing the PV name, as listed above.
 
-### Creating a sql dump from a restore
+### Creating a SQL Dump from a Restore
 
 Restore to a folder:
 
-```pgbackrest restore \
+```bash
+pgbackrest restore \
 --stanza=db \
 --type=time \
 --target="2024-11-04 09:40:00-08:00" \
@@ -325,37 +388,87 @@ Restore to a folder:
 --delta
 ```
 
-Start a temp psql server with restored data:
+Start a temp PostgreSQL server with restored data:
 
-`pg_ctl -D /pgdata/restore start -o "-p 5533"`
+```bash
+pg_ctl -D /pgdata/restore start -o "-p 5533"
+```
 
 View the actual restore timestamp:
 
-`psql -p 5533 -c "SELECT pg_last_xact_replay_timestamp();"`
+```bash
+psql -p 5533 -c "SELECT pg_last_xact_replay_timestamp();"
+```
 
 Dump data to .sql:
 
-`pg_dump -p 5533 -d api --create -F plain > /pgdata/restore.sql`
+```bash
+pg_dump -p 5533 -d api --create -F plain > /pgdata/restore.sql
+```
 
-Shut down temporary sql instance:
+Shut down temporary SQL instance:
 
-`pg_ctl -D /pgdata/restore stop`
+```bash
+pg_ctl -D /pgdata/restore stop
+```
 
-### Secret Backup and Restore
+## Secret Backup and Restore
 
 There is a cron job (secrets-backup) that backs up the openshift secrets object daily. These backups are stored on a PVC, and stored for 60 days.
 
 The PVC is mounted to the sidecar under /backups for easy access. If the secrets ever need to be restored, you can fetch
 from here, and decode the base64 values.
 
-## Notes:
+## GitHub Actions for Database Management
 
-For the api project, stateful sets are contained within the overlays instead of the base. This is due to a kubernetes/kustomize limitation that prevents the storage amount for a volumeclaimtemplate from being changed. If we use the same storage amount in every enviroment, this can be moved back to the base.
+In addition to the manual backup and restore processes described above, you can run a manual backup and restore using GitHub actions. Note that the restore function here will overwrite the current state of the cluster, as opposed to setting up a clone cluster.
+
+### Database Backup Action
+
+This action creates a full backup of a specified PostgreSQL cluster. You need to specify a name for the backup ("annotation"), which can then be used in the restore action.
+
+#### Usage
+
+1. Navigate to the "Actions" tab in your GitHub repository.
+2. Select the "Database Backup" workflow.
+3. Click "Run workflow" and provide the following inputs:
+   - PostgreSQL Cluster Name (default: api-postgres-clone)
+   - Environment to backup (dev, test, or prod)
+   - Backup annotation (default: manual_backup)
+
+### Database Restore Action
+
+This action restores a PostgreSQL cluster from an annotated backup OR to a specific point in time.
+
+#### Usage
+
+1. Navigate to the "Actions" tab in your GitHub repository.
+2. Select the "Database Restore" workflow.
+3. Click "Run workflow" and provide the following inputs:
+   - PostgreSQL Cluster Name (default: api-postgres-clone)
+   - Environment to restore (dev, test, or prod)
+   - Restore timestamp (for point-in-time recovery) OR
+   - Backup annotation (for restoring a specific backup)
+
+## Secret Backup and Restore
+
+There is a cron job (secrets-backup) that backs up the OpenShift secrets object daily. These backups are stored on a PVC and kept for 60 days.
+
+The PVC is mounted to the sidecar under /backups for easy access. If the secrets ever need to be restored, you can fetch
+from here, and decode the base64 values.
+
+## Additional Notes
+
+- For the api project, stateful sets are contained within the overlays instead of the base. This is due to a kubernetes/kustomize limitation that prevents the storage amount for a volumeclaimtemplate from being changed. If we use the same storage amount in every enviroment, this can be moved back to the base.
 
 There is a command:
 
-```
+```sql
 ALTER USER $POSTGRESQL_USER WITH CREATEDB;
 ```
 
 That is run as part of the startup for the postgres deploymentconfig. This is necessary to allow for prisma to make changes to the database from the nestjs app, that contains the prisma client.
+
+- The Nginx reverse proxy is built on OpenResty with OpenIDC support for authentication. It serves as the authentication layer for accessing Kibana using IDIR.
+
+- The log rotation service is a dedicated container for managing application logs efficiently using Alpine Linux and logrotate.
