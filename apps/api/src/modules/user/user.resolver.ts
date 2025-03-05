@@ -1,5 +1,6 @@
 import { Args, Field, Mutation, ObjectType, Query, Resolver } from '@nestjs/graphql';
 import { FindManyUserArgs, FindUniqueUserArgs, User } from '../../@generated/prisma-nestjs-graphql';
+import { GqlCurrentUser } from '../auth/decorators/gql-current-user.decorator';
 import { Roles } from '../auth/decorators/roles.decorator';
 import { AssignUserRolesInput } from './inputs/assign-user-roles.input';
 import { SetUserOrgChartAccessInput } from './inputs/set-user-org-chart-access.input';
@@ -31,10 +32,10 @@ export class UserResolver {
 
   @Roles('super-admin')
   @Query(() => User, { name: 'assignUserRoles' })
-  async assignUserRoles(@Args('data') data: AssignUserRolesInput) {
+  async assignUserRoles(@Args('data') data: AssignUserRolesInput, @GqlCurrentUser() user: Express.User) {
     const { id, roles } = data;
 
-    const result = await this.userService.assignUserRoles(id, roles);
+    const result = await this.userService.assignUserRoles(id, roles, user.id);
 
     return result;
   }
@@ -77,5 +78,11 @@ export class UserResolver {
   @Query(() => UserSearchResponse, { name: 'searchUsers' })
   searchUsers(@Args('search') search: string) {
     return this.userService.searchUsers(search);
+  }
+
+  @Roles('super-admin')
+  @Query(() => User, { name: 'userByEmployeeId', nullable: true })
+  getUserByEmployeeId(@Args('employeeId') employeeId: string) {
+    return this.userService.getUserByEmployeeId(employeeId);
   }
 }

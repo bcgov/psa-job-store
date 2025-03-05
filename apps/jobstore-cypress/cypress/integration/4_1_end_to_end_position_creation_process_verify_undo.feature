@@ -40,7 +40,7 @@ Feature: End-to-End Position Creation Process with Verification warning
 
         When the user undoes previous significant changes
         # takes them to review screen
-        And proceeds to next step
+        # And proceeds to next step
         Then they proceed to the review changes step
         # takes them to additional information screen
         # And proceeds to next step

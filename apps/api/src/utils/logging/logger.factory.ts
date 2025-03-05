@@ -4,6 +4,7 @@ import { v4 as uuidv4 } from 'uuid';
 export const loggerFactory = () => {
   const NODE_ENV = process.env.NODE_ENV;
   const SKIP_LOGGING = process.env.SKIP_LOGGING;
+  const POD_NAME = process.env.HOSTNAME ?? 'local';
 
   return {
     // formatters doesn't work when using multiple transport targets,
@@ -13,6 +14,14 @@ export const loggerFactory = () => {
         severity: pino.levels.labels[level],
         time: new Date().toISOString(),
       };
+    },
+    customLogLevel: function (req, res) {
+      // filter out /health/check requests from logs
+      if (req.url === '/health/check') {
+        return 'silent';
+      }
+
+      return 'info';
     },
     genReqId: (req, res) => {
       const existingId = req.id ?? req.headers['x-request-id'];
@@ -24,19 +33,6 @@ export const loggerFactory = () => {
     },
     level: NODE_ENV !== 'production' ? 'debug' : 'info',
     useLevelLabels: true,
-    // formatters: {
-    //   level(label) {
-    //     return { severity: label };
-    //   },
-    //   log: (obj) => {
-    //     // return null;
-    //     return {
-    //       ...obj,
-    //       time: new Date().toISOString(), // Add timestamp in ISO format
-    //       msg: obj.msg,
-    //     };
-    //   },
-    // },
     transport: {
       targets: [
         {
@@ -50,7 +46,9 @@ export const loggerFactory = () => {
           ? [
               {
                 target: 'pino/file',
-                options: { destination: '/tmp/log/api.log' },
+                options: {
+                  destination: '/tmp/log/api.log',
+                },
                 level: 'info',
               },
             ]
@@ -66,6 +64,11 @@ export const loggerFactory = () => {
           uuid = null;
         }
 
+        // const query = req.body?.query || '';
+        // const queryToLog = query.trim().startsWith('mutation SubmitPositionRequest')
+        //   ? '[REDACTED]'
+        //   : req.query;
+
         return {
           id: req.id,
           method: req.method,
@@ -74,6 +77,7 @@ export const loggerFactory = () => {
           params: req.params,
           origin: req.headers.origin,
           user_unverified: uuid,
+          pod_name: POD_NAME,
         };
       },
       res: (res) => {

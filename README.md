@@ -11,7 +11,7 @@ Welcome to the BC Public Service Agency's Job Store, the all-in-one solution for
 - Effortlessly explore your organizational structure with our intuitive navigation system.
 - Visualize the hierarchy and relationships within your organization at a glance.
 
-### 📈 Create & Edit Positions Instantly
+### 📈 Create Positions Instantly
 
 - Create New Positions: Add new roles to your organization in real-time, customizing as per your needs or using provided job profiles.
 
@@ -28,14 +28,129 @@ Welcome to the BC Public Service Agency's Job Store, the all-in-one solution for
 ### 📨 Classification Review Requests
 
 - Submit position requests for classification review.
-- Ensure compliance and accuracy in role classifications.
 
 ### 🔄 Integration with PeopleSoft and CRM
 
 - Create positions in PeopleSoft
 - Keep track of position requests in CRM and view status changes inside JobStore
 
-## Get Started
+## Project Structure
+
+### Architecture
+
+This architecture integrates authentication, frontend and backend services, and PeopleSoft and CRM external systems. Users authenticate via SiteMinder and Keycloak using Active Directory credentials (IDIR/BCeID). The frontend, built with React, communicates with a NestJS backend hosted in Docker containers on the SILVER OpenShift cluster, with PostgreSQL managing the database schema. The backend interacts with TELUS CRM endpoints to create, retrieve, and update incidents via REST APIs and connects to PSA PeopleSoft APIs for data retrieval and updates using an Integration Broker and Component Interfaces. For detailed interactions, refer to the [architecture diagram](/docs/architecture/readme.md).
+
+### Applications
+
+Turborepo monorepo architecture using npm workspaces:
+Apps Directory - Contains standalone applications:
+
+- api - The NestJS backend API [Read more](/apps/api/README.md)
+- app - The frontend application [Read more](/apps/app/README.md)
+- jobstore-cypress - End-to-end testing with Cypress [Read more](/apps/jobstore-cypress/README.md)
+- report-mailer - a utility for sending reports. [Read more](/apps/report-mailer/README.md)
+- css-migration-util - a utility for keycloak migrations [Read more](/apps/css-migration-util/README.md)
+
+### Shared Code (common-kit)
+
+- Custom shared library package for cross-application functionality
+- Built with Vite and TypeScript
+- Used for organizatonal chart generation as well as docx generation for job profiles
+
+### Database
+
+- PostgreSQL with Prisma as the ORM
+- PGLite for in-memory database during testing
+
+### Testing
+
+- Jest for unit testing
+- Cypress v13.x for end-to-end testing
+- Cucumber for behavior-driven testing (via cypress-cucumber-preprocessor)
+
+### Development Tooling
+
+- TypeScript v5.x across all packages
+- ESLint and Prettier for code formatting and linting
+- Husky for Git hooks [Read more about Husky scripts](#husky-scripts)
+- Changesets for versioning and changelog management
+- Cross-env for environment variable management across platforms
+- SWC for fast TypeScript compilation (for running tests only)
+- Vite for frontend bundling and development server
+
+### Utilities
+
+- UUID for unique identifier generation
+- Day.js for date manipulation
+- CSV parsing with csvtojson
+- Diff utilities (deep-object-diff, diff-match-patch)
+
+### DevOps
+
+The project uses GitHub Actions workflows and custom actions for automating the CI/CD processes of the application. The workflows handle tasks such as building Docker images, running tests, performing database migrations, deploying to OpenShift environments, and managing database backups and restores. See [.github/README.md](/.github/README.md) for more details.
+
+### Deployments
+
+The project is deployed on OpenShift using templates and Kustomize. For more information, see [deployments/README.md](/deployments/README.md) and [deployments/DEVELOPER.md](/deployments/DEVELOPER.md)
+
+## Logging System
+
+The PSA Job Store implements a comprehensive logging system that captures both backend API logs and frontend application errors. This system helps with debugging, monitoring, and troubleshooting issues in production and development environments.
+
+### API Logging
+
+The backend API uses a structured logging approach based on the following components:
+
+#### Logger Configuration
+
+- **Pino Logger**: The API uses [Pino](https://getpino.io/) as the primary logging library, configured through the `nestjs-pino` module.
+- **Request ID Tracking**: Each request is assigned a unique ID for tracing through the system.
+- **User Context**: Logs include user information when available, helping to trace actions to specific users.
+
+#### Log Storage
+
+- **Console Output**: In development, logs are formatted with `pino-pretty` for readability.
+- **File Storage**: In production, logs are stored in `/tmp/log/api.log` for persistence.
+- **Log Rotation**: The system handles log rotation to prevent excessive file sizes.
+
+#### GraphQL Error Logging
+
+- **Apollo Plugin**: A custom Apollo Server plugin captures and logs GraphQL errors.
+- **Error Formatting**: GraphQL errors are formatted before being returned to clients, with sensitive information, such as stack trace removed in production (see `graphql-error.formatter.ts` file).
+
+#### Service-Level Logging
+
+- **Global Logger**: Services can use the `globalLogger` for consistent logging across the application. This is used to keep track of sensitive changes in the application, such as user role changes, position request status changes, etc.
+
+### Frontend Error Logging
+
+The frontend application implements error logging that sends errors to the backend:
+
+#### Error Capture Mechanisms
+
+- **Error Boundary**: React Error Boundary components capture component errors and prevent the entire application from crashing. Any time users are presented with a front end error, that error gets submitted to the server.
+
+#### Error Logging Service
+
+- **`sendLogToServer` Function**: Captures error details including message, stack trace, timestamp, and URL path.
+- **REST Endpoint**: Errors are sent to the `/logs/log` endpoint on the backend API.
+
+#### Backend Storage
+
+- **App Log Service**: The backend stores frontend errors in a dedicated log file (`/tmp/log/app.log`).
+- **Error Context**: Logs include user ID and path information for better context.
+
+### Log Analysis
+
+- **Structured Format**: All logs are in JSON format for easy parsing and analysis.
+- **Correlation**: Request IDs and user IDs help correlate related log entries.
+- **Environment Variables**: Logging behavior can be controlled through environment variables:
+  - `NODE_ENV`: Controls log level and formatting
+  - `SKIP_LOGGING`: Can disable file logging when set to 'true'
+
+### Note
+
+- **GraphQL Query Redaction**: Large binary data in GraphQL queries (like PNG images) is redacted with `[REDACTED]`.
 
 ## Running the project
 
@@ -53,11 +168,11 @@ Install dependencies:
 
 `npm i`
 
-Rename `/sample.env` to `.env` and configure the variables
+Copy and rename `/sample.env` to `.env` and configure the variables
 
 Start elastic search and postgres containers:
 
-`docker compose up`
+`docker compose up -d`
 
 Build common-kit:
 
@@ -69,7 +184,11 @@ Setup the database and seed it with test data:
 
 ("Failed to create group: NUR" warning is normal)
 
-Rename `/apps/app/sample.env` to `.env` and configure the environment.
+Copy and rename `/apps/app/sample.env` to `.env` and configure the environment.
+
+Copy and rename `/apps/api/sample.env` to `.env` and configure the environment.
+
+To see details about the meaning of various variables, see [DEVELOPER.md](deployments/DEVELOPER.md)
 
 Start API project:
 
@@ -81,33 +200,106 @@ Start the web project:
 
 Visit [http://localhost:5173/](http://localhost:5173/) to see the application!
 
-## Running end-to-end tests
+## Running end-to-end tests locally
 
-First, ensure that `TEST_ENV=true` and `E2E_TESTING=true` are set in your `apps/api/.env` file.
+First, ensure that `USE_MOCKS=true` and `E2E_TESTING=true` are set in your `apps/api/.env` file. Copy and rename `sample.env` to `.env` in `/apps/jobstore-cypress`. Ensure `VITE_E2E_AUTH_KEY` flag in that `.env` matches `E2E_AUTH_KEY` variable in `apps/api/.env`
+
+See the [API documentation](/apps/api/README.md#e2e-testing-configuration) for more details on E2E testing configuration.
 
 Ensure that database has been reset to defaults with the seed data:
 
 `npx -w api npm run migrate:reset:e2e-test`
 
-("Failed to create group: NUR" warning is normal)
+("Failed to create group: NUR" error is normal)
 
-Run `npx -w jobstore-cypress cypress open`
+Run `npx -w jobstore-cypress cypress open`. It's recommended to use Edge browser to run e2e tests.
 
-To run in same environment as GitHub actions: `npx cypress run --browser edge --headless`
+To run in same environment as GitHub actions:
 
-## Running Unit Tests
+`npx -w jobstore-cypress cypress run --browser edge --headless`
 
-In the root, run `npx jest`
+This will run all test without any Cypress user interface.
 
-This will run tests in all projects.
+Note that tests need to be run in alphabetical order and the database would need to be reset between runs as there is some dependence between tests, such as front page checking for the number of position requests and some later tests creating position requests, altering that count.
+
+### E2E tests in GitHub actions
+
+The `e2e.yml` GitHub Action is designed to run end-to-end (E2E) tests for after database migrations and deployments have been completed. The workflow initiated automatically by the "Migrate DB Schema" workflow.
+
+#### Main Jobs
+
+1. **Wait for Deployment**
+2. **E2E Tests**
+3. **Cleanup E2E**
+
+### How It Works
+
+1. **Deployment Verification**: Checks if the deployment is ready by verifying the versions of the API and APP match the provided SHA.
+2. **Database Preparation**: Dumps the database schema for use in tests.
+3. **Environment Setup**: Configures the deployment on OpenShift to run in E2E mode (in-memory database, use mocks and loads db schema from the dump)
+4. **Dependency Management**: Caches Node modules and Cypress binary to optimize workflow speed.
+5. **Test Execution**: Runs Cypress tests in headless mode using the Edge browser.
+6. **Artifact Handling**: Uploads screenshots and videos if tests fail.
+7. **Cleanup**: Removes E2E environment settings after test completion.
+
+### Mock services
+
+For information about mock services, see the [API documentation](/apps/api/README.md#mock-services).
+
+## Running Unit Tests locally
+
+To run app tests:
+
+`npx -w app jest`
+
+To run api tests:
+
+`npx -w api jest`
+
+To run common-kit tests:
+
+`npx -w common-kit jest`
 
 _Note:_ If you receive a `EBUSY: resource busy or locked, open..` error, run with a --no-cache flag
 
 To genereate coverage report, run with `--coverage` flag
 
-## Updating seed file secret
+### Unit tests in GitHub actions
 
-To update the seed file, run `oc set data secret/seed-secret --from-file=seed.ts`
+Unit tests also run automatically on GitHub actions any time there is a commit to the `test` branch
+
+## Husky Scripts
+
+This repository uses [Husky](https://typicode.github.io/husky/#/) to manage Git hooks, ensuring code quality and security before commits and pushes. The following scripts are included:
+
+## 1. `pre-commit`
+
+The `pre-commit` script is executed before a commit is finalized. Its main functions are:
+
+- **Branch Protection**: It checks if the current branch is one of the protected branches (`main`, `stage`, or `develop`). If so, it prevents direct commits to these branches, prompting the user to create a feature branch instead.
+- **Secret and Environment Variable Check**: It runs the `check_secrets.sh` script to scan for any secrets or sensitive environment variables in the staged files. If any are found, the commit is aborted, and the user is notified to remove or secure them.
+
+- **Linting**: If the checks pass, it runs `lint-staged` to ensure that only staged files are linted according to the project's linting rules.
+
+## 2. `pre-push`
+
+The `pre-push` script is executed before pushing changes to a remote repository. Its main function is:
+
+- **Branch Protection**: Similar to the `pre-commit` script, it checks if the current branch is one of the protected branches. If so, it prevents the push and instructs the user to push their feature branch and create a Pull Request instead.
+
+## 3. `check_secrets.sh`
+
+This script is responsible for scanning staged files for potential secrets and sensitive environment variables. Its main features include:
+
+- **Regex Pattern for Secrets**: It defines a regex pattern to identify potential secrets in the code.
+
+- **Whitelisting**: It maintains a list of environment variables that are allowed and skips checking for them.
+
+- **Skipping Folders**: It specifies folders to skip during the check, such as `.git`, `.husky`, and `node_modules`.
+
+- **Environment Variable Extraction**: It extracts environment variable values from `.env` files located in the `apps/app` and `apps/api` directories to check for their presence in code.
+
+- **Secret Detection**: It processes each staged file, checking for secrets and environment variables used as literals. If any are found, it reports them and exits with an error code.
 
 ## To generate new changeset entry
 
@@ -119,7 +311,9 @@ in the project root and follow the prompts. This info is going to be automatical
 
 ## To publish a hotfix to production
 
-- Make a hotfix branch off main
+Normal publishing follows the pattern of using a feature branch off develop, merging it into develop, then merging develop into stage, and finally stage into main. However sometimes it is necessary to publish a hotfix into production while holding off the publishing of code on dev/stage branches. For this:
+
+- Make a hotfix branch off main and implement your hotfix
 - Create pull request from hotfix into develop to test it on develop
 - Create pull request from develop to stage to test on stage
 - If looks good, create a pull request from hotfix to main
@@ -130,39 +324,13 @@ If there's a conflict because develop is ahead of main:
 - Merge hotfix into this branch and resolve conflicts
 - Make a pull request from this branch into develop
 
-## @generated files and slow commits
-
-NOTE: this is no longer necessary - generated files were added to .gitignore and are no longer source controlled
-
-To avoid slow commits when auto-generation takes place, run `git add .` and then `npm run lint-generated` (in the api project)
-
-If above doesn't work, use `lacroixdavid1.vscode-format-context-menu` VS Code extension. After installing, right click on the @generated folder and click `Format`
-
-## To apply a db change via db migration
-
-If first time, set the baseline migration:
-`npx -w api prisma migrate resolve --applied 0_init`
-
-To reset database with migrations:
-
-`npx -w api prisma migrate reset` - this will reset the schema and apply the migrations in order.
-
-Create migration:
-`npx -w api prisma migrate dev --name MIGRATION_NAME`
-
-To apply new migrations after pulling latest code:
-
-`npx -w api prisma migrate deploy`
-
-`npx -w api prisma generate`
-
-## Making a database backup to local drive
+## Making a database backup to a local drive
 
 Login to psql pod:
 `oc exec -it  SQL_POD_NAME -- /bin/bash`
 `cd /pgdata`
 
-Get db info:
+To get db info:
 
 `psql`
 `\l`
@@ -171,15 +339,17 @@ Create dump:
 `pg_dump -U USER_NAME DB_NAME > backup.sql`
 
 Exit pod and copy file:
-`oc rsync SQL_POD_NAME:pgdata/backup.sql ~/`
+`oc cp --retries=-1 SQL_POD_NAME:pgdata/backup.sql ~/backup.sql`
 
 Remove remote backup file:
 
 `oc exec SQL_POD_NAME -- rm pgdata/backup.sql`
 
-## To replicate production database to dev/test
+## To replicate production database to dev/test environment or locally
 
 Make a backup of production as above first.
+
+### To load data to dev/test environment on OpenShift
 
 Upload backup file to dev/test sql pod:
 
@@ -189,169 +359,31 @@ Login to sql, and clear all data:
 
 `psql -d api -c "DROP SCHEMA public CASCADE; CREATE SCHEMA public;"`
 
-If importing to local:
-
-`psql -d api -c "DROP SCHEMA public CASCADE; CREATE SCHEMA public;" -h localhost -p 5432 -U admin`
-
-`docker cp backup.sql api-postgres-1:/home/backup.sql`
-
 Import production data:
 
 `psql -U postgres -d api -f backup.sql`
 
-If on local:
+Apply any migrations that are not present in backup:
+`npx -w api prisma migrate deploy`
+
+## To load data into local environment
+
+In docker terminal for the db, delete all records:
+
+`psql -d api -c "DROP SCHEMA public CASCADE; CREATE SCHEMA public;" -h localhost -p 5432 -U admin`
+
+Copy backup dump into the container:
+
+`docker cp backup.sql api-postgres-1:/home/backup.sql`
+
+Load data from backup:
 
 `psql -U postgres -d api -f /home/backup.sql -h localhost -p 5432 -U admin`
 
+Apply any migrations that are not present in backup:
 `npx -w api prisma migrate deploy`
 
-Clear position requests:
-
-`TRUNCATE TABLE position_request;`
-
-## To connect to local db
-
-Open container terminal and enter:
-
-`psql -h localhost -p 5432 -U admin -d api`
-
-## To accelerate new image uptake on openshift after publishing
-
-NOTE: these changes have been integrated into the pipeline and now happen automatically on every publish
-
-Openshift may take up to 15 minutes to pick a new image from artifactory. There is no way to change this frequency. If needed, as a workaround
-perform these operations to get openshift to pick up the image from artifactory faster:
-
-`oc project xxxx-tools`
-
-`oc delete -k deployments/openshift/kustomize/images/image-streams/`
-
-`oc apply -k deployments/openshift/kustomize/images/image-streams/`
-
-## Recursive relationships in schema.prisma
-
-To avoid maximum call stack depth for cases where there is recursive relationship in schema.prisma, cast the input object into
-a type generated by prisma itself instead of prisma-nestjs-graphql, e.g.:
-
-```
-async createJobProfile(data: JobProfileCreateInput) {
-    return this.prisma.jobProfile.create({
-      data: {
-        ...
-      } as any as Prisma.JobProfileCreateInput,
-    });
-  }
-```
-
-Without this, you may encounter errors of this type:
-
-```
-error TS2322: Type 'JobProfileCreateNestedManyWithoutParentInput' is not assignable to type 'JobProfileUncheckedCreateNestedManyWithoutParentInput | JobProfileCreateNestedManyWithoutParentInput'
-```
-
-## To retreive Artifactory username and password
-
-In the tools namespace:
-
-```
-oc get secret/artifacts-default-[random] -o json | jq '.data.username' | tr -d "\"" | base64 -d
-oc get secret/artifacts-default-[random] -o json | jq '.data.password' | tr -d "\"" | base64 -d
-```
-
-## "Uknown blob" or "manifest invalid" build issue
-
-If you get an "Unknown blob" or "manifest invalid" error message during build process, this is likely caused by artifactory being full. To resolve, delete old images from the artifactory repository to free up space and retry the action.
-
-## DB Troubleshooting
-
-_Note_ Below is for high availbility configuration. For MVP, configuraiton is using single database pod
-
-There are two stateful sets, each with their own PVC:
-
-- `api-postgres-00-64ql` - primary component, stores actual data. Runs following containers:
-  - _Crunchy PostgreSQL_: Runs the PostgreSQL database.
-  - _Replication Cert Copy_: This container is responsible for managing replication certificates for secure data replication.
-  - _pgBackRest_: Provides reliable backups and disaster recovery solutions for PostgreSQL.
-    Note: /pgdata is mounted to api-postgres-00-64ql-pgdata. To see what's taking up space, run `du -h` in the directory
-- `api-postgres-repo-host` - handles the pgBackRest repository. pgBackRest is a backup and restore solution for PostgreSQL
-
-### Remoting into db pod
-
-`kubectl exec -it api-postgres-00-64ql-0 -c database -- /bin/bash`
-
-backrest pod:
-
-`kubectl exec -it api-postgres-repo-host-0 -c pgbackrest -- /bin/bash`
-
-### Downloading a log
-
-`kubectl cp -n NAMESPACE api-postgres-00-64ql-0:/pgdata/pg15/log/postgresql-Thu.log postgresql-Thu.log`
-
-### get pgData location
-
-`echo $PGDATA`
-
-Will output `/pgdata/pg15`
-
-### db config file location
-
-`/pgdata/pg15/postgresql.conf`
-
-Do not edit this file directly
-
-### View file sizes
-
-`ls -lh`
-
-### Log location
-
-Logs are located at `/pgdata/pg15/log`
-
-### Reliability and the Write-Ahead Log location
-
-These are stored at `/pgdata/pg15_wal`
-
-WAL files record all changes to the database's data files before those changes are written to the actual data files. If your database is under heavy write load, the volume of WAL files can increase significantly.WAL is designed to ensure that the database can recover from crashes and maintain data integrity. It's also crucial for replication and point-in-time recovery. Before any changes (like INSERT, UPDATE, DELETE) are made to the actual data files on disk, they are first recorded in the WAL files. This ensures that in case of a crash, the database can replay these logs and reconstruct the state of the database up to the last committed transaction.
-
-Periodically, a checkpoint occurs where the current state of the database is written to the data files. Checkpoints help reduce recovery time by marking a known good point in the WAL stream where the database can start replaying logs during recovery.
-
-Each WAL file is ALWAYS 16mb in size.
-
-Archive Process: WAL archiving involves copying completed WAL files to a secondary location (disk, cloud storage, etc.) for safekeeping. This is handled by the archive_command configuration parameter, which specifies a shell command to run for each WAL file that needs to be archived.
-
-`max_wal_size` parameter in config determines the maximum amount of WAL data that can accumulate before a checkpoint is forced. Checkpoints are moments when PostgreSQL writes all the changes from WAL files to the actual data files. With a larger max_wal_size, checkpoints occur less frequently because PostgreSQL allows more WAL data to accumulate before triggering a checkpoint.
-`checkpoint_timeout` parameter specifies the maximum amount of time between automatic WAL checkpoints. Essentially, this setting controls how often PostgreSQL will force a checkpoint to occur, regardless of the amount of WAL activity
-`checkpoint_completion_target` parameter specifies the target of checkpoint completion, as a fraction of total time between checkpoints. The default is 0.9, which spreads the checkpoint across almost all of the available interval, providing fairly consistent I/O load while also leaving some time for checkpoint completion overhead. Reducing this parameter is not recommended because it causes the checkpoint to complete faster. This results in a higher rate of I/O during the checkpoint followed by a period of less I/O between the checkpoint completion and the next scheduled checkpoint
-
-### Clean up WAL files manually
-
-`pg_archivecleanup -d /pgdata/pg15_wal 0000000300000009000000CD` where "0000000300000009000000CD" would the file name after which the files should be removed
-
-To expire from the archive pod (there needs to be space on the volume to perform this operation):
-
-`pgbackrest expire --stanza=db --repo1-retention-full=1`
-
-### Get db size
-
-`psql`
-`\l` - get a list of dbs
-`SELECT pg_size_pretty( pg_database_size('api') );`
-
-## Husky pre-commit hook issues on windows with GitHub desktop
-
-If getting this type of error when commiting changes:
-
-```
-.husky/pre-commit: line 13: npx: command not found
-husky - pre-commit hook exited with code 127 (error)
-husky - command not found in PATH=/mingw64/libexec/git-core:/mingw64/bin:/usr/bin...:undefined
-``
-
-- Reinstall GitHub desktop
-- Check that system PATH variable contains `C:\Program Files\Git\bin` (path containing sh.exe) AND that it's first in the list
-```
-
-## Upgrade psql on CrunchyDB
+## Upgrading psql on CrunchyDB
 
 Modify pgupgrade to include your desired upgrade then run:
 
@@ -393,3 +425,260 @@ To load test the frontend:
 `$env:K6_WEB_DASHBOARD="true"; $env:K6_WEB_DASHBOARD_EXPORT="report.html"; $env:SCENARIO="frontend"; $env:SECRET_KEY="INSERT_E2E_AUTH_KEY_HERE"; $env:TARGET="http://localhost:5173"; k6 run load-test.js`
 
 You can view live results at `http://localhost:5665/`. After the test is finished, a report will be generated to `report.html` in the same folder
+
+## Special mode for video recordings
+
+This was a setup on dev to allow recording of videos. It uses mock data in combination with custom seed data.
+
+Set `DATABASE_URL` to blank by setting this in the api deployment:
+
+```
+name: api
+          env:
+            - name: DATABASE_URL
+          ports:
+            - containerPort: 4000
+```
+
+In secrets, set:
+
+`E2E_TESTING` to `true`
+`USE_MOCKS` to `true`
+
+Load js files containing extra seed data to `api-POD:/tmp/log`. Follow script like below. Note you may need to manually adjust the data if you get errors:
+
+```
+// In db pod on prod:
+
+COPY (
+SELECT json_agg(row_to_json(t))::text
+FROM job_profile t
+) TO '/pgdata/other-profiles.json';
+
+COPY (
+SELECT json_agg(row_to_json(t))::text
+FROM job_profile_classification t
+) TO '/pgdata/job_profiles_classification.json';
+
+
+COPY (
+SELECT json_agg(row_to_json(t))::text
+FROM job_profile_job_family_link t
+) TO '/pgdata/job_profile_job_family_link.json';
+
+COPY (
+SELECT json_agg(row_to_json(t))::text
+FROM job_profile_stream_link t
+) TO '/pgdata/job_profile_stream_link.json';
+
+
+COPY (
+SELECT json_agg(row_to_json(t))::text
+FROM job_profile_behavioural_competency t
+) TO '/pgdata/job_profile_behavioural_competency.json';
+
+COPY (
+SELECT json_agg(row_to_json(t))::text
+FROM job_profile_reports_to t
+) TO '/pgdata/job_profile_reports_to.json';
+
+COPY (
+SELECT json_agg(row_to_json(t))::text
+FROM classification t
+) TO '/pgdata/classifications.json';
+
+
+COPY (
+SELECT json_agg(row_to_json(t))::text
+FROM job_profile_organization t
+) TO '/pgdata/job_profile_organization.json';
+
+COPY (
+SELECT json_agg(row_to_json(t))::text
+FROM organization t
+) TO '/pgdata/organization.json';
+
+
+COPY (
+SELECT json_agg(row_to_json(t))::text
+FROM job_profile_organization t
+) TO '/pgdata/job_profile_organization.json';
+
+// pull dump files to local space
+oc cp --retries=-1 db_pod:pgdata/other-profiles.json ~/other-profiles.json
+oc cp --retries=-1 db_pod:pgdata/job_profiles_classification.json ~/job_profiles_classification.json
+oc cp --retries=-1 db_pod:pgdata/job_profile_job_family_link.json ~/job_profile_job_family_link.json
+oc cp --retries=-1 db_pod:pgdata/job_profile_stream_link.json ~/job_profile_stream_link.json
+oc cp --retries=-1 db_pod:pgdata/job_profile_reports_to.json ~/job_profile_reports_to.json
+oc cp --retries=-1 db_pod:pgdata/classifications.json ~/classifications.json
+oc cp --retries=-1 db_pod:pgdata/job_profile_organization.json ~/job_profile_organization.json
+oc cp --retries=-1 db_pod:pgdata/organization.json ~/organization.json
+
+// Generate ts files with this format using json data from before:
+// export const otherProfileClassifications = [{"classification_id":"5..}]
+
+// build ts files
+
+tsc other-profiles.ts
+tsc other-job-profile-classifications.ts
+tsc other-job-profile-family-link.ts
+tsc other-job-profile-stream-link.ts
+tsc job-profile-reports-to.ts
+tsc other-classifications.ts
+tsc job_profile_organization.ts
+tsc organization.ts
+
+// upload to api pod
+
+oc cp ~/job-profile-reports-to.js api-POD:/tmp/log
+oc cp ~/other-classifications.js api-POD:/tmp/log
+oc cp ~/other-job-profile-classifications.js api-POD:/tmp/log
+oc cp ~/other-job-profile-family-link.js api-POD:/tmp/log
+oc cp ~/other-job-profile-stream-link.js api-POD:/tmp/log
+oc cp ~/other-profiles.js api-POD:/tmp/log
+oc cp ~/organization.js api-POD:/tmp/log
+oc cp ~/job_profile_organization.js api-POD:/tmp/log
+```
+
+## Miscellaneous and troubleshooting
+
+### To accelerate new image uptake on openshift after publishing
+
+NOTE: these changes have been integrated into the pipeline and now happen automatically on every publish
+
+Openshift may take up to 15 minutes to pick a new image from artifactory. There is no way to change this frequency. If needed, as a workaround
+perform these operations to get openshift to pick up the image from artifactory faster:
+
+`oc project xxxx-tools`
+
+`oc delete -k deployments/openshift/kustomize/images/image-streams/`
+
+`oc apply -k deployments/openshift/kustomize/images/image-streams/`
+
+### Recursive relationships in schema.prisma
+
+To avoid maximum call stack depth for cases where there is recursive relationship in schema.prisma, cast the input object into a type generated by prisma itself instead of prisma-nestjs-graphql, e.g.:
+
+```
+async createJobProfile(data: JobProfileCreateInput) {
+    return this.prisma.jobProfile.create({
+      data: {
+        ...
+      } as any as Prisma.JobProfileCreateInput,
+    });
+  }
+```
+
+Without this, you may encounter errors of this type:
+
+```
+error TS2322: Type 'JobProfileCreateNestedManyWithoutParentInput' is not assignable to type 'JobProfileUncheckedCreateNestedManyWithoutParentInput | JobProfileCreateNestedManyWithoutParentInput'
+```
+
+### To retreive Artifactory username and password
+
+In the tools namespace:
+
+```
+oc get secret/artifacts-default-[random] -o json | jq '.data.username' | tr -d "\"" | base64 -d
+oc get secret/artifacts-default-[random] -o json | jq '.data.password' | tr -d "\"" | base64 -d
+```
+
+### "Uknown blob" or "manifest invalid" build issue
+
+If you get an "Unknown blob" or "manifest invalid" error message during build process, this is likely caused by artifactory being full. To resolve, delete old images from the artifactory repository to free up space and retry the action.
+
+Login to artifactory at https://artifacts.developer.gov.bc.ca/ui/admin and select the tools-alexandria project. On the left, select Artifactory->Artifacts
+to show the list of builds.
+
+Under api and app projects, delete old versions, for example "0.0.0" or "0.1.0" to free up space.
+
+### Database operations
+
+#### Remoting into db pod
+
+`kubectl exec -it api-postgres-00-64ql-0 -c database -- /bin/bash`
+
+backrest pod:
+
+`kubectl exec -it api-postgres-repo-host-0 -c pgbackrest -- /bin/bash`
+
+#### Downloading a log
+
+`kubectl cp -n NAMESPACE api-postgres-00-64ql-0:/pgdata/pg15/log/postgresql-Thu.log postgresql-Thu.log`
+
+#### get pgData location
+
+`echo $PGDATA`
+
+Will output `/pgdata/pg15`
+
+#### db config file location
+
+`/pgdata/pg15/postgresql.conf`
+
+Do not edit this file directly
+
+#### Log location
+
+Logs are located at `/pgdata/pg15/log`
+
+#### Reliability and the Write-Ahead Log location
+
+These are stored at `/pgdata/pg15_wal`
+
+WAL files record all changes to the database's data files before those changes are written to the actual data files. If your database is under heavy write load, the volume of WAL files can increase significantly.WAL is designed to ensure that the database can recover from crashes and maintain data integrity. It's also crucial for replication and point-in-time recovery. Before any changes (like INSERT, UPDATE, DELETE) are made to the actual data files on disk, they are first recorded in the WAL files. This ensures that in case of a crash, the database can replay these logs and reconstruct the state of the database up to the last committed transaction.
+
+Periodically, a checkpoint occurs where the current state of the database is written to the data files. Checkpoints help reduce recovery time by marking a known good point in the WAL stream where the database can start replaying logs during recovery.
+
+Each WAL file is ALWAYS 16mb in size.
+
+Archive Process: WAL archiving involves copying completed WAL files to a secondary location (disk, cloud storage, etc.) for safekeeping. This is handled by the archive_command configuration parameter, which specifies a shell command to run for each WAL file that needs to be archived.
+
+`max_wal_size` parameter in config determines the maximum amount of WAL data that can accumulate before a checkpoint is forced. Checkpoints are moments when PostgreSQL writes all the changes from WAL files to the actual data files. With a larger max_wal_size, checkpoints occur less frequently because PostgreSQL allows more WAL data to accumulate before triggering a checkpoint.
+`checkpoint_timeout` parameter specifies the maximum amount of time between automatic WAL checkpoints. Essentially, this setting controls how often PostgreSQL will force a checkpoint to occur, regardless of the amount of WAL activity
+`checkpoint_completion_target` parameter specifies the target of checkpoint completion, as a fraction of total time between checkpoints. The default is 0.9, which spreads the checkpoint across almost all of the available interval, providing fairly consistent I/O load while also leaving some time for checkpoint completion overhead. Reducing this parameter is not recommended because it causes the checkpoint to complete faster. This results in a higher rate of I/O during the checkpoint followed by a period of less I/O between the checkpoint completion and the next scheduled checkpoint
+
+#### Clean up WAL files manually
+
+`pg_archivecleanup -d /pgdata/pg15_wal 0000000300000009000000CD` where "0000000300000009000000CD" would the file name after which the files should be removed
+
+To expire from the archive pod (there needs to be space on the volume to perform this operation):
+
+`pgbackrest expire --stanza=db --repo1-retention-full=1`
+
+#### Get db size
+
+`psql`
+`\l` - get a list of dbs
+`SELECT pg_size_pretty( pg_database_size('api') );`
+
+### Husky pre-commit hook issues on windows with GitHub desktop
+
+If getting this type of error when commiting changes:
+
+```
+.husky/pre-commit: line 13: npx: command not found
+husky - pre-commit hook exited with code 127 (error)
+husky - command not found in PATH=/mingw64/libexec/git-core:/mingw64/bin:/usr/bin...:undefined
+``
+
+- Reinstall GitHub desktop
+- Check that system PATH variable contains `C:\Program Files\Git\bin` (path containing sh.exe) AND that it's first in the list
+```
+
+### Todo document
+
+- chron tasks
+- logging
+- github pipeline documentation
+- commonkit
+- backup process with github actions
+- verify developer.md deployment info
+- document the override for administrative profiles
+- package upgrades
+- monorepo, linting, tsconfig
+- tech stack
+- automatic reports
+- how to configure access to Kibana for specific users
+- the deployment process to openshift, including seeding hasn't been verified since the application was deployed initially

@@ -385,7 +385,7 @@ export const nextRouter = createBrowserRouter([
                         element: <UserListPage />,
                       },
                       {
-                        path: ':id',
+                        path: ':employeeId',
                         element: <UserDetailPage />,
                       },
                     ],

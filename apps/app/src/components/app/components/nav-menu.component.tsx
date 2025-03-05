@@ -23,6 +23,7 @@ import { SendSettingOutlined } from '../../icons/send-setting-outlined';
 import { UserGroupSettingOutlined } from '../../icons/user-group-setting-outlined';
 import { createMenuGroup, createMenuItem, createSubMenu } from '../utils/nav-menu.utils';
 import { userCanAccess } from '../utils/user-has-roles.util';
+import { ClassificationNewPositionLabel } from './classification-new-position-label.component';
 import { CreateButton } from './create-button.component';
 import './nav-menu.component.css';
 
@@ -31,6 +32,7 @@ export interface NavMenuProps {
 }
 
 export const NavMenu = ({ collapsed }: NavMenuProps) => {
+  // const createMenuItem = useCreateMenuItem();
   const auth = useTypedSelector((state) => state.authReducer);
   const location = useLocation();
   const params = useParams<Record<string, string>>();
@@ -228,7 +230,7 @@ export const NavMenu = ({ collapsed }: NavMenuProps) => {
                                 createMenuItem({
                                   key: '/requests/positions/manage',
                                   icon: <PositionRequestSettingOutlined aria-hidden />,
-                                  label: 'New position',
+                                  label: <ClassificationNewPositionLabel />,
                                 }),
                               ]
                             : []),
@@ -365,7 +367,7 @@ export const NavMenu = ({ collapsed }: NavMenuProps) => {
     >
       {/* Main Menu */}
       <Menu
-        aria-label="Main menu - use arrow keys to navigate"
+        aria-label="Main menu"
         rootClassName="jobstore-side-menu-popup"
         inlineIndent={16}
         mode="inline"
@@ -380,7 +382,7 @@ export const NavMenu = ({ collapsed }: NavMenuProps) => {
         <>
           <Divider />
           <Menu
-            aria-label="Help and Docs menu - use arrow keys to navigate"
+            aria-label="Help and Docs menu"
             inlineIndent={16}
             mode="inline"
             selectedKeys={selectedKeys}

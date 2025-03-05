@@ -1,7 +1,7 @@
 import { createObjectCsvWriter } from 'csv-writer';
 import dotenv from 'dotenv';
 import fs from 'fs';
-import moment from 'moment';
+import moment from 'moment-timezone';
 import nodemailer from 'nodemailer';
 import path from 'path';
 import { Client } from 'pg';
@@ -35,8 +35,11 @@ function loadRecipientConfig(): Array<{
     console.log(`Reading recipient file: ${email}`);
     const content = fs.readFileSync(path.join(recipientsDir, file), 'utf-8');
     const { reports, organizations } = JSON.parse(content);
-    console.log(`Reports for ${email}: ${reports.join(', ')}`);
-    console.log(`Organizations for ${email}: ${organizations.join(', ')}`);
+    console.log(`config for ${email}: ${content}`);
+    console.log(`Reports for ${email}: ${reports}`);
+    console.log(`Organizations for ${email}: ${organizations}`);
+    console.log(`Reports for ${email}: ${reports?.join(', ')}`);
+    console.log(`Organizations for ${email}: ${organizations?.join(', ')}`);
     recipients.push({ email, reports, organizations });
   }
   return recipients;
@@ -104,7 +107,7 @@ async function executeQueriesAndWriteCSVs(
       });
 
       // Ensure correct number of placeholders in query
-      const parameterPlaceholderCount = (queryText.match(/\$\d+/g) || []).length;
+      const parameterPlaceholderCount = Array.from(new Set(queryText.match(/\$\d+/g) || [])).length;
       if (parameters.length !== parameterPlaceholderCount) {
         throw new Error(
           `Mismatch between number of parameters (${parameters.length}) and placeholders (${parameterPlaceholderCount}) in query '${queryFile}'`,
@@ -180,7 +183,9 @@ async function sendEmails(
         from: emailFrom,
         to: toEmail,
         subject: `JobStore ${moment(startDate).format('MMMM')} Monthly Report`,
-        text: `Please find the attached report(s) for the period from ${startDate} to ${endDate}.`,
+        text: `Please find the attached report(s) for the period from ${startDate} to ${endDate}.
+              \n\nThese reports are filtered by the organizations you are associated with. If you would like to inquire about changing your access, you can reply to this email.
+              \nIf a report you normally see is missing, it may be because there was no data for that report during the period.`,
         attachments,
       };
 
@@ -232,8 +237,10 @@ async function main() {
       console.log(`Using provided start and end dates from environment variables.`);
     } else {
       // Calculate start and end dates for the previous month
-      startDate = moment().startOf('month').subtract(1, 'month').format('YYYY-MM-DD');
-      endDate = moment().startOf('month').format('YYYY-MM-DD');
+      const now = moment().tz('America/Vancouver'); // Set to your desired timezone
+      console.log(`today is: ${now.format('YYYY-MM-DD')}`);
+      endDate = now.startOf('month').format('YYYY-MM-DD');
+      startDate = now.startOf('month').subtract(1, 'month').format('YYYY-MM-DD');
       console.log(`No start/end dates provided. Using default values for previous month.`);
     }
 

@@ -46,6 +46,10 @@ jobs:
         env:
           HUSKY: 0
 
+      # Build common-kit before running tests
+      - name: Build common-kit
+        run: npm -w common-kit run build
+
       # - name: Save Node Modules Cache
       #   if: steps.cache-node-modules-restore.outputs.cache-hit != 'true'
       #   uses: actions/cache/save@v4

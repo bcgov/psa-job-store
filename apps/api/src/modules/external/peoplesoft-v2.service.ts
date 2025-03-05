@@ -173,6 +173,7 @@ export class PeoplesoftV2Service {
           }),
           retry(3),
           catchError((err) => {
+            console.error('COULD NOT GET PEOPLESOFT PROFILE');
             throw new Error(err);
           }),
         ),

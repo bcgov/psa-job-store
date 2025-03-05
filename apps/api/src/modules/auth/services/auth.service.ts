@@ -3,6 +3,7 @@ import { ConfigService } from '@nestjs/config';
 import { updatedDiff } from 'deep-object-diff';
 import { User } from '../../../@generated/prisma-nestjs-graphql';
 import { guidToUuid } from '../../../utils/guid-to-uuid.util';
+import { globalLogger } from '../../../utils/logging/logger.factory';
 import { CrmService } from '../../external/crm.service';
 import { PeoplesoftV2Service } from '../../external/peoplesoft-v2.service';
 import { KeycloakService } from '../../keycloak/keycloak.service';
@@ -145,9 +146,13 @@ export class AuthService {
           Object.keys(metadataUpdates).includes('department_id')
         ) {
           sessionUser.metadata.org_chart.department_ids = Array.from(
-            new Set(sessionUser.metadata.org_chart.department_ids).add(metadataUpdates.deparment_id),
+            new Set(sessionUser.metadata.org_chart.department_ids).add(metadataUpdates.department_id),
           );
         }
+
+        // ensure we update metadata.peoplesoft with the latest values as well
+        // without this if user's default department changes, the org chart will continue to select old department
+        sessionUser.metadata.peoplesoft = peoplesoftMetadata;
 
         // Implement once 'strategic-hr' role is conceptualized
         //
@@ -180,7 +185,7 @@ export class AuthService {
         // ) {
         //   if (sessionUser.roles.includes('hiring-manager')) {
         //     sessionUser.metadata.org_chart.department_ids = Array.from(
-        //       new Set(sessionUser.metadata.org_chart.department_ids).add(metadataUpdates.deparment_id),
+        //       new Set(sessionUser.metadata.org_chart.department_ids).add(metadataUpdates.department_id),
         //     );
         //   } else {
         //     sessionUser.metadata.org_chart.department_ids = [metadataUpdates.department_id];
@@ -207,6 +212,68 @@ export class AuthService {
         });
       }
     } else {
+      try {
+        if (existingUser) {
+          const existingDepartmentIds = (existingUser as User).metadata.org_chart.department_ids ?? [];
+
+          if (JSON.stringify(existingDepartmentIds) !== JSON.stringify(metadata.org_chart.department_ids)) {
+            globalLogger.info(
+              {
+                log_data: {
+                  userId: id,
+                  source: 'validateIDIRUserinfo',
+                  oldDepartmentIds: existingDepartmentIds,
+                  newDepartmentIds: metadata.org_chart.department_ids,
+                },
+              },
+              'User department access changed',
+            );
+          }
+        }
+      } catch (error) {
+        globalLogger.error(
+          {
+            log_data: {
+              userId: id,
+              error: error instanceof Error ? error.message : String(error),
+            },
+          },
+          'Error during validateIDIRUserinfo',
+        );
+      }
+
+      // log role changes
+
+      try {
+        if (existingUser) {
+          const existingRoles = (existingUser as User).roles ?? [];
+
+          if (JSON.stringify(existingRoles) !== JSON.stringify(roles)) {
+            globalLogger.info(
+              {
+                log_data: {
+                  userId: id,
+                  source: 'validateIDIRUserinfo',
+                  oldRoles: existingRoles,
+                  newRoles: roles,
+                },
+              },
+              'User roles changed',
+            );
+          }
+        }
+      } catch (error) {
+        globalLogger.error(
+          {
+            log_data: {
+              userId: id,
+              error: error instanceof Error ? error.message : String(error),
+            },
+          },
+          'Error during validateIDIRUserinfo 2',
+        );
+      }
+
       await this.prisma.user.upsert({
         where: { id },
         create: {

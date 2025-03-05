@@ -17,5 +17,5 @@ FROM
     "user" u
 WHERE
     array_length(u.roles, 1) > 0 AND
-    u.created_at >= $1 AND
-    u.created_at < $2;
+    (u.created_at AT TIME ZONE 'UTC' AT TIME ZONE 'America/Los_Angeles') >= $1 AND
+    (u.created_at AT TIME ZONE 'UTC' AT TIME ZONE 'America/Los_Angeles') < $2;

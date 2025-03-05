@@ -68,7 +68,7 @@ export const DynamicOrgChart = ({
 
   // refetch data on department id change
   useEffect(() => {
-    console.log('useEffect departmentId: ', departmentId);
+    console.log('== DEPARTMENT CHANGE useEffect departmentId: ', departmentId);
     setSelectedInitial(false);
     setInitialized(false);
     setIsDirty(false);
@@ -104,7 +104,7 @@ export const DynamicOrgChart = ({
           opacity: 1,
         };
       });
-      // console.log('setNodes renderDefault: ', nodes);
+      console.log('setNodes renderDefault: ', nodes);
       setEdges(edges);
       setNodes(nodes);
     },
@@ -196,7 +196,7 @@ export const DynamicOrgChart = ({
 
   // this function handles selection of an item in search results
   const handleSelectResult = useCallback(
-    (id: string) => {
+    (id: string, focus: boolean = true) => {
       console.log('== handleSelectResult: ', id);
       setSelectedNodeIds([id]);
       renderSelectedNodes([id]);
@@ -211,7 +211,7 @@ export const DynamicOrgChart = ({
           const nodeElement = document.getElementById(`node-${id}`);
           console.log('handleSelectResult nodeElement focus: ', nodeElement);
           if (nodeElement) {
-            nodeElement.focus();
+            focus && nodeElement.focus();
           } else {
             console.log('handleSelectResult nodeElement not found: ', id);
           }
@@ -227,6 +227,7 @@ export const DynamicOrgChart = ({
   useEffect(() => {
     if (initialized && targetId != null && !selectedInitial && nodes.length > 0 && !orgChartDataIsFetching) {
       console.log('== setting initial, nodes: ', targetId, nodes);
+      console.log('initialized: ', initialized);
       // check that this node is present in the nodes (may not be if we're on different department)
       const targetNode = nodes.find((node) => node.id === targetId);
       setSelectedInitial(true);
@@ -235,9 +236,8 @@ export const DynamicOrgChart = ({
         console.log('setting initial, targetNode not found');
         return;
       }
-      setTimeout(() => {
-        handleSelectResult(targetId);
-      }, 0);
+
+      handleSelectResult(targetId, false);
       setSelectedInitial(true);
     }
   }, [initialized, targetId, handleSelectResult, selectedInitial, nodes, orgChartDataIsFetching]);
@@ -274,13 +274,13 @@ export const DynamicOrgChart = ({
         fitView({ duration: 800, nodes: searchResultNodes });
       }
     } else {
-      if (isDirty === false) {
+      if (isDirty === false && !initialized && !orgChartDataIsFetching) {
         console.log('fitView C: ', nodes);
         fitView({ duration: 0, nodes });
         setInitialized(true);
       }
     }
-  }, [nodes, fitView, isDirty]);
+  }, [nodes, fitView, isDirty, initialized, orgChartDataIsFetching]);
 
   // hook for when user selects a node
   useOnSelectionChange({
@@ -399,7 +399,7 @@ export const DynamicOrgChart = ({
       // eslint-disable-next-line @typescript-eslint/no-explicit-any
       setSearchResultCount(results.length);
     } else {
-      console.log('onSearch, no search term, resetting nodes');
+      console.log('onSearch, no search term, resetting nodes setNodes');
       setSearchResults([]);
       setSearchResultCount(0);
       setEdges(edges);
@@ -444,9 +444,10 @@ export const DynamicOrgChart = ({
     [elements.nodes],
   );
 
-  if (orgChartDataIsFetching || !initialized)
-    console.log('not rendering yet, orgChartDataIsFetching: ', orgChartDataIsFetching, 'initialized: ', initialized);
-  else console.log('rendering');
+  if (orgChartDataIsFetching) {
+    console.log('not rendering yet, orgChartDataIsFetching: ', orgChartDataIsFetching);
+    // return;
+  }
 
   return (
     <div style={{ display: 'flex', flexDirection: 'column', height: '100%', width: '100%' }} data-testid="org-chart">
@@ -479,7 +480,7 @@ export const DynamicOrgChart = ({
         </Col>
       </Row>
 
-      {orgChartDataIsFetching || !initialized ? (
+      {orgChartDataIsFetching ? (
         <div
           style={{ display: 'flex', justifyContent: 'center', alignItems: 'center', height: '100%', width: '100%' }}
           data-testid="org-chart-loading"

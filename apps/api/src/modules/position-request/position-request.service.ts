@@ -21,6 +21,7 @@ import {
   UuidFilter,
 } from '../../@generated/prisma-nestjs-graphql';
 import { AlexandriaError, AlexandriaErrorClass } from '../../utils/alexandria-error';
+import { globalLogger } from '../../utils/logging/logger.factory';
 import { ClassificationService } from '../external/classification.service';
 import { CrmService } from '../external/crm.service';
 import {
@@ -395,6 +396,54 @@ export class PositionRequestApiService {
         this.logger.warn(
           `Failed to map to an internal status for position request id ${id}: crm_id: ${crm_id}, crm_lookup_name: ${crm_lookup_name}, crm status:  ${crm_status}, crm category: ${crm_category}, ps status: ${positionObj['A.POSN_STATUS']}, positionNumber: ${positionNumber}`,
         );
+
+        try {
+          await this.prisma.positionRequest.update({
+            where: { id: positionRequest.id },
+            data: {
+              ...(positionRequest.unknownStateSince === null && {
+                unknownStateSince: dayjs().toDate(),
+              }),
+              unknownStateMetadata: {
+                crm_id,
+                crm_lookup_name,
+                crm_status,
+                crm_category,
+                ps_status: positionObj['A.POSN_STATUS'],
+                ps_effective_status: positionObj['A.EFF_STATUS'],
+              },
+            },
+          });
+
+          globalLogger.error(
+            {
+              log_data: {
+                id: positionRequest.id,
+                type: 'ps_status_change',
+                source: 'manual',
+                from_status: positionRequest.status,
+                to_status: incomingPositionRequestStatus,
+                crm_id: crm_id,
+                crm_lookup_name: crm_lookup_name,
+                crm_status: crm_status,
+                crm_category: crm_category,
+                ps_status: positionObj['A.POSN_STATUS'],
+                ps_effective_status: positionObj['A.EFF_STATUS'],
+              },
+            },
+            'Failed to map to an internal status',
+          );
+        } catch (error) {
+          globalLogger.error(
+            {
+              log_data: {
+                error: error instanceof Error ? error.message : String(error),
+              },
+            },
+            'Error during submitPositionRequest_afterCreatePosition',
+          );
+        }
+
         // incomingPositionRequestStatus = 'DRAFT';
         throw AlexandriaError('Unexpected error occured while creating position request.');
       }
@@ -403,11 +452,44 @@ export class PositionRequestApiService {
       // if status is completed, update approved_at date
       const status = incomingPositionRequestStatus as PositionRequestStatus;
       const approved_at = status === 'COMPLETED' ? dayjs().toDate() : null;
+
+      try {
+        globalLogger.info(
+          {
+            log_data: {
+              id: positionRequest.id,
+              type: 'ps_status_change',
+              source: 'manual',
+              from_status: positionRequest.status,
+              to_status: incomingPositionRequestStatus,
+              crm_id: crm_id,
+              crm_lookup_name: crm_lookup_name,
+              crm_status: crm_status,
+              crm_category: crm_category,
+              ps_status: positionObj['A.POSN_STATUS'],
+              ps_effective_status: positionObj['A.EFF_STATUS'],
+            },
+          },
+          'Position request status changed',
+        );
+      } catch (error) {
+        globalLogger.error(
+          {
+            log_data: {
+              error: error instanceof Error ? error.message : String(error),
+            },
+          },
+          'Error during submitPositionRequest_afterCreatePosition',
+        );
+      }
+
       return await this.prisma.positionRequest.update({
         where: { id },
         data: {
           status: status,
           ...(approved_at === null ? {} : { approved_at }),
+          unknownStateSince: null, // Reset the unknown state in case it was previously set, since now the status is known
+          unknownStateMetadata: Prisma.DbNull,
         },
       });
     } catch (error) {
@@ -861,13 +943,16 @@ export class PositionRequestApiService {
     return users;
   }
 
-  async getPositionRequestClassifications() {
+  async getPositionRequestClassifications(requestingFeature?: RequestingFeature | null) {
     const classifications = await this.prisma.classification.findMany({
       where: {
         PositionRequest: {
-          some: {
-            status: 'COMPLETED',
-          },
+          some:
+            requestingFeature == 'totalCompApprovedRequests'
+              ? {
+                  status: 'COMPLETED',
+                }
+              : {},
         },
       },
       select: {
@@ -877,6 +962,9 @@ export class PositionRequestApiService {
         code: true,
       },
       distinct: ['id', 'employee_group_id', 'peoplesoft_id'],
+      orderBy: {
+        code: 'asc',
+      },
     });
 
     return classifications;
@@ -1584,11 +1672,6 @@ export class PositionRequestApiService {
       const data: IncidentCreateUpdateInput = {
         subject: `Job Store - Position Number Request - ${classification.code}`,
         primaryContact: { id: contactId },
-        assignedTo: {
-          staffGroup: {
-            lookupName: 'HRSC - Classification',
-          },
-        },
         statusWithType: {
           status: {
             // if user is re-submitting, set crm status to updated, always
@@ -1601,12 +1684,24 @@ export class PositionRequestApiService {
                   : IncidentStatus.Solved,
           },
         },
-        // Need to determine usage of this block
+        // If user is re-submitting, then do not reset the assignedTo and severity
+        // As these may have been changed by CS user and we don't want to revert them back
+        ...(positionRequest.status !== PositionRequestStatus.ACTION_REQUIRED && {
+          assignedTo: {
+            staffGroup: {
+              lookupName: 'HRSC - Classification',
+            },
+          },
+          severity: {
+            lookupName: '4 - Routine',
+          },
+        }),
+        // Even if re-submitting, we expect the category to always be "New Position"
+        // The only time it would be in different category ("Classification"/"Included/Schedule A"/"Management Role Recommendation")
+        // Is if it's in review or completed
+        // E.g. we don't allow back-and-forth if PR is in a different category (would cause unknown state)
         category: {
           id: 1930,
-        },
-        severity: {
-          lookupName: '4 - Routine',
         },
         threads: [
           {
@@ -1833,11 +1928,6 @@ export class PositionRequestApiService {
     return [position, positionRequestNeedsReview.result];
   }
 
-  //deprecated
-  async updatePositionRequestStatus(id: number, status: number) {
-    return await this.crmService.updateIncidentStatus(id, status);
-  }
-
   async getSuggestedManagers(positionNumber: string, positionRequestId: number): Promise<SuggestedManager[]> {
     // console.log('getSuggestedManagers: ', positionNumber, positionRequestId);
 
@@ -1909,5 +1999,26 @@ export class PositionRequestApiService {
     }
 
     return managers;
+  }
+
+  async getStaleUnknownPositionRequests() {
+    const oneDayAgo = dayjs().subtract(1, 'day').toDate();
+
+    return this.prisma.positionRequest.findMany({
+      where: {
+        unknownStateSince: {
+          not: null,
+          lte: oneDayAgo,
+        },
+      },
+      select: {
+        id: true,
+        title: true,
+        unknownStateMetadata: true,
+      },
+      orderBy: {
+        unknownStateSince: 'asc',
+      },
+    });
   }
 }

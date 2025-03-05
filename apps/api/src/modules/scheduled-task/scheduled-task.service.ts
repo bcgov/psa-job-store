@@ -1,10 +1,11 @@
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Inject, Injectable, Logger } from '@nestjs/common';
 import { Cron } from '@nestjs/schedule';
-import { PositionRequestStatus } from '@prisma/client';
+import { PositionRequestStatus, Prisma } from '@prisma/client';
 import { Cache } from 'cache-manager';
 import { getALStatus } from 'common-kit';
 import dayjs from 'dayjs';
+import { globalLogger } from '../../utils/logging/logger.factory';
 import { CrmService } from '../external/crm.service';
 import { PeoplesoftService } from '../external/peoplesoft.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -163,9 +164,29 @@ export class ScheduledTaskService {
       await this.updateMetadata(task, config.frequency);
       await execution();
       this.logger.log(`Completed ${task} @ ${new Date()}`);
+      globalLogger.info(
+        {
+          log_data: {
+            taskname: task,
+            result: 'success',
+          },
+        },
+        'Completed scheduled task',
+      );
     } catch (error) {
       const errorMessage = error instanceof Error ? error.message : String(error);
       this.logger.error(`Error in ${task}: ${errorMessage}`);
+
+      globalLogger.info(
+        {
+          log_data: {
+            taskname: task,
+            result: 'fail',
+            error: errorMessage,
+          },
+        },
+        'Completed scheduled task',
+      );
     } finally {
       await this.releaseLock(task);
     }
@@ -215,6 +236,55 @@ export class ScheduledTaskService {
                 this.logger.warn(
                   `Failed to map to an internal status for crm_id: ${crm_id}, crm_lookup_name: ${crm_lookup_name}, crm status:  ${crm_status}, crm category: ${crm_category}, ps status: ${positionObj['A.POSN_STATUS']}`,
                 );
+
+                try {
+                  // update the pr record and set unknownStateSince to current time
+                  await this.prisma.positionRequest.update({
+                    where: { id: positionRequest.id },
+                    data: {
+                      ...(positionRequest.unknownStateSince === null && {
+                        unknownStateSince: dayjs().toDate(),
+                      }),
+                      unknownStateMetadata: {
+                        crm_id,
+                        crm_lookup_name,
+                        crm_status,
+                        crm_category,
+                        ps_status: positionObj['A.POSN_STATUS'],
+                        ps_effective_status: positionObj['A.EFF_STATUS'],
+                      },
+                    },
+                  });
+
+                  globalLogger.error(
+                    {
+                      log_data: {
+                        id: positionRequest.id,
+                        type: 'ps_status_change',
+                        source: 'automatic',
+                        from_status: positionRequest.status,
+                        to_status: incomingPositionRequestStatus,
+                        crm_id: crm_id,
+                        crm_lookup_name: crm_lookup_name,
+                        crm_status: crm_status,
+                        crm_category: crm_category,
+                        ps_status: positionObj['A.POSN_STATUS'],
+                        ps_effective_status: positionObj['A.EFF_STATUS'],
+                      },
+                    },
+                    'Failed to map to an internal status',
+                  );
+                } catch (error) {
+                  globalLogger.error(
+                    {
+                      log_data: {
+                        error: error instanceof Error ? error.message : String(error),
+                      },
+                    },
+                    'Error during syncPositionStatuses',
+                  );
+                }
+
                 continue;
               }
 
@@ -237,6 +307,36 @@ export class ScheduledTaskService {
                     ps status: ${positionObj['A.POSN_STATUS']}, ps effective status: ${positionObj['A.EFF_STATUS']}`,
                 );
 
+                try {
+                  globalLogger.info(
+                    {
+                      log_data: {
+                        id: positionRequest.id,
+                        type: 'ps_status_change',
+                        source: 'automatic',
+                        from_status: positionRequest.status,
+                        to_status: incomingPositionRequestStatus,
+                        crm_id: crm_id,
+                        crm_lookup_name: crm_lookup_name,
+                        crm_status: crm_status,
+                        crm_category: crm_category,
+                        ps_status: positionObj['A.POSN_STATUS'],
+                        ps_effective_status: positionObj['A.EFF_STATUS'],
+                      },
+                    },
+                    'Position request status changed',
+                  );
+                } catch (error) {
+                  globalLogger.error(
+                    {
+                      log_data: {
+                        error: error instanceof Error ? error.message : String(error),
+                      },
+                    },
+                    'Error during syncPositionStatuses',
+                  );
+                }
+
                 const status = incomingPositionRequestStatus as PositionRequestStatus;
                 // if status is completed, update approved_at date
                 const approved_at = status === 'COMPLETED' ? dayjs().toDate() : null;
@@ -250,6 +350,8 @@ export class ScheduledTaskService {
                       ? {}
                       : { approved_at, time_to_approve: dayjs().diff(positionRequest.submitted_at, 'second') }),
                     ...(reviewed === null ? {} : { approval_type: 'REVIEWED' }),
+                    unknownStateSince: null, // Reset the unknown state in case it was previously set, since now the status is known
+                    unknownStateMetadata: Prisma.DbNull,
                   },
                 });
               }
