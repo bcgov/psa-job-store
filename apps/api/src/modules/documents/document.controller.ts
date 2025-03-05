@@ -13,6 +13,7 @@ import {
   UploadedFile,
   UseInterceptors,
 } from '@nestjs/common';
+import { randomStringGenerator } from '@nestjs/common/utils/random-string-generator.util';
 import { FileInterceptor } from '@nestjs/platform-express';
 import { Response } from 'express';
 import * as fs from 'fs';
@@ -60,7 +61,7 @@ export class DocumentController {
       file_extension: ext,
       title: body.title,
       description: body.description ?? null,
-      url: body.url, // User-defined permalink
+      url: body.url === '' ? randomStringGenerator() : body.url, // User-defined permalink
       category: body.category,
       jobFamilies: {
         create: body.job_family_ids.map((id) => ({ jobFamilyId: id })),
@@ -132,7 +133,7 @@ export class DocumentController {
     const updatedDoc = await this.documentService.updateDocument(id, {
       title: body.title,
       description: body.description ?? null,
-      url: body.url, // User-defined permalink
+      url: body.url === '' ? randomStringGenerator() : body.url, // User-defined permalink
       category: body.category,
       jobFamilies: {
         deleteMany: {},

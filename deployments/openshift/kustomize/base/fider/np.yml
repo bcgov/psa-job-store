@@ -1,0 +1,12 @@
+kind: NetworkPolicy
+apiVersion: networking.k8s.io/v1
+metadata:
+  name: allow-all-ingress-fider
+spec:
+  podSelector:
+    matchLabels:
+      app: fider
+  ingress:
+    - {}
+  policyTypes:
+    - Ingress

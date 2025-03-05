@@ -26,9 +26,13 @@ export const HelpButton = () => {
           Help desk
         </a>
       </Menu.Item>
+      <Menu.Item key="feedback" icon={<QuestionCircleOutlined aria-hidden />}>
+        <a target="_blank" rel="noopener noreferrer" href="https://jobstore-feedback.apps.silver.devops.gov.bc.ca/">
+          Share feedback
+        </a>
+      </Menu.Item>
     </Menu>
   );
-
   return (
     <AccessiblePopoverMenu
       triggerButton={

@@ -17,7 +17,7 @@ spec:
         spec:
             containers:
                 - name: nginx-auth-rp
-                  image: artifacts.developer.gov.bc.ca/af3c-gen-docker-local/nginx-auth-rp:develop-latest
+                  image: artifacts.developer.gov.bc.ca/af3c-gen-docker-local/nginx-auth-rp:v1
                   imagePullPolicy: Always
                   resources:
                       requests:

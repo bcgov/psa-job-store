@@ -7,7 +7,22 @@ import {
   MailOutlined,
   WarningFilled,
 } from '@ant-design/icons';
-import { Alert, Button, Card, Col, Form, Input, Modal, Result, Row, Typography, message, notification } from 'antd';
+import {
+  Alert,
+  Button,
+  Card,
+  Col,
+  Form,
+  Input,
+  Modal,
+  Result,
+  Row,
+  Space,
+  Tooltip,
+  Typography,
+  message,
+  notification,
+} from 'antd';
 import Paragraph from 'antd/es/typography/Paragraph';
 import Title from 'antd/es/typography/Title';
 import { Divider } from 'antd/lib';
@@ -15,7 +30,9 @@ import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useReactFlow } from 'reactflow';
 import LoadingSpinnerWithMessage from '../../components/app/common/components/loading.component';
+import { MissingCRMAccountAlert } from '../../components/app/missing-crm-account-alert.component';
 import ContentWrapper from '../../components/content-wrapper.component';
+import { useTypedSelector } from '../../redux/redux.hooks';
 import { useLazyGetJobProfileQuery } from '../../redux/services/graphql-api/job-profile.api';
 import {
   GetPositionRequestResponseContent,
@@ -65,7 +82,7 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
   // mode = 'readyToCreatePositionNumber';
 
   // use a state for "mode"
-
+  const auth = useTypedSelector((state) => state.authReducer);
   const [mode, setMode] = useState('');
   const [verificationNeededReasons, setVerificationNeededReasons] = useState<string[]>([]);
   // todo: move this to a context
@@ -81,6 +98,11 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
   //   record_id: positionRequestId ?? -1,
   //   record_type: 'PositionRequest',
   // });
+
+  const isCrmAccountNull =
+    auth.isAuthenticated &&
+    (auth.user?.roles ?? []).includes('hiring-manager') &&
+    (auth.user?.metadata?.crm?.contact_id || null) == null;
 
   useEffect(() => {
     triggerGetJobProfile({
@@ -401,13 +423,17 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
             <Button onClick={back} key="back" data-testid="back-button">
               Back
             </Button>,
-            <>
+            <Tooltip
+              open={isCrmAccountNull}
+              title={isCrmAccountNull ? 'Please resolve the above error by contacting the 7-7000 Service Desk' : null}
+            >
               {mode === 'readyToCreatePositionNumber' && (
                 <Button
                   onClick={showModal}
                   key="back"
                   type="primary"
                   loading={submitPositionRequestIsLoading || isLoading}
+                  disabled={isCrmAccountNull}
                 >
                   Generate position number
                 </Button>
@@ -418,11 +444,12 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
                   type="primary"
                   onClick={doSubmit}
                   loading={submitPositionRequestIsLoading || isLoading}
+                  disabled={isCrmAccountNull}
                 >
                   Submit for verification
                 </Button>
               )}
-            </>,
+            </Tooltip>,
           ]}
         >
           <WizardSteps
@@ -467,14 +494,18 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
                             irreversable).
                           </div>
                         </Form.Item>
-                        <Button
-                          type="primary"
-                          onClick={showModal}
-                          loading={submitPositionRequestIsLoading || isLoading}
-                          data-testid="generate-position-button"
-                        >
-                          Generate position number
-                        </Button>
+                        <Space direction="vertical" size="middle">
+                          <MissingCRMAccountAlert />
+                          <Button
+                            type="primary"
+                            onClick={showModal}
+                            loading={submitPositionRequestIsLoading || isLoading}
+                            data-testid="generate-position-button"
+                            disabled={isCrmAccountNull}
+                          >
+                            Generate position number
+                          </Button>
+                        </Space>
                       </Form>
                     </Card>
 
@@ -902,7 +933,7 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
                   <b>By clicking “Generate position number” I affirm that:</b>
                   <ul>
                     <li>
-                      I confirm this Statement of Job Responsibilities accurately reflects the actual work to be
+                      I confirm that this Statement of Job Responsibilities accurately reflects the actual work to be
                       performed of the position(s) as outlined in{' '}
                       <a
                         target="_blank"
@@ -913,15 +944,16 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
                       , and
                     </li>
                     <li>
-                      I confirm the accountabilities are not similar to the supervisor, peer, or management positions
-                      within the work unit, and
+                      I confirm that the accountabilities are distinct from the supervisory or management positions
+                      within the work unit, and, where the role is considered specialized or non-generic, I confirm that
+                      work to be performed is clearly delineated among peers, and
                     </li>
                     <li>
-                      As the excluded manager or delegate, I confirm the job role, accountabilities, and scope of
-                      responsibility are true and accurate, and in establishing this position (s), I confirm the content
-                      I assume all risks related to this decision.{' '}
+                      I confirm the job role, accountabilities, and scope of responsibility are true and accurate, and
+                      in establishing the position(s) as the excluded manager or delegate, I assume all risks related to
+                      this decision, and
                     </li>
-                    <li>I will respond to audits in a timely manner.</li>
+                    <li>I will respond to Job Profile audits in a timely manner, and</li>
                     <li>
                       I will abide by the Public Service Act and all Human Resources policies for hiring decisions
                       related to this position.
