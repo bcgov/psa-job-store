@@ -2,9 +2,9 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { useEffect } from 'react';
 import { useNavigate, useParams, useSearchParams } from 'react-router-dom';
-import LoadingComponent from '../../components/app/common/components/loading.component';
 import '../../components/app/common/css/custom-form.css';
 import '../../components/app/common/css/filtered-table.page.css';
+import LoadingComponent from '../../components/shared/loading-component/loading.component';
 import { useLazyGetJobProfileQuery } from '../../redux/services/graphql-api/job-profile.api';
 import NotFoundComponent from '../not-found/404';
 import { TotalCompCreateProfileComponent } from './components/total-comp-create-profile.component';

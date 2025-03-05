@@ -1,5 +1,5 @@
 import { Button, Card, Divider, Form, Tooltip } from 'antd';
-import PositionProfile from '../../../components/app/common/components/positionProfile';
+import PositionProfile from '../../../components/shared/position-profile/positionProfile';
 import { GetJobProfileResponse, JobProfileModel } from '../../../redux/services/graphql-api/job-profile-types';
 import { GetPositionRequestResponseContent } from '../../../redux/services/graphql-api/position-request.api';
 

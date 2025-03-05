@@ -2,7 +2,7 @@
 import { CopyOutlined, ExportOutlined } from '@ant-design/icons';
 import { Card, Col, Descriptions, Row, Typography, message } from 'antd';
 import { Link } from 'react-router-dom';
-import PositionProfile from '../../../components/app/common/components/positionProfile';
+import PositionProfile from '../../../components/shared/position-profile/positionProfile';
 import { useTypedSelector } from '../../../redux/redux.hooks';
 import { useGetJobProfileMetaQuery } from '../../../redux/services/graphql-api/job-profile.api';
 import {
@@ -180,29 +180,6 @@ export const ServiceRequestDetails: React.FC<ServiceRequestDetailsProps> = ({ po
           positionProfile={positionRequestData?.positionRequest?.reports_to_position}
           orgChartData={positionRequestData?.positionRequest?.orgchart_json}
         ></PositionProfile>
-
-        // <div>
-        //   {reportsToLoading && <LoadingComponent mode="small" />}
-        //   {firstActivePosition2 && reportsToInfo?.positionProfile && reportsToInfo?.positionProfile?.length > 0 && (
-        //     <div>
-        //       <p style={{ margin: 0 }}>{`${firstActivePosition2.employeeName}, ${firstActivePosition2.ministry}`}</p>
-        //       <Typography.Paragraph type="secondary">
-        //         {`${firstActivePosition2.positionDescription}, ${firstActivePosition2.classification}`}
-        //         <br></br>
-        //         {`Position No.: ${firstActivePosition2.positionNumber}`}
-        //         {additionalPositions2 > 0 && ` +${additionalPositions2}`}
-        //       </Typography.Paragraph>
-        //     </div>
-        //   )}
-
-        //   {!firstActivePosition2 && reportsToInfo?.positionProfile && reportsToInfo?.positionProfile?.length == 0 && (
-        //     <div>
-        //       <p style={{ margin: 0 }}>
-        //         Vacant (Position No.: {positionRequestData?.positionRequest?.reports_to_position_id})
-        //       </p>
-        //     </div>
-        //   )}
-        // </div>
       ),
       span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24 },
     },
@@ -215,20 +192,6 @@ export const ServiceRequestDetails: React.FC<ServiceRequestDetailsProps> = ({ po
           positionProfile={positionRequestData?.positionRequest?.excluded_manager_position}
           orgChartData={positionRequestData?.positionRequest?.orgchart_json}
         ></PositionProfile>
-        // <div>
-        //   {excludedLoading && <LoadingComponent mode="small" />}
-        //   {firstActivePosition && (
-        //     <div>
-        //       <p style={{ margin: 0 }}>{`${firstActivePosition.employeeName}, ${firstActivePosition.ministry}`}</p>
-        //       <Typography.Paragraph type="secondary">
-        //         {`${firstActivePosition.positionDescription}, ${firstActivePosition.classification}`}
-        //         <br></br>
-        //         {`Position No.: ${firstActivePosition.positionNumber}`}
-        //         {additionalPositions > 0 && ` +${additionalPositions}`}
-        //       </Typography.Paragraph>
-        //     </div>
-        //   )}
-        // </div>
       ),
       span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24 },
     },

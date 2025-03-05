@@ -12,10 +12,10 @@ import { useFieldArray, useForm } from 'react-hook-form';
 
 import TextArea from 'antd/es/input/TextArea';
 import DOMPurify from 'dompurify';
-import PositionProfile from '../../../components/app/common/components/positionProfile';
 import '../../../components/app/common/css/custom-descriptions.css';
 import '../../../components/app/common/css/custom-form.css';
 import LoadingComponent from '../../../components/shared/loading-component/loading.component';
+import PositionProfile from '../../../components/shared/position-profile/positionProfile';
 import {
   AccountabilitiesModel,
   JobProfileModel,

@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { useEffect, useMemo } from 'react';
 import { useNavigate } from 'react-router-dom';
-import PositionProfile from '../../../components/app/common/components/positionProfile';
 import { PositionProvider } from '../../../components/app/common/contexts/position.context';
 import { PageHeader } from '../../../components/app/page-header.component';
 import ContentWrapper from '../../../components/content-wrapper.component';
+import PositionProfile from '../../../components/shared/position-profile/positionProfile';
 import { useTypedSelector } from '../../../redux/redux.hooks';
 import { getUserRoles } from '../../../utils/get-user-roles.util';
 import { ClassificationTasksPage } from '../../classification-tasks/classification-tasks.page';

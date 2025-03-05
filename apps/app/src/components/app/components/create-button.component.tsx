@@ -5,7 +5,7 @@ import { useMemo } from 'react';
 import { Link, NavLink } from 'react-router-dom';
 import { useTypedSelector } from '../../../redux/redux.hooks';
 import { PositionRequestOutlined } from '../../icons/position-request-outlined';
-import AccessiblePopoverMenu from '../common/components/accessible-popover-menu';
+import AccessiblePopoverMenu from '../../shared/accessible-popover-menu/accessible-popover-menu';
 import { createMenuItem } from '../utils/nav-menu.utils';
 import { userCanAccess } from '../utils/user-has-roles.util';
 export type CreateButtonProps = { collapsed: boolean };
