@@ -8,7 +8,7 @@ The `PSA Job Store` project consists of two main applications and several suppor
 - Backend API service (api)
 - Database (PostgreSQL via Crunchy operator)
 - Elasticsearch for search functionality
-- Kibana for data visualization
+- Kibana for viewing the logs
 - Nginx reverse proxy for Kibana access authentication
 - Log rotation service
 - Report mailer service
@@ -456,6 +456,34 @@ There is a cron job (secrets-backup) that backs up the OpenShift secrets object 
 
 The PVC is mounted to the sidecar under /backups for easy access. If the secrets ever need to be restored, you can fetch
 from here, and decode the base64 values.
+
+## Kibana Service
+
+### Overview
+
+Kibana is an open-source data visualization and exploration tool used for log and time-series analytics, application monitoring, and operational intelligence use cases. In the PSA Job Store project, Kibana is integrated with Elasticsearch to provide logging, monitoring, and debugging capabilities.
+
+### Key Features
+
+- **Log Visualization**: View and analyze application logs in real-time
+- **Search and Filter**: Quickly search through logs using Elasticsearch's query language
+- **Dashboard Creation**: Build custom dashboards for monitoring application health and performance
+- **Error Analysis**: Identify and troubleshoot errors and exceptions
+
+### Using Kibana
+
+#### Viewing Application Logs
+
+1. Navigate to **Discover** in the Kibana sidebar
+2. Select the appropriate index pattern (typically `alexandria-api-log` and `alexandria-app-log`)
+3. Use the time picker to select the relevant time range
+4. Search for specific log entries using the search bar (e.g., `error`, `position-request`, etc.)
+
+There also a number of presets that have been saved. To open these, open the discover window and then select `Open`. You will see options like `API error log`, `App error log` etc.
+
+### Kibana in Production
+
+In production environments, Kibana is deployed as part of the Elasticsearch stack in OpenShift. Access is restricted to users with `super-admin` role. To find the Kibana URL, go to OpenShift -> Networking -> Routes
 
 ## Additional Notes
 

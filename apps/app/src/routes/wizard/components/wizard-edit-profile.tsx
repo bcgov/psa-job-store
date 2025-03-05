@@ -12,10 +12,10 @@ import { useFieldArray, useForm } from 'react-hook-form';
 
 import TextArea from 'antd/es/input/TextArea';
 import DOMPurify from 'dompurify';
-import LoadingSpinnerWithMessage from '../../../components/app/common/components/loading.component';
 import PositionProfile from '../../../components/app/common/components/positionProfile';
 import '../../../components/app/common/css/custom-descriptions.css';
 import '../../../components/app/common/css/custom-form.css';
+import LoadingComponent from '../../../components/shared/loading-component/loading.component';
 import {
   AccountabilitiesModel,
   JobProfileModel,
@@ -738,7 +738,7 @@ const WizardEditProfile = forwardRef(
     const { positionRequestData } = useWizardContext();
 
     if (isLoading || !resetComplete) {
-      return <LoadingSpinnerWithMessage />;
+      return <LoadingComponent />;
     }
 
     const titleStyle = {

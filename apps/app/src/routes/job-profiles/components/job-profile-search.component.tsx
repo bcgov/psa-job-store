@@ -4,8 +4,8 @@ import { Button, Card, Col, Form, Input, Row, Tag, Tooltip } from 'antd';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import Select, { components } from 'react-select';
-import AccessibleTreeSelect from '../../../components/app/common/components/accessible-tree-select';
 import { useWindowWidth } from '../../../components/app/common/hooks/use-window-width';
+import AccessibleTreeSelect from '../../../components/shared/accessible-tree-select/accessible-tree-select';
 import { useGetJobFamiliesQuery } from '../../../redux/services/graphql-api/job-family.api';
 import {
   JobProfileStreamModel,

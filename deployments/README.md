@@ -76,7 +76,7 @@ The deployment uses Kustomize to manage environment-specific configurations. The
 2. **Frontend Application**: User interface for the Job Store
 3. **Database (Crunchy PostgreSQL)**: Persistent storage for application data
 4. **Elasticsearch**: Used for Job Profiles search feature as well as storing of logs
-5. **Kibana**: Data visualization dashboard for Elasticsearch logs
+5. **Kibana**: Dashboard for viewing Elasticsearch logs
 6. **Report Mailer**: Service for generating and sending reports
 7. **Secrets Backup**: Configuration for backing up openshift secrets
 

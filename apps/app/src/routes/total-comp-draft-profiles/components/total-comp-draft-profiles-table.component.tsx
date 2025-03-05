@@ -21,8 +21,8 @@ import { ErrorResponse, Link, useNavigate, useSearchParams } from 'react-router-
 import ErrorGraphic from '../../../assets/empty_error.svg';
 import EmptyJobPositionGraphic from '../../../assets/empty_jobPosition.svg';
 import AccessiblePopoverMenu from '../../../components/app/common/components/accessible-popover-menu';
-import LoadingSpinnerWithMessage from '../../../components/app/common/components/loading.component';
 import '../../../components/app/common/css/filtered-table.component.css';
+import LoadingComponent from '../../../components/shared/loading-component/loading.component';
 import {
   GetJobProfilesArchivedResponse,
   GetJobProfilesDraftsResponse,
@@ -675,7 +675,7 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
   // // Handler to be called when the mouse leaves a row
   // const handleMouseLeave = () => setHoveredRowKey(null);
 
-  if (isLoading) return <LoadingSpinnerWithMessage />;
+  if (isLoading) return <LoadingComponent />;
 
   return (
     <div className="profilesTable" style={style}>

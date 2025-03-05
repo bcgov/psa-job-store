@@ -17,11 +17,11 @@ import { diff_match_patch } from 'diff-match-patch';
 import DOMPurify from 'dompurify';
 import { CSSProperties, useEffect, useState } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
-import LoadingSpinnerWithMessage from '../../../components/app/common/components/loading.component';
 import '../../../components/app/common/css/custom-descriptions.css';
 import { useWindowWidth } from '../../../components/app/common/hooks/use-window-width';
 import { VersionSelect } from '../../../components/app/version-select.component';
 import { DownloadJobProfileComponent } from '../../../components/shared/download-job-profile/download-job-profile.component';
+import LoadingComponent from '../../../components/shared/loading-component/loading.component';
 import { useTypedSelector } from '../../../redux/redux.hooks';
 import {
   AccountabilitiesModel,
@@ -664,7 +664,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
   // const backUrl = `/job-profiles?${searchParams}`;
 
   if (isLoading) {
-    return <LoadingSpinnerWithMessage />;
+    return <LoadingComponent />;
   }
 
   // console.log('effectiveData: ', effectiveData);

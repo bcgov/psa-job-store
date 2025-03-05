@@ -2,14 +2,11 @@ import { CopyOutlined, ExportOutlined } from '@ant-design/icons';
 import { Button, Card, Col, Descriptions, Divider, Result, Row, Space, Tabs, Typography, message } from 'antd';
 import copy from 'copy-to-clipboard';
 import { Link, useParams } from 'react-router-dom';
-import {
-  default as LoadingComponent,
-  default as LoadingSpinnerWithMessage,
-} from '../../components/app/common/components/loading.component';
 import PositionProfile from '../../components/app/common/components/positionProfile';
 import '../../components/app/common/css/filtered-table.component.css';
 import { PageHeader } from '../../components/app/page-header.component';
 import { DownloadJobProfileComponent } from '../../components/shared/download-job-profile/download-job-profile.component';
+import LoadingComponent from '../../components/shared/loading-component/loading.component';
 import { useGetJobProfileMetaQuery } from '../../redux/services/graphql-api/job-profile.api';
 import { useGetPositionRequestQuery } from '../../redux/services/graphql-api/position-request.api';
 import { useGetPositionQuery } from '../../redux/services/graphql-api/position.api';
@@ -529,7 +526,7 @@ export const TotalCompApprovedRequestPage = () => {
   ];
 
   if (!data) {
-    return <LoadingSpinnerWithMessage />;
+    return <LoadingComponent />;
   }
 
   return (

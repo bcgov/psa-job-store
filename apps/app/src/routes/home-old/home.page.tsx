@@ -1,9 +1,9 @@
 import { Card, Col, Divider, Radio, Row, Space, Typography } from 'antd';
 import { useCallback, useEffect, useState } from 'react';
 import { ReactFlowProvider } from 'reactflow';
-import { LinkButton } from '../../components/app/common/components/button-link.component';
 import PositionProfile from '../../components/app/common/components/positionProfile';
 import ContentWrapper from '../../components/content-wrapper.component';
+import { LinkButton } from '../../components/shared/button-link/button-link.component';
 import { useTypedSelector } from '../../redux/redux.hooks';
 import { useGetPositionRequestsCountQuery } from '../../redux/services/graphql-api/position-request.api';
 import MyPositionsTable from '../my-position-requests/components/my-position-requests-table.component';
