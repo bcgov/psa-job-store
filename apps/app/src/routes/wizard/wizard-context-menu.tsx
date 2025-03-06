@@ -1,8 +1,8 @@
 import { EllipsisOutlined } from '@ant-design/icons';
 import { Button, Menu, Modal, Typography, message } from 'antd';
 import { useState } from 'react';
-import AccessiblePopoverMenu from '../../components/app/common/components/accessible-popover-menu';
-import LoadingComponent from '../../components/app/common/components/loading.component';
+import AccessiblePopoverMenu from '../../components/shared/accessible-popover-menu/accessible-popover-menu';
+import LoadingComponent from '../../components/shared/loading-component/loading.component';
 import { useDeletePositionRequestMutation } from '../../redux/services/graphql-api/position-request.api';
 
 interface WizardMenuProps {

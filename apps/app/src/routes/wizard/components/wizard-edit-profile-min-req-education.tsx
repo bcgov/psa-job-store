@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React from 'react';
 import { UseFormReturn, UseFormTrigger } from 'react-hook-form';
-import AccessibleList from '../../../components/app/common/components/accessible-list';
+import AccessibleList from '../../../components/shared/accessible-list/accessible-list';
 import { JobProfileValidationModel } from '../../job-profiles/components/job-profile.component';
 import useFormFields from '../hooks/wizardUseFieldArray';
 import { WizardModalComponent, useModalActions } from './modal.component';

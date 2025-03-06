@@ -3,7 +3,7 @@ import { InfoCircleOutlined } from '@ant-design/icons';
 import { Form, Tooltip, Typography } from 'antd';
 import React from 'react';
 import { UseFormReturn } from 'react-hook-form';
-import AccessibleList from '../../../components/app/common/components/accessible-list';
+import AccessibleList from '../../../components/shared/accessible-list/accessible-list';
 import { JobProfileValidationModel } from '../../job-profiles/components/job-profile.component';
 import useFormFields from '../hooks/wizardUseFieldArray';
 import WizardEditAddButton from './wizard-edit-profile-add-button';

@@ -1,7 +1,7 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import React from 'react';
 import { UseFieldArrayRemove, UseFieldArrayUpdate, UseFormReturn, UseFormTrigger } from 'react-hook-form';
-import AccessibleList from '../../../components/app/common/components/accessible-list';
+import AccessibleList from '../../../components/shared/accessible-list/accessible-list';
 import { JobProfileValidationModel } from '../../job-profiles/components/job-profile.component';
 import { WizardModalComponent, useModalActions } from './modal.component';
 import WizardEditProfileListItem from './wizard-edit-profile-list-item';

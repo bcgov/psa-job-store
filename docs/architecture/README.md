@@ -55,7 +55,7 @@ This diagram represents a high-level architecture of a system integrating multip
 2. The frontend communicates with the backend hosted in the SILVER OpenShift cluster.
 3. Backend services interact with:
    - PostgreSQL for data storage.
-   - TELUS CRM endpoints to manage incidents.
+   - Oracle CRM endpoints to manage incidents.
    - PSA PeopleSoft APIs for HCM-related data.
 
 ### Notes

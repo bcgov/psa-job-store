@@ -10,7 +10,7 @@ import { Button, Menu, Tooltip } from 'antd';
 import React from 'react';
 import RemoveSignificant from '../../../assets/significant-delete.svg';
 
-import AccessiblePopoverMenu from '../../../components/app/common/components/accessible-popover-menu';
+import AccessiblePopoverMenu from '../../../components/shared/accessible-popover-menu/accessible-popover-menu';
 import './wizard-page-wrapper.component.css';
 
 interface ContextOptionsProps {

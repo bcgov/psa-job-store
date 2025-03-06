@@ -2,7 +2,7 @@
 import { MinusCircleOutlined } from '@ant-design/icons';
 import { Button, Form, Input, List, Tooltip } from 'antd';
 import { UseFormReturn } from 'react-hook-form';
-import AccessibleList from '../../../components/app/common/components/accessible-list';
+import AccessibleList from '../../../components/shared/accessible-list/accessible-list';
 import { FormItem } from '../../../utils/FormItem';
 import { JobProfileValidationModel } from '../../job-profiles/components/job-profile.component';
 import { AllowedFieldNames } from './wizard-edit-profile-list-item';

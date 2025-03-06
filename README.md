@@ -2,43 +2,43 @@
 
 ![JobStore Screenshot](/screenshot.PNG?raw=true)
 
-Welcome to the BC Public Service Agency's Job Store, the all-in-one solution for navigating and managing your organization chart with ease and efficiency. This tool is designed to streamline the way you view, edit, and create positions within your organization, all while integrating seamlessly with PeopleSoft and CRM systems.
+## Introduction
 
-## Features
+Welcome to the BC Public Service Agency's Job Store, a comprehensive platform designed to streamline position management and organizational structure visualization across the BC Public Service. This enterprise-grade application integrates seamlessly with PeopleSoft HCM and Oracle CRM systems to provide a unified workflow for position creation, classification, and management.
 
-### 🗺️ Navigate Your Org Chart
+### What is Job Store?
 
-- Effortlessly explore your organizational structure with our intuitive navigation system.
-- Visualize the hierarchy and relationships within your organization at a glance.
+Job Store is a modern web application that addresses the challenges of position management in large government organizations. It provides an intuitive interface for navigating organizational hierarchies, creating positions, and managing job profiles—all while maintaining synchronization with core HR systems.
 
-### 📈 Create Positions Instantly
+### Core Capabilities
 
-- Create New Positions: Add new roles to your organization in real-time, customizing as per your needs or using provided job profiles.
+- **Organizational Visualization**: Interactive org charts that provide a clear view of reporting relationships and position hierarchies
+- **Position Management**: End-to-end workflow for creating, modifying, and tracking positions
+- **Job Profile Library**: Centralized repository of standardized job profiles with search capabilities
+- **Classification Process**: Streamlined workflow for position classification requests and approvals
+- **System Integration**: Bidirectional synchronization with PeopleSoft HCM and Oracle CRM
 
-### 📚 Library of Job Profiles
+### Technical Foundation
 
-- Access a comprehensive library of predefined job profiles.
-- Find the perfect match for your organizational needs with ease.
+Built on a modern technology stack, Job Store leverages:
 
-### ✏️ In-Situ Job Profile Editing
+- **Frontend**: React with TypeScript, Redux Toolkit, and Ant Design
+- **Backend**: NestJS with GraphQL, Prisma ORM, and Elasticsearch
+- **Authentication**: Keycloak integration with IDIR/BCeID via SiteMinder
+- **Infrastructure**: Containerized deployment on OpenShift with PostgreSQL database
+- **DevOps**: CI/CD pipelines with automated testing and deployment
 
-- Directly edit job profiles within the platform.
-- Make quick updates and revisions without leaving the app.
+### Who Uses Job Store?
 
-### 📨 Classification Review Requests
-
-- Submit position requests for classification review.
-
-### 🔄 Integration with PeopleSoft and CRM
-
-- Create positions in PeopleSoft
-- Keep track of position requests in CRM and view status changes inside JobStore
+- **Hiring Managers**: Create position requests and track their progress
+- **Classification Specialists**: Review and process classification requests
+- **Total Compensation**: Creates and updates job profiles
 
 ## Project Structure
 
 ### Architecture
 
-This architecture integrates authentication, frontend and backend services, and PeopleSoft and CRM external systems. Users authenticate via SiteMinder and Keycloak using Active Directory credentials (IDIR/BCeID). The frontend, built with React, communicates with a NestJS backend hosted in Docker containers on the SILVER OpenShift cluster, with PostgreSQL managing the database schema. The backend interacts with TELUS CRM endpoints to create, retrieve, and update incidents via REST APIs and connects to PSA PeopleSoft APIs for data retrieval and updates using an Integration Broker and Component Interfaces. For detailed interactions, refer to the [architecture diagram](/docs/architecture/readme.md).
+This architecture integrates authentication, frontend and backend services, and PeopleSoft and CRM external systems. Users authenticate via SiteMinder and Keycloak using Active Directory credentials (IDIR/BCeID). The frontend, built with React, communicates with a NestJS backend hosted in Docker containers on the SILVER OpenShift cluster, with PostgreSQL managing the database schema. The backend interacts with Oracle CRM endpoints to create, retrieve, and update incidents via REST APIs and connects to PSA PeopleSoft APIs for data retrieval and updates using an Integration Broker and Component Interfaces. For detailed interactions, refer to the [architecture diagram](/docs/architecture/readme.md).
 
 ### Applications
 
@@ -593,67 +593,7 @@ to show the list of builds.
 
 Under api and app projects, delete old versions, for example "0.0.0" or "0.1.0" to free up space.
 
-### Database operations
-
-#### Remoting into db pod
-
-`kubectl exec -it api-postgres-00-64ql-0 -c database -- /bin/bash`
-
-backrest pod:
-
-`kubectl exec -it api-postgres-repo-host-0 -c pgbackrest -- /bin/bash`
-
-#### Downloading a log
-
-`kubectl cp -n NAMESPACE api-postgres-00-64ql-0:/pgdata/pg15/log/postgresql-Thu.log postgresql-Thu.log`
-
-#### get pgData location
-
-`echo $PGDATA`
-
-Will output `/pgdata/pg15`
-
-#### db config file location
-
-`/pgdata/pg15/postgresql.conf`
-
-Do not edit this file directly
-
-#### Log location
-
-Logs are located at `/pgdata/pg15/log`
-
-#### Reliability and the Write-Ahead Log location
-
-These are stored at `/pgdata/pg15_wal`
-
-WAL files record all changes to the database's data files before those changes are written to the actual data files. If your database is under heavy write load, the volume of WAL files can increase significantly.WAL is designed to ensure that the database can recover from crashes and maintain data integrity. It's also crucial for replication and point-in-time recovery. Before any changes (like INSERT, UPDATE, DELETE) are made to the actual data files on disk, they are first recorded in the WAL files. This ensures that in case of a crash, the database can replay these logs and reconstruct the state of the database up to the last committed transaction.
-
-Periodically, a checkpoint occurs where the current state of the database is written to the data files. Checkpoints help reduce recovery time by marking a known good point in the WAL stream where the database can start replaying logs during recovery.
-
-Each WAL file is ALWAYS 16mb in size.
-
-Archive Process: WAL archiving involves copying completed WAL files to a secondary location (disk, cloud storage, etc.) for safekeeping. This is handled by the archive_command configuration parameter, which specifies a shell command to run for each WAL file that needs to be archived.
-
-`max_wal_size` parameter in config determines the maximum amount of WAL data that can accumulate before a checkpoint is forced. Checkpoints are moments when PostgreSQL writes all the changes from WAL files to the actual data files. With a larger max_wal_size, checkpoints occur less frequently because PostgreSQL allows more WAL data to accumulate before triggering a checkpoint.
-`checkpoint_timeout` parameter specifies the maximum amount of time between automatic WAL checkpoints. Essentially, this setting controls how often PostgreSQL will force a checkpoint to occur, regardless of the amount of WAL activity
-`checkpoint_completion_target` parameter specifies the target of checkpoint completion, as a fraction of total time between checkpoints. The default is 0.9, which spreads the checkpoint across almost all of the available interval, providing fairly consistent I/O load while also leaving some time for checkpoint completion overhead. Reducing this parameter is not recommended because it causes the checkpoint to complete faster. This results in a higher rate of I/O during the checkpoint followed by a period of less I/O between the checkpoint completion and the next scheduled checkpoint
-
-#### Clean up WAL files manually
-
-`pg_archivecleanup -d /pgdata/pg15_wal 0000000300000009000000CD` where "0000000300000009000000CD" would the file name after which the files should be removed
-
-To expire from the archive pod (there needs to be space on the volume to perform this operation):
-
-`pgbackrest expire --stanza=db --repo1-retention-full=1`
-
-#### Get db size
-
-`psql`
-`\l` - get a list of dbs
-`SELECT pg_size_pretty( pg_database_size('api') );`
-
-### Husky pre-commit hook issues on windows with GitHub desktop
+## Husky pre-commit hook issues on windows with GitHub desktop on Windows
 
 If getting this type of error when commiting changes:
 
@@ -667,18 +607,14 @@ husky - command not found in PATH=/mingw64/libexec/git-core:/mingw64/bin:/usr/bi
 - Check that system PATH variable contains `C:\Program Files\Git\bin` (path containing sh.exe) AND that it's first in the list
 ```
 
+## Education verification override for "Administrative Services" Job Family
+
+Profiles that have "Administrative Services" Job Family do not require verification if user makes any changes to the "Education" section when going throught he position request creation wizard. This is hard-coded throughout the application and ideally should be formalized into a formal feature. A similar request was received for a different case, so it may be desirable to implemnt this feature for Total Compensation users (https://citz-do.atlassian.net/browse/AL-1144)
+
 ### Todo document
 
-- chron tasks
-- logging
-- github pipeline documentation
-- commonkit
-- backup process with github actions
 - verify developer.md deployment info
-- document the override for administrative profiles
 - package upgrades
 - monorepo, linting, tsconfig
-- tech stack
-- automatic reports
-- how to configure access to Kibana for specific users
 - the deployment process to openshift, including seeding hasn't been verified since the application was deployed initially
+- accessibility notes: accessible components, need for accessible profile view

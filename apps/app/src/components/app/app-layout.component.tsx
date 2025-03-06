@@ -5,8 +5,8 @@ import { useLocalStorage } from 'usehooks-ts';
 import { useTypedSelector } from '../../redux/redux.hooks';
 import { ErrorBoundaryLayout } from '../../routes/not-found/error';
 import { AppHeader } from '../app/header.component';
+import { NavMenu } from '../shared/nav-menu/nav-menu.component';
 import { useWindowWidth } from './common/hooks/use-window-width';
-import { NavMenu } from './components/nav-menu.component';
 import { MissingCRMAccountAlert } from './missing-crm-account-alert.component';
 import styles from './sider.module.css';
 

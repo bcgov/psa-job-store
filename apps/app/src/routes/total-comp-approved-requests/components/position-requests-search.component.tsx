@@ -5,7 +5,7 @@ import dayjs from 'dayjs';
 import { useCallback, useEffect, useMemo, useState } from 'react';
 import { useLocation, useNavigate, useSearchParams } from 'react-router-dom';
 import Select, { components } from 'react-select';
-import { statusIconColorMap } from '../../../components/app/utils/statusIconColorMap.utils';
+import { statusIconColorMap } from '../../../components/app/common/utils/statusIconColorMap.utils';
 import {
   GetPositionRequestSubmittedByResponseItem,
   useGetPositionRequestClassificationsQuery,

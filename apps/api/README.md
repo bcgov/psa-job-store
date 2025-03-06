@@ -913,3 +913,11 @@ The Settings module leverages the User module's functionality:
 - Uses `UserService.getUsers()` to search for existing users in the database
 - Uses `UserService.syncUser()` to import and synchronize user data
 - Uses `UserService.getUser()` to retrieve the imported user with complete metadata
+
+## Error handling with AlexandriaError exception class
+
+When there's an API error that hasn't been handled, user on the front end will see the "Unknown error", but if there's an issue that is expected, an AlexandriaError gets thrown. For example if Total Compensation user tries to create a job profile with a number that already exists the following code willrun:
+
+`throw AlexandriaError('A job profile with this number already exists. Please use a different number.');`
+
+Then on the client there's code that checks if the error returned was of `AlexandriaError` type and in that case it will display that message to the user.

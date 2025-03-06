@@ -1,5 +1,5 @@
 import { Button, Card, Divider, Form, Tooltip } from 'antd';
-import PositionProfile from '../../../components/app/common/components/positionProfile';
+import PositionProfile from '../../../components/shared/position-profile/positionProfile';
 import { GetJobProfileResponse, JobProfileModel } from '../../../redux/services/graphql-api/job-profile-types';
 import { GetPositionRequestResponseContent } from '../../../redux/services/graphql-api/position-request.api';
 
@@ -76,23 +76,6 @@ const OtherDetails: React.FC<OtherDetailsProps> = ({ wizardData, positionRequest
               orgChartData={positionRequestData?.orgchart_json}
             ></PositionProfile>
           </div>
-          {/* <div style={{ margin: 0 }}>
-       {firstActivePosition2 && !isFetchingPositionProfile2 && !isFetchingPositionProfileError2 && (
-         <div data-testid="reporting-manager-info">
-           <p
-             style={{ margin: 0 }}
-           >{`${firstActivePosition2.employeeName}, ${firstActivePosition2.ministry}`}</p>
-           <Typography.Paragraph type="secondary">
-             {`${firstActivePosition2.positionDescription}, ${firstActivePosition2.classification}`}
-             <br></br>
-             {`Position No.: ${firstActivePosition2.positionNumber}`}
-             {additionalPositions2 > 0 && ` +${additionalPositions2}`}
-           </Typography.Paragraph>
-         </div>
-       )}
-       {isFetchingPositionProfile2 && <LoadingSpinnerWithMessage mode={'small'} />}
-       {isFetchingPositionProfileError2 && <p>Error loading, please refresh page</p>}
-     </div> */}
         </Form.Item>
 
         <Divider className="hr-reduced-margin" />

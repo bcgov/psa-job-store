@@ -1,7 +1,7 @@
 import { ExportOutlined, SettingOutlined } from '@ant-design/icons';
 import { Button, Menu } from 'antd';
 import { useState } from 'react';
-import AccessiblePopoverMenu from '../../../components/app/common/components/accessible-popover-menu';
+import AccessiblePopoverMenu from '../../../components/shared/accessible-popover-menu/accessible-popover-menu';
 import './org-chart-help-button.component.css';
 import { OrgChartKeyboardShortcutsModal } from './org-chart-keyboard-shortcuts.modal';
 

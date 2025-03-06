@@ -18,11 +18,11 @@ import { Link, useNavigate, useSearchParams } from 'react-router-dom';
 import ErrorGraphic from '../../../assets/empty_error.svg';
 import EmptyJobPositionGraphic from '../../../assets/empty_jobPosition.svg';
 import TasksCompleteGraphic from '../../../assets/task_complete.svg';
-import AccessiblePopoverMenu from '../../../components/app/common/components/accessible-popover-menu';
-import { LinkButton } from '../../../components/app/common/components/button-link.component';
-import LoadingSpinnerWithMessage from '../../../components/app/common/components/loading.component';
 import '../../../components/app/common/css/filtered-table.component.css';
+import AccessiblePopoverMenu from '../../../components/shared/accessible-popover-menu/accessible-popover-menu';
+import { LinkButton } from '../../../components/shared/button-link/button-link.component';
 import { DownloadJobProfileComponent } from '../../../components/shared/download-job-profile/download-job-profile.component';
+import LoadingComponent from '../../../components/shared/loading-component/loading.component';
 import {
   useDeletePositionRequestMutation,
   useLazyGetPositionRequestsQuery,
@@ -798,7 +798,7 @@ const MyPositionsTable: React.FC<MyPositionsTableProps> = ({
   }, [fetchError]);
 
   // NOTE: DO NOT CHECK OF ISFETCHING HERE, IT WILL BREAK SORTING
-  if (isLoading) return <LoadingSpinnerWithMessage />;
+  if (isLoading) return <LoadingComponent />;
 
   // console.log('data?.positionRequests: ', data?.positionRequests);
 

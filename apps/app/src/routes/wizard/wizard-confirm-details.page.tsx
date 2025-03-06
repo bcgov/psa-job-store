@@ -7,8 +7,8 @@ import { IsNotEmpty } from 'class-validator';
 import { useEffect, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { Link } from 'react-router-dom';
-import LoadingComponent from '../../components/app/common/components/loading.component';
 import '../../components/app/common/css/custom-form.css';
+import LoadingComponent from '../../components/shared/loading-component/loading.component';
 import {
   GetPositionRequestResponseContent,
   useUpdatePositionRequestMutation,

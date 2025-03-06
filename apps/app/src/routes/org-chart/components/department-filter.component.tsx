@@ -1,6 +1,6 @@
 import { TreeSelect, Typography } from 'antd';
 import { useEffect, useState } from 'react';
-import AccessibleTreeSelect from '../../../components/app/common/components/accessible-tree-select';
+import AccessibleTreeSelect from '../../../components/shared/accessible-tree-select/accessible-tree-select';
 import { useGetOrgChartDepartmentFilterQuery } from '../../../redux/services/graphql-api/org-chart.api';
 
 const { Text } = Typography;
