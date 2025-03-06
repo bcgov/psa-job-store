@@ -87,7 +87,7 @@ Apps Directory - Contains standalone applications:
 
 ### DevOps
 
-The project uses GitHub Actions workflows and custom actions for automating the CI/CD processes of the application. The workflows handle tasks such as building Docker images, running tests, performing database migrations, deploying to OpenShift environments, and managing database backups and restores. See [.github/README.md](/.github/README.md) for more details.
+The project uses GitHub Actions workflows and custom actions for automating the CI/CD processes of the application. The workflows handle tasks such as building Docker images, running tests, performing database migrations, deploying to OpenShift environments, and managing database backups and restores. See [.github/ACTIONS_README.md](/.github/ACTIONS_README.md) for more details.
 
 ### Deployments
 
@@ -611,7 +611,7 @@ husky - command not found in PATH=/mingw64/libexec/git-core:/mingw64/bin:/usr/bi
 
 Profiles that have "Administrative Services" Job Family do not require verification if user makes any changes to the "Education" section when going throught he position request creation wizard. This is hard-coded throughout the application and ideally should be formalized into a formal feature. A similar request was received for a different case, so it may be desirable to implemnt this feature for Total Compensation users (https://citz-do.atlassian.net/browse/AL-1144)
 
-### Todo document
+### Documentation todo
 
 - verify developer.md deployment info
 - package upgrades
