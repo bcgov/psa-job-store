@@ -10,7 +10,7 @@ import {
   UseFieldArrayRemove,
   UseFormReturn,
 } from 'react-hook-form';
-import LoadingSpinnerWithMessage from '../../../components/app/common/components/loading.component';
+import LoadingComponent from '../../../components/shared/loading-component/loading.component';
 import { useGetBehaviouralCompetenciesQuery } from '../../../redux/services/graphql-api/behavioural-comptency.api';
 import { BehaviouralCompetency } from '../../../redux/services/graphql-api/job-profile-types';
 import { FormItem } from '../../../utils/FormItem';
@@ -96,7 +96,7 @@ const BehaviouralComptencyPicker: React.FC<BehaviouralComptencyPickerProps> = ({
     }
   }, [data]);
 
-  if (isLoading) return <LoadingSpinnerWithMessage mode="small" />;
+  if (isLoading) return <LoadingComponent mode="small" />;
   if (error) return <p>An error occurred</p>;
 
   const renderOption = (option: SelectableOption) => {

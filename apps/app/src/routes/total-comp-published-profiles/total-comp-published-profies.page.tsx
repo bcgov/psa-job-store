@@ -19,8 +19,6 @@ export const TotalCompPublishedProfilesPage = () => {
     setHasData(isDataAvailable);
   };
 
-  // if (!ministriesData) return <LoadingSpinnerWithMessage />;
-
   return (
     <>
       <PageHeader title="Published profiles" subTitle="Job profiles available in the job store." />

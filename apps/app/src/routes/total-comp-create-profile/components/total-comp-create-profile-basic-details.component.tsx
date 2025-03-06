@@ -28,8 +28,8 @@ import {
 import { CSSProperties, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { Controller, useFieldArray, useWatch } from 'react-hook-form';
 import { useParams } from 'react-router-dom';
-import LoadingSpinnerWithMessage from '../../../components/app/common/components/loading.component';
-import MinistriesSelect from '../../../components/app/common/components/ministries-select.component';
+import LoadingComponent from '../../../components/shared/loading-component/loading.component';
+import MinistriesSelect from '../../../components/shared/ministries-select/ministries-select.component';
 import {
   useGetFilteredClassificationsQuery,
   useGetGroupedClassificationsQuery,
@@ -1062,7 +1062,7 @@ export const BasicDetails: React.FC<BasicDetailsProps> = ({}) => {
     [classificationsData?.classifications, selectedEmployeeClassificationGroups],
   );
 
-  if (isLoading) return <LoadingSpinnerWithMessage />;
+  if (isLoading) return <LoadingComponent />;
 
   return (
     <>

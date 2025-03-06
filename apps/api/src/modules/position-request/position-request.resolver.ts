@@ -275,29 +275,6 @@ export class PositionRequestApiResolver {
     return this.positionRequestService.getPositionRequestSubmittedBy(user.roles, requestingFeature);
   }
 
-  @Mutation(() => Boolean)
-  //deprecated - if we want to use this in the future, update to check Peoplesoft status as well
-  async updatePositionRequestStatus(
-    @Args('id', { type: () => Int }) id: number,
-    @Args('status', { type: () => Int }) status: number,
-    @GqlCurrentUser() user: Express.User,
-  ) {
-    // This is only for e2e testing to simulate classifications changing status of sercie request
-    // check for test node env flag, if not true, return false
-    if (this.configService.get('TEST_ENV') !== 'true') {
-      return false;
-    }
-
-    // get CRM service id from position request id from db
-
-    const positionRequest = await this.positionRequestService.getPositionRequest(id, user.id, ['classification']);
-
-    const crmId = positionRequest.crm_id;
-
-    await this.positionRequestService.updatePositionRequestStatus(crmId, status);
-    return true;
-  }
-
   @Query(() => [SuggestedManager], { name: 'suggestedManagers' })
   async suggestedManagers(
     @Args('positionNumber') positionNumber: string,

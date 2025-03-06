@@ -3,9 +3,7 @@
   "version": "0.0.0",
   "private": true,
   "type": "module",
-  "scripts": {
-    "test-e2e": "node cypress/setupOAuth2Server.cjs"
-  },
+  "scripts": {},
   "dependencies": {
     "dotenv": "^16.3.1"
   },

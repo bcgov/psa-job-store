@@ -1,7 +1,7 @@
 import React from 'react';
 import { Navigate } from 'react-router-dom';
 import { useTypedSelector } from '../../redux/redux.hooks';
-import LoadingSpinnerWithMessage from '../app/common/components/loading.component';
+import LoadingComponent from '../shared/loading-component/loading.component';
 
 interface RoleGuardProps {
   children: React.ReactNode;
@@ -13,7 +13,7 @@ const RoleGuard: React.FC<RoleGuardProps> = ({ children, roles }) => {
 
   if (auth.isLoading) {
     // Render a loading indicator or any appropriate content while loading
-    return <LoadingSpinnerWithMessage />;
+    return <LoadingComponent />;
   }
 
   if (!auth.isAuthenticated) {

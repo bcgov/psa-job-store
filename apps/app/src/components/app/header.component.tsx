@@ -3,7 +3,7 @@ import { Alert, Button, Col, Layout, Menu, Row, Typography } from 'antd';
 import { Link } from 'react-router-dom';
 import { useTypedSelector } from '../../redux/redux.hooks';
 import { InitialsAvatar } from '../../routes/home-old/components/initials-avatar.component';
-import AccessiblePopoverMenu from './common/components/accessible-popover-menu';
+import AccessiblePopoverMenu from '../shared/accessible-popover-menu/accessible-popover-menu';
 import styles from './header.module.css';
 import { HelpButton } from './help-button.component';
 

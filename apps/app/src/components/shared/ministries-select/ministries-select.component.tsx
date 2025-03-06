@@ -1,6 +1,6 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Select } from 'antd';
-import { useGetOrganizationsQuery } from '../../../../redux/services/graphql-api/organization';
+import { useGetOrganizationsQuery } from '../../../redux/services/graphql-api/organization';
 
 const MinistriesSelect = ({ onChange, isMultiSelect, onBlur, value, setValue }: any) => {
   const { data } = useGetOrganizationsQuery();

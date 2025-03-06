@@ -9,7 +9,6 @@ import passport from 'passport';
 import { AppModule } from './app.module';
 import { AppConfigDto } from './dtos/app-config.dto';
 import { getSessionStore } from './utils/session.utils';
-// import { ErrorLoggingInterceptor } from './utils/logging/response-logging.interceptor';
 
 async function bootstrap() {
   const app = await NestFactory.create<NestExpressApplication>(AppModule, { bufferLogs: true });
@@ -39,7 +38,6 @@ async function bootstrap() {
   app.useLogger(app.get(Logger));
   app.useGlobalPipes(new ValidationPipe({ skipMissingProperties: false, transform: true }));
   app.use(json({ limit: '7000kb' })); // to allow large org charts to be submitted
-  // app.useGlobalInterceptors(new ErrorLoggingInterceptor());
 
   await app.listen(4000);
 }

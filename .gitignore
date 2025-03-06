@@ -445,3 +445,7 @@ apps/api/prisma/seed.ts
 
 # Ignore jest reports
 apps/app/test-report.html
+
+# Ignore load-test results
+apps/api/test/results
+

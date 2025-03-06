@@ -4,7 +4,7 @@ import { BaseSelectRef } from 'rc-select';
 import { useEffect, useRef, useState } from 'react';
 import TreeView, { INode, NodeId, flattenTree } from 'react-accessible-treeview';
 import { IFlatMetadata } from 'react-accessible-treeview/dist/TreeView/utils';
-import { filterTree } from '../utils/treeSearchUtils';
+import { filterTree } from '../../app/common/utils/treeSearchUtils';
 import './accessible-tree-select.css';
 
 const ArrowIcon = ({ isOpen, className }: { isOpen: boolean; className?: string }) => {

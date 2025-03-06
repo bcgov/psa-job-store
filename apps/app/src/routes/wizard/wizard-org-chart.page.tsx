@@ -5,8 +5,8 @@ import { useCallback, useEffect, useState } from 'react';
 import { Link, useLocation, useNavigate } from 'react-router-dom';
 import { useReactFlow } from 'reactflow';
 import 'reactflow/dist/style.css';
-import LoadingComponent from '../../components/app/common/components/loading.component';
 import { usePosition } from '../../components/app/common/contexts/position.context';
+import LoadingComponent from '../../components/shared/loading-component/loading.component';
 import { useTypedSelector } from '../../redux/redux.hooks';
 import {
   GetPositionRequestResponseContent,

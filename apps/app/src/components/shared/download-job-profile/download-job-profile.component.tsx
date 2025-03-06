@@ -10,7 +10,7 @@ import React, { useCallback, useRef, useState } from 'react';
 
 import { useLazyGetJobProfileQuery } from '../../../redux/services/graphql-api/job-profile.api';
 import { useLazyGetPositionRequestQuery } from '../../../redux/services/graphql-api/position-request.api';
-import LoadingComponent from '../../app/common/components/loading.component';
+import LoadingComponent from '../loading-component/loading.component';
 
 export interface DownloadJobProfileComponentProps {
   jobProfile?: Record<string, any> | null;

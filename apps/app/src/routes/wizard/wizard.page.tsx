@@ -2,8 +2,8 @@ import { ArrowLeftOutlined } from '@ant-design/icons';
 import { Button, Modal } from 'antd';
 import { useEffect, useRef, useState } from 'react';
 import { Link, useSearchParams } from 'react-router-dom';
-import LoadingComponent from '../../components/app/common/components/loading.component';
-import PositionProfile from '../../components/app/common/components/positionProfile';
+import LoadingComponent from '../../components/shared/loading-component/loading.component';
+import PositionProfile from '../../components/shared/position-profile/positionProfile';
 import { useGetDepartmentQuery } from '../../redux/services/graphql-api/department.api';
 import { JobProfileModel } from '../../redux/services/graphql-api/job-profile-types';
 import {

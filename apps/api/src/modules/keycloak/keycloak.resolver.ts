@@ -11,7 +11,6 @@ export class KeycloakResolver {
   @Query(() => [KeycloakUser], { name: 'findKeycloakUsers' })
   @Roles('super-admin')
   findKeycloakUsers(@Args() args: FindManyKeycloakUserArgs) {
-    console.log('args: ', args);
     return this.keycloakService.findUsers(args.field, args.value);
   }
 

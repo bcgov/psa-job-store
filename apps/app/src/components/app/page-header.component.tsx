@@ -160,13 +160,6 @@ export const PageHeader = ({
               <DownOutlined />
             </Button>
           </Select>
-          // This could be adapted to simplfy this component
-          // <VersionSelect
-          //     id={id ?? '-1'}
-          //     version={version ?? '-1'}
-          //     selectVersionCallback={(selectedVersion: IdVersion) => {
-          //     }}
-          //   />
         )}
         {showButton1 && (
           <Popover content={button1Content} trigger="click" placement="bottomRight">
