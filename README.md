@@ -57,6 +57,8 @@ Apps Directory - Contains standalone applications:
 - Built with Vite and TypeScript
 - Used for organizatonal chart generation as well as docx generation for job profiles
 
+[Read more](/packages/common-kit/README.md)
+
 ### Database
 
 - PostgreSQL with Prisma as the ORM
