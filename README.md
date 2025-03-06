@@ -635,6 +635,10 @@ The project uses a variety of dependencies across its monorepo structure. Regula
 
 There instances of `any` types in the codebase. Improving type safety by replacing these with proper interfaces or type definitions would enhance code maintainability and reduce potential runtime errors.
 
+### Windows development environment
+
+Local development on Windows machines was done in Windows environment. To improve consistency with the development experience on MacOS, it is recommended to move the project into WSL.
+
 ### Documentation todo
 
 - verify developer.md deployment info
