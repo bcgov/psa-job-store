@@ -1,6 +1,6 @@
 import { Space } from 'antd';
 import React from 'react';
-import { statusIconColorMap } from '../../../components/app/utils/statusIconColorMap.utils';
+import { statusIconColorMap } from '../../../components/app/common/utils/statusIconColorMap.utils';
 import './wizard-position-request-status-indicator.css';
 
 interface StatusIndicatorProps {

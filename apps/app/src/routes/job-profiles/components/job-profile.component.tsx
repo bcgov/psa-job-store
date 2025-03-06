@@ -19,7 +19,6 @@ import { CSSProperties, useEffect, useState } from 'react';
 import { useParams, useSearchParams } from 'react-router-dom';
 import '../../../components/app/common/css/custom-descriptions.css';
 import { useWindowWidth } from '../../../components/app/common/hooks/use-window-width';
-import { VersionSelect } from '../../../components/app/version-select.component';
 import { DownloadJobProfileComponent } from '../../../components/shared/download-job-profile/download-job-profile.component';
 import LoadingComponent from '../../../components/shared/loading-component/loading.component';
 import { useTypedSelector } from '../../../redux/redux.hooks';
@@ -37,6 +36,7 @@ import {
 import NotFoundComponent from '../../not-found/404';
 import AccessibleDocumentFromDescriptions from './accessible-document-from-descriptions';
 import './job-profile.component.css';
+import { VersionSelect } from './version-select.component';
 
 const { Text } = Typography;
 // const { useBreakpoint } = Grid;

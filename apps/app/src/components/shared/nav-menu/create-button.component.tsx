@@ -6,8 +6,8 @@ import { Link, NavLink } from 'react-router-dom';
 import { useTypedSelector } from '../../../redux/redux.hooks';
 import { PositionRequestOutlined } from '../../icons/position-request-outlined';
 import AccessiblePopoverMenu from '../../shared/accessible-popover-menu/accessible-popover-menu';
-import { createMenuItem } from '../utils/nav-menu.utils';
-import { userCanAccess } from '../utils/user-has-roles.util';
+import { createMenuItem } from './nav-menu.utils';
+import { userCanAccess } from './user-has-roles.util';
 export type CreateButtonProps = { collapsed: boolean };
 
 export const CreateButton = ({ collapsed }: CreateButtonProps) => {

@@ -6,7 +6,7 @@ import copy from 'copy-to-clipboard';
 import dayjs from 'dayjs';
 import { cloneElement, useEffect, useRef, useState } from 'react';
 import { Link, useBlocker, useLocation, useNavigate, useParams } from 'react-router-dom';
-import { statusIconColorMap } from '../../components/app/utils/statusIconColorMap.utils';
+import { statusIconColorMap } from '../../components/app/common/utils/statusIconColorMap.utils';
 import { DownloadJobProfileComponent } from '../../components/shared/download-job-profile/download-job-profile.component';
 import LoadingComponent from '../../components/shared/loading-component/loading.component';
 import PositionProfile from '../../components/shared/position-profile/positionProfile';

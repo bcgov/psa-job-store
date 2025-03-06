@@ -2,8 +2,8 @@
 import { DownOutlined, TagOutlined } from '@ant-design/icons';
 import { Button, Select } from 'antd';
 import { useNavigate, useSearchParams } from 'react-router-dom';
-import { IdVersion } from '../../redux/services/graphql-api/job-profile-types';
-import { useGetJobProfileMetaQuery } from '../../redux/services/graphql-api/job-profile.api';
+import { IdVersion } from '../../../redux/services/graphql-api/job-profile-types';
+import { useGetJobProfileMetaQuery } from '../../../redux/services/graphql-api/job-profile.api';
 
 // Define the type for your breadcrumb item
 

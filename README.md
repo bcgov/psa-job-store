@@ -2,43 +2,43 @@
 
 ![JobStore Screenshot](/screenshot.PNG?raw=true)
 
-Welcome to the BC Public Service Agency's Job Store, the all-in-one solution for navigating and managing your organization chart with ease and efficiency. This tool is designed to streamline the way you view, edit, and create positions within your organization, all while integrating seamlessly with PeopleSoft and CRM systems.
+## Introduction
 
-## Features
+Welcome to the BC Public Service Agency's Job Store, a comprehensive platform designed to streamline position management and organizational structure visualization across the BC Public Service. This enterprise-grade application integrates seamlessly with PeopleSoft HCM and Oracle CRM systems to provide a unified workflow for position creation, classification, and management.
 
-### 🗺️ Navigate Your Org Chart
+### What is Job Store?
 
-- Effortlessly explore your organizational structure with our intuitive navigation system.
-- Visualize the hierarchy and relationships within your organization at a glance.
+Job Store is a modern web application that addresses the challenges of position management in large government organizations. It provides an intuitive interface for navigating organizational hierarchies, creating positions, and managing job profiles—all while maintaining synchronization with core HR systems.
 
-### 📈 Create Positions Instantly
+### Core Capabilities
 
-- Create New Positions: Add new roles to your organization in real-time, customizing as per your needs or using provided job profiles.
+- **Organizational Visualization**: Interactive org charts that provide a clear view of reporting relationships and position hierarchies
+- **Position Management**: End-to-end workflow for creating, modifying, and tracking positions
+- **Job Profile Library**: Centralized repository of standardized job profiles with search capabilities
+- **Classification Process**: Streamlined workflow for position classification requests and approvals
+- **System Integration**: Bidirectional synchronization with PeopleSoft HCM and Oracle CRM
 
-### 📚 Library of Job Profiles
+### Technical Foundation
 
-- Access a comprehensive library of predefined job profiles.
-- Find the perfect match for your organizational needs with ease.
+Built on a modern technology stack, Job Store leverages:
 
-### ✏️ In-Situ Job Profile Editing
+- **Frontend**: React with TypeScript, Redux Toolkit, and Ant Design
+- **Backend**: NestJS with GraphQL, Prisma ORM, and Elasticsearch
+- **Authentication**: Keycloak integration with IDIR/BCeID via SiteMinder
+- **Infrastructure**: Containerized deployment on OpenShift with PostgreSQL database
+- **DevOps**: CI/CD pipelines with automated testing and deployment
 
-- Directly edit job profiles within the platform.
-- Make quick updates and revisions without leaving the app.
+### Who Uses Job Store?
 
-### 📨 Classification Review Requests
-
-- Submit position requests for classification review.
-
-### 🔄 Integration with PeopleSoft and CRM
-
-- Create positions in PeopleSoft
-- Keep track of position requests in CRM and view status changes inside JobStore
+- **Hiring Managers**: Create position requests and track their progress
+- **Classification Specialists**: Review and process classification requests
+- **Total Compensation**: Creates and updates job profiles
 
 ## Project Structure
 
 ### Architecture
 
-This architecture integrates authentication, frontend and backend services, and PeopleSoft and CRM external systems. Users authenticate via SiteMinder and Keycloak using Active Directory credentials (IDIR/BCeID). The frontend, built with React, communicates with a NestJS backend hosted in Docker containers on the SILVER OpenShift cluster, with PostgreSQL managing the database schema. The backend interacts with TELUS CRM endpoints to create, retrieve, and update incidents via REST APIs and connects to PSA PeopleSoft APIs for data retrieval and updates using an Integration Broker and Component Interfaces. For detailed interactions, refer to the [architecture diagram](/docs/architecture/readme.md).
+This architecture integrates authentication, frontend and backend services, and PeopleSoft and CRM external systems. Users authenticate via SiteMinder and Keycloak using Active Directory credentials (IDIR/BCeID). The frontend, built with React, communicates with a NestJS backend hosted in Docker containers on the SILVER OpenShift cluster, with PostgreSQL managing the database schema. The backend interacts with Oracle CRM endpoints to create, retrieve, and update incidents via REST APIs and connects to PSA PeopleSoft APIs for data retrieval and updates using an Integration Broker and Component Interfaces. For detailed interactions, refer to the [architecture diagram](/docs/architecture/readme.md).
 
 ### Applications
 
@@ -617,3 +617,4 @@ Profiles that have "Administrative Services" Job Family do not require verificat
 - package upgrades
 - monorepo, linting, tsconfig
 - the deployment process to openshift, including seeding hasn't been verified since the application was deployed initially
+- accessibility notes: accessible components, need for accessible profile view
