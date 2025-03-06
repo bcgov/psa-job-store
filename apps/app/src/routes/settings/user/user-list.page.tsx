@@ -168,7 +168,7 @@ export const UserListPage = () => {
                 align: 'center',
                 title: 'Actions',
                 render: (_, record) => (
-                  <Link to={`${record.id}`}>
+                  <Link to={`${record.metadata?.peoplesoft?.employee_id}`}>
                     <Tooltip title="Manage user">
                       <Button icon={<SettingOutlined />} />
                     </Tooltip>

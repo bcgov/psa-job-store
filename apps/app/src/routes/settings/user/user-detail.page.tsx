@@ -3,33 +3,34 @@ import { useEffect } from 'react';
 import { useParams } from 'react-router-dom';
 import { PageHeader } from '../../../components/app/page-header.component';
 import ContentWrapper from '../../../components/content-wrapper.component';
-import { useLazyGetUserForSettingsQuery } from '../../../redux/services/graphql-api/settings/settings.api';
+import { useLazyGetUserByEmployeeIdQuery } from '../../../redux/services/graphql-api/settings/settings.api';
 import NotFoundComponent from '../../not-found/404';
 import { AssignRolesCard } from './components/assign-roles-card.component';
 import { OrgChartAccessCard } from './components/org-chart-access-card.component';
 import { OtherDetailsCard } from './components/other-details-card.component';
 
 export const UserDetailPage = () => {
-  const { id } = useParams();
-  const [userTrigger, { data, isFetching: userIsFetching }] = useLazyGetUserForSettingsQuery();
+  const { employeeId } = useParams();
+  const [userTrigger, { data, isFetching: userIsFetching }] = useLazyGetUserByEmployeeIdQuery();
 
   useEffect(() => {
-    if (id != null) userTrigger(id);
-  }, [id]);
+    if (employeeId != null) userTrigger(employeeId);
+  }, [employeeId]);
+  console.log('data: ', data);
 
-  return !userIsFetching && data && !data?.user ? (
+  return !userIsFetching && data && !data?.userByEmployeeId ? (
     <NotFoundComponent entity="User" />
   ) : (
     <>
       <PageHeader
-        title={userIsFetching ? <Spin spinning /> : data?.user?.name}
-        additionalBreadcrumb={{ title: data?.user?.name }}
+        title={userIsFetching ? <Spin spinning /> : data?.userByEmployeeId?.name}
+        additionalBreadcrumb={{ title: data?.userByEmployeeId?.name }}
       />
       <ContentWrapper>
         <Space direction="vertical" style={{ marginTop: '1rem', width: '100%' }}>
-          <AssignRolesCard user={data?.user} />
-          <OrgChartAccessCard user={data?.user} />
-          <OtherDetailsCard user={data?.user} />
+          <AssignRolesCard user={data?.userByEmployeeId} />
+          <OrgChartAccessCard user={data?.userByEmployeeId} />
+          <OtherDetailsCard user={data?.userByEmployeeId} />
         </Space>
       </ContentWrapper>
     </>
