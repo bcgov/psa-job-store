@@ -13,7 +13,7 @@ Job Store is a modern web application that addresses the challenges of position 
 ### Core Capabilities
 
 - **Organizational Visualization**: Interactive org charts that provide a clear view of reporting relationships and position hierarchies
-- **Position Management**: End-to-end workflow for creating, modifying, and tracking positions
+- **Position Management**: End-to-end workflow for creating, modifying, and tracking position requests
 - **Job Profile Library**: Centralized repository of standardized job profiles with search capabilities
 - **Classification Process**: Streamlined workflow for position classification requests and approvals
 - **System Integration**: Bidirectional synchronization with PeopleSoft HCM and Oracle CRM
@@ -94,65 +94,6 @@ The project uses GitHub Actions workflows and custom actions for automating the 
 ### Deployments
 
 The project is deployed on OpenShift using templates and Kustomize. For more information, see [deployments/README.md](/deployments/README.md) and [deployments/DEVELOPER.md](/deployments/DEVELOPER.md)
-
-## Logging System
-
-The PSA Job Store implements a comprehensive logging system that captures both backend API logs and frontend application errors. This system helps with debugging, monitoring, and troubleshooting issues in production and development environments.
-
-### API Logging
-
-The backend API uses a structured logging approach based on the following components:
-
-#### Logger Configuration
-
-- **Pino Logger**: The API uses [Pino](https://getpino.io/) as the primary logging library, configured through the `nestjs-pino` module.
-- **Request ID Tracking**: Each request is assigned a unique ID for tracing through the system.
-- **User Context**: Logs include user information when available, helping to trace actions to specific users.
-
-#### Log Storage
-
-- **Console Output**: In development, logs are formatted with `pino-pretty` for readability.
-- **File Storage**: In production, logs are stored in `/tmp/log/api.log` for persistence.
-- **Log Rotation**: The system handles log rotation to prevent excessive file sizes.
-
-#### GraphQL Error Logging
-
-- **Apollo Plugin**: A custom Apollo Server plugin captures and logs GraphQL errors.
-- **Error Formatting**: GraphQL errors are formatted before being returned to clients, with sensitive information, such as stack trace removed in production (see `graphql-error.formatter.ts` file).
-
-#### Service-Level Logging
-
-- **Global Logger**: Services can use the `globalLogger` for consistent logging across the application. This is used to keep track of sensitive changes in the application, such as user role changes, position request status changes, etc.
-
-### Frontend Error Logging
-
-The frontend application implements error logging that sends errors to the backend:
-
-#### Error Capture Mechanisms
-
-- **Error Boundary**: React Error Boundary components capture component errors and prevent the entire application from crashing. Any time users are presented with a front end error, that error gets submitted to the server.
-
-#### Error Logging Service
-
-- **`sendLogToServer` Function**: Captures error details including message, stack trace, timestamp, and URL path.
-- **REST Endpoint**: Errors are sent to the `/logs/log` endpoint on the backend API.
-
-#### Backend Storage
-
-- **App Log Service**: The backend stores frontend errors in a dedicated log file (`/tmp/log/app.log`).
-- **Error Context**: Logs include user ID and path information for better context.
-
-### Log Analysis
-
-- **Structured Format**: All logs are in JSON format for easy parsing and analysis.
-- **Correlation**: Request IDs and user IDs help correlate related log entries.
-- **Environment Variables**: Logging behavior can be controlled through environment variables:
-  - `NODE_ENV`: Controls log level and formatting
-  - `SKIP_LOGGING`: Can disable file logging when set to 'true'
-
-### Note
-
-- **GraphQL Query Redaction**: Large binary data in GraphQL queries (like PNG images) is redacted with `[REDACTED]`.
 
 ## Running the project
 
@@ -269,6 +210,65 @@ To genereate coverage report, run with `--coverage` flag
 ### Unit tests in GitHub actions
 
 Unit tests also run automatically on GitHub actions any time there is a commit to the `test` branch
+
+## Logging System
+
+The PSA Job Store implements a comprehensive logging system that captures both backend API logs and frontend application errors. This system helps with debugging, monitoring, and troubleshooting issues in production and development environments.
+
+### API Logging
+
+The backend API uses a structured logging approach based on the following components:
+
+#### Logger Configuration
+
+- **Pino Logger**: The API uses [Pino](https://getpino.io/) as the primary logging library, configured through the `nestjs-pino` module.
+- **Request ID Tracking**: Each request is assigned a unique ID for tracing through the system.
+- **User Context**: Logs include user information when available, helping to trace actions to specific users.
+
+#### Log Storage
+
+- **Console Output**: In development, logs are formatted with `pino-pretty` for readability.
+- **File Storage**: In production, logs are stored in `/tmp/log/api.log` for persistence.
+- **Log Rotation**: The system handles log rotation to prevent excessive file sizes.
+
+#### GraphQL Error Logging
+
+- **Apollo Plugin**: A custom Apollo Server plugin captures and logs GraphQL errors.
+- **Error Formatting**: GraphQL errors are formatted before being returned to clients, with sensitive information, such as stack trace removed in production (see `graphql-error.formatter.ts` file).
+
+#### Service-Level Logging
+
+- **Global Logger**: Services can use the `globalLogger` for consistent logging across the application. This is used to keep track of sensitive changes in the application, such as user role changes, position request status changes, etc.
+
+### Frontend Error Logging
+
+The frontend application implements error logging that sends errors to the backend:
+
+#### Error Capture Mechanisms
+
+- **Error Boundary**: React Error Boundary components capture component errors and prevent the entire application from crashing. Any time users are presented with a front end error, that error gets submitted to the server.
+
+#### Error Logging Service
+
+- **`sendLogToServer` Function**: Captures error details including message, stack trace, timestamp, and URL path.
+- **REST Endpoint**: Errors are sent to the `/logs/log` endpoint on the backend API.
+
+#### Backend Storage
+
+- **App Log Service**: The backend stores frontend errors in a dedicated log file (`/tmp/log/app.log`).
+- **Error Context**: Logs include user ID and path information for better context.
+
+### Log Analysis
+
+- **Structured Format**: All logs are in JSON format for easy parsing and analysis.
+- **Correlation**: Request IDs and user IDs help correlate related log entries.
+- **Environment Variables**: Logging behavior can be controlled through environment variables:
+  - `NODE_ENV`: Controls log level and formatting
+  - `SKIP_LOGGING`: Can disable file logging when set to 'true'
+
+### Note
+
+- **GraphQL Query Redaction**: Large binary data in GraphQL queries (like PNG images) is redacted with `[REDACTED]`.
 
 ## Husky Scripts
 
@@ -609,9 +609,35 @@ husky - command not found in PATH=/mingw64/libexec/git-core:/mingw64/bin:/usr/bi
 - Check that system PATH variable contains `C:\Program Files\Git\bin` (path containing sh.exe) AND that it's first in the list
 ```
 
-## Education verification override for "Administrative Services" Job Family
+## Technical debt or pending improvements
+
+### Education verification override for "Administrative Services" Job Family
 
 Profiles that have "Administrative Services" Job Family do not require verification if user makes any changes to the "Education" section when going throught he position request creation wizard. This is hard-coded throughout the application and ideally should be formalized into a formal feature. A similar request was received for a different case, so it may be desirable to implemnt this feature for Total Compensation users (https://citz-do.atlassian.net/browse/AL-1144)
+
+### React code restructuring
+
+Some React modules, such as Total Compensation Job Profile editing forms could be refactored into smaller, more reusable components.
+
+### Automated testing
+
+While the project contains E2E tests as well as unit tests for front end and backend, they are far from being comprehensive and the coverage of them could be improved.
+
+### Accessibility improvements
+
+The job profile view currently uses a tabular approach to displaying the data, which is not accessible to screen readers. To deal with this issue, the tabular view is made invisible to screen readers and an alternative, plain text view is displayed. The issue with this approach is that the page does not focus on relevant elements as user goes through the content, making it more challenging for users who use both the screen reader as well as visual cues. Replace the tabular view with a custom component that has similar visual layout but that can be followed by the screen reader as if it's a plain text document.
+
+### Dependency management and updates
+
+The project uses a variety of dependencies across its monorepo structure. Regular audits and updates of these dependencies should be scheduled to ensure security patches are applied and to take advantage of new features. Consider implementing automated dependency update checks as part of the CI/CD pipeline.
+
+### Type safety improvements
+
+There instances of `any` types in the codebase. Improving type safety by replacing these with proper interfaces or type definitions would enhance code maintainability and reduce potential runtime errors.
+
+### Windows development environment
+
+Local development on Windows machines was done in Windows environment. To improve consistency with the development experience on MacOS, it is recommended to move the project into WSL.
 
 ### Documentation todo
 
