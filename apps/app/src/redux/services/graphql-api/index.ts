@@ -45,7 +45,8 @@ export function checkForExpiredSessionError(response: any) {
 
   if (
     response?.errors?.[0]?.message == 'UNAUTHENTICATED' ||
-    response?.errors?.[0]?.extensions?.code == 'UNAUTHENTICATED'
+    response?.errors?.[0]?.extensions?.code == 'UNAUTHENTICATED' ||
+    response?.errors?.[0]?.message.includes('Unauthenticated')
   ) {
     return true;
   }
@@ -118,6 +119,36 @@ const baseQuery = async (args: any, api: any, extraOptions: any) => {
       }
       window.location.href = '/auth/login';
       throw error;
+    }
+
+    // Check for GraphQL errors in the meta field
+    if (error && error.response && error.response.errors && !isToastShown) {
+      // Extract the first error message
+      const errorCode = error.response.errors[0]?.extensions?.code;
+      const errorMessage = error.response.errors[0]?.message;
+
+      // if it's unauthorized, do not show the error toast -  the system will handle the redirect to login page
+      if (errorCode == 'UNAUTHENTICATED') return error;
+
+      if (errorMessage.startsWith('ALEXANDRIA_ERROR:') && !suppressErrorToast) {
+        isToastShown = true;
+        errorToastShown = true;
+        const messageParts = errorMessage.split(':');
+        const errorDescription = messageParts[1];
+        notification.error({
+          placement: 'bottomRight',
+          duration: 0,
+          message: 'Error',
+          description: errorDescription,
+          onClose: () => {
+            isToastShown = false; // Reset the flag when the toast is closed
+          },
+        });
+        throw new Error(errorMessage);
+      }
+
+      // Throw a custom error with the extracted message
+      throw new Error(errorMessage);
     }
 
     // Handle any other unexpected errors
