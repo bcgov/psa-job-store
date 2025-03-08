@@ -17,7 +17,7 @@ export class SessionAuthGuard extends AuthGuard('oidc') {
   }
 
   private isAuthenticated = (request: Request) => {
-    return request.isAuthenticated();
+    return request.user && request.isAuthenticated();
   };
 
   private userHasRoles = (request: Request, requiredRoles: string[]) => {
@@ -31,15 +31,28 @@ export class SessionAuthGuard extends AuthGuard('oidc') {
   canActivate(context: ExecutionContext) {
     const gqlContext = GqlExecutionContext.create(context);
     const request: Request = gqlContext.getContext().req;
-    const requiredRoles: string[] | undefined = this.reflector.get<string[]>(ROLES, context.getHandler());
 
     const isAuthenticated = this.isAuthenticated(request);
-    const hasRoles = this.userHasRoles(request, requiredRoles);
 
     if (!isAuthenticated) {
-      throw new UnauthorizedException('UNAUTHENTICATED');
+      throw new UnauthorizedException({
+        message: 'ALEXANDRIA_ERROR: Unauthenticated - You must be logged in to access this resource',
+        extensions: {
+          code: 'UNAUTHENTICATED',
+        },
+      });
     }
+    const requiredRoles: string[] | undefined = this.reflector.get<string[]>(ROLES, context.getHandler());
 
+    const hasRoles = this.userHasRoles(request, requiredRoles);
+    if (!hasRoles) {
+      throw new UnauthorizedException({
+        message: 'ALEXANDRIA_ERROR: Unauthorized - You do not have the required roles to access this resource',
+        extensions: {
+          code: 'UNAUTHENTICATED',
+        },
+      });
+    }
     return isAuthenticated && hasRoles;
   }
 }
