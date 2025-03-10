@@ -1,6 +1,6 @@
 import { CopyOutlined, MailOutlined, QuestionCircleOutlined, TeamOutlined } from '@ant-design/icons';
 import { Button, Menu, message } from 'antd';
-import AccessiblePopoverMenu from './common/components/accessible-popover-menu';
+import AccessiblePopoverMenu from '../shared/accessible-popover-menu/accessible-popover-menu';
 
 export const HelpButton = () => {
   const content = (

@@ -3,8 +3,8 @@ import debounce from 'lodash.debounce';
 import React, { useCallback, useEffect, useMemo, useState } from 'react';
 
 import { autolayout } from 'common-kit';
-import LoadingComponent from '../../../../components/app/common/components/loading.component';
 import { PositionProvider } from '../../../../components/app/common/contexts/position.context';
+import LoadingComponent from '../../../../components/shared/loading-component/loading.component';
 import { useLazyGetOrgChartQuery } from '../../../../redux/services/graphql-api/org-chart.api';
 import { initialElements } from '../../constants/initial-elements.constant';
 import { Elements } from '../../interfaces/elements.interface';

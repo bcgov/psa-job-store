@@ -1928,11 +1928,6 @@ export class PositionRequestApiService {
     return [position, positionRequestNeedsReview.result];
   }
 
-  //deprecated
-  async updatePositionRequestStatus(id: number, status: number) {
-    return await this.crmService.updateIncidentStatus(id, status);
-  }
-
   async getSuggestedManagers(positionNumber: string, positionRequestId: number): Promise<SuggestedManager[]> {
     // console.log('getSuggestedManagers: ', positionNumber, positionRequestId);
 

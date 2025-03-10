@@ -6,18 +6,6 @@ import ContentWrapper from '../../components/content-wrapper.component';
 import TotalCompProfilesTable from '../total-comp-draft-profiles/components/total-comp-draft-profiles-table.component';
 
 export const TotalCompArchivedProfilesPage = () => {
-  // const ministriesData = useGetJobProfilesDraftsMinistriesQuery().data?.jobProfilesDraftsMinistries;
-  // console.log('ministriesData: ', ministriesData);
-  // const careerGroupData = useGetJobProfilesDraftsCareerGroupsQuery().data?.jobProfilesDraftsCareerGroups;
-
-  // const [hasData, setHasData] = useState(false);
-
-  // const handleDataAvailability = (isDataAvailable: boolean) => {
-  //   setHasData(isDataAvailable);
-  // };
-
-  // if (!ministriesData) return <LoadingSpinnerWithMessage />;
-
   return (
     <>
       <PageHeader
@@ -26,20 +14,12 @@ export const TotalCompArchivedProfilesPage = () => {
       />
 
       <ContentWrapper>
-        {/* {hasData && (
-          <JobProfileSearch
-            searchPlaceHolderText={'Search by job title or job store number'}
-            fullWidth={true}
-          />
-        )} */}
-
         <TotalCompProfilesTable
           state="DRAFT"
           is_archived={true}
           itemsPerPage={10}
           tableTitle={'Job profiles'}
           style={{ marginTop: '1rem', display: 'flex', flexDirection: 'column', flexGrow: 1 }}
-          // onDataAvailable={handleDataAvailability}
         ></TotalCompProfilesTable>
       </ContentWrapper>
     </>

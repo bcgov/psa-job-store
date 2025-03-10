@@ -5,11 +5,11 @@ import { MenuProps } from 'antd/es/menu';
 import copy from 'copy-to-clipboard';
 import { useState } from 'react';
 import { useParams } from 'react-router-dom';
-import LoadingSpinnerWithMessage from '../../components/app/common/components/loading.component';
-import PositionProfile from '../../components/app/common/components/positionProfile';
 import '../../components/app/common/css/filtered-table.component.css';
 import { PageHeader } from '../../components/app/page-header.component';
 import { DownloadJobProfileComponent } from '../../components/shared/download-job-profile/download-job-profile.component';
+import LoadingComponent from '../../components/shared/loading-component/loading.component';
+import PositionProfile from '../../components/shared/position-profile/positionProfile';
 import { useGetPositionRequestForDeptQuery } from '../../redux/services/graphql-api/position-request.api';
 import { useTestUser } from '../../utils/useTestUser';
 import { JobProfileWithDiff } from '../classification-tasks/components/job-profile-with-diff.component';
@@ -50,7 +50,7 @@ export const ViewPositionPage = () => {
   };
 
   if (!data) {
-    return <LoadingSpinnerWithMessage />;
+    return <LoadingComponent />;
   }
 
   // console.log('positionRequest data: ', data);

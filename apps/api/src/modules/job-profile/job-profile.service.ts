@@ -947,7 +947,6 @@ export class JobProfileService {
           },
         }),
         number: data.number,
-        state: 'PUBLISHED',
       },
     });
 

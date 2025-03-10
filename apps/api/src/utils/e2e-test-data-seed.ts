@@ -2381,7 +2381,7 @@ export async function seed(prismaInp?: ExtendedPrismaClientType | ExtendedPrisma
   //   // File written successfully
   // });
 
-  console.log('inserting profiles: ', other_profiles.length);
+  console.log('inserting additional profiles: ', other_profiles.length);
   const jobProfiles =
     other_profiles.length > 0
       ? [...other_profiles, profile208]
@@ -2431,7 +2431,7 @@ export async function seed(prismaInp?: ExtendedPrismaClientType | ExtendedPrisma
 
   let other_classifications: any[] = [] as any[];
   try {
-    console.log('importing other classifications1');
+    // console.log('importing other classifications1');
     const path =
       process.env.NODE_ENV == 'development' ? '../../other-classifications.js' : '/tmp/log/other-classifications.js';
 

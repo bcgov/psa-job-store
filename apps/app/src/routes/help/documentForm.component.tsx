@@ -18,7 +18,7 @@ import {
 } from 'antd';
 import React, { useEffect, useState } from 'react';
 import { useNavigate } from 'react-router-dom';
-import AccessibleTreeSelect from '../../components/app/common/components/accessible-tree-select';
+import AccessibleTreeSelect from '../../components/shared/accessible-tree-select/accessible-tree-select';
 import { useLazyCheckDocumentURLQuery } from '../../redux/services/graphql-api/document.api';
 import { useGetJobFamiliesQuery } from '../../redux/services/graphql-api/job-family.api';
 import { useGetJobProfileStreamsQuery } from '../../redux/services/graphql-api/job-profile-stream';

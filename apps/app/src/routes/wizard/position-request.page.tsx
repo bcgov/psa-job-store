@@ -6,10 +6,10 @@ import copy from 'copy-to-clipboard';
 import dayjs from 'dayjs';
 import { cloneElement, useEffect, useRef, useState } from 'react';
 import { Link, useBlocker, useLocation, useNavigate, useParams } from 'react-router-dom';
-import LoadingSpinnerWithMessage from '../../components/app/common/components/loading.component';
-import PositionProfile from '../../components/app/common/components/positionProfile';
-import { statusIconColorMap } from '../../components/app/utils/statusIconColorMap.utils';
+import { statusIconColorMap } from '../../components/app/common/utils/statusIconColorMap.utils';
 import { DownloadJobProfileComponent } from '../../components/shared/download-job-profile/download-job-profile.component';
+import LoadingComponent from '../../components/shared/loading-component/loading.component';
+import PositionProfile from '../../components/shared/position-profile/positionProfile';
 import { useLazyGetClassificationsQuery } from '../../redux/services/graphql-api/classification.api';
 import {
   GetPositionRequestResponse,
@@ -293,7 +293,7 @@ export const PositionRequestPage = () => {
   };
 
   const renderStepComponent = () => {
-    if (!wizardContextPositionRequestData) return <LoadingSpinnerWithMessage />;
+    if (!wizardContextPositionRequestData) return <LoadingComponent />;
 
     switch (currentStep) {
       case 0:
@@ -361,7 +361,7 @@ export const PositionRequestPage = () => {
           />
         );
       default:
-        return <LoadingSpinnerWithMessage />;
+        return <LoadingComponent />;
     }
   };
 
@@ -708,7 +708,7 @@ export const PositionRequestPage = () => {
       : []),
   ];
 
-  if (classificationsDataLoading || !classificationsFetched) return <LoadingSpinnerWithMessage />;
+  if (classificationsDataLoading || !classificationsFetched) return <LoadingComponent />;
 
   return !(wizardContextPositionRequestData || positionRequestData) && !isLoading ? (
     <NotFoundComponent entity="Position request" />
@@ -785,7 +785,7 @@ export const PositionRequestPage = () => {
                   data-testid="tab-bar"
                 />
               ) : (
-                <LoadingSpinnerWithMessage />
+                <LoadingComponent />
               )}
             </div>
           </WizardPageWrapper>
@@ -806,7 +806,7 @@ export const PositionRequestPage = () => {
               <p>You can resume the process from "My Position Requests" page</p>
             </Modal>
           )}
-          {currentStep !== null ? renderStepComponent() : <LoadingSpinnerWithMessage />}
+          {currentStep !== null ? renderStepComponent() : <LoadingComponent />}
         </>
       )}
     </>

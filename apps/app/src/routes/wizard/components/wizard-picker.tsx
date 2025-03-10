@@ -76,9 +76,6 @@ const WizardPicker: React.FC<WizardPickerProps> = ({
     }
   }, [data, fields]);
 
-  // if (isLoading) return <LoadingSpinnerWithMessage mode="small" />;
-  // if (error) return <p>An error occurred</p>;
-
   const onAdd = (selectedItems: string[]) => {
     // Create a map of existing fields for quick lookup
     const existingFields = new Map(fields.map((field) => [field.text, field]));

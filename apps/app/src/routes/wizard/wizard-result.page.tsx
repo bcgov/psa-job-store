@@ -29,9 +29,9 @@ import { Divider } from 'antd/lib';
 import { useEffect, useState } from 'react';
 import { Link, useNavigate } from 'react-router-dom';
 import { useReactFlow } from 'reactflow';
-import LoadingSpinnerWithMessage from '../../components/app/common/components/loading.component';
 import { MissingCRMAccountAlert } from '../../components/app/missing-crm-account-alert.component';
 import ContentWrapper from '../../components/content-wrapper.component';
+import LoadingComponent from '../../components/shared/loading-component/loading.component';
 import { useTypedSelector } from '../../redux/redux.hooks';
 import { useLazyGetJobProfileQuery } from '../../redux/services/graphql-api/job-profile.api';
 import {
@@ -385,7 +385,7 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
   };
 
   if (positionNeedsRivewLoading || isFetchingPositionNeedsRivew || !orgChartDataForPng || originalJobProfileFetching)
-    return <LoadingSpinnerWithMessage />;
+    return <LoadingComponent />;
 
   return (
     <>

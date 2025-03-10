@@ -28,8 +28,8 @@ import {
 import { CSSProperties, useCallback, useContext, useEffect, useMemo, useState } from 'react';
 import { Controller, useFieldArray, useWatch } from 'react-hook-form';
 import { useParams } from 'react-router-dom';
-import LoadingSpinnerWithMessage from '../../../components/app/common/components/loading.component';
-import MinistriesSelect from '../../../components/app/common/components/ministries-select.component';
+import LoadingComponent from '../../../components/shared/loading-component/loading.component';
+import MinistriesSelect from '../../../components/shared/ministries-select/ministries-select.component';
 import {
   useGetFilteredClassificationsQuery,
   useGetGroupedClassificationsQuery,
@@ -478,7 +478,7 @@ export const BasicDetails: React.FC<BasicDetailsProps> = ({}) => {
     if (classification) {
       // If a classification is found, look for a corresponding OEX classification
       const oexClassification = classificationsData?.classifications.find(
-        (c) => c.employee_group_id == 'OEX' && c.grade == classification.grade && c.code == classification.code,
+        (c) => c.employee_group_id == 'OEX' && c.code.toLowerCase() == classification.code.toLowerCase(), // && c.grade == classification.grade 
       );
 
       if (oexClassification) {
@@ -1048,10 +1048,10 @@ export const BasicDetails: React.FC<BasicDetailsProps> = ({}) => {
             ? classificationsData?.classifications.filter((c) => c.employee_group_id == selected?.employeeGroup)
             : selected?.employeeGroup == 'OEX'
               ? classificationsData?.classifications.filter(
-                  (c) => c.employee_group_id == classification?.employee_group_id && classification.code == c.code,
+                  (c) => c.employee_group_id == classification?.employee_group_id && classification.code.toLowerCase() == c.code.toLowerCase(),
                 )
               : classificationsData?.classifications.filter(
-                  (c) => c.employee_group_id == selected?.employeeGroup && otherClassification?.code == c.code,
+                  (c) => c.employee_group_id == selected?.employeeGroup && otherClassification?.code.toLowerCase() == c.code.toLowerCase(),
                 );
       } else {
         list = classificationsData?.classifications.filter((c) => c.employee_group_id == selected?.employeeGroup);
@@ -1062,7 +1062,7 @@ export const BasicDetails: React.FC<BasicDetailsProps> = ({}) => {
     [classificationsData?.classifications, selectedEmployeeClassificationGroups],
   );
 
-  if (isLoading) return <LoadingSpinnerWithMessage />;
+  if (isLoading) return <LoadingComponent />;
 
   return (
     <>

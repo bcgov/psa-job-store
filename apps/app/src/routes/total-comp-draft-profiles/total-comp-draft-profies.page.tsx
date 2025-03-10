@@ -1,10 +1,10 @@
 /* eslint-disable @typescript-eslint/no-explicit-any */
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { useState } from 'react';
-import LoadingSpinnerWithMessage from '../../components/app/common/components/loading.component';
 import '../../components/app/common/css/filtered-table.page.css';
 import { PageHeader } from '../../components/app/page-header.component';
 import ContentWrapper from '../../components/content-wrapper.component';
+import LoadingComponent from '../../components/shared/loading-component/loading.component';
 import {
   useGetJobProfilesDraftsClassificationsQuery,
   useGetJobProfilesDraftsMinistriesQuery,
@@ -23,7 +23,7 @@ export const TotalCompDraftProfilesPage = () => {
     setHasData(isDataAvailable);
   };
 
-  if (!ministriesData || !classificationData) return <LoadingSpinnerWithMessage />;
+  if (!ministriesData || !classificationData) return <LoadingComponent />;
 
   return (
     <>

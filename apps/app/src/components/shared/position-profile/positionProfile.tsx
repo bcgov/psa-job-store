@@ -2,9 +2,9 @@
 import { CopyOutlined } from '@ant-design/icons';
 import { message, Skeleton, Typography } from 'antd';
 import React, { useEffect, useState } from 'react';
-import { useGetOrganizationQuery } from '../../../../redux/services/graphql-api/organization';
-import { PositionProfileModel, useGetPositionProfileQuery } from '../../../../redux/services/graphql-api/position.api';
-import LoadingSpinnerWithMessage from '../components/loading.component';
+import { useGetOrganizationQuery } from '../../../redux/services/graphql-api/organization';
+import { PositionProfileModel, useGetPositionProfileQuery } from '../../../redux/services/graphql-api/position.api';
+import LoadingComponent from '../loading-component/loading.component';
 
 interface PositionProfileProps {
   positionNumber?: number | string | null | undefined;
@@ -96,7 +96,7 @@ const PositionProfile: React.FC<PositionProfileProps> = ({
     <>
       {isLoading || isOrganizationFetching ? (
         loadingStyle === 'spinner' ? (
-          <LoadingSpinnerWithMessage mode="small" />
+          <LoadingComponent mode="small" />
         ) : (
           <Skeleton.Input active={true} size={'small'} />
         )

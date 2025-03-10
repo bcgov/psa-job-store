@@ -66,9 +66,6 @@ const WizardProfessionalRegistrationPicker: React.FC<WizardProfessionalRegistrat
     }
   }, [data, fields]);
 
-  // if (isLoading) return <LoadingSpinnerWithMessage mode="small" />;
-  // if (error) return <p>An error occurred</p>;
-
   const onAdd = (selectedItems: string[]) => {
     // console.log('onAdd selectedItems: ', selectedItems);
     // console.log('selectableOptions: ', selectableOptions);
