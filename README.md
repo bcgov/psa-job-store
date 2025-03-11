@@ -611,10 +611,6 @@ husky - command not found in PATH=/mingw64/libexec/git-core:/mingw64/bin:/usr/bi
 
 ## Technical debt or pending improvements
 
-### Education verification override for "Administrative Services" Job Family
-
-Profiles that have "Administrative Services" Job Family do not require verification if user makes any changes to the "Education" section when going throught he position request creation wizard. This is hard-coded throughout the application and ideally should be formalized into a formal feature. A similar request was received for a different case, so it may be desirable to implemnt this feature for Total Compensation users (https://citz-do.atlassian.net/browse/AL-1144)
-
 ### React code restructuring
 
 Some React modules, such as Total Compensation Job Profile editing forms could be refactored into smaller, more reusable components.
@@ -646,3 +642,4 @@ Local development on Windows machines was done in Windows environment. To improv
 - monorepo, linting, tsconfig
 - the deployment process to openshift, including seeding hasn't been verified since the application was deployed initially
 - accessibility notes: accessible components, need for accessible profile view
+- how forms are constructed - react-hook form, controller

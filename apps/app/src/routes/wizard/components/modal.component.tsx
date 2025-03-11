@@ -113,11 +113,8 @@ export const useModalActions = ({
     (props: Partial<Omit<WizardModalProps, 'action'>> & { action: () => void }) => {
       // console.log('showModal called');
       if (alertShown || !props.isSignificant) {
-        // console.log(
-        //   'alert already shown or field not significant, calling action + trigger, alertShow/props.isSignificant: ',
-        //   alertShown,
-        //   props.isSignificant,
-        // );
+        // If alert is already shown or the item is not significant (either field or section),
+        // just execute the action without showing the modal
         props.action();
         trigger?.();
         return;
@@ -162,10 +159,11 @@ export const useModalActions = ({
         action: () => {}, // Provide a no-op function as the action
         inputRef,
         actionType: 'focus',
-        isSignificant: field?.is_significant ?? true,
+        // Check both field significance and section significance
+        isSignificant: (field?.is_significant ?? true) && isSignificant,
       });
     },
-    [showModal],
+    [showModal, isSignificant],
   );
 
   const handleAddModal = useCallback(

@@ -16,6 +16,7 @@ interface UseFormFieldsProps {
   fieldName: string;
   significant?: true | undefined;
   significant_add?: boolean | undefined;
+  sectionSignificant?: boolean;
 }
 
 const useFormFields = ({
@@ -25,6 +26,7 @@ const useFormFields = ({
   originalFields,
   significant,
   significant_add = true,
+  sectionSignificant = true,
 }: UseFormFieldsProps) => {
   const { fields, append, remove, update } = useFieldArray({
     control: useFormReturn.control,
@@ -41,14 +43,14 @@ const useFormFields = ({
         onOk: () => {
           // If confirmed, remove the item
           remove(index);
-          if (significant && currentValues[index].is_significant)
+          if (significant && currentValues[index].is_significant && sectionSignificant)
             setEditedFields && setEditedFields((prev) => ({ ...prev, [index]: false }));
         },
       });
     } else {
       // If it's an original field, mark as disabled
       update(index, { ...currentValues[index], disabled: true });
-      if (significant && currentValues[index].is_significant)
+      if (significant && currentValues[index].is_significant && sectionSignificant)
         setEditedFields && setEditedFields((prev) => ({ ...prev, [index]: true }));
     }
   };
@@ -57,7 +59,7 @@ const useFormFields = ({
     const currentValues = useFormReturn.getValues(fieldName);
     update(index, { ...currentValues[index], disabled: false });
 
-    if (currentValues[index].is_significant)
+    if (currentValues[index].is_significant && sectionSignificant)
       setEditedFields &&
         setEditedFields((prev) => ({
           ...prev,
@@ -66,7 +68,7 @@ const useFormFields = ({
   };
 
   const handleAddNew = () => {
-    if (significant && significant_add)
+    if (significant && significant_add && sectionSignificant)
       setEditedFields && setEditedFields((prev) => ({ ...prev, [fields.length]: true }));
     append({
       text: '',

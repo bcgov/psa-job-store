@@ -24,6 +24,7 @@ interface ProfessionalRegistrationRequirementsProps {
   formErrors: any;
   trigger: UseFormTrigger<JobProfileValidationModel>;
   pickerData: any;
+  sectionSignificant?: boolean;
 }
 
 const ProfessionalRegistrationRequirements: React.FC<ProfessionalRegistrationRequirementsProps> = ({
@@ -36,6 +37,7 @@ const ProfessionalRegistrationRequirements: React.FC<ProfessionalRegistrationReq
   formErrors,
   trigger,
   pickerData,
+  sectionSignificant = true,
 }) => {
   const { profRegAlertShown, setProfRegAlertShown } = useWizardContext();
 
@@ -45,6 +47,7 @@ const ProfessionalRegistrationRequirements: React.FC<ProfessionalRegistrationReq
     setEditedFields: setEditedFields,
     originalFields: originalFields,
     significant: true,
+    sectionSignificant,
   });
 
   const {
@@ -54,9 +57,7 @@ const ProfessionalRegistrationRequirements: React.FC<ProfessionalRegistrationReq
   } = useFormFields({
     useFormReturn,
     fieldName: 'optional_professional_registration_requirements',
-    // setEditedFields: setEditedFields,
-    // originalFields: originalFields,
-    significant: true,
+    sectionSignificant:false,
   });
 
   const { modalProps, closeModal, handleRemoveModal, handleFocusModal, handleAddModal } = useModalActions({
@@ -65,7 +66,7 @@ const ProfessionalRegistrationRequirements: React.FC<ProfessionalRegistrationReq
     setAlertShown: setProfRegAlertShown,
     dataTestId: 'prof-reg-warning',
     trigger,
-    isSignificant: true,
+    isSignificant: sectionSignificant,
   });
 
   const renderFields = (field: any, index: number) => {
@@ -81,6 +82,7 @@ const ProfessionalRegistrationRequirements: React.FC<ProfessionalRegistrationReq
       handleRemove,
       originalFields,
       update,
+      sectionSignificant,
     };
 
     return (
@@ -144,6 +146,7 @@ const ProfessionalRegistrationRequirements: React.FC<ProfessionalRegistrationReq
             <WizardEditAddButton
               testId="add-prof-reg-button"
               isSignificant
+              sectionSignificant={sectionSignificant}
               onClick={() => handleAddModal(handleAddNew)}
             >
               Add a custom requirement

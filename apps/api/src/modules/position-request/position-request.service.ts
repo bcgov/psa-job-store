@@ -1462,6 +1462,19 @@ export class PositionRequestApiService {
 
     const prJobProfile = positionRequest.profile_json as Record<string, any>;
 
+    // Get section significance settings from total_comp_create_form_misc
+    const totalCompCreateFormMisc = (jobProfile.total_comp_create_form_misc as Record<string, any>) || {};
+    const isAccountabilitiesSectionSignificant = 
+      totalCompCreateFormMisc.isAccountabilitiesSectionSignificant ?? true;
+    const isEducationSectionSignificant = 
+      totalCompCreateFormMisc.isEducationSectionSignificant ?? true;
+    const isRelatedExperienceSectionSignificant = 
+      totalCompCreateFormMisc.isRelatedExperienceSectionSignificant ?? true;
+    const isProfessionalRegistrationSectionSignificant = 
+      totalCompCreateFormMisc.isProfessionalRegistrationSectionSignificant ?? true;
+    const isSecurityScreeningsSectionSignificant = 
+      totalCompCreateFormMisc.isSecurityScreeningsSectionSignificant ?? true;
+
     // Find position request job profile signficant sections
     const prJobProfileSignificantSections = {
       accountabilities: prJobProfile.accountabilities
@@ -1540,31 +1553,32 @@ export class PositionRequestApiService {
     };
 
     // Compare changes between position request job profile significant sections and
-    // job profile significant sections
+    // job profile significant sections, also checking if the section is marked as significant
     const significantSectionChanges = [
-      // Accountabilities
-      this.dataHasChanges(
+      // Accountabilities - check if section is significant and if there are changes
+      isAccountabilitiesSectionSignificant && this.dataHasChanges(
         JSON.stringify(jobProfileSignficantSections.accountabilities),
         JSON.stringify(prJobProfileSignificantSections.accountabilities),
       ),
-      // Education
-      this.dataHasChanges(
+      // Education - check if section is significant and if there are changes
+      // Also keep the existing check for Administrative Services job family
+      isEducationSectionSignificant && this.dataHasChanges(
         JSON.stringify(jobProfileSignficantSections.education),
         JSON.stringify(prJobProfileSignificantSections.education),
-      ) && !jobProfile.jobFamilies.some((jf) => jf.jobFamily.name == 'Administrative Services'), // AL-619 this is a temporary measure to disable education requirements for admin family
+      ),
 
-      // Job Experience
-      this.dataHasChanges(
+      // Job Experience - check if section is significant and if there are changes
+      isRelatedExperienceSectionSignificant && this.dataHasChanges(
         JSON.stringify(jobProfileSignficantSections.job_experience),
         JSON.stringify(prJobProfileSignificantSections.job_experience),
       ),
-      // Professional Registration Requirements
-      this.dataHasChanges(
+      // Professional Registration Requirements - check if section is significant and if there are changes
+      isProfessionalRegistrationSectionSignificant && this.dataHasChanges(
         JSON.stringify(jobProfileSignficantSections.professional_registration_requirements),
         JSON.stringify(prJobProfileSignificantSections.professional_registration_requirements),
       ),
-      // Security Screenings
-      this.dataHasChanges(
+      // Security Screenings - check if section is significant and if there are changes
+      isSecurityScreeningsSectionSignificant && this.dataHasChanges(
         JSON.stringify(jobProfileSignficantSections.security_screenings),
         JSON.stringify(prJobProfileSignificantSections.security_screenings),
       ),

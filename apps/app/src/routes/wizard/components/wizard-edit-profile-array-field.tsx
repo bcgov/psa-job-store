@@ -24,6 +24,7 @@ interface WizardEditProfileArrayFieldProps {
   editedFields?: { [key: number]: boolean };
   setEditedFields?: React.Dispatch<React.SetStateAction<{ [key: number]: boolean }>>;
   formErrors?: any;
+  sectionSignificant?: boolean;
 }
 
 const WizardEditProfileArrayField: React.FC<WizardEditProfileArrayFieldProps> = ({
@@ -39,12 +40,14 @@ const WizardEditProfileArrayField: React.FC<WizardEditProfileArrayFieldProps> = 
   editedFields,
   setEditedFields,
   formErrors,
+  sectionSignificant = true,
 }) => {
   const { fields, handleRemove, handleAddBack, handleAddNew, handleReset, update } = useFormFields({
     useFormReturn,
     fieldName,
     originalFields,
     setEditedFields,
+    sectionSignificant,
   });
 
   const renderFields = (field: any, index: number) => {
@@ -60,6 +63,7 @@ const WizardEditProfileArrayField: React.FC<WizardEditProfileArrayFieldProps> = 
       editedFields,
       setEditedFields,
       update,
+      sectionSignificant,
     };
 
     return <WizardEditProfileListItem {...commonProps} label={label} fieldName={fieldName} testId={testId} />;
@@ -92,6 +96,7 @@ const WizardEditProfileArrayField: React.FC<WizardEditProfileArrayFieldProps> = 
       <WizardEditAddButton
         testId={`add-${testId}-button`}
         isSignificant={false}
+        sectionSignificant={sectionSignificant}
         onClick={() => {
           handleAddNew();
         }}
