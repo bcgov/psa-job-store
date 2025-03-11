@@ -2,11 +2,10 @@
 
 ![JobStore Screenshot](/screenshot.PNG?raw=true)
 
-## Introduction
+## 1. Introduction
 
-Welcome to the BC Public Service Agency's Job Store, a comprehensive platform designed to streamline position management and organizational structure visualization across the BC Public Service. This enterprise-grade application integrates seamlessly with PeopleSoft HCM and Oracle CRM systems to provide a unified workflow for position creation, classification, and management.
-
-### What is Job Store?
+### Project Overview
+Welcome to the BC Public Service Agency's Job Store, a comprehensive platform designed to streamline position management and organizational structure visualization across the BC Public Service. This enterprise-grade application integrates with PeopleSoft HCM and Oracle CRM systems to provide a unified workflow for position creation, classification, and management.
 
 Job Store is a modern web application that addresses the challenges of position management in large government organizations. It provides an intuitive interface for navigating organizational hierarchies, creating positions, and managing job profiles—all while maintaining synchronization with core HR systems.
 
@@ -34,13 +33,63 @@ Built on a modern technology stack, Job Store leverages:
 - **Classification Specialists**: Review and process classification requests
 - **Total Compensation**: Creates and updates job profiles
 
-## Project Structure
+## 2. Getting Started
 
-### Architecture
+### Requirements
+- node >=20.11.1 <21.0.0
+
+### Installation
+
+First, clone the repository:
+
+`git clone https://github.com/bcgov/psa-job-store.git`
+
+Install dependencies:
+
+`npm i`
+
+Copy and rename `/sample.env` to `.env` and configure the variables
+
+Copy and rename `/apps/app/sample.env` to `.env` and configure the environment.
+
+Copy and rename `/apps/api/sample.env` to `.env` and configure the environment.
+
+### Running the project locally
+
+Start elastic search and postgres containers:
+
+`docker compose up -d`
+
+Build common-kit:
+
+`npm -w common-kit run build`
+
+Setup the database and seed it with test data:
+
+`npx -w api npm run migrate:reset:e2e-test`
+
+("Failed to create group: NUR" warning is normal)
+
+To see details about the meaning of various variables, see [DEVELOPER.md](deployments/DEVELOPER.md)
+
+Start API project:
+
+`npm -w api run start:dev`
+
+Start the web project:
+
+`npm -w app run dev`
+
+Visit [http://localhost:5173/](http://localhost:5173/) to see the application!
+
+
+## 3. Project Architecture
+
+### System Architecture
 
 This architecture integrates authentication, frontend and backend services, and PeopleSoft and CRM external systems. Users authenticate via SiteMinder and Keycloak using Active Directory credentials (IDIR/BCeID). The frontend, built with React, communicates with a NestJS backend hosted in Docker containers on the SILVER OpenShift cluster, with PostgreSQL managing the database schema. The backend interacts with Oracle CRM endpoints to create, retrieve, and update incidents via REST APIs and connects to PSA PeopleSoft APIs for data retrieval and updates using an Integration Broker and Component Interfaces. For detailed interactions, refer to the [architecture diagram](/docs/architecture/readme.md).
 
-### Applications
+### Applications Structure
 
 Turborepo monorepo architecture using npm workspaces:
 Apps Directory - Contains standalone applications:
@@ -59,26 +108,58 @@ Apps Directory - Contains standalone applications:
 
 [Read more](/packages/common-kit/README.md)
 
-### Database
+### Database Architecture
 
-- PostgreSQL with Prisma as the ORM
-- PGLite for in-memory database during testing
+The PSA Job Store uses PostgreSQL as its primary database with Prisma ORM for database access, migrations, and schema management.
+#### Key Components:
 
-### Testing
+- **PostgreSQL**: Enterprise-grade relational database that provides robust data storage, transaction support, and advanced querying capabilities.
+- **Prisma ORM**: Modern database toolkit that provides type-safe database access, automated migrations, and schema management.
+- **PGLite**: In-memory PostgreSQL implementation used for testing to ensure isolation and performance.
+- **Database Session Store**: Sessions are stored in the `_session` table for persistent authentication across server restarts.
 
-- Jest for unit testing
-- Cypress v13.x for end-to-end testing
-- Cucumber for behavior-driven testing (via cypress-cucumber-preprocessor)
+#### Core Data Models:
 
-### Development Tooling
+- **Job Profiles**: Comprehensive templates for positions including classifications, requirements, competencies, and reporting relationships.
+- **Position Requests**: Workflow-driven requests for creating or modifying positions with approval tracking.
+- **Users**: User accounts with role assignments and metadata from external systems.
+- **Organizations**: Hierarchical structure of ministries, departments, and business units.
+- **Classifications**: Job classifications with associated employee groups and salary bands.
 
-- TypeScript v5.x across all packages
-- ESLint and Prettier for code formatting and linting
-- Husky for Git hooks [Read more about Husky scripts](#husky-scripts)
-- Changesets for versioning and changelog management
-- Cross-env for environment variable management across platforms
-- SWC for fast TypeScript compilation (for running tests only)
-- Vite for frontend bundling and development server
+#### Database Management:
+
+- **Migrations**: Managed through Prisma with version control and rollback capabilities.
+- **Seeding**: Automated data seeding for development, testing, and production environments.
+- **Read Replicas**: Support for database read replicas to improve performance for read-heavy operations.
+
+For detailed schema information, see the [Prisma schema file](/apps/api/prisma/schema.prisma) which defines all models, relationships, and enumerations as well as [API project documentation](/apps/api/README.md)
+
+### Authentication System
+
+The PSA Job Store implements an authentication system that integrates with BC Government identity providers through Keycloak and SiteMinder.
+
+#### Key Components:
+
+- **SiteMinder**: Provides a common logon page and handles initial authentication.
+- **Active Directory**: Stores user credentials for IDIR (internal government users) and BCeID (external users).
+- **Keycloak**: Acts as an identity provider in the "PSJ Standard Realm," managing authentication tokens and user sessions.
+- **Session Management**: Express session middleware with PostgreSQL storage for persistent sessions.
+- **Role-Based Access Control**: User permissions are determined by assigned roles in Keycloak.
+
+#### User Synchronization:
+
+- User information is synchronized between Keycloak, PeopleSoft, and the application database.
+- PeopleSoft provides employee metadata including position, department, and organizational information.
+- Role assignments are managed through the application and synchronized with Keycloak.
+
+#### Security Features:
+
+- HTTP-only cookies for session management to prevent XSS attacks.
+- Session timeout after 30 minutes of inactivity (configurable).
+- CSRF protection through built-in features in Apollo GraphQL server.
+- Secure cookie settings for HTTPS environments through the usage of `secure: 'auto'` cookie setting.
+
+For more details on the authentication implementation, see the [API Authentication documentation](/apps/api/README.md#authentication-system) and the [architecture diagram](/docs/architecture/README.md).
 
 ### Utilities
 
@@ -87,135 +168,63 @@ Apps Directory - Contains standalone applications:
 - CSV parsing with csvtojson
 - Diff utilities (deep-object-diff, diff-match-patch)
 
-### DevOps
+## 4. Development Workflow
 
-The project uses GitHub Actions workflows and custom actions for automating the CI/CD processes of the application. The workflows handle tasks such as building Docker images, running tests, performing database migrations, deploying to OpenShift environments, and managing database backups and restores. See [.github/ACTIONS_README.md](/.github/ACTIONS_README.md) for more details.
+### Development Tooling
+- TypeScript v5.x across all packages
+- ESLint and Prettier for code formatting and linting
+- Husky for Git hooks [Read more about Husky scripts](#husky-scripts)
+- Changesets for versioning and changelog management
+- Cross-env for environment variable management across platforms
+- SWC for fast TypeScript compilation (for running tests only)
+- Vite for frontend bundling and development server
 
-### Deployments
+### Git Workflow (with Husky)
 
-The project is deployed on OpenShift using templates and Kustomize. For more information, see [deployments/README.md](/deployments/README.md) and [deployments/DEVELOPER.md](/deployments/DEVELOPER.md)
+This repository uses [Husky](https://typicode.github.io/husky/#/) to manage Git hooks, ensuring code quality and security before commits and pushes. The following scripts are included:
 
-## Running the project
+#### 1. `pre-commit`
 
-### Requirements
+The `pre-commit` script is executed before a commit is finalized. Its main functions are:
 
-- node >=20.11.1 <21.0.0
+- **Branch Protection**: It checks if the current branch is one of the protected branches (`main`, `stage`, or `develop`). If so, it prevents direct commits to these branches, prompting the user to create a feature branch instead.
+- **Secret and Environment Variable Check**: It runs the `check_secrets.sh` script to scan for any secrets or sensitive environment variables in the staged files. If any are found, the commit is aborted, and the user is notified to remove or secure them.
 
-### Installation
+- **Linting**: If the checks pass, it runs `lint-staged` to ensure that only staged files are linted according to the project's linting rules.
 
-First, clone the repository:
+#### 2. `pre-push`
 
-`git clone https://github.com/bcgov/psa-job-store.git`
+The `pre-push` script is executed before pushing changes to a remote repository. Its main function is:
 
-Install dependencies:
+- **Branch Protection**: Similar to the `pre-commit` script, it checks if the current branch is one of the protected branches. If so, it prevents the push and instructs the user to push their feature branch and create a Pull Request instead.
 
-`npm i`
+#### 3. `check_secrets.sh`
 
-Copy and rename `/sample.env` to `.env` and configure the variables
+This script is responsible for scanning staged files for potential secrets and sensitive environment variables. Its main features include:
 
-Start elastic search and postgres containers:
+- **Regex Pattern for Secrets**: It defines a regex pattern to identify potential secrets in the code.
 
-`docker compose up -d`
+- **Whitelisting**: It maintains a list of environment variables that are allowed and skips checking for them.
 
-Build common-kit:
+- **Skipping Folders**: It specifies folders to skip during the check, such as `.git`, `.husky`, and `node_modules`.
 
-`npm -w common-kit run build`
+- **Environment Variable Extraction**: It extracts environment variable values from `.env` files located in the `apps/app` and `apps/api` directories to check for their presence in code.
 
-Setup the database and seed it with test data:
+- **Secret Detection**: It processes each staged file, checking for secrets and environment variables used as literals. If any are found, it reports them and exits with an error code.
 
-`npx -w api npm run migrate:reset:e2e-test`
+### Changeset Management
 
-("Failed to create group: NUR" warning is normal)
+When completing a feature, run
 
-Copy and rename `/apps/app/sample.env` to `.env` and configure the environment.
+`npx changeset`
 
-Copy and rename `/apps/api/sample.env` to `.env` and configure the environment.
+in the project root and follow the prompts. This info is going to be automatically included in change log.
 
-To see details about the meaning of various variables, see [DEVELOPER.md](deployments/DEVELOPER.md)
-
-Start API project:
-
-`npm -w api run start:dev`
-
-Start the web project:
-
-`npm -w app run dev`
-
-Visit [http://localhost:5173/](http://localhost:5173/) to see the application!
-
-## Running end-to-end tests locally
-
-First, ensure that `USE_MOCKS=true` and `E2E_TESTING=true` are set in your `apps/api/.env` file. Copy and rename `sample.env` to `.env` in `/apps/jobstore-cypress`. Ensure `VITE_E2E_AUTH_KEY` flag in that `.env` matches `E2E_AUTH_KEY` variable in `apps/api/.env`
-
-See the [API documentation](/apps/api/README.md#e2e-testing-configuration) for more details on E2E testing configuration.
-
-Ensure that database has been reset to defaults with the seed data:
-
-`npx -w api npm run migrate:reset:e2e-test`
-
-("Failed to create group: NUR" error is normal)
-
-Run `npx -w jobstore-cypress cypress open`. It's recommended to use Edge browser to run e2e tests.
-
-To run in same environment as GitHub actions:
-
-`npx -w jobstore-cypress cypress run --browser edge --headless`
-
-This will run all test without any Cypress user interface.
-
-Note that tests need to be run in alphabetical order and the database would need to be reset between runs as there is some dependence between tests, such as front page checking for the number of position requests and some later tests creating position requests, altering that count.
-
-### E2E tests in GitHub actions
-
-The `e2e.yml` GitHub Action is designed to run end-to-end (E2E) tests for after database migrations and deployments have been completed. The workflow initiated automatically by the "Migrate DB Schema" workflow.
-
-#### Main Jobs
-
-1. **Wait for Deployment**
-2. **E2E Tests**
-3. **Cleanup E2E**
-
-### How It Works
-
-1. **Deployment Verification**: Checks if the deployment is ready by verifying the versions of the API and APP match the provided SHA.
-2. **Database Preparation**: Dumps the database schema for use in tests.
-3. **Environment Setup**: Configures the deployment on OpenShift to run in E2E mode (in-memory database, use mocks and loads db schema from the dump)
-4. **Dependency Management**: Caches Node modules and Cypress binary to optimize workflow speed.
-5. **Test Execution**: Runs Cypress tests in headless mode using the Edge browser.
-6. **Artifact Handling**: Uploads screenshots and videos if tests fail.
-7. **Cleanup**: Removes E2E environment settings after test completion.
-
-### Mock services
-
-For information about mock services, see the [API documentation](/apps/api/README.md#mock-services).
-
-## Running Unit Tests locally
-
-To run app tests:
-
-`npx -w app jest`
-
-To run api tests:
-
-`npx -w api jest`
-
-To run common-kit tests:
-
-`npx -w common-kit jest`
-
-_Note:_ If you receive a `EBUSY: resource busy or locked, open..` error, run with a --no-cache flag
-
-To genereate coverage report, run with `--coverage` flag
-
-### Unit tests in GitHub actions
-
-Unit tests also run automatically on GitHub actions any time there is a commit to the `test` branch
-
-## Logging System
+### Logging System
 
 The PSA Job Store implements a comprehensive logging system that captures both backend API logs and frontend application errors. This system helps with debugging, monitoring, and troubleshooting issues in production and development environments.
 
-### API Logging
+#### API Logging
 
 The backend API uses a structured logging approach based on the following components:
 
@@ -258,7 +267,7 @@ The frontend application implements error logging that sends errors to the backe
 - **App Log Service**: The backend stores frontend errors in a dedicated log file (`/tmp/log/app.log`).
 - **Error Context**: Logs include user ID and path information for better context.
 
-### Log Analysis
+#### Log Analysis
 
 - **Structured Format**: All logs are in JSON format for easy parsing and analysis.
 - **Correlation**: Request IDs and user IDs help correlate related log entries.
@@ -266,50 +275,17 @@ The frontend application implements error logging that sends errors to the backe
   - `NODE_ENV`: Controls log level and formatting
   - `SKIP_LOGGING`: Can disable file logging when set to 'true'
 
-### Note
+#### Note
 
 - **GraphQL Query Redaction**: Large binary data in GraphQL queries (like PNG images) is redacted with `[REDACTED]`.
 
-## Husky Scripts
+## 5. Deployment
 
-This repository uses [Husky](https://typicode.github.io/husky/#/) to manage Git hooks, ensuring code quality and security before commits and pushes. The following scripts are included:
+The project is deployed on OpenShift using templates and Kustomize. For more information, see [deployments/README.md](/deployments/README.md) and [deployments/DEVELOPER.md](/deployments/DEVELOPER.md)
 
-## 1. `pre-commit`
+### CI/CD Pipeline
 
-The `pre-commit` script is executed before a commit is finalized. Its main functions are:
-
-- **Branch Protection**: It checks if the current branch is one of the protected branches (`main`, `stage`, or `develop`). If so, it prevents direct commits to these branches, prompting the user to create a feature branch instead.
-- **Secret and Environment Variable Check**: It runs the `check_secrets.sh` script to scan for any secrets or sensitive environment variables in the staged files. If any are found, the commit is aborted, and the user is notified to remove or secure them.
-
-- **Linting**: If the checks pass, it runs `lint-staged` to ensure that only staged files are linted according to the project's linting rules.
-
-## 2. `pre-push`
-
-The `pre-push` script is executed before pushing changes to a remote repository. Its main function is:
-
-- **Branch Protection**: Similar to the `pre-commit` script, it checks if the current branch is one of the protected branches. If so, it prevents the push and instructs the user to push their feature branch and create a Pull Request instead.
-
-## 3. `check_secrets.sh`
-
-This script is responsible for scanning staged files for potential secrets and sensitive environment variables. Its main features include:
-
-- **Regex Pattern for Secrets**: It defines a regex pattern to identify potential secrets in the code.
-
-- **Whitelisting**: It maintains a list of environment variables that are allowed and skips checking for them.
-
-- **Skipping Folders**: It specifies folders to skip during the check, such as `.git`, `.husky`, and `node_modules`.
-
-- **Environment Variable Extraction**: It extracts environment variable values from `.env` files located in the `apps/app` and `apps/api` directories to check for their presence in code.
-
-- **Secret Detection**: It processes each staged file, checking for secrets and environment variables used as literals. If any are found, it reports them and exits with an error code.
-
-## To generate new changeset entry
-
-When completing a feature, run
-
-`npx changeset`
-
-in the project root and follow the prompts. This info is going to be automatically included in change log.
+The project uses GitHub Actions workflows and custom actions for automating the CI/CD processes of the application. The workflows handle tasks such as building Docker images, running tests, performing database migrations, deploying to OpenShift environments, and managing database backups and restores. See [.github/ACTIONS_README.md](/.github/ACTIONS_README.md) for more details.
 
 ## To publish a hotfix to production
 
@@ -326,7 +302,87 @@ If there's a conflict because develop is ahead of main:
 - Merge hotfix into this branch and resolve conflicts
 - Make a pull request from this branch into develop
 
-## Making a database backup to a local drive
+## 6. Testing
+
+### Testing Strategy
+
+- Jest for unit testing
+- Cypress v13.x for end-to-end testing
+- Cucumber for behavior-driven testing (via cypress-cucumber-preprocessor)
+
+### Running Unit Tests locally
+
+To run app tests:
+
+`npx -w app jest`
+
+To run api tests:
+
+`npx -w api jest`
+
+To run common-kit tests:
+
+`npx -w common-kit jest`
+
+_Note:_ If you receive a `EBUSY: resource busy or locked, open..` error, run with a --no-cache flag
+
+To genereate coverage report, run with `--coverage` flag
+
+### Unit tests in GitHub actions
+
+Unit tests also run automatically on GitHub actions any time there is a commit to the `test` branch
+
+### Running end-to-end tests locally
+
+First, ensure that `USE_MOCKS=true` and `E2E_TESTING=true` are set in your `apps/api/.env` file. Copy and rename `sample.env` to `.env` in `/apps/jobstore-cypress`. Ensure `VITE_E2E_AUTH_KEY` flag in that `.env` matches `E2E_AUTH_KEY` variable in `apps/api/.env`
+
+See the [API documentation](/apps/api/README.md#e2e-testing-configuration) for more details on E2E testing configuration.
+
+Ensure that database has been reset to defaults with the seed data:
+
+`npx -w api npm run migrate:reset:e2e-test`
+
+("Failed to create group: NUR" error is normal)
+
+Run `npx -w jobstore-cypress cypress open`. It's recommended to use Edge browser to run e2e tests.
+
+To run in same environment as GitHub actions:
+
+`npx -w jobstore-cypress cypress run --browser edge --headless`
+
+This will run all test without any Cypress user interface.
+
+Note that tests need to be run in alphabetical order and the database would need to be reset between runs as there is some dependence between tests, such as front page checking for the number of position requests and some later tests creating position requests, altering that count.
+
+### E2E tests in GitHub actions
+
+The `e2e.yml` GitHub Action is designed to run end-to-end (E2E) tests for after database migrations and deployments have been completed. The workflow initiated automatically by the "Migrate DB Schema" workflow.
+
+### Main Jobs
+
+1. **Wait for Deployment**
+2. **E2E Tests**
+3. **Cleanup E2E**
+
+### How It Works
+
+1. **Deployment Verification**: Checks if the deployment is ready by verifying the versions of the API and APP match the provided SHA.
+2. **Database Preparation**: Dumps the database schema for use in tests.
+3. **Environment Setup**: Configures the deployment on OpenShift to run in E2E mode (in-memory database, use mocks and loads db schema from the dump)
+4. **Dependency Management**: Caches Node modules and Cypress binary to optimize workflow speed.
+5. **Test Execution**: Runs Cypress tests in headless mode using the Edge browser.
+6. **Artifact Handling**: Uploads screenshots and videos if tests fail.
+7. **Cleanup**: Removes E2E environment settings after test completion.
+
+#### Mock services
+
+For information about mock services, see the [API documentation](/apps/api/README.md#mock-services).
+
+
+
+## 7. Database Management
+
+### Making a database backup to a local drive
 
 Login to psql pod:
 `oc exec -it  SQL_POD_NAME -- /bin/bash`
@@ -347,11 +403,11 @@ Remove remote backup file:
 
 `oc exec SQL_POD_NAME -- rm pgdata/backup.sql`
 
-## To replicate production database to dev/test environment or locally
+### To replicate production database to dev/test environment or locally
 
 Make a backup of production as above first.
 
-### To load data to dev/test environment on OpenShift
+#### To load data to dev/test environment on OpenShift
 
 Upload backup file to dev/test sql pod:
 
@@ -368,7 +424,7 @@ Import production data:
 Apply any migrations that are not present in backup:
 `npx -w api prisma migrate deploy`
 
-## To load data into local environment
+#### To load data into local environment
 
 In docker terminal for the db, delete all records:
 
@@ -385,7 +441,8 @@ Load data from backup:
 Apply any migrations that are not present in backup:
 `npx -w api prisma migrate deploy`
 
-## Upgrading psql on CrunchyDB
+
+### Upgrading psql on CrunchyDB
 
 Modify pgupgrade to include your desired upgrade then run:
 
@@ -416,19 +473,9 @@ Remove annotation:
 
 `oc annotate postgrescluster api-postgres-clone postgres-operator.crunchydata.com/allow-upgrade-`
 
-## Running load test
+## 8. Special procedures
 
-Install K6, then in `apps\api\test`, run (PowerShell):
-
-`$env:K6_WEB_DASHBOARD="true"; $env:K6_WEB_DASHBOARD_EXPORT="report.html"; $env:SCENARIO="api"; $env:SECRET_KEY="INSERT_E2E_AUTH_KEY_HERE"; $env:TARGET="http://localhost:4000"; k6 run load-test.js`
-
-To load test the frontend:
-
-`$env:K6_WEB_DASHBOARD="true"; $env:K6_WEB_DASHBOARD_EXPORT="report.html"; $env:SCENARIO="frontend"; $env:SECRET_KEY="INSERT_E2E_AUTH_KEY_HERE"; $env:TARGET="http://localhost:5173"; k6 run load-test.js`
-
-You can view live results at `http://localhost:5665/`. After the test is finished, a report will be generated to `report.html` in the same folder
-
-## Special mode for video recordings
+### Special mode for video recordings
 
 This was a setup on dev to allow recording of videos. It uses mock data in combination with custom seed data.
 
@@ -542,20 +589,19 @@ oc cp ~/organization.js api-POD:/tmp/log
 oc cp ~/job_profile_organization.js api-POD:/tmp/log
 ```
 
-## Miscellaneous and troubleshooting
+## 9. Miscellaneous and troubleshooting
 
-### To accelerate new image uptake on openshift after publishing
+### Running load test
 
-NOTE: these changes have been integrated into the pipeline and now happen automatically on every publish
+Install K6, then in `apps\api\test`, run (PowerShell):
 
-Openshift may take up to 15 minutes to pick a new image from artifactory. There is no way to change this frequency. If needed, as a workaround
-perform these operations to get openshift to pick up the image from artifactory faster:
+`$env:K6_WEB_DASHBOARD="true"; $env:K6_WEB_DASHBOARD_EXPORT="report.html"; $env:SCENARIO="api"; $env:SECRET_KEY="INSERT_E2E_AUTH_KEY_HERE"; $env:TARGET="http://localhost:4000"; k6 run load-test.js`
 
-`oc project xxxx-tools`
+To load test the frontend:
 
-`oc delete -k deployments/openshift/kustomize/images/image-streams/`
+`$env:K6_WEB_DASHBOARD="true"; $env:K6_WEB_DASHBOARD_EXPORT="report.html"; $env:SCENARIO="frontend"; $env:SECRET_KEY="INSERT_E2E_AUTH_KEY_HERE"; $env:TARGET="http://localhost:5173"; k6 run load-test.js`
 
-`oc apply -k deployments/openshift/kustomize/images/image-streams/`
+You can view live results at `http://localhost:5665/`. After the test is finished, a report will be generated to `report.html` in the same folder
 
 ### Recursive relationships in schema.prisma
 
@@ -595,7 +641,7 @@ to show the list of builds.
 
 Under api and app projects, delete old versions, for example "0.0.0" or "0.1.0" to free up space.
 
-## Husky pre-commit hook issues on windows with GitHub desktop on Windows
+### Husky pre-commit hook issues on windows with GitHub desktop on Windows
 
 If getting this type of error when commiting changes:
 
@@ -609,7 +655,7 @@ husky - command not found in PATH=/mingw64/libexec/git-core:/mingw64/bin:/usr/bi
 - Check that system PATH variable contains `C:\Program Files\Git\bin` (path containing sh.exe) AND that it's first in the list
 ```
 
-## Technical debt or pending improvements
+## 10. Technical debt or pending improvements
 
 ### React code restructuring
 
@@ -635,7 +681,7 @@ There instances of `any` types in the codebase. Improving type safety by replaci
 
 Local development on Windows machines was done in Windows environment. To improve consistency with the development experience on MacOS, it is recommended to move the project into WSL.
 
-### Documentation todo
+## 11. Documentation todo
 
 - verify developer.md deployment info
 - package upgrades

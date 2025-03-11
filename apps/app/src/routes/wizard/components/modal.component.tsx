@@ -144,10 +144,10 @@ export const useModalActions = ({
       showModal({
         action: () => handleRemove(index),
         actionType: 'remove',
-        // field must be significant for the modal to show up but also
-        // the section must be significant as well
-        // if section is not significant but field is, do not show modal
-        isSignificant: (field?.is_significant ?? true) && isSignificant,
+        // Show modal if either the field is significant OR the section is significant
+        // This ensures individually significant fields still trigger the modal
+        // even if the section is marked as non-significant
+        isSignificant: (field?.is_significant ?? true) && !field?.isCustom,
       });
     },
     [showModal, isSignificant],
@@ -159,8 +159,10 @@ export const useModalActions = ({
         action: () => {}, // Provide a no-op function as the action
         inputRef,
         actionType: 'focus',
-        // Check both field significance and section significance
-        isSignificant: (field?.is_significant ?? true) && isSignificant,
+        // Show modal if either the field is significant OR the section is significant
+        // This ensures individually significant fields still trigger the modal
+        // even if the section is marked as non-significant
+        isSignificant: (field?.is_significant ?? true)&& !field?.isCustom,
       });
     },
     [showModal, isSignificant],
@@ -172,6 +174,8 @@ export const useModalActions = ({
       showModal({
         action: handleAdd,
         actionType: 'add',
+        // For adding new items, we still respect the section significance flag
+        // since new items are affected by it
         isSignificant: isSignificant,
       });
     },
