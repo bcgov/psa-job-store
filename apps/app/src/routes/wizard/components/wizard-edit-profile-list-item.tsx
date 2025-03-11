@@ -73,7 +73,9 @@ const WizardEditProfileListItem: React.FC<FieldItemProps> = ({
       : `Remove ${label ?? fieldName} ${index + 1}`;
 
   const isEdited = editedFields ? editedFields[index] || field.isCustom : false;
-  const isItemSignificant = field.is_significant && sectionSignificant;
+  const isItemSignificant = field.isCustom 
+    ? field.is_significant && sectionSignificant 
+    : field.is_significant;
 
   const handleFieldChange = debounce((index, updatedValue) => {
     setEditedFields &&

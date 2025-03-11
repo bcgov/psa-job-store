@@ -1479,37 +1479,73 @@ export class PositionRequestApiService {
     const prJobProfileSignificantSections = {
       accountabilities: prJobProfile.accountabilities
         .filter(
-          (obj) =>
-            (obj.is_significant === true && (Object.keys(obj).indexOf('disabled') === -1 || obj.disabled === false)) ||
-            ((Object.keys(obj).indexOf('is_significant') === -1 || obj.is_significant === false) &&
-              obj.isCustom === true),
+          (obj) => {
+            // For custom items, check section significance flag
+            if (obj.isCustom === true) {
+              return isAccountabilitiesSectionSignificant && 
+                (obj.is_significant === true && (Object.keys(obj).indexOf('disabled') === -1 || obj.disabled === false));
+            }
+            // For non-custom items, check individual significance
+            return (obj.is_significant === true && (Object.keys(obj).indexOf('disabled') === -1 || obj.disabled === false)) ||
+              ((Object.keys(obj).indexOf('is_significant') === -1 || obj.is_significant === false) &&
+                obj.isCustom === true);
+          }
         )
         .map((obj) => obj.text),
       education: prJobProfile.education
         .filter(
-          (obj) =>
-            obj.is_significant === true && (Object.keys(obj).indexOf('disabled') === -1 || obj.disabled === false),
+          (obj) => {
+            // For custom items, check section significance flag
+            if (obj.isCustom === true) {
+              return isEducationSectionSignificant && 
+                (obj.is_significant === true && (Object.keys(obj).indexOf('disabled') === -1 || obj.disabled === false));
+            }
+            // For non-custom items, check individual significance
+            return obj.is_significant === true && (Object.keys(obj).indexOf('disabled') === -1 || obj.disabled === false);
+          }
         )
         .map((obj) => obj.text),
       job_experience: prJobProfile.job_experience
         .filter(
-          (obj) =>
-            obj.is_significant === true && (Object.keys(obj).indexOf('disabled') === -1 || obj.disabled === false),
+          (obj) => {
+            // For custom items, check section significance flag
+            if (obj.isCustom === true) {
+              return isRelatedExperienceSectionSignificant && 
+                (obj.is_significant === true && (Object.keys(obj).indexOf('disabled') === -1 || obj.disabled === false));
+            }
+            // For non-custom items, check individual significance
+            return obj.is_significant === true && (Object.keys(obj).indexOf('disabled') === -1 || obj.disabled === false);
+          }
         )
         .map((obj) => obj.text),
       professional_registration_requirements: prJobProfile.professional_registration_requirements
         .filter(
-          (obj) =>
-            obj.is_significant === true && (Object.keys(obj).indexOf('disabled') === -1 || obj.disabled === false),
+          (obj) => {
+            // For custom items, check section significance flag
+            if (obj.isCustom === true) {
+              return isProfessionalRegistrationSectionSignificant && 
+                (obj.is_significant === true && (Object.keys(obj).indexOf('disabled') === -1 || obj.disabled === false));
+            }
+            // For non-custom items, check individual significance
+            return obj.is_significant === true && (Object.keys(obj).indexOf('disabled') === -1 || obj.disabled === false);
+          }
         )
         .map((obj) => obj.text),
       security_screenings: prJobProfile.security_screenings
         // check for undefined and treat it as significant, since significant flag was added later
         // initially all security screenings were treated as significant
         .filter(
-          (obj) =>
-            (obj.is_significant === true || obj.is_significant === undefined) &&
-            (Object.keys(obj).indexOf('disabled') === -1 || obj.disabled === false),
+          (obj) => {
+            // For custom items, check section significance flag
+            if (obj.isCustom === true) {
+              return isSecurityScreeningsSectionSignificant && 
+                ((obj.is_significant === true || obj.is_significant === undefined) && 
+                (Object.keys(obj).indexOf('disabled') === -1 || obj.disabled === false));
+            }
+            // For non-custom items, check individual significance
+            return (obj.is_significant === true || obj.is_significant === undefined) &&
+              (Object.keys(obj).indexOf('disabled') === -1 || obj.disabled === false);
+          }
         )
         .map((obj) => obj.text),
     };
@@ -1555,30 +1591,34 @@ export class PositionRequestApiService {
     // Compare changes between position request job profile significant sections and
     // job profile significant sections, also checking if the section is marked as significant
     const significantSectionChanges = [
-      // Accountabilities - check if section is significant and if there are changes
-      isAccountabilitiesSectionSignificant && this.dataHasChanges(
+      // Accountabilities - check if there are changes
+      // Section significance is already applied in the filter functions above
+      this.dataHasChanges(
         JSON.stringify(jobProfileSignficantSections.accountabilities),
         JSON.stringify(prJobProfileSignificantSections.accountabilities),
       ),
-      // Education - check if section is significant and if there are changes
-      // Also keep the existing check for Administrative Services job family
-      isEducationSectionSignificant && this.dataHasChanges(
+      // Education - check if there are changes
+      // Section significance is already applied in the filter functions above
+      this.dataHasChanges(
         JSON.stringify(jobProfileSignficantSections.education),
         JSON.stringify(prJobProfileSignificantSections.education),
       ),
 
-      // Job Experience - check if section is significant and if there are changes
-      isRelatedExperienceSectionSignificant && this.dataHasChanges(
+      // Job Experience - check if there are changes
+      // Section significance is already applied in the filter functions above
+      this.dataHasChanges(
         JSON.stringify(jobProfileSignficantSections.job_experience),
         JSON.stringify(prJobProfileSignificantSections.job_experience),
       ),
-      // Professional Registration Requirements - check if section is significant and if there are changes
-      isProfessionalRegistrationSectionSignificant && this.dataHasChanges(
+      // Professional Registration Requirements - check if there are changes
+      // Section significance is already applied in the filter functions above
+      this.dataHasChanges(
         JSON.stringify(jobProfileSignficantSections.professional_registration_requirements),
         JSON.stringify(prJobProfileSignificantSections.professional_registration_requirements),
       ),
-      // Security Screenings - check if section is significant and if there are changes
-      isSecurityScreeningsSectionSignificant && this.dataHasChanges(
+      // Security Screenings - check if there are changes
+      // Section significance is already applied in the filter functions above
+      this.dataHasChanges(
         JSON.stringify(jobProfileSignficantSections.security_screenings),
         JSON.stringify(prJobProfileSignificantSections.security_screenings),
       ),

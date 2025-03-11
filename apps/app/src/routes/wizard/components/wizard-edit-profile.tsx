@@ -323,39 +323,72 @@ const WizardEditProfile = forwardRef(
       const isSecurityScreeningsSectionSignificant = 
         totalCompCreateFormMisc.isSecurityScreeningsSectionSignificant ?? true;
 
-      // Check if any flags are true in editedAccReqFieldsArray, but only if section is marked as significant
-      const anyReqAccsTrue = isAccountabilitiesSectionSignificant && 
-        Object.values(editedAccReqFields).some((item) => item === true);
+      // Check if any flags are true in editedAccReqFieldsArray
+      // Only apply section significance to custom items (isCustom === true)
+      const anyReqAccsTrue = Object.entries(editedAccReqFields).some(([index, item]) => {
+        const currentValues = getValues('accountabilities');
+        const currentItem = currentValues[Number(index)];
+        // Apply section significance only to custom items
+        if ((currentItem as AccountabilitiesModel)?.isCustom === true) {
+          return item === true && isAccountabilitiesSectionSignificant;
+        }
+        // For non-custom items, check individual significance
+        return item === true && (currentItem as AccountabilitiesModel)?.is_significant === true;
+      });
 
-      const anyEducationTrue = isEducationSectionSignificant && 
-        Object.entries(editedMinReqFields).some(([index, item]) => {
-          const originalItem = originalMinReqFields[Number(index)];
-          if (!originalItem) return item === true;
-          return item === true && originalItem && originalItem.is_significant;
-        });
+      const anyEducationTrue = Object.entries(editedMinReqFields).some(([index, item]) => {
+        const originalItem = originalMinReqFields[Number(index)];
+        const currentValues = getValues('education');
+        const currentItem = currentValues[Number(index)];
+        // Apply section significance only to custom items
+        if ((currentItem as AccountabilitiesModel)?.isCustom === true) {
+          return item === true && isEducationSectionSignificant;
+        }
+        // For non-custom items, check individual significance
+        if (!originalItem) return item === true;
+        return item === true && originalItem && originalItem.is_significant;
+      });
 
-      const anyRelWorkTrue = isRelatedExperienceSectionSignificant && 
-        Object.entries(editedRelWorkFields).some(([index, item]) => {
-          const originalItem = originalRelWorkFields[Number(index)];
-          if (!originalItem) return item === true;
-          return item === true && originalItem && originalItem.is_significant;
-        });
+      const anyRelWorkTrue = Object.entries(editedRelWorkFields).some(([index, item]) => {
+        const originalItem = originalRelWorkFields[Number(index)];
+        const currentValues = getValues('job_experience');
+        const currentItem = currentValues[Number(index)];
+        // Apply section significance only to custom items
+        if ((currentItem as AccountabilitiesModel)?.isCustom === true) {
+          return item === true && isRelatedExperienceSectionSignificant;
+        }
+        // For non-custom items, check individual significance
+        if (!originalItem) return item === true;
+        return item === true && originalItem && originalItem.is_significant;
+      });
 
-      const anyProfRegTrue = isProfessionalRegistrationSectionSignificant && 
-        Object.entries(editedProfessionalRegistrationFields).some(([index, item]) => {
-          const originalItem = originalProfessionalRegistrationFields?.[Number(index)];
-          if (!originalItem) return item === true;
-          return item === true && originalItem && originalItem.is_significant;
-        });
+      const anyProfRegTrue = Object.entries(editedProfessionalRegistrationFields).some(([index, item]) => {
+        const originalItem = originalProfessionalRegistrationFields?.[Number(index)];
+        const currentValues = getValues('professional_registration_requirements');
+        const currentItem = currentValues[Number(index)];
+        // Apply section significance only to custom items
+        if ((currentItem as AccountabilitiesModel)?.isCustom === true) {
+          return item === true && isProfessionalRegistrationSectionSignificant;
+        }
+        // For non-custom items, check individual significance
+        if (!originalItem) return item === true;
+        return item === true && originalItem && originalItem.is_significant;
+      });
 
-      const anySsecurityScreeningsTrue = isSecurityScreeningsSectionSignificant && 
-        Object.entries(editedSecurityScreeningsFields).some(([index, item]) => {
-          const originalItem = originalSecurityScreeningsFields?.[Number(index)];
-          // check for undefined and treat it as significant, since significant flag was added later
-          // initially all security screenings were treated as significant
-          if (!originalItem) return item === true;
-          return item === true && originalItem && originalItem.is_significant;
-        });
+      const anySsecurityScreeningsTrue = Object.entries(editedSecurityScreeningsFields).some(([index, item]) => {
+        const originalItem = originalSecurityScreeningsFields?.[Number(index)];
+        const currentValues = getValues('security_screenings');
+        const currentItem = currentValues[Number(index)];
+        // Apply section significance only to custom items
+        if ((currentItem as AccountabilitiesModel)?.isCustom === true) {
+          return item === true && isSecurityScreeningsSectionSignificant;
+        }
+        // For non-custom items, check individual significance
+        // check for undefined and treat it as significant, since significant flag was added later
+        // initially all security screenings were treated as significant
+        if (!originalItem) return item === true;
+        return item === true && originalItem && originalItem.is_significant;
+      });
 
       const verificationReasons = [];
       anyReqAccsTrue && verificationReasons.push(reasons.ACCOUNTABILITIES);
