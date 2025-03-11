@@ -4,7 +4,7 @@ import { updatedDiff } from 'deep-object-diff';
 import { User } from '../../../@generated/prisma-nestjs-graphql';
 import { guidToUuid } from '../../../utils/guid-to-uuid.util';
 import { CrmService } from '../../external/crm.service';
-import { PeoplesoftV2Service } from '../../external/peoplesoft-v2.service';
+import { PeoplesoftService } from '../../external/peoplesoft.service';
 import { KeycloakService } from '../../keycloak/keycloak.service';
 import { PrismaService } from '../../prisma/prisma.service';
 import { UserService } from '../../user/user.service';
@@ -16,7 +16,7 @@ export class AuthService {
   constructor(
     private readonly crmService: CrmService,
     private readonly keycloakService: KeycloakService,
-    private readonly peoplesoftService: PeoplesoftV2Service,
+    private readonly peoplesoftService: PeoplesoftService,
     private readonly prisma: PrismaService,
     private readonly userService: UserService,
     private readonly configService: ConfigService,
@@ -24,7 +24,7 @@ export class AuthService {
 
   private async getPeoplesoftMetadata(idir: string) {
     const userProfile = await this.peoplesoftService.getProfileV2(idir);
-    const employee = userProfile ? await this.peoplesoftService.getEmployee(userProfile.EMPLID) : undefined;
+    const employee = userProfile ? await this.peoplesoftService.getEmployeeV2(userProfile.EMPLID) : undefined;
 
     return {
       department_id: employee ? employee.DEPTID : null,
@@ -35,7 +35,7 @@ export class AuthService {
   }
 
   private async userPositionHasSubordinates(position_id: string) {
-    const subordinates = (await this.peoplesoftService.getSubordinates(position_id)) ?? [];
+    const subordinates = (await this.peoplesoftService.getSubordinatesV2(position_id)) ?? [];
 
     return subordinates.length > 0;
   }
@@ -253,7 +253,7 @@ export class AuthService {
 
   async getPeoplesoftDetails(idir: string) {
     const profile = await this.peoplesoftService.getProfileV2(idir);
-    const employee = profile ? await this.peoplesoftService.getEmployee(profile.EMPLID) : undefined;
+    const employee = profile ? await this.peoplesoftService.getEmployeeV2(profile.EMPLID) : undefined;
 
     return {
       profile,

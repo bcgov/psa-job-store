@@ -514,6 +514,7 @@ model Classification {
   id                String // JOBCODE
   employee_group_id String // SAL_ADMIN_PLAN
   peoplesoft_id     String // SETID
+  fusion_id         BigInt?  @db.BigInt // Fusion JobId
   code              String // DESCRSHORT
   name              String // DESCR
   grade             String // GRADE
@@ -536,6 +537,7 @@ model Department {
   organization     Organization @relation(fields: [organization_id], references: [id])
   organization_id  String
   peoplesoft_id    String // SETID
+  fusion_id        BigInt?      @db.BigInt // Fusion JobId
   code             String // DESCRSHORT
   name             String // DESCR
   effective_status String // EFF_STATUS
@@ -559,6 +561,7 @@ model DepartmentMetadata {
 model Location {
   id               String   @id // LOCATION
   peoplesoft_id    String // SETID
+  fusion_id        BigInt?  @db.BigInt // Fusion JobId
   code             String // DESCRSHORT
   name             String // DESCR
   effective_status String // EFF_STATUS
@@ -572,6 +575,7 @@ model Location {
 model Organization {
   id               String   @id // BUSINESS_UNIT
   peoplesoft_id    String   @unique // SETID
+  fusion_id        BigInt?  @db.BigInt // Fusion JobId
   code             String // DESCRSHORT
   name             String // DESCR
   effective_status String // EFF_STATUS
@@ -643,4 +647,15 @@ enum DocumentCategory {
   CAREER_MAP
   REFERENCE_GUIDE
   RESOURCES
+}
+
+/// Populated from the Fusion API
+model Grade {
+  id                BigInt   @id @db.BigInt
+  employee_group_id String // GradeCode before the underscore
+  grade             String // GradeCode after the underscore
+  effective_status  String // ActiveStatus
+  effective_date    DateTime @db.Date // EffectiveStartDate
+
+  @@map("grade")
 }
