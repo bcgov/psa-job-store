@@ -192,7 +192,7 @@ export class ScheduledTaskService {
     }
   }
 
-  @Cron('*/5 * * * * *')
+  // @Cron('*/5 * * * * *')
   async syncPeoplesoftData() {
     await this.executeTask(ScheduledTask.PeoplesoftSync, async () => {
       await this.peoplesoftService.syncClassifications();
@@ -201,7 +201,7 @@ export class ScheduledTaskService {
     });
   }
 
-  @Cron('*/5 * * * * *')
+  // @Cron('*/5 * * * * *')
   async syncPositionStatuses() {
     await this.executeTask(ScheduledTask.CrmSync, async () => {
       await this.crmService.syncIncidentStatus().then(async (rows) => {
@@ -362,12 +362,12 @@ export class ScheduledTaskService {
     });
   }
 
-  @Cron('*/5 * * * * *')
+  // @Cron('*/5 * * * * *')
   async syncUsers() {
     await this.executeTask(ScheduledTask.UserSync, async () => await this.userService.syncUsers());
   }
 
-  @Cron('*/20 * * * * *')
+  // @Cron('*/20 * * * * *')
   async updateJobProfileViewCount() {
     const jobProfileCounts: Map<number, number> = await this.cacheManager.get('jobProfileCounts');
 
