@@ -138,6 +138,11 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
       markAllNonEditableJob_experience: false,
       markAllSignificantJob_experience: false,
       markAllNonEditableSec: false,
+      isAccountabilitiesSectionSignificant: true,
+      isEducationSectionSignificant: true,
+      isRelatedExperienceSectionSignificant: true,
+      isProfessionalRegistrationSectionSignificant: true,
+      isSecurityScreeningsSectionSignificant: true,
     },
   });
 
@@ -192,6 +197,26 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
       profileSetValue(
         'markAllNonEditableSec',
         jobProfileData.jobProfile.total_comp_create_form_misc?.markAllNonEditableSec ?? false,
+      );
+      profileSetValue(
+        'isAccountabilitiesSectionSignificant',
+          jobProfileData.jobProfile.total_comp_create_form_misc?.isAccountabilitiesSectionSignificant ?? true,
+      );
+      profileSetValue(
+        'isEducationSectionSignificant',
+        jobProfileData.jobProfile.total_comp_create_form_misc?.isEducationSectionSignificant ?? true,
+      );
+      profileSetValue(
+        'isRelatedExperienceSectionSignificant',
+        jobProfileData.jobProfile.total_comp_create_form_misc?.isRelatedExperienceSectionSignificant ?? true,
+      );
+      profileSetValue(
+        'isProfessionalRegistrationSectionSignificant',
+        jobProfileData.jobProfile.total_comp_create_form_misc?.isProfessionalRegistrationSectionSignificant ?? true,
+      );
+      profileSetValue(
+        'isSecurityScreeningsSectionSignificant',
+        jobProfileData.jobProfile.total_comp_create_form_misc?.isSecurityScreeningsSectionSignificant ?? true,
       );
       setTimeout(() => {
         triggerProfileValidation();

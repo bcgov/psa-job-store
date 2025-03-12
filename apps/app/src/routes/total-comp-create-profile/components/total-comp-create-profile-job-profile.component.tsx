@@ -183,11 +183,17 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
   const markAllSignificantSecurityScreenings = profileWatch('markAllSignificantSecurityScreenings');
   const markAllNonEditableJob_experience = profileWatch('markAllNonEditableJob_experience');
   const markAllSignificantJob_experience = profileWatch('markAllSignificantJob_experience');
-
   const markAllNonEditableSec = profileWatch('markAllNonEditableSec');
   // const markAllNonEditableProfReg = profileWatch('markAllNonEditableProfReg');
 
   const markAllSignificant = profileWatch('markAllSignificant');
+  // New section significance checkboxes
+  const isAccountabilitiesSectionSignificant = profileWatch('isAccountabilitiesSectionSignificant');
+  const isEducationSectionSignificant = profileWatch('isEducationSectionSignificant');
+  const isRelatedExperienceSectionSignificant = profileWatch('isRelatedExperienceSectionSignificant');
+  const isProfessionalRegistrationSectionSignificant = profileWatch('isProfessionalRegistrationSectionSignificant');
+  const isSecurityScreeningsSectionSignificant = profileWatch('isSecurityScreeningsSectionSignificant');
+  
   const accountabilities = profileWatch('accountabilities');
   const securityScreenings = profileWatch('security_screenings');
   const educations = profileWatch('education');
@@ -401,6 +407,27 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                           <Col>
                             <Form.Item style={{ margin: 0 }}>
                               <Row>
+                              <Col>
+                                  <Controller
+                                    control={profileControl}
+                                    name="isAccountabilitiesSectionSignificant"
+                                    render={({ field }) => (
+                                      <Checkbox
+                                        {...field}
+                                        checked={isAccountabilitiesSectionSignificant}
+                                        onChange={(e) => {
+                                          field.onChange(e.target.checked);
+                                          triggerProfileValidation();
+                                        }}
+                                      >
+                                        Is a significant section
+                                        <Tooltip title="If selected, all custom fields that users create in this section will trigger classification verification or review.">
+                                          <InfoCircleOutlined style={{ marginLeft: 8 }} />
+                                        </Tooltip>
+                                      </Checkbox>
+                                    )}
+                                  ></Controller>
+                                </Col>
                                 <Col>
                                   <Controller
                                     control={profileControl}
@@ -449,6 +476,7 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                                     )}
                                   ></Controller>
                                 </Col>
+                                
                               </Row>
                             </Form.Item>
                           </Col>
@@ -633,6 +661,27 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                                 <Col>
                                   <Controller
                                     control={profileControl}
+                                    name="isEducationSectionSignificant"
+                                    render={({ field }) => (
+                                      <Checkbox
+                                        {...field}
+                                        checked={isEducationSectionSignificant}
+                                        onChange={(e) => {
+                                          field.onChange(e.target.checked);
+                                          triggerProfileValidation();
+                                        }}
+                                      >
+                                        Is a significant section
+                                        <Tooltip title="If selected, all custom fields that users create in this section will trigger classification verification or review.">
+                                          <InfoCircleOutlined style={{ marginLeft: 8 }} />
+                                        </Tooltip>
+                                      </Checkbox>
+                                    )}
+                                  ></Controller>
+                                </Col>
+                                <Col>
+                                  <Controller
+                                    control={profileControl}
                                     name="markAllNonEditableEdu"
                                     render={({ field }) => (
                                       <Checkbox
@@ -676,6 +725,7 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                                     )}
                                   ></Controller>
                                 </Col>
+                                
                               </Row>
                             ) : (
                               <></>
@@ -893,6 +943,28 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                           {isCurrentVersion ? (
                             <Form.Item style={{ margin: 0 }}>
                               <Row>
+                              <Col>
+                                  <Controller
+                                    control={profileControl}
+                                    name="isRelatedExperienceSectionSignificant"
+                                    render={({ field }) => (
+                                      <Checkbox
+                                        {...field}
+                                        checked={isRelatedExperienceSectionSignificant}
+                                        onChange={(e) => {
+                                          field.onChange(e.target.checked);
+                                          triggerProfileValidation();
+                                        }}
+                                        disabled={!isCurrentVersion}
+                                      >
+                                        Is a significant section
+                                        <Tooltip title="If selected, all custom fields that users create in this section will trigger classification verification or review.">
+                                          <InfoCircleOutlined style={{ marginLeft: 8 }} />
+                                        </Tooltip>
+                                      </Checkbox>
+                                    )}
+                                  ></Controller>
+                                </Col>
                                 <Col>
                                   <Controller
                                     control={profileControl}
@@ -1095,6 +1167,28 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                           {isCurrentVersion ? (
                             <Form.Item style={{ margin: 0 }}>
                               <Row>
+                              <Col>
+                                  <Controller
+                                    control={profileControl}
+                                    name="isProfessionalRegistrationSectionSignificant"
+                                    render={({ field }) => (
+                                      <Checkbox
+                                        {...field}
+                                        checked={isProfessionalRegistrationSectionSignificant}
+                                        onChange={(e) => {
+                                          field.onChange(e.target.checked);
+                                          triggerProfileValidation();
+                                        }}
+                                        disabled={!isCurrentVersion}
+                                      >
+                                        Is a significant section
+                                        <Tooltip title="If selected, all custom fields that users create in this section will trigger classification verification or review.">
+                                          <InfoCircleOutlined style={{ marginLeft: 8 }} />
+                                        </Tooltip>
+                                      </Checkbox>
+                                    )}
+                                  ></Controller>
+                                </Col>
                                 <Col>
                                   <Controller
                                     control={profileControl}
@@ -1727,6 +1821,28 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                           <Col>
                             <Form.Item style={{ margin: 0 }}>
                               <Row>
+                              <Col>
+                                  <Controller
+                                    control={profileControl}
+                                    name="isSecurityScreeningsSectionSignificant"
+                                    render={({ field }) => (
+                                      <Checkbox
+                                        {...field}
+                                        checked={isSecurityScreeningsSectionSignificant}
+                                        onChange={(e) => {
+                                          field.onChange(e.target.checked);
+                                          triggerProfileValidation();
+                                        }}
+                                        disabled={!isCurrentVersion}
+                                      >
+                                        Is a significant section
+                                        <Tooltip title="If selected, all custom fields that users create in this section will trigger classification verification or review.">
+                                          <InfoCircleOutlined style={{ marginLeft: 8 }} />
+                                        </Tooltip>
+                                      </Checkbox>
+                                    )}
+                                  ></Controller>
+                                </Col>
                                 <Col>
                                   <Controller
                                     control={profileControl}
@@ -1775,6 +1891,7 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                                     )}
                                   ></Controller>
                                 </Col>
+                                
                               </Row>
                             </Form.Item>
                           </Col>
