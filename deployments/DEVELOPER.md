@@ -54,6 +54,12 @@ ELASTIC_PASSWORD=
 # `express-session` Settings
 SESSION_SECRET=
 
+# Fusion Settings (Optional - Set only when migrating to Fusion)
+USE_FUSION=
+FUSION_URL=
+FUSION_USERNAME=
+FUSION_PASSWORD=
+
 # PeopleSoft Settings
 PEOPLESOFT_URL=
 PEOPLESOFT_USERNAME=
