@@ -9,9 +9,11 @@ import { TotalCompCreateJobProfileInfo } from './total-comp-create-profile-info.
 import { TotalCompCreateJobProfile } from './total-comp-create-profile-job-profile.component';
 import { useTCContext } from './total-comp-create-profile.provider';
 
-interface TabBarProps {}
+interface TabBarProps {
+  isArchived?: boolean;
+}
 
-const TCTabBar: React.FC<TabsProps & TabBarProps> = ({}) => {
+const TCTabBar: React.FC<TabsProps & TabBarProps> = ({ isArchived }) => {
   const { jobProfileMeta, isCurrentVersion, link } = useTCContext();
 
   const renderTabBar: TabsProps['renderTabBar'] = (props, DefaultTabBar) => (
@@ -38,28 +40,32 @@ const TCTabBar: React.FC<TabsProps & TabBarProps> = ({}) => {
     {
       key: '1',
       label: 'Basic details',
-      children: <BasicDetails></BasicDetails>,
+      children: <BasicDetails />,
     },
     {
       key: '2',
       label: 'Job profile',
-      children: <TotalCompCreateJobProfile></TotalCompCreateJobProfile>,
-    },
-
-    {
-      key: '4',
-      label: 'Actions',
-      children: <TotalCompCreateJobProfileActions></TotalCompCreateJobProfileActions>,
+      children: <TotalCompCreateJobProfile />,
     },
   ];
-  if (jobProfileMeta)
-    tabItems.push(
-      jobProfileMeta && {
-        key: '5',
-        label: 'Info',
-        children: <TotalCompCreateJobProfileInfo></TotalCompCreateJobProfileInfo>,
-      },
-    );
+
+  // Only show Actions tab if not archived
+  if (!isArchived) {
+    tabItems.push({
+      key: '4',
+      label: 'Actions',
+      children: <TotalCompCreateJobProfileActions />,
+    });
+  }
+
+  // Always show Info tab if metadata exists
+  if (jobProfileMeta) {
+    tabItems.push({
+      key: '5',
+      label: 'Info',
+      children: <TotalCompCreateJobProfileInfo />,
+    });
+  }
 
   return (
     <ContentWrapper padTop={false}>

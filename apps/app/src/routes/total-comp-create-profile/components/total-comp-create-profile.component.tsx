@@ -315,12 +315,12 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
         value={{
           ...formMethods,
           watchedState: state,
+          isArchived: jobProfileData?.jobProfile.is_archived ?? false,
           professionalRegistrationRequirementsFieldArray: professionalRegistrationRequirementsFieldArray,
         }}
       >
         {isLoading ? <></> : <JobProfileHeader title={title} />}
-
-        <TCTabBar></TCTabBar>
+        <TCTabBar isArchived={jobProfileData?.jobProfile.is_archived ?? false} />
       </FormContext.Provider>
     </>
   );

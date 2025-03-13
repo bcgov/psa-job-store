@@ -7,6 +7,7 @@ interface FormContextType {
   basicUseFormReturn: UseFormReturn<BasicDetailsValidationModel>;
   jobProfileUseFormReturn: UseFormReturn<JobProfileValidationModel>;
   watchedState: string;
+  isArchived: boolean;
   professionalRegistrationRequirementsFieldArray: UseFieldArrayReturn<
     JobProfileValidationModel,
     'professional_registration_requirements',

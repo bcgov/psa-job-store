@@ -9,6 +9,8 @@ interface DuplicateButtonProps {
   redirectLink: string;
   variant?: 'button' | 'menuItem';
   buttonText?: string;
+  isArchived?: boolean;
+  state?: string;
 }
 
 export const DuplicateButton = ({
@@ -17,6 +19,8 @@ export const DuplicateButton = ({
   redirectLink,
   variant = 'button',
   buttonText = 'Duplicate job profile',
+  isArchived = false,
+  state = 'DRAFT',
 }: DuplicateButtonProps) => {
   const navigate = useNavigate();
   const [duplicateJobProfile] = useDuplicateJobProfileMutation();
@@ -29,7 +33,9 @@ export const DuplicateButton = ({
       jobProfileVersion: version,
     }).unwrap();
 
-    navigate(`${redirectLink}${res.duplicateJobProfile}`);
+    // Always redirect to drafts if duplicating an archived or published profile
+    const targetLink = isArchived || state === 'PUBLISHED' ? '/job-profiles/manage/draft/' : redirectLink;
+    navigate(`${targetLink}${res.duplicateJobProfile}`);
   };
 
   if (variant === 'menuItem') {
