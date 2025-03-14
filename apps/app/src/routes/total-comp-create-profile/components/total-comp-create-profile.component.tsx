@@ -268,7 +268,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
   // Received job profile data: set profileJson, trigger getJobProfileMeta and getPositionRequestsCount
   useEffect(() => {
     if (jobProfileData) {
-      if (jobProfileData.jobProfile.state == 'PUBLISHED') {
+      if (jobProfileData.jobProfile.state == 'PUBLISHED' || jobProfileData.jobProfile.is_archived) {
         triggerGetJobProfileMeta(jobProfileData.jobProfile.id);
         triggerGetPositionRequestsCount({ where: { parent_job_profile_id: { equals: jobProfileData.jobProfile.id } } });
       }
