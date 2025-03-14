@@ -24,6 +24,7 @@ interface RequiredAccountabilitiesProps {
   handleReset: (index: number) => void;
   update: UseFieldArrayUpdate<any, string>;
   remove: UseFieldArrayRemove;
+  sectionSignificant?: boolean;
 }
 
 const RequiredAccountabilities: React.FC<RequiredAccountabilitiesProps> = ({
@@ -40,6 +41,7 @@ const RequiredAccountabilities: React.FC<RequiredAccountabilitiesProps> = ({
   handleReset,
   update,
   remove,
+  sectionSignificant = true,
 }) => {
   const { reqAlertShown, setReqAlertShown } = useWizardContext();
 
@@ -49,7 +51,7 @@ const RequiredAccountabilities: React.FC<RequiredAccountabilitiesProps> = ({
     setAlertShown: setReqAlertShown,
     dataTestId: 'accountabilities-warning',
     trigger,
-    isSignificant: true,
+    isSignificant: sectionSignificant,
   });
 
   const renderAccReqFields = (field: any, index: number) => {
@@ -66,6 +68,7 @@ const RequiredAccountabilities: React.FC<RequiredAccountabilitiesProps> = ({
       originalFields,
       update,
       remove,
+      sectionSignificant,
     };
 
     // console.log('field: ', field);

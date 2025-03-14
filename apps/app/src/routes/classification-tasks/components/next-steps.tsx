@@ -9,6 +9,8 @@ export const NextSteps = () => {
   const [needsAttentionFrom, setNeedsAttentionFrom] = useState('CA');
   const [confirmationRequired, setConfirmationRequired] = useState('confirmationRequired');
   const [reviewRequired, setReviewRequired] = useState('required');
+  const [exclusionType, setExclusionType] = useState('Included');
+
   return (
     <Card
       title={
@@ -328,12 +330,6 @@ Learn More
                         <List.Item>
                           <List.Item.Meta
                             avatar={<Avatar shape="square" src={PeopleSoftGraphic} />}
-                            title={<>PeopleSoft: Update “Reason” (e.g., JEP)</>}
-                          />
-                        </List.Item>
-                        <List.Item>
-                          <List.Item.Meta
-                            avatar={<Avatar shape="square" src={PeopleSoftGraphic} />}
                             title={<>PeopleSoft: Add ECLASS # to “Case/Profile”</>}
                           />
                         </List.Item>
@@ -404,6 +400,207 @@ Learn More
             },
             {
               key: '4',
+              label: 'Exclusion review',
+              children: (
+                <Space direction="vertical" size="small" style={{ width: '100%' }}>
+                  <div
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      flexDirection: 'column',
+                      justifyContent: 'center',
+                      alignItems: 'flex-start',
+                      gap: 10,
+                      display: 'inline-flex',
+                    }}
+                  >
+                    <div></div>
+                    <div
+                      style={{
+                        alignSelf: 'stretch',
+                        height: 32,
+                        justifyContent: 'flex-start',
+                        alignItems: 'center',
+                        gap: 4,
+                        display: 'inline-flex',
+                      }}
+                    >
+                      <span>If Classification Review is not required and the position is </span>
+                      <Select
+                        defaultValue={'Included'}
+                        value={exclusionType}
+                        onChange={(value) => setExclusionType(value)}
+                        style={{ width: '120px' }}
+                        options={[
+                          { value: 'Included', label: 'Included' },
+                          { value: 'Excluded', label: 'Excluded' },
+                        ]}
+                      />
+                    </div>
+                    <div></div>
+                  </div>
+
+                  {exclusionType === 'Excluded' && (
+                    <List>
+                      <List.Item>
+                        <List.Item.Meta
+                          avatar={<Avatar shape="square" src={ECLASSGraphic} />}
+                          title="ECLASS: If the profile is not significantly modified and the changes are ok'd by the Analyst:"
+                          description="Set up a case to document modified profile."
+                        />
+                      </List.Item>
+                      <List.Item>
+                        <List.Item.Meta
+                          avatar={<Avatar shape="square" src={OracleServiceCloudGraphic} />}
+                          title={
+                            <>
+                              CRM: Update "Category" of the CRM ticket to <Tag>Exclude a position</Tag>
+                            </>
+                          }
+                        />
+                      </List.Item>
+                      <List.Item>
+                        <List.Item.Meta
+                          avatar={<Avatar shape="square" src={OracleServiceCloudGraphic} />}
+                          title={
+                            <>
+                              CRM: Update "Case ID" to <Tag>ECLASS</Tag>
+                            </>
+                          }
+                        />
+                      </List.Item>
+                      <List.Item>
+                        <List.Item.Meta
+                          avatar={<Avatar shape="square" src={OracleServiceCloudGraphic} />}
+                          title={
+                            <>
+                              CRM: Reassign the CRM ticket to an <Tag>Exclusion Advisor</Tag>
+                            </>
+                          }
+                        />
+                      </List.Item>
+                      <List.Item>
+                        <List.Item.Meta
+                          avatar={<Avatar shape="square" src={OracleServiceCloudGraphic} />}
+                          title={
+                            <>
+                              CRM: Update CRM ticket status to <Tag color="purple">Unresolved</Tag>
+                            </>
+                          }
+                        />
+                      </List.Item>
+                    </List>
+                  )}
+
+                  {exclusionType === 'Included' && (
+                    <>
+                      <List>
+                        <List.Item>
+                          <List.Item.Meta
+                            avatar={<Avatar shape="square" src={PeopleSoftGraphic} />}
+                            title={
+                              <>
+                                PeopleSoft: Change the position status to <Tag color={'cyan'}>Approved</Tag>
+                              </>
+                            }
+                          />
+                        </List.Item>
+                        <List.Item>
+                          <List.Item.Meta
+                            avatar={<Avatar shape="square" src={PeopleSoftGraphic} />}
+                            title={'PeopleSoft: Add CRM ticket # to "Detailed Position Description"'}
+                            description={'Proposed position # is in the original service request (in private note)'}
+                          />
+                        </List.Item>
+                        <List.Item>
+                          <List.Item.Meta
+                            avatar={<Avatar shape="square" src={OracleServiceCloudGraphic} />}
+                            title={
+                              'CRM: Send a notification to the client with the new position number using standard text'
+                            }
+                          />
+                        </List.Item>
+                        <List.Item>
+                          <List.Item.Meta
+                            avatar={<Avatar shape="square" src={OracleServiceCloudGraphic} />}
+                            title={
+                              <>
+                                CRM: Update CRM ticket status to <Tag color={'cyan'}>Solved</Tag>
+                              </>
+                            }
+                          />
+                        </List.Item>
+                      </List>
+                      <Alert
+                        style={{ marginBottom: '1rem' }}
+                        message={<span>No actions required in Job Store.</span>}
+                        type="info"
+                        showIcon
+                      />
+                    </>
+                  )}
+                </Space>
+              ),
+            },
+            {
+              key: '5',
+              label: 'Cancel request',
+              children: (
+                <Space direction="vertical" size="small" style={{ width: '100%' }}>
+                  <div
+                    style={{
+                      width: '100%',
+                      height: '100%',
+                      flexDirection: 'column',
+                      justifyContent: 'center',
+                      alignItems: 'flex-start',
+                      gap: 10,
+                      display: 'inline-flex',
+                    }}
+                  >
+                    <div></div>
+                    <div
+                      style={{
+                        alignSelf: 'stretch',
+                        height: 32,
+                        justifyContent: 'flex-start',
+                        alignItems: 'center',
+                        gap: 4,
+                        display: 'inline-flex',
+                      }}
+                    >
+                      If the request was made by mistake or is no longer needed after verification or review:
+                    </div>
+                    <div></div>
+                  </div>
+
+                  <List>
+                    <List.Item>
+                      <List.Item.Meta
+                        avatar={<Avatar shape="square" src={PeopleSoftGraphic} />}
+                        title={
+                          <>
+                            PeopleSoft: Change the position status to <Tag>Inactive</Tag>
+                          </>
+                        }
+                      />
+                    </List.Item>
+                    <List.Item>
+                      <List.Item.Meta
+                        avatar={<Avatar shape="square" src={OracleServiceCloudGraphic} />}
+                        title={
+                          <>
+                            CRM: Update CRM ticket status to <Tag color="cyan">Solved</Tag>
+                          </>
+                        }
+                      />
+                    </List.Item>
+                  </List>
+                </Space>
+              ),
+            },
+            {
+              key: '6',
               label: 'Approve',
               children: (
                 <Space direction="vertical" size="small" style={{ width: '100%' }}>
