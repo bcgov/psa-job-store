@@ -23,6 +23,7 @@ interface SecurityScreeningsProps {
   formErrors: any;
   trigger: UseFormTrigger<JobProfileValidationModel>;
   pickerData: any;
+  sectionSignificant?: boolean;
 }
 
 const SecurityScreenings: React.FC<SecurityScreeningsProps> = ({
@@ -34,6 +35,7 @@ const SecurityScreenings: React.FC<SecurityScreeningsProps> = ({
   formErrors,
   trigger,
   pickerData,
+  sectionSignificant = true,
 }) => {
   const { secAlertShown, setSecAlertShown } = useWizardContext();
 
@@ -43,6 +45,7 @@ const SecurityScreenings: React.FC<SecurityScreeningsProps> = ({
     setEditedFields: setEditedFields,
     originalFields: originalFields,
     significant: true,
+    sectionSignificant,
   });
 
   const {
@@ -52,8 +55,7 @@ const SecurityScreenings: React.FC<SecurityScreeningsProps> = ({
   } = useFormFields({
     useFormReturn,
     fieldName: 'optional_security_screenings',
-
-    significant: true,
+    sectionSignificant,
   });
 
   const { modalProps, closeModal, handleRemoveModal, handleFocusModal, handleAddModal } = useModalActions({
@@ -62,7 +64,7 @@ const SecurityScreenings: React.FC<SecurityScreeningsProps> = ({
     setAlertShown: setSecAlertShown,
     dataTestId: 'security-warning',
     trigger,
-    isSignificant: true,
+    isSignificant: sectionSignificant,
   });
 
   const renderFields = (field: any, index: number) => {
@@ -78,7 +80,7 @@ const SecurityScreenings: React.FC<SecurityScreeningsProps> = ({
       handleRemove,
       originalFields,
       update,
-      fields,
+      sectionSignificant,
     };
 
     return (
@@ -141,6 +143,7 @@ const SecurityScreenings: React.FC<SecurityScreeningsProps> = ({
             <WizardEditAddButton
               testId="add-security-screening-button"
               isSignificant
+              sectionSignificant={sectionSignificant}
               onClick={() => handleAddModal(handleAddNew)}
             >
               Add a custom requirement

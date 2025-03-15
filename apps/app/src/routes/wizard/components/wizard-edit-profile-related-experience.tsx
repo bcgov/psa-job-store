@@ -20,6 +20,7 @@ interface RelatedExperienceProps {
   setEditedFields: React.Dispatch<React.SetStateAction<{ [key: number]: boolean }>>;
   formErrors: any;
   trigger: UseFormTrigger<JobProfileValidationModel>;
+  sectionSignificant?: boolean;
 }
 
 const RelatedExperience: React.FC<RelatedExperienceProps> = ({
@@ -30,6 +31,7 @@ const RelatedExperience: React.FC<RelatedExperienceProps> = ({
   setEditedFields,
   formErrors,
   trigger,
+  sectionSignificant = true,
 }) => {
   const { relWorkAlertShown, setRelWorkAlertShown } = useWizardContext();
 
@@ -39,6 +41,7 @@ const RelatedExperience: React.FC<RelatedExperienceProps> = ({
     setEditedFields: setEditedFields,
     originalFields: originalFields,
     significant: true,
+    sectionSignificant,
   });
 
   const { modalProps, closeModal, handleRemoveModal, handleFocusModal, handleAddModal } = useModalActions({
@@ -47,7 +50,7 @@ const RelatedExperience: React.FC<RelatedExperienceProps> = ({
     setAlertShown: setRelWorkAlertShown,
     dataTestId: 'experience-warning',
     trigger,
-    isSignificant: true,
+    isSignificant: sectionSignificant,
   });
 
   const renderFields = (field: any, index: number) => {
@@ -63,6 +66,7 @@ const RelatedExperience: React.FC<RelatedExperienceProps> = ({
       handleRemove,
       originalFields,
       update,
+      sectionSignificant,
     };
 
     return (
@@ -96,6 +100,7 @@ const RelatedExperience: React.FC<RelatedExperienceProps> = ({
       <WizardEditAddButton
         testId="add-job-experience-button"
         isSignificant
+        sectionSignificant={sectionSignificant}
         onClick={() => handleAddModal(handleAddNew)}
       >
         Add a related experience

@@ -1,5 +1,11 @@
 # api
 
+## 0.15.0
+
+### Minor Changes
+
+- [#1364](https://github.com/bcgov/psa-job-store/pull/1364) [`421ea1a`](https://github.com/bcgov/psa-job-store/commit/421ea1afcef3609f42863d0289a7f8fc6111bff9) Thanks [@alex-struk](https://github.com/alex-struk)! - AL-1144 Allow TC users to toggle if additions to a job profile section trigger verification
+
 ## 0.14.0
 
 ### Minor Changes

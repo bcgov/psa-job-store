@@ -43,6 +43,7 @@ interface FieldItemProps {
   remove?: UseFieldArrayRemove;
   fields?: Record<'id', string>[];
   trigger?: UseFormTrigger<JobProfileValidationModel>;
+  sectionSignificant?: boolean;
 }
 
 const WizardEditProfileListItem: React.FC<FieldItemProps> = ({
@@ -62,7 +63,7 @@ const WizardEditProfileListItem: React.FC<FieldItemProps> = ({
   onFocus,
   update,
   originalFields,
-  isAdmin = undefined,
+  sectionSignificant = true,
 }) => {
   const inputRef = useRef(null);
   const removeAriaLabel = field.is_readonly
@@ -71,9 +72,10 @@ const WizardEditProfileListItem: React.FC<FieldItemProps> = ({
       ? `Undo remove ${label ?? fieldName} ${index + 1}`
       : `Remove ${label ?? fieldName} ${index + 1}`;
 
-  let isEdited = false;
-  if (isAdmin === undefined) isEdited = editedFields ? editedFields[index] || field.isCustom : false;
-  else isEdited = editedFields ? !isAdmin && (editedFields[index] || field.isCustom) : false;
+  const isEdited = editedFields ? editedFields[index] || field.isCustom : false;
+  const isItemSignificant = field.isCustom 
+    ? field.is_significant && sectionSignificant 
+    : field.is_significant;
 
   const handleFieldChange = debounce((index, updatedValue) => {
     setEditedFields &&
@@ -134,7 +136,7 @@ const WizardEditProfileListItem: React.FC<FieldItemProps> = ({
                 {label ?? fieldName} {index + 1}
               </label>
               <div
-                className={`${isEdited && field.is_significant ? 'edited-field-container' : ''} input-container`}
+                className={`${isEdited && isItemSignificant ? 'edited-field-container' : ''} input-container`}
                 style={{ display: field.is_readonly ? 'none' : 'block' }}
                 // || field.tc_is_readonly
               >
@@ -146,7 +148,7 @@ const WizardEditProfileListItem: React.FC<FieldItemProps> = ({
                   autoSize
                   disabled={field.disabled || useFormReturn.getValues(`${fieldName}.${index}.is_readonly`)}
                   className={`${field.disabled ? 'strikethrough-textarea' : ''} ${
-                    isEdited && field.is_significant ? 'edited-textarea' : ''
+                    isEdited && isItemSignificant ? 'edited-textarea' : ''
                   }`}
                   onChange={(event) => {
                     onChange(event);
@@ -175,16 +177,14 @@ const WizardEditProfileListItem: React.FC<FieldItemProps> = ({
                     }
 
                     // setTimeout(() => {
-                    if (isAdmin === undefined) validateVerification?.();
-                    else if (!isAdmin) validateVerification?.();
+                    validateVerification?.();
                     // }, 100);
 
                     onBlur();
                   }}
                   onFocus={() => {
                     console.log('onFocus, inputRef: ', inputRef);
-                    if (isAdmin === undefined) onFocus?.(inputRef);
-                    else if (!isAdmin) onFocus?.(inputRef);
+                    onFocus?.(inputRef);
                   }}
                   value={value ? (typeof value === 'string' ? value : value.text) : ''}
                 />
@@ -198,7 +198,7 @@ const WizardEditProfileListItem: React.FC<FieldItemProps> = ({
                   // return editedFields?.[index] ?? false;
                   return value !== originalFields?.[index]?.text;
                 })()}
-                isSignificant={field.is_significant && !isAdmin}
+                isSignificant={isItemSignificant}
                 removeAriaLabel={removeAriaLabel}
                 id={label}
                 handleReset={handleReset}

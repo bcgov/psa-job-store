@@ -21,6 +21,7 @@ interface AccountabilitiesSectionProps {
   formErrors: any;
   trigger: UseFormTrigger<JobProfileValidationModel>;
   pickerData: any;
+  sectionSignificant?: boolean;
 }
 
 const AccountabilitiesSection: React.FC<AccountabilitiesSectionProps> = ({
@@ -33,6 +34,7 @@ const AccountabilitiesSection: React.FC<AccountabilitiesSectionProps> = ({
   formErrors,
   trigger,
   pickerData,
+  sectionSignificant = true,
 }) => {
   const { reqAlertShown, setReqAlertShown } = useWizardContext();
   const {
@@ -42,6 +44,7 @@ const AccountabilitiesSection: React.FC<AccountabilitiesSectionProps> = ({
   } = useFormFields({
     useFormReturn,
     fieldName: 'optional_accountabilities',
+    sectionSignificant:false,
   });
 
   const { fields, handleRemove, handleAddBack, handleReset, update, remove, handleAddNew } = useFormFields({
@@ -50,6 +53,7 @@ const AccountabilitiesSection: React.FC<AccountabilitiesSectionProps> = ({
     setEditedFields: setEditedAccReqFields,
     originalFields: originalAccReqFields,
     significant: true,
+    sectionSignificant,
   });
 
   const { modalProps, closeModal, handleAddModal } = useModalActions({
@@ -58,7 +62,7 @@ const AccountabilitiesSection: React.FC<AccountabilitiesSectionProps> = ({
     setAlertShown: setReqAlertShown,
     dataTestId: 'accountabilities-warning',
     trigger,
-    isSignificant: true,
+    isSignificant: sectionSignificant,
   });
 
   return (
@@ -95,6 +99,7 @@ const AccountabilitiesSection: React.FC<AccountabilitiesSectionProps> = ({
               handleReset={handleReset}
               update={update}
               remove={remove}
+              sectionSignificant={sectionSignificant}
             />
 
             <OptionalList
@@ -121,6 +126,7 @@ const AccountabilitiesSection: React.FC<AccountabilitiesSectionProps> = ({
                   <WizardEditAddButton
                     testId="add-accountability-button"
                     isSignificant
+                    sectionSignificant={sectionSignificant}
                     onClick={() => handleAddModal(handleAddNew)}
                   >
                     Add a custom accountability

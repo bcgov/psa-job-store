@@ -741,7 +741,7 @@ export class JobProfileService {
     const jobProfiles = await this.prisma.jobProfile.findMany({
       where: {
         id: jobStoreId,
-        state: 'PUBLISHED',
+        OR: [{ state: 'PUBLISHED' }, { is_archived: true }],
       },
       select: {
         id: true,

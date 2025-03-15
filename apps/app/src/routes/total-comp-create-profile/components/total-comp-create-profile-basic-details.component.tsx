@@ -478,7 +478,7 @@ export const BasicDetails: React.FC<BasicDetailsProps> = ({}) => {
     if (classification) {
       // If a classification is found, look for a corresponding OEX classification
       const oexClassification = classificationsData?.classifications.find(
-        (c) => c.employee_group_id == 'OEX' && c.code.toLowerCase() == classification.code.toLowerCase(), // && c.grade == classification.grade 
+        (c) => c.employee_group_id == 'OEX' && c.code.toLowerCase() == classification.code.toLowerCase(), // && c.grade == classification.grade
       );
 
       if (oexClassification) {
@@ -1048,10 +1048,14 @@ export const BasicDetails: React.FC<BasicDetailsProps> = ({}) => {
             ? classificationsData?.classifications.filter((c) => c.employee_group_id == selected?.employeeGroup)
             : selected?.employeeGroup == 'OEX'
               ? classificationsData?.classifications.filter(
-                  (c) => c.employee_group_id == classification?.employee_group_id && classification.code.toLowerCase() == c.code.toLowerCase(),
+                  (c) =>
+                    c.employee_group_id == classification?.employee_group_id &&
+                    classification.code.toLowerCase() == c.code.toLowerCase(),
                 )
               : classificationsData?.classifications.filter(
-                  (c) => c.employee_group_id == selected?.employeeGroup && otherClassification?.code.toLowerCase() == c.code.toLowerCase(),
+                  (c) =>
+                    c.employee_group_id == selected?.employeeGroup &&
+                    otherClassification?.code.toLowerCase() == c.code.toLowerCase(),
                 );
       } else {
         list = classificationsData?.classifications.filter((c) => c.employee_group_id == selected?.employeeGroup);
@@ -1078,12 +1082,12 @@ export const BasicDetails: React.FC<BasicDetailsProps> = ({}) => {
               trigger={triggerBasicDetailsValidation}
               formErrors={basicFormErrors}
               useFormReturn={basicUseFormReturn}
-              readOnly={!isCurrentVersion}
+              readOnly={!isCurrentVersion || jobProfileData?.jobProfile.is_archived}
             />
             <Card title="JobStore Number" style={{ marginTop: 16 }} bordered={false} className="custom-card">
               <Row justify="start">
                 <Col xs={24} sm={24} md={24} lg={18} xl={16}>
-                  {isCurrentVersion ? (
+                  {isCurrentVersion && !jobProfileData?.jobProfile.is_archived ? (
                     <>
                       <FormItem control={control} name="jobStoreNumber">
                         <label style={srOnlyStyle} htmlFor="jobStoreNumber">
@@ -1122,7 +1126,7 @@ export const BasicDetails: React.FC<BasicDetailsProps> = ({}) => {
             </Card>
 
             <Card title="Classification" style={{ marginTop: 16 }} bordered={false}>
-              {isCurrentVersion ? (
+              {isCurrentVersion && !jobProfileData?.jobProfile.is_archived ? (
                 <>
                   <Form.Item label="Employee groups" labelCol={{ className: 'card-label' }} className="label-only" />
                   <div style={{ marginBottom: '1.5rem' }}>
@@ -1406,7 +1410,7 @@ export const BasicDetails: React.FC<BasicDetailsProps> = ({}) => {
               <Row justify="start">
                 <Col xs={24} sm={24} md={24} lg={18} xl={16}>
                   <Form.Item label="Job role" labelCol={{ className: 'card-label' }}>
-                    {isCurrentVersion ? (
+                    {isCurrentVersion && !jobProfileData?.jobProfile.is_archived ? (
                       <>
                         <Controller
                           name="jobRole"
@@ -1448,7 +1452,7 @@ export const BasicDetails: React.FC<BasicDetailsProps> = ({}) => {
                     className="label-only"
                   ></Form.Item>
                   {professionsFields.map((field, index: number) =>
-                    isCurrentVersion ? (
+                    isCurrentVersion && !jobProfileData?.jobProfile.is_archived ? (
                       <div key={field.id}>
                         <Form.Item style={{ marginBottom: '0.5rem' }}>
                           {/* First level of selection for job family /profession */}
@@ -1543,7 +1547,7 @@ export const BasicDetails: React.FC<BasicDetailsProps> = ({}) => {
                       </>
                     ),
                   )}
-                  {isCurrentVersion && (
+                  {isCurrentVersion && !jobProfileData?.jobProfile.is_archived && (
                     <Form.Item>
                       <Button
                         type="dashed"
@@ -1559,7 +1563,9 @@ export const BasicDetails: React.FC<BasicDetailsProps> = ({}) => {
                     </Form.Item>
                   )}
 
-                  {isCurrentVersion && <WizardValidationError formErrors={basicFormErrors} fieldName="professions" />}
+                  {isCurrentVersion && !jobProfileData?.jobProfile.is_archived && (
+                    <WizardValidationError formErrors={basicFormErrors} fieldName="professions" />
+                  )}
                 </Col>
               </Row>
             </Card>
@@ -1570,7 +1576,7 @@ export const BasicDetails: React.FC<BasicDetailsProps> = ({}) => {
                   {/* Role Radio Buttons */}
 
                   <Form.Item label="Role" labelCol={{ className: 'card-label' }}>
-                    {isCurrentVersion ? (
+                    {isCurrentVersion && !jobProfileData?.jobProfile.is_archived ? (
                       <Controller
                         name="role"
                         control={control}
@@ -1594,7 +1600,7 @@ export const BasicDetails: React.FC<BasicDetailsProps> = ({}) => {
                   {/* Report-to relationship Select */}
 
                   <Form.Item label="Report-to relationship" labelCol={{ className: 'card-label' }}>
-                    {isCurrentVersion ? (
+                    {isCurrentVersion && !jobProfileData?.jobProfile.is_archived ? (
                       <>
                         <Controller
                           name="reportToRelationship"
@@ -1671,7 +1677,7 @@ export const BasicDetails: React.FC<BasicDetailsProps> = ({}) => {
                 <Col xs={24} sm={24} md={24} lg={18} xl={16}>
                   {/* Scopes of Responsibility Select */}
                   <Form.Item label="Scope of Responsibility" labelCol={{ className: 'card-label' }}>
-                    {isCurrentVersion ? (
+                    {isCurrentVersion && !jobProfileData?.jobProfile.is_archived ? (
                       <>
                         <Controller
                           name="scopeOfResponsibility"
@@ -1721,7 +1727,7 @@ export const BasicDetails: React.FC<BasicDetailsProps> = ({}) => {
                     }
                     labelCol={{ className: 'card-label' }}
                   >
-                    {isCurrentVersion ? (
+                    {isCurrentVersion && !jobProfileData?.jobProfile.is_archived ? (
                       <>
                         <Controller
                           name="ministries"
@@ -1777,7 +1783,12 @@ export const BasicDetails: React.FC<BasicDetailsProps> = ({}) => {
                       control={control}
                       render={({ field: { onChange, value, ref } }) => (
                         <>
-                          <Switch checked={value} onChange={onChange} ref={ref} disabled={!isCurrentVersion} />
+                          <Switch
+                            checked={value}
+                            onChange={onChange}
+                            ref={ref}
+                            disabled={!isCurrentVersion && !jobProfileData?.jobProfile.is_archived}
+                          />
                           <span className="ant-form-text" style={{ marginLeft: '0.8rem' }}>
                             Verification or Classification Review required
                           </span>
@@ -1791,7 +1802,7 @@ export const BasicDetails: React.FC<BasicDetailsProps> = ({}) => {
 
             <JobContextEditor
               control={control}
-              isCurrentVersion={isCurrentVersion}
+              isCurrentVersion={isCurrentVersion && !jobProfileData?.jobProfile.is_archived}
               jobProfileData={jobProfileData}
               triggerBasicDetailsValidation={triggerBasicDetailsValidation}
               basicFormErrors={basicFormErrors}

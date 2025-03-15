@@ -159,8 +159,12 @@ function transformFormDataToApiSchema({ formData, id, jobProfileData }: any): Cr
         markAllSignificantSecurityScreenings: formData.markAllSignificantSecurityScreenings,
         markAllNonEditableJob_experience: formData.markAllNonEditableJob_experience,
         markAllSignificantJob_experience: formData.markAllSignificantJob_experience,
-
         markAllNonEditableSec: formData.markAllNonEditableSec,
+        isAccountabilitiesSectionSignificant: formData.isAccountabilitiesSectionSignificant,
+        isEducationSectionSignificant: formData.isEducationSectionSignificant,
+        isRelatedExperienceSectionSignificant: formData.isRelatedExperienceSectionSignificant,
+        isProfessionalRegistrationSectionSignificant: formData.isProfessionalRegistrationSectionSignificant,
+        isSecurityScreeningsSectionSignificant: formData.isSecurityScreeningsSectionSignificant,
       },
       behavioural_competencies: formData.behavioural_competencies
         .map((a: any) => ({

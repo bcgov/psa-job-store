@@ -383,6 +383,13 @@ export class JobProfileValidationModel {
   markAllNonEditableJob_experience: boolean;
   markAllSignificantJob_experience: boolean;
   markAllNonEditableSec: boolean;
+
+  isAccountabilitiesSectionSignificant?: boolean;
+  isEducationSectionSignificant?: boolean;
+  isRelatedExperienceSectionSignificant?: boolean;
+  isProfessionalRegistrationSectionSignificant?: boolean;
+  isSecurityScreeningsSectionSignificant?: boolean;
+
   jobStoreNumber: string;
   originalJobStoreNumber: string;
   employeeGroups: string[];

@@ -84,14 +84,28 @@ export const TotalCompCreateJobProfileInfo: React.FC<TotalCompCreateJobProfileIn
               column={24}
               items={[
                 {
-                  key: 'updated by',
-                  label: <Typography.Title level={3}>Updated by</Typography.Title>,
-                  children: <span tabIndex={0}>{profileJson?.jobProfile?.updated_by?.name}</span>,
+                  key: profileJson?.jobProfile?.is_archived ? 'archived by' : 'updated by',
+                  label: (
+                    <Typography.Title level={3}>
+                      {profileJson?.jobProfile?.is_archived ? 'Archived by' : 'Updated by'}
+                    </Typography.Title>
+                  ),
+                  children: (
+                    <span tabIndex={0}>
+                      {profileJson?.jobProfile?.is_archived
+                        ? profileJson?.jobProfile?.updated_by?.name
+                        : profileJson?.jobProfile?.updated_by?.name}
+                    </span>
+                  ),
                   span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
                 },
                 {
-                  key: 'updated at',
-                  label: <Typography.Title level={3}>Updated at</Typography.Title>,
+                  key: profileJson?.jobProfile?.is_archived ? 'archived at' : 'updated at',
+                  label: (
+                    <Typography.Title level={3}>
+                      {profileJson?.jobProfile?.is_archived ? 'Archived at' : 'Updated at'}
+                    </Typography.Title>
+                  ),
                   children: (
                     <span tabIndex={0}>
                       {profileJson?.jobProfile?.updated_at &&
@@ -215,18 +229,31 @@ export const TotalCompCreateJobProfileInfo: React.FC<TotalCompCreateJobProfileIn
           bordered
           column={24}
           items={[
-            // {
-            //   key: 'Last updated by',
-            //   label: <Typography.Title level={3}>Last updated by</Typography.Title>,
-            //   children: <span tabIndex={0}>{profileJson?.jobProfile?.updated_by?.name}</span>,
-            //   span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
-            // },
-            // {
-            //   key: 'Last updated at',
-            //   label: <Typography.Title level={3}>Last updated at</Typography.Title>,
-            //   children: <span tabIndex={0}>{profileJson?.jobProfile?.updated_at}</span>,
-            //   span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
-            // },
+            {
+              key: 'Created by',
+              label: <Typography.Title level={3}>Created by</Typography.Title>,
+              children: <span tabIndex={0}>{jobProfileMeta?.jobProfileMeta.createdBy?.user}</span>,
+              span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
+            },
+            {
+              key: 'Created at',
+              label: <Typography.Title level={3}>Created at</Typography.Title>,
+              children: (
+                <span tabIndex={0}>
+                  {jobProfileMeta?.jobProfileMeta.createdBy?.date &&
+                    new Intl.DateTimeFormat('en-CA', {
+                      year: 'numeric',
+                      month: '2-digit',
+                      day: '2-digit',
+                      hour: '2-digit',
+                      hour12: false,
+                      minute: '2-digit',
+                      second: '2-digit',
+                    }).format(new Date(jobProfileMeta.jobProfileMeta.createdBy.date))}
+                </span>
+              ),
+              span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
+            },
             {
               key: 'First published by',
               label: <Typography.Title level={3}>First published by</Typography.Title>,
@@ -248,31 +275,6 @@ export const TotalCompCreateJobProfileInfo: React.FC<TotalCompCreateJobProfileIn
                       minute: '2-digit',
                       second: '2-digit',
                     }).format(new Date(jobProfileMeta.jobProfileMeta.firstPublishedBy.date))}
-                </span>
-              ),
-              span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
-            },
-            {
-              key: 'Created by',
-              label: <Typography.Title level={3}>Created by</Typography.Title>,
-              children: <span tabIndex={0}>{jobProfileMeta?.jobProfileMeta.firstCreatedBy?.owner ?? ''}</span>,
-              span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
-            },
-            {
-              key: 'Created at',
-              label: <Typography.Title level={3}>Created at</Typography.Title>,
-              children: (
-                <span tabIndex={0}>
-                  {jobProfileMeta?.jobProfileMeta.firstCreatedBy?.date &&
-                    new Intl.DateTimeFormat('en-CA', {
-                      year: 'numeric',
-                      month: '2-digit',
-                      day: '2-digit',
-                      hour: '2-digit',
-                      hour12: false,
-                      minute: '2-digit',
-                      second: '2-digit',
-                    }).format(new Date(jobProfileMeta.jobProfileMeta.firstCreatedBy.date))}
                 </span>
               ),
               span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },

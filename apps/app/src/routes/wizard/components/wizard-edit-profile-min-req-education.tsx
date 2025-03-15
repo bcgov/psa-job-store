@@ -17,9 +17,9 @@ interface EducationProps {
   validateVerification: () => void;
   editedFields: { [key: number]: boolean };
   setEditedFields: React.Dispatch<React.SetStateAction<{ [key: number]: boolean }>>;
-  isAdmin: boolean;
   formErrors: any;
   trigger: UseFormTrigger<JobProfileValidationModel>;
+  sectionSignificant?: boolean;
 }
 
 const Education: React.FC<EducationProps> = ({
@@ -28,9 +28,9 @@ const Education: React.FC<EducationProps> = ({
   validateVerification,
   editedFields,
   setEditedFields,
-  isAdmin,
   formErrors,
   trigger,
+  sectionSignificant = true,
 }) => {
   const { minReqAlertShown, setMinReqAlertShown } = useWizardContext();
 
@@ -40,6 +40,7 @@ const Education: React.FC<EducationProps> = ({
     setEditedFields: setEditedFields,
     originalFields: originalFields,
     significant: true,
+    sectionSignificant,
   });
 
   const { modalProps, closeModal, handleRemoveModal, handleFocusModal, handleAddModal } = useModalActions({
@@ -48,7 +49,7 @@ const Education: React.FC<EducationProps> = ({
     setAlertShown: setMinReqAlertShown,
     dataTestId: 'education-warning',
     trigger,
-    isSignificant: !isAdmin,
+    isSignificant: sectionSignificant,
   });
 
   const renderFields = (field: any, index: number) => {
@@ -64,6 +65,7 @@ const Education: React.FC<EducationProps> = ({
       handleRemove,
       originalFields,
       update,
+      sectionSignificant,
     };
 
     return (
@@ -76,7 +78,6 @@ const Education: React.FC<EducationProps> = ({
         onFocus={(inputRef) => {
           handleFocusModal({ inputRef, field });
         }}
-        isAdmin={isAdmin}
       />
     );
   };
@@ -90,8 +91,9 @@ const Education: React.FC<EducationProps> = ({
       <WizardValidationError formErrors={formErrors} fieldName="education" />
 
       <WizardEditAddButton
-        isSignificant={false}
         testId="add-education-button"
+        isSignificant
+        sectionSignificant={sectionSignificant}
         onClick={() => handleAddModal(handleAddNew)}
       >
         Add an education or work requirement

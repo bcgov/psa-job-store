@@ -158,6 +158,11 @@ export interface JobProfileModel {
     markAllSignificantJob_experience: boolean;
     markAllNonEditableSec: boolean;
     markAllSignificantSecurityScreenings: boolean;
+    isAccountabilitiesSectionSignificant: boolean;
+    isEducationSectionSignificant: boolean;
+    isRelatedExperienceSectionSignificant: boolean;
+    isProfessionalRegistrationSectionSignificant: boolean;
+    isSecurityScreeningsSectionSignificant: boolean;
   };
   role_type: { id: number; name?: string };
   reports_to: ClassificationModelWrapped[];

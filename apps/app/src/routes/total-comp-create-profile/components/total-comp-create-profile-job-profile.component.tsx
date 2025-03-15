@@ -19,7 +19,7 @@ import { useTCContext } from './total-comp-create-profile.provider';
 interface TotalCompCreateJobProfileProps {}
 
 export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps> = ({}) => {
-  const { isCurrentVersion, pickerData } = useTCContext();
+  const { isCurrentVersion, jobProfileData, pickerData } = useTCContext();
 
   const context = useContext(FormContext);
   if (!context) {
@@ -183,11 +183,17 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
   const markAllSignificantSecurityScreenings = profileWatch('markAllSignificantSecurityScreenings');
   const markAllNonEditableJob_experience = profileWatch('markAllNonEditableJob_experience');
   const markAllSignificantJob_experience = profileWatch('markAllSignificantJob_experience');
-
   const markAllNonEditableSec = profileWatch('markAllNonEditableSec');
   // const markAllNonEditableProfReg = profileWatch('markAllNonEditableProfReg');
 
   const markAllSignificant = profileWatch('markAllSignificant');
+  // New section significance checkboxes
+  const isAccountabilitiesSectionSignificant = profileWatch('isAccountabilitiesSectionSignificant');
+  const isEducationSectionSignificant = profileWatch('isEducationSectionSignificant');
+  const isRelatedExperienceSectionSignificant = profileWatch('isRelatedExperienceSectionSignificant');
+  const isProfessionalRegistrationSectionSignificant = profileWatch('isProfessionalRegistrationSectionSignificant');
+  const isSecurityScreeningsSectionSignificant = profileWatch('isSecurityScreeningsSectionSignificant');
+  
   const accountabilities = profileWatch('accountabilities');
   const securityScreenings = profileWatch('security_screenings');
   const educations = profileWatch('education');
@@ -379,13 +385,13 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
               trigger={triggerProfileValidation}
               formErrors={profileFormErrors}
               useFormReturn={jobProfileUseFormReturn}
-              readOnly={!isCurrentVersion}
+              readOnly={!isCurrentVersion || jobProfileData?.jobProfile.is_archived}
             />
             <WizardProgramOverview
               trigger={triggerProfileValidation}
               formErrors={profileFormErrors}
               useFormReturn={jobProfileUseFormReturn}
-              readOnly={!isCurrentVersion}
+              readOnly={!isCurrentVersion || jobProfileData?.jobProfile.is_archived}
             />
 
             <Card title="Accountabilities" style={{ marginTop: 16 }} bordered={false}>
@@ -396,11 +402,33 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                     style={{ marginBottom: '0' }}
                     labelCol={{ className: 'full-width-label card-label' }}
                     label={
-                      isCurrentVersion && (
+                      isCurrentVersion &&
+                      !jobProfileData?.jobProfile.is_archived && (
                         <Row justify="space-between" align="middle" style={{ width: '100%' }}>
                           <Col>
                             <Form.Item style={{ margin: 0 }}>
                               <Row>
+                              <Col>
+                                  <Controller
+                                    control={profileControl}
+                                    name="isAccountabilitiesSectionSignificant"
+                                    render={({ field }) => (
+                                      <Checkbox
+                                        {...field}
+                                        checked={isAccountabilitiesSectionSignificant}
+                                        onChange={(e) => {
+                                          field.onChange(e.target.checked);
+                                          triggerProfileValidation();
+                                        }}
+                                      >
+                                        Is a significant section
+                                        <Tooltip title="If selected, all custom fields that users create in this section will trigger classification verification or review.">
+                                          <InfoCircleOutlined style={{ marginLeft: 8 }} />
+                                        </Tooltip>
+                                      </Checkbox>
+                                    )}
+                                  ></Controller>
+                                </Col>
                                 <Col>
                                   <Controller
                                     control={profileControl}
@@ -449,6 +477,7 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                                     )}
                                   ></Controller>
                                 </Col>
+                                
                               </Row>
                             </Form.Item>
                           </Col>
@@ -459,7 +488,7 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                     {accountabilitiesFields.map((field, index) => (
                       <Row align="top" key={field.id} gutter={16}>
                         {/* up/down controls */}
-                        {isCurrentVersion && (
+                        {isCurrentVersion && !jobProfileData?.jobProfile.is_archived && (
                           <Col flex="none" className="reorder-controls">
                             <ReorderButtons
                               index={index}
@@ -493,7 +522,7 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                                         triggerProfileValidation();
                                       }}
                                       checked={value}
-                                      disabled={!isCurrentVersion}
+                                      disabled={!isCurrentVersion || jobProfileData?.jobProfile.is_archived}
                                     >
                                       Non-editable
                                     </Checkbox>
@@ -514,7 +543,11 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                                         triggerProfileValidation();
                                       }} // send value to hook form
                                       // disable if this item is non-editable
-                                      disabled={accountabilities?.[index].nonEditable || !isCurrentVersion}
+                                      disabled={
+                                        accountabilities?.[index].nonEditable ||
+                                        !isCurrentVersion ||
+                                        jobProfileData?.jobProfile.is_archived
+                                      }
                                       checked={value || accountabilities?.[index].nonEditable}
                                     >
                                       Significant
@@ -524,7 +557,7 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                               />
                             </div>
                           </Row>
-                          {isCurrentVersion ? (
+                          {isCurrentVersion && !jobProfileData?.jobProfile.is_archived ? (
                             <Row gutter={10}>
                               <Col flex="auto">
                                 <Form.Item>
@@ -567,7 +600,7 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                         </Col>
                       </Row>
                     ))}
-                    {isCurrentVersion ? (
+                    {isCurrentVersion && !jobProfileData?.jobProfile.is_archived ? (
                       <Form.Item>
                         <WizardValidationError formErrors={profileFormErrors} fieldName="accountabilities" />
                         <Button
@@ -598,7 +631,7 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
               bordered={false}
               bodyStyle={{ paddingTop: 0 }}
             >
-              {isCurrentVersion ? (
+              {isCurrentVersion && !jobProfileData?.jobProfile.is_archived ? (
                 <Alert
                   className="custom-alert"
                   role="note"
@@ -623,13 +656,37 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                       <Row
                         justify="space-between"
                         align="middle"
-                        style={{ width: '100%', marginTop: !isCurrentVersion ? '1rem' : undefined }}
+                        style={{
+                          width: '100%',
+                          marginTop: !isCurrentVersion || jobProfileData?.jobProfile.is_archived ? '1rem' : undefined,
+                        }}
                       >
                         <Col>Education and work experience</Col>
                         <Col>
                           <Form.Item style={{ margin: 0 }}>
-                            {isCurrentVersion ? (
+                            {isCurrentVersion && !jobProfileData?.jobProfile.is_archived ? (
                               <Row>
+                                <Col>
+                                  <Controller
+                                    control={profileControl}
+                                    name="isEducationSectionSignificant"
+                                    render={({ field }) => (
+                                      <Checkbox
+                                        {...field}
+                                        checked={isEducationSectionSignificant}
+                                        onChange={(e) => {
+                                          field.onChange(e.target.checked);
+                                          triggerProfileValidation();
+                                        }}
+                                      >
+                                        Is a significant section
+                                        <Tooltip title="If selected, all custom fields that users create in this section will trigger classification verification or review.">
+                                          <InfoCircleOutlined style={{ marginLeft: 8 }} />
+                                        </Tooltip>
+                                      </Checkbox>
+                                    )}
+                                  ></Controller>
+                                </Col>
                                 <Col>
                                   <Controller
                                     control={profileControl}
@@ -676,6 +733,7 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                                     )}
                                   ></Controller>
                                 </Col>
+                                
                               </Row>
                             ) : (
                               <></>
@@ -688,7 +746,7 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                     {educationAndWorkExperienceFields.map((field, index) => (
                       <Row align="top" key={field.id} gutter={16} style={{ marginBottom: '1rem' }}>
                         {/* up/down controls */}
-                        {isCurrentVersion && (
+                        {isCurrentVersion && !jobProfileData?.jobProfile.is_archived && (
                           <Col flex="none" className="reorder-controls">
                             <ReorderButtons
                               index={index}
@@ -718,7 +776,7 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                                       onChange(args);
                                     }}
                                     checked={value}
-                                    disabled={!isCurrentVersion}
+                                    disabled={!isCurrentVersion || jobProfileData?.jobProfile.is_archived}
                                   >
                                     Non-editable
                                   </Checkbox>
@@ -735,7 +793,11 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                                       }
                                       onChange(args);
                                     }}
-                                    disabled={educations?.[index].nonEditable || !isCurrentVersion}
+                                    disabled={
+                                      educations?.[index].nonEditable ||
+                                      !isCurrentVersion ||
+                                      jobProfileData?.jobProfile.is_archived
+                                    }
                                     checked={value || educations?.[index].nonEditable}
                                   >
                                     Significant
@@ -744,7 +806,7 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                               />
                             </div>
                           </Row>
-                          {isCurrentVersion ? (
+                          {isCurrentVersion && !jobProfileData?.jobProfile.is_archived ? (
                             <Row gutter={10}>
                               <Col flex="auto">
                                 {field.tc_is_readonly &&
@@ -819,7 +881,7 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                       </Row>
                     ))}
 
-                    {isCurrentVersion ? (
+                    {isCurrentVersion && !jobProfileData?.jobProfile.is_archived ? (
                       <>
                         <WizardValidationError formErrors={profileFormErrors} fieldName="education" />
 
@@ -890,9 +952,31 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                       <Row justify="space-between" align="middle" style={{ width: '100%' }}>
                         <Col>Related experience</Col>
                         <Col>
-                          {isCurrentVersion ? (
+                          {isCurrentVersion && !jobProfileData?.jobProfile.is_archived ? (
                             <Form.Item style={{ margin: 0 }}>
                               <Row>
+                              <Col>
+                                  <Controller
+                                    control={profileControl}
+                                    name="isRelatedExperienceSectionSignificant"
+                                    render={({ field }) => (
+                                      <Checkbox
+                                        {...field}
+                                        checked={isRelatedExperienceSectionSignificant}
+                                        onChange={(e) => {
+                                          field.onChange(e.target.checked);
+                                          triggerProfileValidation();
+                                        }}
+                                        disabled={!isCurrentVersion}
+                                      >
+                                        Is a significant section
+                                        <Tooltip title="If selected, all custom fields that users create in this section will trigger classification verification or review.">
+                                          <InfoCircleOutlined style={{ marginLeft: 8 }} />
+                                        </Tooltip>
+                                      </Checkbox>
+                                    )}
+                                  ></Controller>
+                                </Col>
                                 <Col>
                                   <Controller
                                     control={profileControl}
@@ -901,7 +985,10 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                                       <Checkbox
                                         {...field}
                                         checked={markAllNonEditableJob_experience}
-                                        disabled={job_experienceFields.length === 0 || !isCurrentVersion}
+                                        disabled={
+                                          job_experienceFields.length === 0 ||
+                                          (!isCurrentVersion && !jobProfileData?.jobProfile.is_archived)
+                                        }
                                         onChange={(e) => {
                                           field.onChange(e.target.checked);
                                           updateNonEditableJob_experience(e.target.checked);
@@ -930,7 +1017,7 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                                         disabled={
                                           markAllNonEditableJob_experience ||
                                           job_experienceFields.length === 0 ||
-                                          !isCurrentVersion
+                                          (!isCurrentVersion && !jobProfileData?.jobProfile.is_archived)
                                         }
                                       >
                                         Mark all as significant
@@ -953,7 +1040,7 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                     {job_experienceFields.map((field, index) => (
                       <Row align="top" key={field.id} gutter={16} style={{ marginBottom: '1rem' }}>
                         {/* up/down controls */}
-                        {isCurrentVersion && (
+                        {isCurrentVersion && !jobProfileData?.jobProfile.is_archived && (
                           <Col flex="none" className="reorder-controls">
                             <ReorderButtons
                               index={index}
@@ -983,7 +1070,7 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                                       onChange(args);
                                     }}
                                     checked={value}
-                                    disabled={!isCurrentVersion}
+                                    disabled={!isCurrentVersion || jobProfileData?.jobProfile.is_archived}
                                   >
                                     Non-editable
                                   </Checkbox>
@@ -1000,7 +1087,11 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                                       }
                                       onChange(args);
                                     }}
-                                    disabled={job_experiences?.[index].nonEditable || !isCurrentVersion}
+                                    disabled={
+                                      job_experiences?.[index].nonEditable ||
+                                      !isCurrentVersion ||
+                                      jobProfileData?.jobProfile.is_archived
+                                    }
                                     checked={value || job_experiences?.[index].nonEditable}
                                   >
                                     Significant
@@ -1009,7 +1100,7 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                               />
                             </div>
                           </Row>
-                          {isCurrentVersion ? (
+                          {isCurrentVersion && !jobProfileData?.jobProfile.is_archived ? (
                             <Row gutter={10}>
                               <Col flex="auto">
                                 <Form.Item>
@@ -1052,7 +1143,7 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                         </Col>
                       </Row>
                     ))}
-                    {isCurrentVersion ? (
+                    {isCurrentVersion && !jobProfileData?.jobProfile.is_archived ? (
                       <>
                         <WizardValidationError formErrors={profileFormErrors} fieldName="job_experience" />
                         <Form.Item>
@@ -1092,9 +1183,31 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                         {/* NEW */}
 
                         <Col>
-                          {isCurrentVersion ? (
+                          {isCurrentVersion && !jobProfileData?.jobProfile.is_archived ? (
                             <Form.Item style={{ margin: 0 }}>
                               <Row>
+                              <Col>
+                                  <Controller
+                                    control={profileControl}
+                                    name="isProfessionalRegistrationSectionSignificant"
+                                    render={({ field }) => (
+                                      <Checkbox
+                                        {...field}
+                                        checked={isProfessionalRegistrationSectionSignificant}
+                                        onChange={(e) => {
+                                          field.onChange(e.target.checked);
+                                          triggerProfileValidation();
+                                        }}
+                                        disabled={!isCurrentVersion}
+                                      >
+                                        Is a significant section
+                                        <Tooltip title="If selected, all custom fields that users create in this section will trigger classification verification or review.">
+                                          <InfoCircleOutlined style={{ marginLeft: 8 }} />
+                                        </Tooltip>
+                                      </Checkbox>
+                                    )}
+                                  ></Controller>
+                                </Col>
                                 <Col>
                                   <Controller
                                     control={profileControl}
@@ -1104,7 +1217,8 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                                         {...field}
                                         checked={markAllNonEditableProReg}
                                         disabled={
-                                          professionalRegistrationRequirementsFields.length === 0 || !isCurrentVersion
+                                          professionalRegistrationRequirementsFields.length === 0 ||
+                                          (!isCurrentVersion && !jobProfileData?.jobProfile.is_archived)
                                         }
                                         onChange={(e) => {
                                           field.onChange(e.target.checked);
@@ -1134,7 +1248,7 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                                         disabled={
                                           markAllNonEditableProReg ||
                                           professionalRegistrationRequirementsFields.length === 0 ||
-                                          !isCurrentVersion
+                                          (!isCurrentVersion && !jobProfileData?.jobProfile.is_archived)
                                         }
                                       >
                                         Mark all as significant
@@ -1159,7 +1273,7 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                     {professionalRegistrationRequirementsFields.map((field: any, index: any) => (
                       <Row align="top" key={field.id} gutter={16} style={{ marginBottom: '1rem' }}>
                         {/* up/down controls */}
-                        {isCurrentVersion && (
+                        {isCurrentVersion && !jobProfileData?.jobProfile.is_archived && (
                           <Col flex="none" className="reorder-controls">
                             <ReorderButtons
                               index={index}
@@ -1192,7 +1306,7 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                                       onChange(args);
                                     }}
                                     checked={value}
-                                    disabled={!isCurrentVersion}
+                                    disabled={!isCurrentVersion || jobProfileData?.jobProfile.is_archived}
                                   >
                                     Non-editable
                                   </Checkbox>
@@ -1209,7 +1323,11 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                                       }
                                       onChange(args);
                                     }}
-                                    disabled={professionalRegistrations?.[index].nonEditable || !isCurrentVersion}
+                                    disabled={
+                                      professionalRegistrations?.[index].nonEditable ||
+                                      !isCurrentVersion ||
+                                      jobProfileData?.jobProfile.is_archived
+                                    }
                                     checked={value || professionalRegistrations?.[index].nonEditable}
                                   >
                                     Significant
@@ -1219,7 +1337,7 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                             </div>
                             {/* END NEW Non-editable checkbox */}
                           </Row>
-                          {isCurrentVersion ? (
+                          {isCurrentVersion && !jobProfileData?.jobProfile.is_archived ? (
                             <Row gutter={10}>
                               <Col flex="auto">
                                 {/* Needs to be tc_is_readonly AND exist in the picklist to appear as read only */}
@@ -1302,7 +1420,7 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                         </Col>
                       </Row>
                     ))}
-                    {isCurrentVersion ? (
+                    {isCurrentVersion && !jobProfileData?.jobProfile.is_archived ? (
                       <>
                         <WizardValidationError
                           formErrors={profileFormErrors}
@@ -1359,7 +1477,7 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                     }
                   >
                     {preferencesFields.map((field, index) =>
-                      isCurrentVersion ? (
+                      isCurrentVersion && !jobProfileData?.jobProfile.is_archived ? (
                         <Row align="top" key={field.id} gutter={16} style={{ marginBottom: '1rem' }}>
                           {/* up/down controls */}
                           <Col flex="none" className="reorder-controls">
@@ -1437,7 +1555,7 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                         </Row>
                       ),
                     )}
-                    {isCurrentVersion ? (
+                    {isCurrentVersion && !jobProfileData?.jobProfile.is_archived ? (
                       <Form.Item>
                         <Row>
                           <Col>
@@ -1481,7 +1599,7 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                     }
                   >
                     {knowledgeSkillsAbilitiesFields.map((field, index) =>
-                      isCurrentVersion ? (
+                      isCurrentVersion && !jobProfileData?.jobProfile.is_archived ? (
                         <Row align="top" key={field.id} gutter={16} style={{ marginBottom: '1rem' }}>
                           {/* up/down controls */}
                           <Col flex="none" className="reorder-controls">
@@ -1562,7 +1680,7 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                         </Row>
                       ),
                     )}
-                    {isCurrentVersion ? (
+                    {isCurrentVersion && !jobProfileData?.jobProfile.is_archived ? (
                       <>
                         <WizardValidationError formErrors={profileFormErrors} fieldName="knowledge_skills_abilities" />
                         <Form.Item>
@@ -1613,7 +1731,7 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                     }
                   >
                     {willingnessStatementsFields.map((field, index) =>
-                      isCurrentVersion ? (
+                      isCurrentVersion && !jobProfileData?.jobProfile.is_archived ? (
                         <Row align="top" key={field.id} gutter={16} style={{ marginBottom: '1rem' }}>
                           {/* up/down controls */}
                           <Col flex="none" className="reorder-controls">
@@ -1680,7 +1798,7 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                         </Row>
                       ),
                     )}
-                    {isCurrentVersion ? (
+                    {isCurrentVersion && !jobProfileData?.jobProfile.is_archived ? (
                       <Form.Item>
                         <Row>
                           <Col>
@@ -1723,10 +1841,32 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                     label={
                       <Row justify="space-between" align="middle" style={{ width: '100%' }}>
                         <Col>Security Screenings</Col>
-                        {isCurrentVersion ? (
+                        {isCurrentVersion && !jobProfileData?.jobProfile.is_archived ? (
                           <Col>
                             <Form.Item style={{ margin: 0 }}>
                               <Row>
+                              <Col>
+                                  <Controller
+                                    control={profileControl}
+                                    name="isSecurityScreeningsSectionSignificant"
+                                    render={({ field }) => (
+                                      <Checkbox
+                                        {...field}
+                                        checked={isSecurityScreeningsSectionSignificant}
+                                        onChange={(e) => {
+                                          field.onChange(e.target.checked);
+                                          triggerProfileValidation();
+                                        }}
+                                        disabled={!isCurrentVersion}
+                                      >
+                                        Is a significant section
+                                        <Tooltip title="If selected, all custom fields that users create in this section will trigger classification verification or review.">
+                                          <InfoCircleOutlined style={{ marginLeft: 8 }} />
+                                        </Tooltip>
+                                      </Checkbox>
+                                    )}
+                                  ></Controller>
+                                </Col>
                                 <Col>
                                   <Controller
                                     control={profileControl}
@@ -1764,7 +1904,7 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                                         disabled={
                                           markAllNonEditableSec ||
                                           securityScreeningsFields.length === 0 ||
-                                          !isCurrentVersion
+                                          (!isCurrentVersion && !jobProfileData?.jobProfile.is_archived)
                                         }
                                       >
                                         Mark all as significant
@@ -1775,6 +1915,7 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                                     )}
                                   ></Controller>
                                 </Col>
+                                
                               </Row>
                             </Form.Item>
                           </Col>
@@ -1787,7 +1928,7 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                     {securityScreeningsFields.map((field, index) => (
                       <Row align="top" key={field.id} gutter={16} style={{ marginBottom: '1rem' }}>
                         {/* up/down controls */}
-                        {isCurrentVersion && (
+                        {isCurrentVersion && !jobProfileData?.jobProfile.is_archived && (
                           <Col flex="none" className="reorder-controls">
                             <ReorderButtons
                               index={index}
@@ -1817,7 +1958,7 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                                       onChange(args);
                                     }}
                                     checked={value}
-                                    disabled={!isCurrentVersion}
+                                    disabled={!isCurrentVersion || jobProfileData?.jobProfile.is_archived}
                                   >
                                     Non-editable
                                   </Checkbox>
@@ -1835,7 +1976,11 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                                       }
                                       onChange(args);
                                     }}
-                                    disabled={securityScreenings?.[index].nonEditable || !isCurrentVersion}
+                                    disabled={
+                                      securityScreenings?.[index].nonEditable ||
+                                      !isCurrentVersion ||
+                                      jobProfileData?.jobProfile.is_archived
+                                    }
                                     checked={value || securityScreenings?.[index].nonEditable}
                                   >
                                     Significant
@@ -1844,7 +1989,7 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                               />
                             </div>
                           </Row>
-                          {isCurrentVersion ? (
+                          {isCurrentVersion && !jobProfileData?.jobProfile.is_archived ? (
                             <Row gutter={10}>
                               <Col flex="auto">
                                 {field.tc_is_readonly &&
@@ -1921,7 +2066,7 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                         </Col>
                       </Row>
                     ))}
-                    {isCurrentVersion ? (
+                    {isCurrentVersion && !jobProfileData?.jobProfile.is_archived ? (
                       <>
                         <WizardValidationError formErrors={profileFormErrors} fieldName="security_screenings" />
                         <Form.Item>
@@ -1936,7 +2081,7 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                                 title="Security screenings"
                                 buttonText="Browse and add security screenings"
                                 addAsSignificantAndReadonly={true}
-                                tc_is_readonly={true}
+                                tc_is_readonly={!isCurrentVersion || jobProfileData?.jobProfile.is_archived}
                               />
                             </Col>
                             <Col>
@@ -1978,7 +2123,7 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                     }
                   >
                     {optionalRequirementsFields.map((field, index) =>
-                      isCurrentVersion ? (
+                      isCurrentVersion && !jobProfileData?.jobProfile.is_archived ? (
                         <Row align="top" key={field.id} gutter={16} style={{ marginBottom: '1rem' }}>
                           {/* up/down controls */}
                           <Col flex="none" className="reorder-controls">
@@ -2024,7 +2169,7 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                         </Row>
                       ),
                     )}
-                    {isCurrentVersion ? (
+                    {isCurrentVersion && !jobProfileData?.jobProfile.is_archived ? (
                       <Form.Item>
                         <Button
                           type="link"
@@ -2059,7 +2204,7 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                 validateFunction={triggerProfileValidation}
                 formErrors={profileFormErrors}
                 useFormReturn={jobProfileUseFormReturn}
-                readOnly={!isCurrentVersion}
+                readOnly={!isCurrentVersion || jobProfileData?.jobProfile.is_archived}
               ></BehaviouralComptencyPicker>
             </Card>
           </Form>
