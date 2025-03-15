@@ -556,6 +556,7 @@ export const jobProfileApi = graphqlApi.injectEndpoints({
                     code
                   }
                 }
+                is_archived
                 valid_from
                 valid_to
                 version
