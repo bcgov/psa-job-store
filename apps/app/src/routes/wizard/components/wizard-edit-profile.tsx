@@ -175,9 +175,6 @@ const WizardEditProfile = forwardRef(
       {},
     );
 
-    // AL-619 this is a temporary measure to disable education requirements for admin family
-    const [isAdmin, setisAdmin] = useState<boolean>(false);
-
     useEffect(() => {
       // If profileData exists, use it to set the form state
       if (profileData) {
@@ -312,36 +309,83 @@ const WizardEditProfile = forwardRef(
       // );
       // console.log('resetComplete:', resetComplete);
       // check if the form in its current state would require verification
+      
+      // Get section significance settings from total_comp_create_form_misc
+      const totalCompCreateFormMisc = (originalProfileData?.jobProfile?.total_comp_create_form_misc as Record<string, any>) || {};
+      const isAccountabilitiesSectionSignificant = 
+        totalCompCreateFormMisc.isAccountabilitiesSectionSignificant ?? true;
+      const isEducationSectionSignificant = 
+        totalCompCreateFormMisc.isEducationSectionSignificant ?? true;
+      const isRelatedExperienceSectionSignificant = 
+        totalCompCreateFormMisc.isRelatedExperienceSectionSignificant ?? true;
+      const isProfessionalRegistrationSectionSignificant = 
+        totalCompCreateFormMisc.isProfessionalRegistrationSectionSignificant ?? true;
+      const isSecurityScreeningsSectionSignificant = 
+        totalCompCreateFormMisc.isSecurityScreeningsSectionSignificant ?? true;
 
-      // check if any flags are true in editedAccReqFieldsArray
-      const anyReqAccsTrue = Object.values(editedAccReqFields).some((item) => item === true);
-
-      // AL-619 this is a temporary measure to disable education requirements for admin family
+      // Check if any flags are true in editedAccReqFieldsArray
+      // Only apply section significance to custom items (isCustom === true)
+      const anyReqAccsTrue = Object.entries(editedAccReqFields).some(([index, item]) => {
+        const currentValues = getValues('accountabilities');
+        const currentItem = currentValues[Number(index)];
+        // Apply section significance only to custom items
+        if ((currentItem as AccountabilitiesModel)?.isCustom === true) {
+          return item === true && isAccountabilitiesSectionSignificant;
+        }
+        // For non-custom items, check individual significance
+        return item === true && (currentItem as AccountabilitiesModel)?.is_significant === true;
+      });
 
       const anyEducationTrue = Object.entries(editedMinReqFields).some(([index, item]) => {
         const originalItem = originalMinReqFields[Number(index)];
-        if (!originalItem) return item === true && !isAdmin;
-
-        return item === true && originalItem && originalItem.is_significant && !isAdmin;
+        const currentValues = getValues('education');
+        const currentItem = currentValues[Number(index)];
+        // Apply section significance only to custom items
+        if ((currentItem as AccountabilitiesModel)?.isCustom === true) {
+          return item === true && isEducationSectionSignificant;
+        }
+        // For non-custom items, check individual significance
+        if (!originalItem) return item === true;
+        return item === true && originalItem && originalItem.is_significant;
       });
 
       const anyRelWorkTrue = Object.entries(editedRelWorkFields).some(([index, item]) => {
         const originalItem = originalRelWorkFields[Number(index)];
+        const currentValues = getValues('job_experience');
+        const currentItem = currentValues[Number(index)];
+        // Apply section significance only to custom items
+        if ((currentItem as AccountabilitiesModel)?.isCustom === true) {
+          return item === true && isRelatedExperienceSectionSignificant;
+        }
+        // For non-custom items, check individual significance
         if (!originalItem) return item === true;
         return item === true && originalItem && originalItem.is_significant;
       });
 
       const anyProfRegTrue = Object.entries(editedProfessionalRegistrationFields).some(([index, item]) => {
         const originalItem = originalProfessionalRegistrationFields?.[Number(index)];
+        const currentValues = getValues('professional_registration_requirements');
+        const currentItem = currentValues[Number(index)];
+        // Apply section significance only to custom items
+        if ((currentItem as AccountabilitiesModel)?.isCustom === true) {
+          return item === true && isProfessionalRegistrationSectionSignificant;
+        }
+        // For non-custom items, check individual significance
         if (!originalItem) return item === true;
         return item === true && originalItem && originalItem.is_significant;
       });
 
       const anySsecurityScreeningsTrue = Object.entries(editedSecurityScreeningsFields).some(([index, item]) => {
         const originalItem = originalSecurityScreeningsFields?.[Number(index)];
+        const currentValues = getValues('security_screenings');
+        const currentItem = currentValues[Number(index)];
+        // Apply section significance only to custom items
+        if ((currentItem as AccountabilitiesModel)?.isCustom === true) {
+          return item === true && isSecurityScreeningsSectionSignificant;
+        }
+        // For non-custom items, check individual significance
         // check for undefined and treat it as significant, since significant flag was added later
         // initially all security screenings were treated as significant
-
         if (!originalItem) return item === true;
         return item === true && originalItem && originalItem.is_significant;
       });
@@ -369,7 +413,6 @@ const WizardEditProfile = forwardRef(
       editedRelWorkFields,
       editedSecurityScreeningsFields,
       onVerificationRequiredChange,
-      isAdmin,
       originalMinReqFields,
       originalRelWorkFields,
       resetComplete,
@@ -377,6 +420,7 @@ const WizardEditProfile = forwardRef(
       originalProfessionalRegistrationFields,
       originalSecurityScreeningsFields,
       verificationNeededReasons,
+      originalProfileData?.jobProfile?.total_comp_create_form_misc,
     ]);
 
     useEffect(() => {
@@ -389,13 +433,22 @@ const WizardEditProfile = forwardRef(
       validateVerification,
     ]);
 
+    // Define section significance variables
+    const totalCompCreateFormMisc = (originalProfileData?.jobProfile?.total_comp_create_form_misc as Record<string, any>) || {};
+    const isAccountabilitiesSectionSignificant = 
+      totalCompCreateFormMisc.isAccountabilitiesSectionSignificant ?? true;
+    const isEducationSectionSignificant = 
+      totalCompCreateFormMisc.isEducationSectionSignificant ?? true;
+    const isRelatedExperienceSectionSignificant = 
+      totalCompCreateFormMisc.isRelatedExperienceSectionSignificant ?? true;
+    const isProfessionalRegistrationSectionSignificant = 
+      totalCompCreateFormMisc.isProfessionalRegistrationSectionSignificant ?? true;
+    const isSecurityScreeningsSectionSignificant = 
+      totalCompCreateFormMisc.isSecurityScreeningsSectionSignificant ?? true;
+
     // console.log('effectiveData: ', effectiveData);
     useEffect(() => {
       if (effectiveData && !isLoading && originalProfileData) {
-        // AL-619 this is a temporary measure to disable education requirements for admin family
-        originalProfileData?.jobProfile?.jobFamilies.some((jf) => jf.jobFamily.name === 'Administrative Services') &&
-          setisAdmin(true);
-
         // console.log('effectiveData?.classifications: ', effectiveData?.classifications);
 
         const classificationIds =
@@ -926,6 +979,7 @@ const WizardEditProfile = forwardRef(
                 formErrors={formErrors}
                 trigger={trigger}
                 pickerData={pickerData}
+                sectionSignificant={isAccountabilitiesSectionSignificant}
               />
 
               <MinimumRequirementsSection
@@ -959,10 +1013,13 @@ const WizardEditProfile = forwardRef(
                 originalSecurityScreeningsFields={originalSecurityScreeningsFields}
                 setEditedSecurityScreeningsFields={setEditedSecurityScreeningsFields}
                 editedSecurityScreeningsFields={editedSecurityScreeningsFields}
-                isAdmin={isAdmin}
                 formErrors={formErrors}
                 trigger={trigger}
                 pickerData={pickerData}
+                educationSectionSignificant={isEducationSectionSignificant}
+                relatedExperienceSectionSignificant={isRelatedExperienceSectionSignificant}
+                professionalRegistrationSectionSignificant={isProfessionalRegistrationSectionSignificant}
+                securityScreeningsSectionSignificant={isSecurityScreeningsSectionSignificant}
               />
 
               <WizardBehaviouralCompetencies

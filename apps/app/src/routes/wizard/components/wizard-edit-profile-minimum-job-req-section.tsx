@@ -48,10 +48,15 @@ interface MinimumRequirementsSectionProps {
   originalSecurityScreeningsFields: any[];
   originalOptionalRequirementsFields: any[];
 
-  isAdmin: boolean;
   formErrors: any;
   trigger: UseFormTrigger<JobProfileValidationModel>;
   pickerData: any;
+  
+  // Add new props for section significance
+  educationSectionSignificant?: boolean;
+  relatedExperienceSectionSignificant?: boolean;
+  professionalRegistrationSectionSignificant?: boolean;
+  securityScreeningsSectionSignificant?: boolean;
 }
 
 const MinimumRequirementsSection: React.FC<MinimumRequirementsSectionProps> = ({
@@ -95,10 +100,15 @@ const MinimumRequirementsSection: React.FC<MinimumRequirementsSectionProps> = ({
 
   originalSecurityScreeningsFields,
 
-  isAdmin,
   formErrors,
   trigger,
   pickerData,
+  
+  // Default to true for backward compatibility
+  educationSectionSignificant = true,
+  relatedExperienceSectionSignificant = true,
+  professionalRegistrationSectionSignificant = true,
+  securityScreeningsSectionSignificant = true,
 }) => {
   return (
     <Card title={<h3>Minimum job requirements</h3>} className="custom-card" style={{ marginTop: 16 }}>
@@ -136,9 +146,9 @@ const MinimumRequirementsSection: React.FC<MinimumRequirementsSectionProps> = ({
                 originalFields={originalEducationFields}
                 validateVerification={validateVerification}
                 setEditedFields={setEditedEducationFields}
-                isAdmin={isAdmin}
                 formErrors={formErrors}
                 trigger={trigger}
+                sectionSignificant={educationSectionSignificant}
               />
             </div>
 
@@ -153,6 +163,7 @@ const MinimumRequirementsSection: React.FC<MinimumRequirementsSectionProps> = ({
                 editedFields={editedRelatedExperienceFields}
                 formErrors={formErrors}
                 trigger={trigger}
+                sectionSignificant={relatedExperienceSectionSignificant}
               />
             </div>
 
@@ -168,6 +179,7 @@ const MinimumRequirementsSection: React.FC<MinimumRequirementsSectionProps> = ({
                 formErrors={formErrors}
                 trigger={trigger}
                 pickerData={pickerData}
+                sectionSignificant={professionalRegistrationSectionSignificant}
               />
             </div>
 
@@ -219,6 +231,7 @@ const MinimumRequirementsSection: React.FC<MinimumRequirementsSectionProps> = ({
                 formErrors={formErrors}
                 trigger={trigger}
                 pickerData={pickerData}
+                sectionSignificant={securityScreeningsSectionSignificant}
               />
             </div>
 

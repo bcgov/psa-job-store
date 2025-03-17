@@ -138,6 +138,11 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
       markAllNonEditableJob_experience: false,
       markAllSignificantJob_experience: false,
       markAllNonEditableSec: false,
+      isAccountabilitiesSectionSignificant: true,
+      isEducationSectionSignificant: true,
+      isRelatedExperienceSectionSignificant: true,
+      isProfessionalRegistrationSectionSignificant: true,
+      isSecurityScreeningsSectionSignificant: true,
     },
   });
 
@@ -192,6 +197,26 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
       profileSetValue(
         'markAllNonEditableSec',
         jobProfileData.jobProfile.total_comp_create_form_misc?.markAllNonEditableSec ?? false,
+      );
+      profileSetValue(
+        'isAccountabilitiesSectionSignificant',
+          jobProfileData.jobProfile.total_comp_create_form_misc?.isAccountabilitiesSectionSignificant ?? true,
+      );
+      profileSetValue(
+        'isEducationSectionSignificant',
+        jobProfileData.jobProfile.total_comp_create_form_misc?.isEducationSectionSignificant ?? true,
+      );
+      profileSetValue(
+        'isRelatedExperienceSectionSignificant',
+        jobProfileData.jobProfile.total_comp_create_form_misc?.isRelatedExperienceSectionSignificant ?? true,
+      );
+      profileSetValue(
+        'isProfessionalRegistrationSectionSignificant',
+        jobProfileData.jobProfile.total_comp_create_form_misc?.isProfessionalRegistrationSectionSignificant ?? true,
+      );
+      profileSetValue(
+        'isSecurityScreeningsSectionSignificant',
+        jobProfileData.jobProfile.total_comp_create_form_misc?.isSecurityScreeningsSectionSignificant ?? true,
       );
       setTimeout(() => {
         triggerProfileValidation();
@@ -268,7 +293,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
   // Received job profile data: set profileJson, trigger getJobProfileMeta and getPositionRequestsCount
   useEffect(() => {
     if (jobProfileData) {
-      if (jobProfileData.jobProfile.state == 'PUBLISHED') {
+      if (jobProfileData.jobProfile.state == 'PUBLISHED' || jobProfileData.jobProfile.is_archived) {
         triggerGetJobProfileMeta(jobProfileData.jobProfile.id);
         triggerGetPositionRequestsCount({ where: { parent_job_profile_id: { equals: jobProfileData.jobProfile.id } } });
       }
@@ -315,12 +340,12 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
         value={{
           ...formMethods,
           watchedState: state,
+          isArchived: jobProfileData?.jobProfile.is_archived ?? false,
           professionalRegistrationRequirementsFieldArray: professionalRegistrationRequirementsFieldArray,
         }}
       >
         {isLoading ? <></> : <JobProfileHeader title={title} />}
-
-        <TCTabBar></TCTabBar>
+        <TCTabBar isArchived={jobProfileData?.jobProfile.is_archived ?? false} />
       </FormContext.Provider>
     </>
   );
