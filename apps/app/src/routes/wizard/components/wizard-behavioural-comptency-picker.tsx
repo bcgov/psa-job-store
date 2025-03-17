@@ -185,12 +185,14 @@ const BehaviouralComptencyPicker: React.FC<BehaviouralComptencyPickerProps> = ({
                   }}
                   key={field.id} // Ensure this is a unique value
                 >
-                  <ReorderButtons
-                    index={index}
-                    moveItem={handleOptionalRequirementsMove}
-                    upperDisabled={index === 0}
-                    lowerDisabled={index === behavioural_competencies_fields.length - 1}
-                  />
+                  {!readOnly && (
+                    <ReorderButtons
+                      index={index}
+                      moveItem={handleOptionalRequirementsMove}
+                      upperDisabled={index === 0}
+                      lowerDisabled={index === behavioural_competencies_fields.length - 1}
+                    />
+                  )}
                   {/* Display behavioural competency name and description */}
                   <p style={{ flex: 1, marginRight: '10px', marginLeft: '10px', marginBottom: 0 }}>
                     <strong>

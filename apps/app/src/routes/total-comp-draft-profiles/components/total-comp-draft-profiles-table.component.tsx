@@ -128,21 +128,25 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
   let isLoading: boolean;
   let fetchError: ErrorResponse | SerializedError | null | undefined;
   let link: string;
+  let duplicateLink: string;
   if (state === 'DRAFT') {
     if (is_archived === false) {
       // eslint-disable-next-line react-hooks/rules-of-hooks
       [trigger, { data, isLoading, error: fetchError }] = useLazyGetJobProfilesDraftsQuery();
       link = '/job-profiles/manage/draft/';
+      duplicateLink = link;
     } else {
       // eslint-disable-next-line react-hooks/rules-of-hooks
       [trigger, { data, isLoading, error: fetchError }] = useLazyGetJobProfilesArchivedQuery();
       link = '/job-profiles/manage/archived/';
+      duplicateLink = '/job-profiles/manage/draft/';
     }
   } else {
     // TC user is viewing published job profiles
     // eslint-disable-next-line react-hooks/rules-of-hooks
     [trigger, { data, isLoading, error: fetchError }] = useLazyGetJobProfilesQuery();
     link = '/job-profiles/manage/published/';
+    duplicateLink = '/job-profiles/manage/draft/';
   }
 
   // Check if data is available and call the callback function to notify the parent component
@@ -502,10 +506,13 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
 
   const navigate = useNavigate();
   const duplicate = async (record: any) => {
-    // console.log('duplicate', record);
-    const res = await duplicateJobProfile({ jobProfileId: record.id, jobProfileVersion: record.version }).unwrap();
-    // console.log('res: ', res);
-    navigate(`${link}${res.duplicateJobProfile}`);
+    const res = await duplicateJobProfile({
+      jobProfileId: record.id,
+      jobProfileVersion: record.version,
+    }).unwrap();
+    // Always redirect to drafts if duplicating an archived or published profile
+    const targetLink = is_archived || state === 'PUBLISHED' ? '/job-profiles/manage/draft/' : duplicateLink;
+    navigate(`${targetLink}${res.duplicateJobProfile}`);
   };
 
   const update = async (record: any, state: string) => {
@@ -782,7 +789,7 @@ const TotalCompProfilesTable: React.FC<MyPositionsTableProps> = ({
               </>
             ) : (
               <>
-                <div>Looks like you’re not working on anything right now.</div>
+                <div>Looks like you're not working on anything right now.</div>
                 {/* Link button to the orgchart page */}
                 <Link to="/job-profiles/manage/create">
                   <Button type="primary" style={{ marginTop: '1rem' }}>
