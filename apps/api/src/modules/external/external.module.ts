@@ -64,7 +64,7 @@ import { PositionService } from './position.service';
         if (configService.get('USE_MOCKS') === 'true') {
           return new MockPeoplesoftService(configService);
         } else {
-          return configService.get('USE_FUSION') === true
+          return configService.get('USE_FUSION') === 'true'
             ? new FusionService(configService, httpService, prisma, searchService)
             : new PeoplesoftService(configService, httpService, prisma, searchService);
         }
