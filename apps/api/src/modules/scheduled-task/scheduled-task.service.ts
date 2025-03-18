@@ -1,5 +1,6 @@
 import { CACHE_MANAGER } from '@nestjs/cache-manager';
 import { Inject, Injectable, Logger } from '@nestjs/common';
+import { Cron } from '@nestjs/schedule';
 import { PositionRequestStatus } from '@prisma/client';
 import { Cache } from 'cache-manager';
 import { getALStatus } from 'common-kit';
@@ -170,16 +171,17 @@ export class ScheduledTaskService {
     }
   }
 
-  // @Cron('*/5 * * * * *')
+  @Cron('*/5 * * * * *')
   async syncPeoplesoftData() {
     await this.executeTask(ScheduledTask.PeoplesoftSync, async () => {
+      await this.peoplesoftService.syncGrades();
       await this.peoplesoftService.syncClassifications();
       await this.peoplesoftService.syncLocations();
       await this.peoplesoftService.syncOrganizationsAndDepartments();
     });
   }
 
-  // @Cron('*/5 * * * * *')
+  @Cron('*/5 * * * * *')
   async syncPositionStatuses() {
     await this.executeTask(ScheduledTask.CrmSync, async () => {
       await this.crmService.syncIncidentStatus().then(async (rows) => {
@@ -259,12 +261,12 @@ export class ScheduledTaskService {
     });
   }
 
-  // @Cron('*/5 * * * * *')
+  @Cron('*/5 * * * * *')
   async syncUsers() {
     await this.executeTask(ScheduledTask.UserSync, async () => await this.userService.syncUsers());
   }
 
-  // @Cron('*/20 * * * * *')
+  @Cron('*/20 * * * * *')
   async updateJobProfileViewCount() {
     const jobProfileCounts: Map<number, number> = await this.cacheManager.get('jobProfileCounts');
 

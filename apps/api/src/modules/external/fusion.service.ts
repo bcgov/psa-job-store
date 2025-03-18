@@ -287,7 +287,7 @@ export class FusionService {
     const response = await firstValueFrom(
       this.httpService
         .get(
-          `${this.configService.get('FUSION_URL')}/hcmRestApi/resources/11.13.18.05/organizations/?q=ClassificationCode='FUN_BUSINESS_UNIT';Name LIKE '%(BC???)'&onlyData=true&fields=OrganizationId,Name,Status,EffectiveStartDate&limit=${limit}&offset=${offset}`,
+          `${this.configService.get('FUSION_URL')}/hcmRestApi/resources/11.13.18.05/organizations/?q=ClassificationCode='FUN_BUSINESS_UNIT' AND Name LIKE '%(BC???)'&onlyData=true&fields=OrganizationId,Name,Status,EffectiveStartDate&limit=${limit}&offset=${offset}`,
           { headers: this.fusionHeaders },
         )
         .pipe(
@@ -351,7 +351,7 @@ export class FusionService {
         const regex = /^(.*?)(?:_(.*))?$/;
         const [_, setId, jobCode] = item.JobCode.match(regex);
         const [gradeId, employeeGroupId, grade] = ((): [any, any, any] => {
-          const gradeId: BigInt = BigInt(item.validGrades[0]?.GradeId);
+          const gradeId: BigInt = BigInt(item.validGrades?.items?.[0]?.GradeId);
 
           const { employee_group_id, grade } = gradeMap.get(gradeId) ?? {
             employee_group_id: undefined,
@@ -360,7 +360,7 @@ export class FusionService {
 
           return [gradeId, employee_group_id, grade];
         })();
-
+        //
         await this.prisma.classification.upsert({
           where: {
             id_employee_group_id_peoplesoft_id: {
@@ -371,28 +371,32 @@ export class FusionService {
           },
           create: {
             id: jobCode,
-            employee_group: {
-              connect: {
-                id: employeeGroupId,
+            ...(employeeGroupId != null && {
+              employee_group: {
+                connect: {
+                  id: employeeGroupId,
+                },
               },
-            },
+            }),
             peoplesoft_id: setId,
             fusion_id: item.JobId,
-            code: item.JobCustomerFlex[0]?.shortDescription,
+            code: item.JobCustomerFlex?.items?.[0]?.shortDescription,
             name: item.Name,
             grade: grade,
             effective_status: item.ActiveStatus === 'A' ? 'Active' : 'Inactive',
             effective_date: new Date(item.EffectiveStartDate),
           },
           update: {
-            employee_group: {
-              connect: {
-                id: employeeGroupId,
+            ...(employeeGroupId != null && {
+              employee_group: {
+                connect: {
+                  id: employeeGroupId,
+                },
               },
-            },
+            }),
             peoplesoft_id: setId,
             fusion_id: item.JobId,
-            code: item.JobCustomerFlex[0]?.shortDescription,
+            code: item.JobCustomerFlex?.items?.[0]?.shortDescription,
             name: item.Name,
             grade: grade,
             effective_status: item.ActiveStatus === 'A' ? 'Active' : 'Inactive',
@@ -437,9 +441,11 @@ export class FusionService {
       const { items, hasMore } = await this.getDepartments(limit, offset);
 
       for await (const item of items) {
-        const ministryId = item.OrganizationDFF[0]?.parentDepartment;
+        const [_, numericMinistryId] = item.Name.match(/^([^-]+)/);
+        const ministryId = `BC${numericMinistryId}`;
+        const location = item.LocationId ? locationMap.get(BigInt(item.LocationId)) : undefined;
 
-        if (ministryId && ministryMap.get(ministryId)) {
+        if (location && ministryId && ministryMap.get(ministryId)) {
           await this.prisma.department.upsert({
             where: {
               id: item.Name,
@@ -448,7 +454,7 @@ export class FusionService {
               id: item.Name,
               location: {
                 connect: {
-                  id: item.LocationId ? locationMap.get(BigInt(item.LocationId)) : '',
+                  id: location,
                 },
               },
               organization: {
@@ -458,7 +464,7 @@ export class FusionService {
               },
               peoplesoft_id: (ministryId ?? '').replace('BC', 'ST'),
               fusion_id: item.OrganizationId,
-              code: item.OrganizationDFF[0]?.departmentShortDescription,
+              code: item.OrganizationDFF?.items?.[0]?.departmentShortDescription,
               name: item.Title,
               effective_status: item.Status === 'A' ? 'Active' : 'Inactive',
               effective_date: new Date(item.EffectiveStartDate),
@@ -467,7 +473,7 @@ export class FusionService {
               id: item.Name,
               location: {
                 connect: {
-                  id: item.LocationId ? locationMap.get(BigInt(item.LocationId)) : '',
+                  id: location,
                 },
               },
               organization: {
@@ -477,7 +483,7 @@ export class FusionService {
               },
               peoplesoft_id: (ministryId ?? '').replace('BC', 'ST'),
               fusion_id: item.OrganizationId,
-              code: item.OrganizationDFF[0]?.departmentShortDescription,
+              code: item.OrganizationDFF?.items?.[0]?.departmentShortDescription,
               name: item.Title,
               effective_status: item.Status === 'A' ? 'Active' : 'Inactive',
               effective_date: new Date(item.EffectiveStartDate),
@@ -583,16 +589,16 @@ export class FusionService {
             id: item.LocationCode,
             peoplesoft_id: 'BCSET',
             fusion_id: item.LocationId,
-            code: item.locationsDFF[0]?.shortDescription ?? '',
-            name: item.addresses[0]?.AddressLine1,
+            code: item.locationsDFF?.items?.[0]?.shortDescription ?? '',
+            name: item.addresses?.items?.[0]?.AddressLine1,
             effective_status: item.ActiveStatusMeaning,
             effective_date: new Date(item.EffectiveStartDate),
           },
           update: {
             peoplesoft_id: 'BCSET',
             fusion_id: item.LocationId,
-            code: item.locationsDFF[0]?.shortDescription ?? '',
-            name: item.addresses[0]?.AddressLine1,
+            code: item.locationsDFF?.items?.[0]?.shortDescription ?? '',
+            name: item.addresses?.items?.[0]?.AddressLine1,
             effective_status: item.ActiveStatusMeaning,
             effective_date: new Date(item.EffectiveStartDate),
           },
@@ -619,37 +625,41 @@ export class FusionService {
 
       const { items, hasMore } = await this.getOrganizations(limit, offset);
 
-      items.forEach(async (item) => {
+      for await (const item of items) {
         const parts = item.Name.match(/^(.+?)\s*\(([^()]+)\)$/) ?? [];
         const [_, name, id] = parts;
 
         if (id && name) {
-          await this.prisma.organization.upsert({
-            where: {
-              id: id,
-            },
-            create: {
-              id,
-              peoplesoft_id: id.replace('BC', 'ST'),
-              fusion_id: item.OrganizationId,
-              code: id.replace('BC', 'ST'),
-              name,
-              effective_status: item.Status === 'A' ? 'Active' : 'Inactive',
-              effective_date: new Date(item.EffectiveStartDate),
-            },
-            update: {
-              peoplesoft_id: id.replace('BC', 'ST'),
-              fusion_id: item.OrganizationId,
-              code: id.replace('BC', 'ST'),
-              name,
-              effective_status: item.Status === 'A' ? 'Active' : 'Inactive',
-              effective_date: new Date(item.EffectiveStartDate),
-            },
-          });
+          try {
+            await this.prisma.organization.upsert({
+              where: {
+                id: id,
+              },
+              create: {
+                id,
+                peoplesoft_id: id.replace('BC', 'ST'),
+                fusion_id: item.OrganizationId,
+                code: id.replace('BC', 'ST'),
+                name,
+                effective_status: item.Status === 'A' ? 'Active' : 'Inactive',
+                effective_date: new Date(item.EffectiveStartDate),
+              },
+              update: {
+                peoplesoft_id: id.replace('BC', 'ST'),
+                fusion_id: item.OrganizationId,
+                code: id.replace('BC', 'ST'),
+                name,
+                effective_status: item.Status === 'A' ? 'Active' : 'Inactive',
+                effective_date: new Date(item.EffectiveStartDate),
+              },
+            });
+          } catch (error) {
+            console.log('error!');
+          }
         }
-      });
+      }
 
-      fetchNextPage = false;
+      fetchNextPage = hasMore;
       if (fetchNextPage) {
         offset = offset + limit;
       }
@@ -721,7 +731,7 @@ export class FusionService {
         'A.REPORTS_TO': worker?.assignments?.items?.[0]?.managers?.items?.[0]?.PositionCode
           ? String(worker?.assignments?.items?.[0]?.managers?.items?.[0]?.PositionCode ?? '').padStart(8, '0')
           : '',
-        'A.SAL_ADMIN_PLAN': classification.employee_group_id,
+        'A.SAL_ADMIN_PLAN': classification?.employee_group_id,
         'A.TGB_E_CLASS': item.PositionCustomerFlex?.items?.[0]?.caseProfile ?? '',
         'A.LOCATION': location?.id ?? '',
         'A.UPDATE_INCUMBENTS': '',

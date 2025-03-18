@@ -1841,7 +1841,6 @@ export class PositionRequestApiService {
   async getSuggestedManagers(positionNumber: string, positionRequestId: number): Promise<SuggestedManager[]> {
     // console.log('getSuggestedManagers: ', positionNumber, positionRequestId);
 
-    console.log('A');
     const positionRequest = await this.prisma.positionRequest.findUnique({
       where: { id: positionRequestId },
       select: { orgchart_json: true, reports_to_position_id: true },
@@ -1851,7 +1850,6 @@ export class PositionRequestApiService {
     // console.log('orgChart: ', orgChart);
     const managers: SuggestedManager[] = [];
 
-    console.log('B');
     if (orgChart && typeof orgChart === 'object' && 'nodes' in orgChart && 'edges' in orgChart) {
       // Check the initial position first
       const initialNode = (orgChart.nodes as any[]).find((node: any) => node.id === positionNumber);
@@ -1874,16 +1872,11 @@ export class PositionRequestApiService {
       // Start traversing up from the given position
       let currentPositionId = positionNumber;
 
-      console.log('C');
-      let count = 0;
       while (true) {
         // Find the edge where the current position is the target
         const currentEdge = (orgChart.edges as any[]).find((edge: any) => edge.target === currentPositionId);
 
-        console.log('currentPositionId: ', currentPositionId);
-
         if (!currentEdge) {
-          console.log('C1');
           break;
         }
 
@@ -1891,21 +1884,15 @@ export class PositionRequestApiService {
         const managerNode = (orgChart.nodes as any[]).find((node: any) => node.id === currentEdge.source);
 
         if (!managerNode) {
-          console.log('C2');
-
           break;
         }
 
-        console.log('D');
         console.log('managerNode.data.employees.length: ', managerNode.data.employees.length);
         // console.log('checking manager classification: ', managerNode.data.classification);
         // Check if the position's classification contains "Band"
         if (managerNode.data.classification.name.includes('Band')) {
-          console.log('D1');
           // Add all employees in this position to the managers array
           managerNode.data.employees.forEach((employee: any) => {
-            console.log('manager: ', employee);
-
             managers.push({
               id: employee.id,
               name: employee.name,
@@ -1920,16 +1907,7 @@ export class PositionRequestApiService {
 
         // Move up the chain
         currentPositionId = currentEdge.source;
-        console.log(currentPositionId);
-
-        count = count + 1;
-        console.log(count);
-        if (count > 10) {
-          break;
-        }
       }
-
-      console.log('E');
     }
 
     return managers;

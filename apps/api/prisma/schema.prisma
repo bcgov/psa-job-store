@@ -514,7 +514,7 @@ model Classification {
   id                String // JOBCODE
   employee_group_id String // SAL_ADMIN_PLAN
   peoplesoft_id     String // SETID
-  fusion_id         BigInt?  @db.BigInt // Fusion JobId
+  fusion_id         BigInt?  @unique @db.BigInt // Fusion JobId
   code              String // DESCRSHORT
   name              String // DESCR
   grade             String // GRADE
@@ -537,7 +537,7 @@ model Department {
   organization     Organization @relation(fields: [organization_id], references: [id])
   organization_id  String
   peoplesoft_id    String // SETID
-  fusion_id        BigInt?      @db.BigInt // Fusion JobId
+  fusion_id        BigInt?      @unique @db.BigInt // Fusion OrganizationId
   code             String // DESCRSHORT
   name             String // DESCR
   effective_status String // EFF_STATUS
@@ -561,7 +561,7 @@ model DepartmentMetadata {
 model Location {
   id               String   @id // LOCATION
   peoplesoft_id    String // SETID
-  fusion_id        BigInt?  @db.BigInt // Fusion JobId
+  fusion_id        BigInt?  @unique @db.BigInt // Fusion LocationId
   code             String // DESCRSHORT
   name             String // DESCR
   effective_status String // EFF_STATUS
@@ -575,7 +575,7 @@ model Location {
 model Organization {
   id               String   @id // BUSINESS_UNIT
   peoplesoft_id    String   @unique // SETID
-  fusion_id        BigInt?  @db.BigInt // Fusion JobId
+  fusion_id        BigInt?  @unique @db.BigInt // Fusion OrganizationId
   code             String // DESCRSHORT
   name             String // DESCR
   effective_status String // EFF_STATUS

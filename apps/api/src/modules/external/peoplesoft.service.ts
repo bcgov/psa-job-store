@@ -485,6 +485,9 @@ export class PeoplesoftService {
   async updateMockPosition(positionNbr: string, data: UpdateMockPositionInput) {}
   async resetMockData() {}
 
+  // Mock function to remain compatible with FusionService
+  async syncGrades() {}
+
   async createPosition(data: PositionCreateInput) {
     const response = await firstValueFrom(
       this.httpService
