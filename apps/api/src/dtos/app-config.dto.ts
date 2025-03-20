@@ -104,6 +104,10 @@ export class AppConfigDto {
 
   @IsOptional()
   @IsString()
+  USE_FUSION?: string;
+
+  @IsOptional()
+  @IsString()
   FUSION_URL?: string;
 
   @IsOptional()
@@ -116,7 +120,19 @@ export class AppConfigDto {
 
   @IsOptional()
   @IsString()
-  USE_FUSION?: string;
+  ORACLE_IDP_TOKEN_URL?: string;
+
+  @IsOptional()
+  @IsString()
+  ORACLE_IDP_ID?: string;
+
+  @IsOptional()
+  @IsString()
+  ORACLE_IDP_SECRET?: string;
+
+  @IsOptional()
+  @IsString()
+  OIC_URL?: string;
 
   @IsString()
   USE_MOCKS: string;
