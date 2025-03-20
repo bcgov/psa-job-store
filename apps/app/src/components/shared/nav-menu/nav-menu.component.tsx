@@ -66,16 +66,13 @@ export const NavMenu = ({ collapsed }: NavMenuProps) => {
   }, []);
 
   const helpMenuItem = useMemo(() => {
-    if (userCanAccess(auth.user, ['super-admin'])) {
-      return createMenuItem({
-        key: '/help',
-        icon: <BookOutlined aria-hidden />,
-        label: 'Help and Docs',
-        title: 'Help and Docs',
-      });
-    }
-    return null;
-  }, [auth.user]);
+    return createMenuItem({
+      key: '/help',
+      icon: <BookOutlined aria-hidden />,
+      label: 'Help and Docs',
+      title: 'Help and Docs',
+    });
+  }, []);
 
   const menuItems = useMemo(
     () => [
