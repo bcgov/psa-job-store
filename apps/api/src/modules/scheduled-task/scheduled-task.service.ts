@@ -54,6 +54,7 @@ export class ScheduledTaskService {
   };
 
   private readonly logger = new Logger(ScheduledTaskService.name);
+  private bootstrapComplete = false;
 
   constructor(
     private readonly crmService: CrmService,
@@ -62,6 +63,11 @@ export class ScheduledTaskService {
     private readonly userService: UserService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
+
+  setBootstrapComplete() {
+    this.bootstrapComplete = true;
+    this.logger.log('Bootstrap complete, scheduled tasks are now enabled');
+  }
 
   private async isMetadataOutdated(task: ScheduledTask): Promise<boolean> {
     const metadata = await this.prisma.scheduledTaskMetadata.findUnique({
@@ -138,7 +144,13 @@ export class ScheduledTaskService {
     }
   }
 
-  private async executeTask(task: ScheduledTask, execution: () => Promise<void>) {
+  private async executeTask(task: ScheduledTask, execution: () => Promise<void>, forceExecution = false) {
+    // Skip execution if bootstrap is not complete and not forcing execution
+    if (!this.bootstrapComplete && !forceExecution) {
+      this.logger.log(`Skipping ${task} as bootstrap is not complete`);
+      return;
+    }
+
     const config = this.taskConfigs[task];
     let needsUpdate = await this.isMetadataOutdated(task);
 
@@ -172,17 +184,17 @@ export class ScheduledTaskService {
   }
 
   @Cron('*/5 * * * * *')
-  async syncPeoplesoftData() {
+  async syncPeoplesoftData(forceExecution = false) {
     await this.executeTask(ScheduledTask.PeoplesoftSync, async () => {
       await this.peoplesoftService.syncGrades();
       await this.peoplesoftService.syncClassifications();
       await this.peoplesoftService.syncLocations();
       await this.peoplesoftService.syncOrganizationsAndDepartments();
-    });
+    }, forceExecution);
   }
 
   @Cron('*/5 * * * * *')
-  async syncPositionStatuses() {
+  async syncPositionStatuses(forceExecution = false) {
     await this.executeTask(ScheduledTask.CrmSync, async () => {
       await this.crmService.syncIncidentStatus().then(async (rows) => {
         // console.log('this.crmService.syncIncidentStatus rows: ', rows);
@@ -258,16 +270,21 @@ export class ScheduledTaskService {
           }
         }
       });
-    });
+    }, forceExecution);
   }
 
   @Cron('*/5 * * * * *')
-  async syncUsers() {
-    await this.executeTask(ScheduledTask.UserSync, async () => await this.userService.syncUsers());
+  async syncUsers(forceExecution = false) {
+    await this.executeTask(ScheduledTask.UserSync, async () => await this.userService.syncUsers(), forceExecution);
   }
 
   @Cron('*/20 * * * * *')
   async updateJobProfileViewCount() {
+    // Skip execution if bootstrap is not complete
+    if (!this.bootstrapComplete) {
+      return;
+    }
+    
     const jobProfileCounts: Map<number, number> = await this.cacheManager.get('jobProfileCounts');
 
     if (!jobProfileCounts) {

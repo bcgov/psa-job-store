@@ -693,7 +693,7 @@ export class FusionService {
     const positions = await firstValueFrom(
       this.httpService
         .get(
-          `${this.configService.get('FUSION_URL')}/hcmRestApi/resources/11.13.18.05/positions?onlyData=true&expand=all&limit=25&offset=0&q=${positionQ}`,
+          `${this.configService.get('FUSION_URL')}/hcmRestApi/resources/11.13.18.05/positions?onlyData=true&expand=all&limit=500&offset=0&q=${positionQ}`,
           { headers: this.fusionHeaders },
         )
         .pipe(
@@ -713,7 +713,7 @@ export class FusionService {
 
       const department = await this.prisma.department.findUnique({ where: { fusion_id: item.DepartmentId } });
       const classification = await this.prisma.classification.findUnique({ where: { fusion_id: item.JobId } });
-      const location = await this.prisma.location.findUnique({ where: { fusion_id: item.LocationId } });
+      const location = item.LocationId ? await this.prisma.location.findUnique({ where: { fusion_id: item.LocationId } }) : undefined;
       const worker = await this.getPublicWorker(positionNumber);
 
       results.push({
