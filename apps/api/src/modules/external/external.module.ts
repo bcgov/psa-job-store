@@ -22,6 +22,8 @@ import { MockCrmService } from './crm.service.mock';
 import { FusionService } from './fusion.service';
 import { LocationResolver } from './location.resolver';
 import { LocationService } from './location.service';
+import { OicService } from './oic.service';
+import { OracleIdpService } from './oracle-idp.service';
 import { OrgChartResolver } from './org-chart.resolver';
 import { OrgChartService } from './org-chart.service';
 import { MockPeopleSoftResolver } from './peoplesoft.mock.resolver';
@@ -46,6 +48,8 @@ import { PositionService } from './position.service';
     DepartmentResolver,
     DepartmentService,
     FusionService,
+    OracleIdpService,
+    OicService,
     OrganizationResolver,
     OrganizationService,
     PositionResolver,

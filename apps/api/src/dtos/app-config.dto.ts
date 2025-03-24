@@ -132,6 +132,10 @@ export class AppConfigDto {
 
   @IsOptional()
   @IsString()
+  ORACLE_IDP_SCOPE?: string;
+
+  @IsOptional()
+  @IsString()
   OIC_URL?: string;
 
   @IsString()
