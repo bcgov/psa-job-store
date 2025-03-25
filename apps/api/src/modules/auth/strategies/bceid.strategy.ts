@@ -40,7 +40,10 @@ export class BCeIDStrategy extends PassportStrategy(Strategy, 'bceid') {
 
     try {
       const sessionUser = await this.authService.validateUserinfo(userinfo);
-      return sessionUser ?? false;
+      return sessionUser ? {
+        ...sessionUser,
+        id_token: tokenSet.id_token
+      } : false;
     } catch (error) {
       throw new UnauthorizedException();
     }

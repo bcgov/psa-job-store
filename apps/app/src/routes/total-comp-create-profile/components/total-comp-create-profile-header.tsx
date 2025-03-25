@@ -70,6 +70,8 @@ export const JobProfileHeader: React.FC<JobProfileHeaderProps> = ({ title }) => 
                 version={jobProfileData?.jobProfile.version}
                 redirectLink={link}
                 variant="menuItem"
+                isArchived={jobProfileData?.jobProfile.is_archived}
+                state={state}
               />
               <Menu.Item key="copy">
                 <CopyLinkButton
@@ -116,6 +118,8 @@ export const JobProfileHeader: React.FC<JobProfileHeaderProps> = ({ title }) => 
                 version={jobProfileData?.jobProfile.version}
                 redirectLink={link}
                 variant="menuItem"
+                isArchived={jobProfileData?.jobProfile.is_archived}
+                state={state}
               />
               <Menu.Item key="save">
                 <div style={{ padding: '5px 0' }}>

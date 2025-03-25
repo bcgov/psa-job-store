@@ -293,7 +293,7 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
   // Received job profile data: set profileJson, trigger getJobProfileMeta and getPositionRequestsCount
   useEffect(() => {
     if (jobProfileData) {
-      if (jobProfileData.jobProfile.state == 'PUBLISHED') {
+      if (jobProfileData.jobProfile.state == 'PUBLISHED' || jobProfileData.jobProfile.is_archived) {
         triggerGetJobProfileMeta(jobProfileData.jobProfile.id);
         triggerGetPositionRequestsCount({ where: { parent_job_profile_id: { equals: jobProfileData.jobProfile.id } } });
       }
@@ -340,12 +340,12 @@ export const TotalCompCreateProfileComponent: React.FC<TotalCompCreateProfileCom
         value={{
           ...formMethods,
           watchedState: state,
+          isArchived: jobProfileData?.jobProfile.is_archived ?? false,
           professionalRegistrationRequirementsFieldArray: professionalRegistrationRequirementsFieldArray,
         }}
       >
         {isLoading ? <></> : <JobProfileHeader title={title} />}
-
-        <TCTabBar></TCTabBar>
+        <TCTabBar isArchived={jobProfileData?.jobProfile.is_archived ?? false} />
       </FormContext.Provider>
     </>
   );
