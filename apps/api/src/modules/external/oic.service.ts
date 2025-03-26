@@ -49,7 +49,7 @@ export class OicService {
   }
 
   async createPosition(data: FusionUpsertPositionInput) {
-    if (data.Positionld.length > 0) throw AlexandriaError('PositionId must be blank to create a new position');
+    if (data.PositionId.length > 0) throw AlexandriaError('PositionId must be blank to create a new position');
 
     const response = await firstValueFrom(
       this.httpService
@@ -69,7 +69,7 @@ export class OicService {
   }
 
   async updatePosition(data: FusionUpsertPositionInput) {
-    if (data.Positionld.length === 0) throw AlexandriaError('PositionId is required to update a position');
+    if (data.PositionId.length === 0) throw AlexandriaError('PositionId is required to update a position');
 
     const response = await firstValueFrom(
       this.httpService

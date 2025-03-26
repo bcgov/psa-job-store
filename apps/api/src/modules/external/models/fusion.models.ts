@@ -6,17 +6,12 @@ export type FusionHiringStatusType = 'APPROVED' | 'FROZEN' | 'PROPOSED';
 
 export type FusionRegularTemporaryType = 'R' | 'T';
 
-// March 24, 2025
-//  Determined on a call that the following properties have the incorrect name:
-//  - Positionld (Should be PositionId)
-//  - Jobld (Should be JobId)
-//  Update these properties when the fix is available in Fusion
 export interface FusionUpsertPositionInput {
-  Positionld: string;
+  PositionId: string;
   EffectiveStartDate: string;
   BusinessUnitId: string;
   DepartmentId: string;
-  Jobld: string;
+  JobId: string;
   ReportsToPositionCode: string;
   ActiveStatus: FusionActiveStatusType;
   HiringStatus: FusionHiringStatusType;
