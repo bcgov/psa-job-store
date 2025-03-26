@@ -36,7 +36,10 @@ export class IDIRStrategy extends PassportStrategy(Strategy, 'idir') {
     const sessionUser = await this.authService.validateUserinfo(userinfo);
 
     try {
-      return sessionUser;
+      return {
+        ...sessionUser,
+        id_token: tokenSet.id_token
+      };
     } catch (error) {
       throw new UnauthorizedException();
     }
