@@ -40,7 +40,12 @@ export class AuthService {
 
     return subordinates.length > 0;
   }
-
+  /**
+   * Validates and processes user information obtained from a BCeID authentication response.
+   *
+   * @param userinfo An object containing the user information received from the BCeID authentication service.
+   * @returns The sessionUser object if the user has the 'bceid' role; otherwise, undefined.
+   */
   private async validateBCeIDUserinfo(userinfo: BCeIDUserinfoResponse) {
     const id = guidToUuid(userinfo.bceid_user_guid);
     const existingUser = await this.userService.getUser({ where: { id } });
@@ -56,7 +61,8 @@ export class AuthService {
       metadata: (existingUser?.metadata ?? {}) as Record<string, unknown>,
     };
 
-    return existingUser ? sessionUser : undefined;
+    //
+    return sessionUser.roles.includes('bceid') ? sessionUser : undefined;
   }
 
   /**
