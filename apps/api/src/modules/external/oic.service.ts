@@ -5,10 +5,15 @@ import { AxiosHeaders } from 'axios';
 import { catchError, firstValueFrom, map, retry } from 'rxjs';
 import { AppConfigDto } from '../../dtos/app-config.dto';
 import { AlexandriaError } from '../../utils/alexandria-error';
-import { FusionCheckPositionUploadStatusInput, FusionUpsertPositionInput } from './models/fusion.models';
+import {
+  FusionAssignSupervisorPositionInput,
+  FusionCheckPositionUploadStatusInput,
+  FusionUpsertPositionInput,
+} from './models/fusion.models';
 import { OracleIdpService } from './oracle-idp.service';
 
 enum OicEndpoints {
+  AssignSupervisor = '/ic/api/integration/v1/flows/rest/HCM_IN_POSITION_HIER_INT/1.0/position',
   Upsert = '/ic/api/integration/v1/flows/rest/HCM_IN_POSITION_INT/1.0/position',
   CheckPositionUploadStatus = '/ic/api/integration/v1/flows/rest/HCM_IN_GET_POSIT_IMPOR_STATU/1.0/',
 }
@@ -46,6 +51,24 @@ export class OicService {
     }
 
     return headers;
+  }
+
+  async assignSupervisorPosition(data: FusionAssignSupervisorPositionInput) {
+    const response = await firstValueFrom(
+      this.httpService
+        .post(`${this.configService.get('OIC_URL')}${OicEndpoints.AssignSupervisor}`, data, {
+          headers: await this.getHeaders(),
+        })
+        .pipe(
+          map((r) => r.data),
+          retry(3),
+          catchError((err) => {
+            throw new Error(err);
+          }),
+        ),
+    );
+
+    return response;
   }
 
   async createPosition(data: FusionUpsertPositionInput) {

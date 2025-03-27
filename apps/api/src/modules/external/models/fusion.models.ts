@@ -6,6 +6,14 @@ export type FusionHiringStatusType = 'APPROVED' | 'FROZEN' | 'PROPOSED';
 
 export type FusionRegularTemporaryType = 'R' | 'T';
 
+export interface FusionAssignSupervisorPositionInput {
+  PositionId: string;
+  EffectiveStartDate: string;
+  BusinessUnitId: string;
+  ParentPositionId: string;
+  ParentBusinessUnitId: string;
+}
+
 export interface FusionUpsertPositionInput {
   PositionId: string;
   EffectiveStartDate: string;
