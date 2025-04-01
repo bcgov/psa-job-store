@@ -1,4 +1,4 @@
-import { CopyOutlined, MailOutlined, QuestionCircleOutlined, TeamOutlined } from '@ant-design/icons';
+import { CopyOutlined, MailOutlined, QuestionCircleOutlined } from '@ant-design/icons';
 import { Button, Menu, message } from 'antd';
 import AccessiblePopoverMenu from '../shared/accessible-popover-menu/accessible-popover-menu';
 
