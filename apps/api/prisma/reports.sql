@@ -130,14 +130,14 @@ ORDER BY willingness_statement;
 
 WITH job_family_streams AS (
     SELECT DISTINCT
-        jp.id AS job_profile_id,
+        cjp.id AS job_profile_id,
         jpjf.id AS job_family_id,
         jpjf.name AS job_family_name,
         jps.name AS stream_name
-    FROM job_profile jp
-    JOIN job_profile_job_family_link jpjfl ON jp.id = jpjfl."jobProfileId"
+    FROM current_job_profiles cjp
+    JOIN job_profile_job_family_link jpjfl ON cjp.id = jpjfl."jobProfileId"
     JOIN job_profile_job_family jpjf ON jpjfl."jobFamilyId" = jpjf.id
-    LEFT JOIN job_profile_stream_link jpsl ON jp.id = jpsl."jobProfileId"
+    LEFT JOIN job_profile_stream_link jpsl ON cjp.id = jpsl."jobProfileId"
     LEFT JOIN job_profile_stream jps ON jpsl."streamId" = jps.id AND jps.job_family_id = jpjf.id
 ),
 family_streams_aggregated AS (
@@ -151,8 +151,8 @@ family_streams_aggregated AS (
 ),
 grouped_data AS (
     SELECT
-        jp.id AS profile_id,
-        jp.number,
+        cjp.id AS profile_id,
+        cjp.number,
         prr->>'text' AS professional_registration_requirement,
         STRING_AGG(DISTINCT '"' || c.name || '"', ', ') AS classifications,
         STRING_AGG(DISTINCT '"' || o.name || '"', ', ') AS organizations,
@@ -167,22 +167,22 @@ grouped_data AS (
                 ', ' ORDER BY fsa.job_family_name
             )
             FROM family_streams_aggregated fsa
-            WHERE fsa.job_profile_id = jp.id
+            WHERE fsa.job_profile_id = cjp.id
         ) AS job_families_and_streams
     FROM
-        job_profile jp
-        LEFT JOIN job_profile_classification jpc ON jp.id = jpc.job_profile_id
+        current_job_profiles cjp
+        LEFT JOIN job_profile_classification jpc ON cjp.id = jpc.job_profile_id
         LEFT JOIN classification c ON jpc.classification_id = c.id 
             AND jpc.classification_employee_group_id = c.employee_group_id 
             AND jpc.classification_peoplesoft_id = c.peoplesoft_id
-        LEFT JOIN job_profile_organization jpo ON jp.id = jpo.job_profile_id
+        LEFT JOIN job_profile_organization jpo ON cjp.id = jpo.job_profile_id
         LEFT JOIN organization o ON jpo.organization_id = o.id,
-        JSONB_ARRAY_ELEMENTS(jp.professional_registration_requirements) AS prr
+        JSONB_ARRAY_ELEMENTS(cjp.professional_registration_requirements) AS prr
     WHERE
-        jp.professional_registration_requirements IS NOT NULL
+        cjp.professional_registration_requirements IS NOT NULL
         AND prr->>'text' IS NOT NULL
     GROUP BY
-        jp.id, jp.number, prr->>'text'
+        cjp.id, cjp.number, prr->>'text'
 )
 SELECT
     professional_registration_requirement,
@@ -194,6 +194,7 @@ SELECT
 FROM grouped_data
 GROUP BY professional_registration_requirement
 ORDER BY professional_registration_requirement;
+
 
 -- Security screenings grouped by text
 
@@ -337,14 +338,14 @@ ORDER BY knowledge_skill_ability;
 
 WITH job_family_streams AS (
     SELECT DISTINCT
-        jp.id AS job_profile_id,
+        cjp.id AS job_profile_id,
         jpjf.id AS job_family_id,
         jpjf.name AS job_family_name,
         jps.name AS stream_name
-    FROM job_profile jp
-    JOIN job_profile_job_family_link jpjfl ON jp.id = jpjfl."jobProfileId"
+    FROM current_job_profiles cjp
+    JOIN job_profile_job_family_link jpjfl ON cjp.id = jpjfl."jobProfileId"
     JOIN job_profile_job_family jpjf ON jpjfl."jobFamilyId" = jpjf.id
-    LEFT JOIN job_profile_stream_link jpsl ON jp.id = jpsl."jobProfileId"
+    LEFT JOIN job_profile_stream_link jpsl ON cjp.id = jpsl."jobProfileId"
     LEFT JOIN job_profile_stream jps ON jpsl."streamId" = jps.id AND jps.job_family_id = jpjf.id
 ),
 family_streams_aggregated AS (
@@ -357,10 +358,10 @@ family_streams_aggregated AS (
     GROUP BY job_profile_id, job_family_id, job_family_name
 )
 SELECT
-    jp.id AS "Profile ID",
-    jp.number AS "Profile Number",
-    jp.title AS "Title",
-	jp.state as "State",
+    cjp.id AS "Profile ID",
+    cjp.number AS "Profile Number",
+    cjp.title AS "Title",
+    cjp.state as "State",
     CASE
         WHEN STRING_AGG(DISTINCT c.code, ', ') IS NOT NULL THEN 
             '"' || STRING_AGG(DISTINCT c.code, '", "') || '"'
@@ -377,7 +378,7 @@ SELECT
             ', ' ORDER BY fsa.job_family_name
         )
         FROM family_streams_aggregated fsa
-        WHERE fsa.job_profile_id = jp.id
+        WHERE fsa.job_profile_id = cjp.id
     ) AS "Job Families and Streams",
     CASE
         WHEN STRING_AGG(DISTINCT o.name, ', ') IS NOT NULL THEN 
@@ -385,21 +386,22 @@ SELECT
         ELSE NULL
     END AS "Organizations",
     CASE 
-        WHEN jp.review_required THEN 'Yes'
+        WHEN cjp.review_required THEN 'Yes'
         ELSE 'No'
     END AS "Review Required"
 FROM 
-    job_profile jp
-LEFT JOIN job_profile_classification jpc ON jp.id = jpc.job_profile_id
+    current_job_profiles cjp
+LEFT JOIN job_profile_classification jpc ON cjp.id = jpc.job_profile_id
 LEFT JOIN classification c ON jpc.classification_id = c.id 
     AND jpc.classification_employee_group_id = c.employee_group_id 
     AND jpc.classification_peoplesoft_id = c.peoplesoft_id
-LEFT JOIN job_profile_organization jpo ON jp.id = jpo.job_profile_id
+LEFT JOIN job_profile_organization jpo ON cjp.id = jpo.job_profile_id
 LEFT JOIN organization o ON jpo.organization_id = o.id
 GROUP BY 
-    jp.id, jp.number, jp.title, jp.review_required, jp.state
+    cjp.id, cjp.number, cjp.title, cjp.review_required, cjp.state
 ORDER BY 
-    jp.number
+    cjp.number
+
 
 -- All profiles - profile id, profile number, title, classifications, job families and streams, organizations, review required, published/not published
 

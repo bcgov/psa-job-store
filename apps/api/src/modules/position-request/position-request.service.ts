@@ -2000,6 +2000,7 @@ export class PositionRequestApiService {
       // console.log('initialNode: ', initialNode);
       if (initialNode) {
         initialNode.data.employees.forEach((employee: any) => {
+          console.log('employee: ', employee);
           managers.push({
             id: employee.id,
             name: employee.name,
@@ -2030,6 +2031,7 @@ export class PositionRequestApiService {
           break;
         }
 
+        console.log('managerNode.data.employees.length: ', managerNode.data.employees.length);
         // console.log('checking manager classification: ', managerNode.data.classification);
         // Check if the position's classification contains "Band"
         if (managerNode.data.classification.name.includes('Band')) {
