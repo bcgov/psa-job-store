@@ -1,4 +1,4 @@
-import { CopyOutlined, MailOutlined, QuestionCircleOutlined, TeamOutlined } from '@ant-design/icons';
+import { CopyOutlined, MailOutlined, QuestionCircleOutlined } from '@ant-design/icons';
 import { Button, Menu, message } from 'antd';
 import AccessiblePopoverMenu from '../shared/accessible-popover-menu/accessible-popover-menu';
 
@@ -17,7 +17,7 @@ export const HelpButton = () => {
           Jobstore@gov.bc.ca <CopyOutlined style={{ cursor: 'pointer' }} aria-hidden />
         </>
       </Menu.Item>
-      <Menu.Item key="teams" icon={<TeamOutlined aria-hidden />}>
+      {/* <Menu.Item key="teams" icon={<TeamOutlined aria-hidden />}>
         <a
           target="_blank"
           rel="noopener noreferrer"
@@ -25,7 +25,7 @@ export const HelpButton = () => {
         >
           Help desk
         </a>
-      </Menu.Item>
+      </Menu.Item> */}
       <Menu.Item key="feedback" icon={<QuestionCircleOutlined aria-hidden />}>
         <a target="_blank" rel="noopener noreferrer" href="https://jobstore-feedback.apps.silver.devops.gov.bc.ca/">
           Share feedback
