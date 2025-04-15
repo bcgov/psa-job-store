@@ -1414,11 +1414,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
                 )}
               </Col>
               <Col>
-                {['bceid', 'total-compensation'].some((role) => roles.includes(role)) ? (
-                  <DownloadJobProfileComponent jobProfile={effectiveData} />
-                ) : (
-                  <></>
-                )}
+                <DownloadJobProfileComponent jobProfile={effectiveData} />
               </Col>
             </Row>
           </div>
