@@ -14,7 +14,7 @@ on:
 jobs:
   metadata:
     name: Get Metadata
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
 
     outputs:
       needs-migration: ${{ steps.get-migrations.outputs.changes }}
@@ -42,7 +42,7 @@ jobs:
     name: Migrate DB Schema
     needs: metadata
     if: ${{ contains(needs.metadata.outputs.needs-migration, 'migration') }}
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     environment:
       name: ${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'stage' && 'test' || 'dev' }}
     steps:
@@ -71,7 +71,7 @@ jobs:
     name: Deploy
     needs: metadata
     if: ${{inputs.changed_apps != '[]' && inputs.changed_apps != ''}}
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     environment:
       name: ${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'stage' && 'test' || 'dev' }}
     steps:
@@ -90,7 +90,7 @@ jobs:
   trigger-e2e:
     name: Trigger E2E Tests
     needs: [metadata, deploy]
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     if: |
       always() &&
       (github.ref_name == 'stage') &&
