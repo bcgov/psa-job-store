@@ -7,7 +7,7 @@ on:
 jobs:
   metadata:
     name: Get Metadata
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
 
     outputs:
       changed-apps: ${{ steps.get-changed-apps.outputs.changes }}
@@ -35,7 +35,7 @@ jobs:
     name: Build ${{ matrix.app }}
     needs: metadata
     if: ${{needs.metadata.outputs.changed-apps != '[]' && needs.metadata.outputs.changed-apps != ''}}
-    runs-on: ubuntu-20.04
+    runs-on: ubuntu-22.04
     environment:
       name: ${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'stage' && 'test' || 'dev' }}
     strategy:
@@ -121,7 +121,7 @@ jobs:
 
   # trigger-unit-tests:
   #   name: Trigger Unit Tests
-  #   runs-on: ubuntu-20.04
+  #   runs-on: ubuntu-22.04
   #   if: |
   #     always() &&
   #     (github.ref_name == 'stage')
@@ -142,4 +142,3 @@ jobs:
   #           } catch (error) {
   #             console.log('Error triggering unit tests:', error);
   #             throw error;
-  #           }

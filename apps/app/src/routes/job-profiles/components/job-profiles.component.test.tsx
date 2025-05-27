@@ -35,6 +35,10 @@ jest.mock('react-router-dom', () => ({
   useParams: jest.fn(),
 }));
 
+jest.mock('../../../components/shared/download-job-profile/download-job-profile.component', () => ({
+  DownloadJobProfileComponent: () => <div data-testid="mock-download-job-profile" />,
+}));
+
 // Mocking the useBreakpoint hook
 jest.mock('antd/lib/grid', () => {
   const originalModule = jest.requireActual('antd/lib/grid');

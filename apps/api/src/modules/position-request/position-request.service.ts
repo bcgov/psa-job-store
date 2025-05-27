@@ -1821,7 +1821,7 @@ export class PositionRequestApiService {
           }
           
             <ul>
-              <li>Have you received executive approval (Depuity Minister or delegate) for this new position?    Yes</li>
+              <li>Have you received executive approval (Deputy Minister or delegate) for this new position?    Yes</li>
               <li>What is the effective date?    ${dayjs().format('MMM D, YYYY')}</li>
               <li>What is the pay list/department ID number?    ${paylist_department.id}</li>
               <li>What is the expected classification level?    ${classification.code} (${classification.name})</li>
@@ -1843,7 +1843,7 @@ export class PositionRequestApiService {
               }</li>
               <li>Has the classification been approved by Classification Services? If so, what is the E-Class case number? (Not required if using Job Store profile)    n/a</li>
               <li>Please attach a copy of the job profile you will be using.    Attached</li>
-              <li>Please attach a copy of your Organization Chart that shows the topic position and the job titles, position numbers and classifiction levels, of the supervisor, peer and subordinate positions.    Attached</li>
+              <li>Please attach a copy of your Organization Chart that shows the topic position and the job titles, position numbers and classification levels, of the supervisor, peer and subordinate positions.    Attached</li>
             </ul>
           </div>
 

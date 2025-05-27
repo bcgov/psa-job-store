@@ -31,7 +31,7 @@ export const LoginPage = () => {
               <Text>
                 Phone:{' '}
                 <a href="tel://2503877000" target="_blank">
-                  250-387-7700
+                  250-387-7000
                 </a>
               </Text>
               <Text>
