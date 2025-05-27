@@ -69,8 +69,8 @@ export const NavMenu = ({ collapsed }: NavMenuProps) => {
     return createMenuItem({
       key: '/help',
       icon: <BookOutlined aria-hidden />,
-      label: 'Help and Docs',
-      title: 'Help and Docs',
+      label: 'Resources',
+      title: 'Resources',
     });
   }, []);
 
@@ -379,7 +379,7 @@ export const NavMenu = ({ collapsed }: NavMenuProps) => {
         <>
           <Divider />
           <Menu
-            aria-label="Help and Docs menu"
+            aria-label="Resources menu"
             inlineIndent={16}
             mode="inline"
             selectedKeys={selectedKeys}
