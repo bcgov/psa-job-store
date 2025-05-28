@@ -102,6 +102,42 @@ export class AppConfigDto {
   @IsString()
   PEOPLESOFT_PASSWORD: string;
 
+  @IsOptional()
+  @IsString()
+  USE_FUSION?: string;
+
+  @IsOptional()
+  @IsString()
+  FUSION_URL?: string;
+
+  @IsOptional()
+  @IsString()
+  FUSION_USERNAME?: string;
+
+  @IsOptional()
+  @IsString()
+  FUSION_PASSWORD?: string;
+
+  @IsOptional()
+  @IsString()
+  ORACLE_IDP_TOKEN_URL?: string;
+
+  @IsOptional()
+  @IsString()
+  ORACLE_IDP_ID?: string;
+
+  @IsOptional()
+  @IsString()
+  ORACLE_IDP_SECRET?: string;
+
+  @IsOptional()
+  @IsString()
+  ORACLE_IDP_SCOPE?: string;
+
+  @IsOptional()
+  @IsString()
+  OIC_URL?: string;
+
   @IsString()
   USE_MOCKS: string;
 
