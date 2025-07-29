@@ -828,17 +828,7 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                                   <Controller
                                     control={profileControl}
                                     name={`education.${index}.text`}
-                                    render={({ field: { onChange, onBlur, value } }) => (
-                                      // <TextArea
-                                      //   autoSize
-                                      //   placeholder="Add education"
-                                      //   onChange={(event) => {
-                                      //     onChange(event);
-                                      //     debounce(triggerProfileValidation, 300)();
-                                      //   }}
-                                      //   onBlur={onBlur}
-                                      //   value={value?.toString()}
-                                      // />
+                                    render={({ field: { onChange, value } }) => (
                                       <QuillEditor
                                         value={typeof value === 'string' ? value : (value?.toString() ?? '')}
                                         onTextChange={(val: string) => {
@@ -1114,17 +1104,7 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                                   <Controller
                                     control={profileControl}
                                     name={`job_experience.${index}.text`}
-                                    render={({ field: { onChange, onBlur, value } }) => (
-                                      // <TextArea
-                                      //   autoSize
-                                      //   placeholder="Add related experience"
-                                      //   onChange={(event) => {
-                                      //     onChange(event);
-                                      //     debounce(triggerProfileValidation, 300)();
-                                      //   }}
-                                      //   onBlur={onBlur}
-                                      //   value={value?.toString()}
-                                      // />
+                                    render={({ field: { onChange, value } }) => (
                                       <QuillEditor
                                         value={typeof value === 'string' ? value : (value?.toString() ?? '')}
                                         onTextChange={(val: string) => {
@@ -1383,19 +1363,9 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                                   <Controller
                                     control={profileControl}
                                     name={`professional_registration_requirements.${index}.text`}
-                                    render={({ field: { onChange, onBlur, value } }) => {
+                                    render={({ field: { onChange, value } }) => {
                                       return (
                                         <>
-                                          {/* <TextArea
-                                            autoSize
-                                            placeholder="Add a professional registration or certification requirement"
-                                            onChange={(event) => {
-                                              onChange(event);
-                                              debounce(triggerProfileValidation, 300)();
-                                            }}
-                                            onBlur={onBlur}
-                                            value={value?.toString()}
-                                          /> */}
                                           <QuillEditor
                                             value={typeof value === 'string' ? value : (value?.toString() ?? '')}
                                             onTextChange={(val: string) => {
@@ -1536,14 +1506,7 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                                   <Controller
                                     control={profileControl}
                                     name={`preferences.${index}.text`}
-                                    render={({ field: { onChange, onBlur, value } }) => (
-                                      // <TextArea
-                                      //   autoSize
-                                      //   placeholder="Add a preference"
-                                      //   onChange={onChange}
-                                      //   onBlur={onBlur}
-                                      //   value={value?.toString()}
-                                      // />
+                                    render={({ field: { onChange, value } }) => (
                                       <QuillEditor
                                         value={typeof value === 'string' ? value : (value?.toString() ?? '')}
                                         onTextChange={(val: string) => {
@@ -1667,17 +1630,7 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                                   <Controller
                                     control={profileControl}
                                     name={`knowledge_skills_abilities.${index}.text`}
-                                    render={({ field: { onChange, onBlur, value } }) => (
-                                      // <TextArea
-                                      //   autoSize
-                                      //   placeholder="Add a knowledge, skill, or ability"
-                                      //   onChange={(event) => {
-                                      //     onChange(event);
-                                      //     debounce(triggerProfileValidation, 300)();
-                                      //   }}
-                                      //   onBlur={onBlur}
-                                      //   value={value?.toString()}
-                                      // />
+                                    render={({ field: { onChange, value } }) => (
                                       <QuillEditor
                                         value={typeof value === 'string' ? value : (value?.toString() ?? '')}
                                         onTextChange={(val: string) => {
@@ -1800,14 +1753,7 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                                   <Controller
                                     control={profileControl}
                                     name={`willingness_statements.${index}.text`}
-                                    render={({ field: { onChange, onBlur, value } }) => (
-                                      // <TextArea
-                                      //   autoSize
-                                      //   placeholder="Add a willingness statement or proviso"
-                                      //   onChange={onChange}
-                                      //   onBlur={onBlur}
-                                      //   value={value?.toString()}
-                                      // />
+                                    render={({ field: { onChange, value } }) => (
                                       <QuillEditor
                                         value={typeof value === 'string' ? value : (value?.toString() ?? '')}
                                         onTextChange={(val: string) => {
@@ -2063,17 +2009,7 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                                   <Controller
                                     control={profileControl}
                                     name={`security_screenings.${index}.text`}
-                                    render={({ field: { onChange, onBlur, value } }) => (
-                                      // <TextArea
-                                      //   autoSize
-                                      //   placeholder="Add a security screenings requirement"
-                                      //   onChange={(event) => {
-                                      //     onChange(event);
-                                      //     debounce(triggerProfileValidation, 300)();
-                                      //   }}
-                                      //   onBlur={onBlur}
-                                      //   value={value?.toString()}
-                                      // />
+                                    render={({ field: { onChange, value } }) => (
                                       <QuillEditor
                                         value={typeof value === 'string' ? value : (value?.toString() ?? '')}
                                         onTextChange={(val: string) => {
@@ -2202,14 +2138,7 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                                   <Controller
                                     control={profileControl}
                                     name={`optional_requirements.${index}.text`}
-                                    render={({ field: { onChange, onBlur, value } }) => (
-                                      // <TextArea
-                                      //   autoSize
-                                      //   placeholder="Add an optional requirement"
-                                      //   onChange={onChange}
-                                      //   onBlur={onBlur}
-                                      //   value={value?.toString()}
-                                      // />
+                                    render={({ field: { onChange, value } }) => (
                                       <QuillEditor
                                         value={typeof value === 'string' ? value : (value?.toString() ?? '')}
                                         onTextChange={(val: string) => {
