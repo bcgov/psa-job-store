@@ -1,3 +1,6 @@
+import { parseDocument } from 'htmlparser2';
+import type { Element, Text, Node } from 'domhandler';
+
 /* eslint-disable @typescript-eslint/no-explicit-any */
 import { Buffer } from 'buffer';
 import dayjs from 'dayjs';
@@ -99,12 +102,126 @@ function mapToFlatRecord(input: any): Record<string, any> {
   return flattenObject(input);
 }
 
+/**
+ * Converts a simple HTML string to plain text for use in docx TextRun.
+ * Strips tags and preserves line breaks and list items as text.
+ */
+function htmlToDocxParagraphs(html: string): TextRun[] {
+  const doc = parseDocument(html);
+
+  function parseNode(
+    node: Node,
+    listContext?: { type: 'ul' | 'ol'; index: number },
+    style: { bold?: boolean; italics?: boolean; link?: string; underline?: object } = {},
+  ): TextRun[] {
+    if (node.type === 'text') {
+      return [
+        new TextRun({
+          font: 'Calibri',
+          size: '12pt',
+          text: (node as Text).data,
+          bold: style.bold,
+          italics: style.italics,
+          ...(style.underline ? { underline: style.underline } : {}),
+        }),
+      ];
+    }
+    if (node.type === 'tag') {
+      const el = node as Element;
+      if (el.name === 'br') {
+        return [new TextRun({ break: 1 })];
+      }
+      if (el.name === 'ul') {
+        // For unordered lists, pass type 'ul' and index is not used
+        return el.children.flatMap((child) => parseNode(child, { type: 'ul', index: 0 }, style));
+      }
+      if (el.name === 'ol') {
+        // For ordered lists, pass type 'ol' and index for each <li>
+        let idx = 1;
+        return el.children.flatMap((child) => {
+          if ((child as Element).name === 'li') {
+            // Pass correct index for each <li>
+            const result = parseNode(child, { type: 'ol', index: idx }, style);
+            idx++;
+            return result;
+          }
+          // If not <li>, just parse normally
+          return parseNode(child, listContext, style);
+        });
+      }
+      if (el.name === 'li') {
+        let prefix = '';
+        let type = '';
+        let idx = listContext?.index;
+        // Check data-list attribute first
+        if (el.attribs && el.attribs['data-list']) {
+          if (el.attribs['data-list'] === 'ordered') {
+            type = 'ol';
+          } else if (el.attribs['data-list'] === 'bullet') {
+            type = 'ul';
+          }
+        } else if (listContext?.type) {
+          type = listContext.type;
+        }
+        if (type === 'ol' && typeof idx === 'number') {
+          prefix = `${idx}. `;
+        } else {
+          prefix = '• ';
+        }
+        return [
+          new TextRun({ font: 'Calibri', size: '12pt', text: prefix }),
+          ...el.children.flatMap((child) => parseNode(child, undefined, style)),
+          new TextRun({ break: 1 }),
+        ];
+      }
+      if (el.name === 'b' || el.name === 'strong') {
+        return el.children.flatMap((child) => parseNode(child, listContext, { ...style, bold: true }));
+      }
+      if (el.name === 'i' || el.name === 'em') {
+        return el.children.flatMap((child) => parseNode(child, listContext, { ...style, italics: true }));
+      }
+      if (el.name === 'u') {
+        return el.children.flatMap((child) => parseNode(child, listContext, { ...style, underline: {} }));
+      }
+      // For all other tags, just join children
+      return el.children.flatMap((child) => parseNode(child, listContext, style));
+    }
+    return [];
+  }
+
+  // Remove consecutive breaks at the end
+  let runs: TextRun[] = [];
+  for (let i = 0; i < doc.children.length; i++) {
+    const child = doc.children[i];
+    // If this is a list block (<ol> or <ul>), insert a break before its first <li> if previous run is not a break
+    if (
+      child.type === 'tag' &&
+      ((child as Element).name === 'ol' || (child as Element).name === 'ul') &&
+      runs.length > 0 &&
+      !(runs[runs.length - 1] as any).break
+    ) {
+      // Find first <li> child
+      const firstLi = (child as Element).children.find((c) => c.type === 'tag' && (c as Element).name === 'li');
+      if (firstLi) {
+        runs.push(new TextRun({ break: 1 }));
+      }
+    }
+    const parsed = parseNode(child);
+    runs.push(...parsed);
+  }
+  // Optionally, you can clean up trailing breaks
+  // while (runs.length > 0 && runs[runs.length - 1].break) {
+  //   runs.pop();
+  // }
+  return runs;
+}
+
 const generateJobProfile = ({ jobProfile, positionRequest, supervisorProfile }: GenerateJobProfileProps) => {
   const transformedJobProfile = mapToFlatRecord(jobProfile);
-  // console.log('commonkit generateJobProfile, jobProfile: ', jobProfile);
-  // console.log('commonkit transformedJobProfile', transformedJobProfile);
-  // console.log('supervisorProfile', supervisorProfile);
-  // console.log('positionRequest', positionRequest);
+  console.log('commonkit generateJobProfile, jobProfile: ', jobProfile);
+  console.log('commonkit transformedJobProfile', transformedJobProfile);
+  console.log('supervisorProfile', supervisorProfile);
+  console.log('positionRequest', positionRequest);
   return new Document({
     sections: [
       {
@@ -494,13 +611,7 @@ const generateJobProfile = ({ jobProfile, positionRequest, supervisorProfile }: 
                       bullet: {
                         level: 0,
                       },
-                      children: [
-                        new TextRun({
-                          font: 'Calibri',
-                          size: '12pt',
-                          text: obj,
-                        }),
-                      ],
+                      children: htmlToDocxParagraphs(obj),
                     }),
                 ),
               ]
@@ -520,13 +631,7 @@ const generateJobProfile = ({ jobProfile, positionRequest, supervisorProfile }: 
                       bullet: {
                         level: 0,
                       },
-                      children: [
-                        new TextRun({
-                          font: 'Calibri',
-                          size: '12pt',
-                          text: obj,
-                        }),
-                      ],
+                      children: htmlToDocxParagraphs(obj),
                     }),
                 ),
               ]
@@ -545,13 +650,7 @@ const generateJobProfile = ({ jobProfile, positionRequest, supervisorProfile }: 
                       bullet: {
                         level: 0,
                       },
-                      children: [
-                        new TextRun({
-                          font: 'Calibri',
-                          size: '12pt',
-                          text: obj,
-                        }),
-                      ],
+                      children: htmlToDocxParagraphs(obj),
                     }),
                 ),
               ]
@@ -571,13 +670,7 @@ const generateJobProfile = ({ jobProfile, positionRequest, supervisorProfile }: 
                       bullet: {
                         level: 0,
                       },
-                      children: [
-                        new TextRun({
-                          font: 'Calibri',
-                          size: '12pt',
-                          text: obj,
-                        }),
-                      ],
+                      children: htmlToDocxParagraphs(obj),
                     }),
                 ),
               ]
@@ -596,13 +689,7 @@ const generateJobProfile = ({ jobProfile, positionRequest, supervisorProfile }: 
                       bullet: {
                         level: 0,
                       },
-                      children: [
-                        new TextRun({
-                          font: 'Calibri',
-                          size: '12pt',
-                          text: obj,
-                        }),
-                      ],
+                      children: htmlToDocxParagraphs(obj),
                     }),
                 ),
               ]
@@ -622,13 +709,7 @@ const generateJobProfile = ({ jobProfile, positionRequest, supervisorProfile }: 
                       bullet: {
                         level: 0,
                       },
-                      children: [
-                        new TextRun({
-                          font: 'Calibri',
-                          size: '12pt',
-                          text: obj,
-                        }),
-                      ],
+                      children: htmlToDocxParagraphs(obj),
                     }),
                 ),
               ]
@@ -647,13 +728,7 @@ const generateJobProfile = ({ jobProfile, positionRequest, supervisorProfile }: 
                       bullet: {
                         level: 0,
                       },
-                      children: [
-                        new TextRun({
-                          font: 'Calibri',
-                          size: '12pt',
-                          text: obj,
-                        }),
-                      ],
+                      children: htmlToDocxParagraphs(obj),
                     }),
                 ),
               ]
@@ -672,13 +747,7 @@ const generateJobProfile = ({ jobProfile, positionRequest, supervisorProfile }: 
                       bullet: {
                         level: 0,
                       },
-                      children: [
-                        new TextRun({
-                          font: 'Calibri',
-                          size: '12pt',
-                          text: obj,
-                        }),
-                      ],
+                      children: htmlToDocxParagraphs(obj),
                     }),
                 ),
               ]
@@ -697,13 +766,7 @@ const generateJobProfile = ({ jobProfile, positionRequest, supervisorProfile }: 
                       bullet: {
                         level: 0,
                       },
-                      children: [
-                        new TextRun({
-                          font: 'Calibri',
-                          size: '12pt',
-                          text: obj,
-                        }),
-                      ],
+                      children: htmlToDocxParagraphs(obj),
                     }),
                 ),
               ]
