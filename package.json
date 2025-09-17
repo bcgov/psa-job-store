@@ -12,6 +12,12 @@
     "lint": "turbo run lint",
     "prepare": "husky"
   },
+  "overrides": {
+    "@prisma/extension-read-replicas": "0.4.0",
+    "csstype": "3.1.2",
+    "sha.js": "2.4.12",
+    "vitest": "2.1.9"
+  },
   "dependencies": {
     "react-accessible-treeview": "^2.10.0",
     "reflect-metadata": "^0.2.2"
@@ -32,8 +38,5 @@
   "packageManager": "npm@10.9.1",
   "engines": {
     "node": ">=22.11.0 <23.0.0"
-  },
-  "overrides": {
-    "csstype": "3.1.2"
   }
 }
