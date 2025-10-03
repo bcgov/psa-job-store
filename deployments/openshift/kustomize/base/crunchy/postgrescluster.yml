@@ -4,6 +4,7 @@ metadata:
   name: api-postgres-alpha
 spec:
   shutdown: false
+  openshift: true
   instances:
     - replicas: 3
       resources:

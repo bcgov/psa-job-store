@@ -1,6 +1,7 @@
 import { DeleteOutlined, InfoCircleOutlined, PlusOutlined } from '@ant-design/icons';
+import 'quill/dist/quill.snow.css';
+import QuillEditor from './quill-editor';
 import { Alert, Button, Card, Checkbox, Col, Divider, Form, Row, Tooltip, Typography } from 'antd';
-import TextArea from 'antd/es/input/TextArea';
 import debounce from 'lodash.debounce';
 import { useContext, useEffect, useRef, useState } from 'react';
 import { Controller, useFieldArray } from 'react-hook-form';
@@ -193,7 +194,7 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
   const isRelatedExperienceSectionSignificant = profileWatch('isRelatedExperienceSectionSignificant');
   const isProfessionalRegistrationSectionSignificant = profileWatch('isProfessionalRegistrationSectionSignificant');
   const isSecurityScreeningsSectionSignificant = profileWatch('isSecurityScreeningsSectionSignificant');
-  
+
   const accountabilities = profileWatch('accountabilities');
   const securityScreenings = profileWatch('security_screenings');
   const educations = profileWatch('education');
@@ -408,7 +409,7 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                           <Col>
                             <Form.Item style={{ margin: 0 }}>
                               <Row>
-                              <Col>
+                                <Col>
                                   <Controller
                                     control={profileControl}
                                     name="isAccountabilitiesSectionSignificant"
@@ -477,7 +478,6 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                                     )}
                                   ></Controller>
                                 </Col>
-                                
                               </Row>
                             </Form.Item>
                           </Col>
@@ -564,16 +564,15 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                                   <Controller
                                     control={profileControl}
                                     name={`accountabilities.${index}.text`}
-                                    render={({ field: { onChange, onBlur, value } }) => (
-                                      <TextArea
-                                        autoSize
-                                        placeholder="Add an accountability"
-                                        onChange={(event) => {
-                                          onChange(event);
+                                    render={({ field: { onChange, value } }) => (
+                                      <QuillEditor
+                                        value={typeof value === 'string' ? value : (value?.toString() ?? '')}
+                                        onTextChange={(val: string) => {
+                                          onChange(val);
                                           debounce(triggerProfileValidation, 300)();
                                         }}
-                                        onBlur={onBlur}
-                                        value={value?.toString()}
+                                        placeholder="Add an accountability"
+                                        readOnly={!isCurrentVersion || jobProfileData?.jobProfile.is_archived}
                                       />
                                     )}
                                   />
@@ -733,7 +732,6 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                                     )}
                                   ></Controller>
                                 </Col>
-                                
                               </Row>
                             ) : (
                               <></>
@@ -830,16 +828,15 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                                   <Controller
                                     control={profileControl}
                                     name={`education.${index}.text`}
-                                    render={({ field: { onChange, onBlur, value } }) => (
-                                      <TextArea
-                                        autoSize
-                                        placeholder="Add education"
-                                        onChange={(event) => {
-                                          onChange(event);
+                                    render={({ field: { onChange, value } }) => (
+                                      <QuillEditor
+                                        value={typeof value === 'string' ? value : (value?.toString() ?? '')}
+                                        onTextChange={(val: string) => {
+                                          onChange(val);
                                           debounce(triggerProfileValidation, 300)();
                                         }}
-                                        onBlur={onBlur}
-                                        value={value?.toString()}
+                                        placeholder="Add education"
+                                        readOnly={!isCurrentVersion || jobProfileData?.jobProfile.is_archived}
                                       />
                                     )}
                                   />
@@ -955,7 +952,7 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                           {isCurrentVersion && !jobProfileData?.jobProfile.is_archived ? (
                             <Form.Item style={{ margin: 0 }}>
                               <Row>
-                              <Col>
+                                <Col>
                                   <Controller
                                     control={profileControl}
                                     name="isRelatedExperienceSectionSignificant"
@@ -1107,16 +1104,15 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                                   <Controller
                                     control={profileControl}
                                     name={`job_experience.${index}.text`}
-                                    render={({ field: { onChange, onBlur, value } }) => (
-                                      <TextArea
-                                        autoSize
-                                        placeholder="Add related experience"
-                                        onChange={(event) => {
-                                          onChange(event);
+                                    render={({ field: { onChange, value } }) => (
+                                      <QuillEditor
+                                        value={typeof value === 'string' ? value : (value?.toString() ?? '')}
+                                        onTextChange={(val: string) => {
+                                          onChange(val);
                                           debounce(triggerProfileValidation, 300)();
                                         }}
-                                        onBlur={onBlur}
-                                        value={value?.toString()}
+                                        placeholder="Add related experience"
+                                        readOnly={!isCurrentVersion || jobProfileData?.jobProfile.is_archived}
                                       />
                                     )}
                                   />
@@ -1186,7 +1182,7 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                           {isCurrentVersion && !jobProfileData?.jobProfile.is_archived ? (
                             <Form.Item style={{ margin: 0 }}>
                               <Row>
-                              <Col>
+                                <Col>
                                   <Controller
                                     control={profileControl}
                                     name="isProfessionalRegistrationSectionSignificant"
@@ -1367,18 +1363,17 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                                   <Controller
                                     control={profileControl}
                                     name={`professional_registration_requirements.${index}.text`}
-                                    render={({ field: { onChange, onBlur, value } }) => {
+                                    render={({ field: { onChange, value } }) => {
                                       return (
                                         <>
-                                          <TextArea
-                                            autoSize
-                                            placeholder="Add a professional registration or certification requirement"
-                                            onChange={(event) => {
-                                              onChange(event);
+                                          <QuillEditor
+                                            value={typeof value === 'string' ? value : (value?.toString() ?? '')}
+                                            onTextChange={(val: string) => {
+                                              onChange(val);
                                               debounce(triggerProfileValidation, 300)();
                                             }}
-                                            onBlur={onBlur}
-                                            value={value?.toString()}
+                                            placeholder="Add a professional registration or certification requirement"
+                                            readOnly={!isCurrentVersion || jobProfileData?.jobProfile.is_archived}
                                           />
                                         </>
                                       );
@@ -1511,13 +1506,15 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                                   <Controller
                                     control={profileControl}
                                     name={`preferences.${index}.text`}
-                                    render={({ field: { onChange, onBlur, value } }) => (
-                                      <TextArea
-                                        autoSize
+                                    render={({ field: { onChange, value } }) => (
+                                      <QuillEditor
+                                        value={typeof value === 'string' ? value : (value?.toString() ?? '')}
+                                        onTextChange={(val: string) => {
+                                          onChange(val);
+                                          debounce(triggerProfileValidation, 300)();
+                                        }}
                                         placeholder="Add a preference"
-                                        onChange={onChange}
-                                        onBlur={onBlur}
-                                        value={value?.toString()}
+                                        readOnly={!isCurrentVersion || jobProfileData?.jobProfile.is_archived}
                                       />
                                     )}
                                   />
@@ -1633,16 +1630,15 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                                   <Controller
                                     control={profileControl}
                                     name={`knowledge_skills_abilities.${index}.text`}
-                                    render={({ field: { onChange, onBlur, value } }) => (
-                                      <TextArea
-                                        autoSize
-                                        placeholder="Add a knowledge, skill, or ability"
-                                        onChange={(event) => {
-                                          onChange(event);
+                                    render={({ field: { onChange, value } }) => (
+                                      <QuillEditor
+                                        value={typeof value === 'string' ? value : (value?.toString() ?? '')}
+                                        onTextChange={(val: string) => {
+                                          onChange(val);
                                           debounce(triggerProfileValidation, 300)();
                                         }}
-                                        onBlur={onBlur}
-                                        value={value?.toString()}
+                                        placeholder="Add a knowledge, skill, or ability"
+                                        readOnly={!isCurrentVersion || jobProfileData?.jobProfile.is_archived}
                                       />
                                     )}
                                   />
@@ -1757,13 +1753,15 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                                   <Controller
                                     control={profileControl}
                                     name={`willingness_statements.${index}.text`}
-                                    render={({ field: { onChange, onBlur, value } }) => (
-                                      <TextArea
-                                        autoSize
+                                    render={({ field: { onChange, value } }) => (
+                                      <QuillEditor
+                                        value={typeof value === 'string' ? value : (value?.toString() ?? '')}
+                                        onTextChange={(val: string) => {
+                                          onChange(val);
+                                          debounce(triggerProfileValidation, 300)();
+                                        }}
                                         placeholder="Add a willingness statement or proviso"
-                                        onChange={onChange}
-                                        onBlur={onBlur}
-                                        value={value?.toString()}
+                                        readOnly={!isCurrentVersion || jobProfileData?.jobProfile.is_archived}
                                       />
                                     )}
                                   />
@@ -1845,7 +1843,7 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                           <Col>
                             <Form.Item style={{ margin: 0 }}>
                               <Row>
-                              <Col>
+                                <Col>
                                   <Controller
                                     control={profileControl}
                                     name="isSecurityScreeningsSectionSignificant"
@@ -1915,7 +1913,6 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                                     )}
                                   ></Controller>
                                 </Col>
-                                
                               </Row>
                             </Form.Item>
                           </Col>
@@ -2012,16 +2009,15 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                                   <Controller
                                     control={profileControl}
                                     name={`security_screenings.${index}.text`}
-                                    render={({ field: { onChange, onBlur, value } }) => (
-                                      <TextArea
-                                        autoSize
-                                        placeholder="Add a security screenings requirement"
-                                        onChange={(event) => {
-                                          onChange(event);
+                                    render={({ field: { onChange, value } }) => (
+                                      <QuillEditor
+                                        value={typeof value === 'string' ? value : (value?.toString() ?? '')}
+                                        onTextChange={(val: string) => {
+                                          onChange(val);
                                           debounce(triggerProfileValidation, 300)();
                                         }}
-                                        onBlur={onBlur}
-                                        value={value?.toString()}
+                                        placeholder="Add a security screenings requirement"
+                                        readOnly={!isCurrentVersion || jobProfileData?.jobProfile.is_archived}
                                       />
                                     )}
                                   />
@@ -2142,13 +2138,15 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                                   <Controller
                                     control={profileControl}
                                     name={`optional_requirements.${index}.text`}
-                                    render={({ field: { onChange, onBlur, value } }) => (
-                                      <TextArea
-                                        autoSize
+                                    render={({ field: { onChange, value } }) => (
+                                      <QuillEditor
+                                        value={typeof value === 'string' ? value : (value?.toString() ?? '')}
+                                        onTextChange={(val: string) => {
+                                          onChange(val);
+                                          debounce(triggerProfileValidation, 300)();
+                                        }}
                                         placeholder="Add an optional requirement"
-                                        onChange={onChange}
-                                        onBlur={onBlur}
-                                        value={value?.toString()}
+                                        readOnly={!isCurrentVersion || jobProfileData?.jobProfile.is_archived}
                                       />
                                     )}
                                   />
