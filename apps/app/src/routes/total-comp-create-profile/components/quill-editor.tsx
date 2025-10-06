@@ -8,10 +8,11 @@ interface QuillEditorProps {
   onTextChange?: (...args: any[]) => void;
   onSelectionChange?: (...args: any[]) => void;
   onBlur?: (event: React.FocusEvent<HTMLDivElement>) => void;
+  placeholder?: string;
 }
 
 const QuillEditor = forwardRef<Quill, QuillEditorProps>(
-  ({ readOnly, value, onTextChange, onSelectionChange, onBlur }, ref) => {
+  ({ readOnly, value, onTextChange, onSelectionChange, onBlur, placeholder }, ref) => {
     // const Delta = Quill.import('delta');
     const containerRef = useRef<HTMLDivElement | null>(null);
     const onTextChangeRef = useRef(onTextChange);
@@ -59,6 +60,7 @@ const QuillEditor = forwardRef<Quill, QuillEditorProps>(
       const quill = new Quill(editorContainer, {
         theme: 'snow',
         modules: quill_modules,
+        placeholder: placeholder || '',
       });
 
       if (ref) {
@@ -73,7 +75,9 @@ const QuillEditor = forwardRef<Quill, QuillEditorProps>(
       }
 
       quill.on(Quill.events.TEXT_CHANGE, (...args) => {
-        onTextChangeRef.current?.(...args);
+        //onTextChangeRef.current?.(...args);
+        const html = quill.root.innerHTML;
+        onTextChangeRef.current?.(html, ...args); // Pass HTML as first argument
       });
 
       quill.on(Quill.events.SELECTION_CHANGE, (...args) => {
