@@ -1034,7 +1034,7 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                     }
                   >
                     {job_experienceFields.map((field, index) => (
-                      <Row align="top" key={field.id} gutter={16} style={{ marginBottom: '1rem' }}>
+                      <Row align="top" key={field.id} gutter={16} style={{ marginBottom: '1rem' }} wrap={false}>
                         {/* up/down controls */}
                         {isCurrentVersion && !jobProfileData?.jobProfile.is_archived && (
                           <Col flex="none" className="reorder-controls">
@@ -1097,7 +1097,7 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                             </div>
                           </Row>
                           {isCurrentVersion && !jobProfileData?.jobProfile.is_archived ? (
-                            <Row gutter={10}>
+                            <Row gutter={10} wrap={false}>
                               <Col flex="auto">
                                 <Form.Item>
                                   <Controller
@@ -1266,7 +1266,7 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                     }
                   >
                     {professionalRegistrationRequirementsFields.map((field: any, index: any) => (
-                      <Row align="top" key={field.id} gutter={16} style={{ marginBottom: '1rem' }}>
+                      <Row align="top" key={field.id} gutter={16} style={{ marginBottom: '1rem' }} wrap={false}>
                         {/* up/down controls */}
                         {isCurrentVersion && !jobProfileData?.jobProfile.is_archived && (
                           <Col flex="none" className="reorder-controls">
@@ -1333,7 +1333,7 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                             {/* END NEW Non-editable checkbox */}
                           </Row>
                           {isCurrentVersion && !jobProfileData?.jobProfile.is_archived ? (
-                            <Row gutter={10}>
+                            <Row gutter={10} wrap={false}>
                               <Col flex="auto">
                                 {/* Needs to be tc_is_readonly AND exist in the picklist to appear as read only */}
                                 {field.tc_is_readonly &&
@@ -1472,7 +1472,7 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                   >
                     {preferencesFields.map((field, index) =>
                       isCurrentVersion && !jobProfileData?.jobProfile.is_archived ? (
-                        <Row align="top" key={field.id} gutter={16} style={{ marginBottom: '1rem' }}>
+                        <Row align="top" key={field.id} gutter={16} style={{ marginBottom: '1rem' }} wrap={false}>
                           {/* up/down controls */}
                           <Col flex="none" className="reorder-controls">
                             <ReorderButtons
@@ -1483,7 +1483,7 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                             />
                           </Col>
                           <Col flex="auto">
-                            <Row gutter={10}>
+                            <Row gutter={10} wrap={false}>
                               <Col flex="auto">
                                 {field.tc_is_readonly &&
                                   itemInPickerData(field.text?.toString() ?? '', 'preferences') && (
@@ -1596,7 +1596,7 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                   >
                     {knowledgeSkillsAbilitiesFields.map((field, index) =>
                       isCurrentVersion && !jobProfileData?.jobProfile.is_archived ? (
-                        <Row align="top" key={field.id} gutter={16} style={{ marginBottom: '1rem' }}>
+                        <Row align="top" key={field.id} gutter={16} style={{ marginBottom: '1rem' }} wrap={false}>
                           {/* up/down controls */}
                           <Col flex="none" className="reorder-controls">
                             <ReorderButtons
@@ -1607,7 +1607,7 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                             />
                           </Col>
                           <Col flex="auto">
-                            <Row gutter={10}>
+                            <Row gutter={10} wrap={false}>
                               <Col flex="auto">
                                 {field.tc_is_readonly &&
                                   itemInPickerData(field.text?.toString() ?? '', 'knowledgeSkillsAbilities') && (
@@ -1727,7 +1727,7 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                   >
                     {willingnessStatementsFields.map((field, index) =>
                       isCurrentVersion && !jobProfileData?.jobProfile.is_archived ? (
-                        <Row align="top" key={field.id} gutter={16} style={{ marginBottom: '1rem' }}>
+                        <Row align="top" key={field.id} gutter={16} style={{ marginBottom: '1rem' }} wrap={false}>
                           {/* up/down controls */}
                           <Col flex="none" className="reorder-controls">
                             <ReorderButtons
@@ -1739,7 +1739,7 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                           </Col>
                           <Col flex="auto">
                             <Row>{/* Non-editable checkbox */}</Row>
-                            <Row gutter={10}>
+                            <Row gutter={10} wrap={false}>
                               <Col flex="auto">
                                 {field.tc_is_readonly && (
                                   <div style={{ display: 'flex' }}>
@@ -1922,7 +1922,7 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                     }
                   >
                     {securityScreeningsFields.map((field, index) => (
-                      <Row align="top" key={field.id} gutter={16} style={{ marginBottom: '1rem' }}>
+                      <Row align="top" key={field.id} gutter={16} style={{ marginBottom: '1rem' }} wrap={false}>
                         {/* up/down controls */}
                         {isCurrentVersion && !jobProfileData?.jobProfile.is_archived && (
                           <Col flex="none" className="reorder-controls">
@@ -1986,7 +1986,7 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                             </div>
                           </Row>
                           {isCurrentVersion && !jobProfileData?.jobProfile.is_archived ? (
-                            <Row gutter={10}>
+                            <Row gutter={10} wrap={false}>
                               <Col flex="auto">
                                 {field.tc_is_readonly &&
                                   itemInPickerData(field.text?.toString() ?? '', 'securityScreenings') && (
@@ -2119,7 +2119,7 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                   >
                     {optionalRequirementsFields.map((field, index) =>
                       isCurrentVersion && !jobProfileData?.jobProfile.is_archived ? (
-                        <Row align="top" key={field.id} gutter={16} style={{ marginBottom: '1rem' }}>
+                        <Row align="top" key={field.id} gutter={16} style={{ marginBottom: '1rem' }} wrap={false}>
                           {/* up/down controls */}
                           <Col flex="none" className="reorder-controls">
                             <ReorderButtons
@@ -2131,7 +2131,7 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                           </Col>
                           <Col flex="auto">
                             <Row>{/* Non-editable checkbox */}</Row>
-                            <Row gutter={10}>
+                            <Row gutter={10} wrap={false}>
                               <Col flex="auto">
                                 <Form.Item>
                                   <Controller
