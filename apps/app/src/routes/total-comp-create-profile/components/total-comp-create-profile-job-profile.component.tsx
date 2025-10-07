@@ -486,7 +486,7 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                     }
                   >
                     {accountabilitiesFields.map((field, index) => (
-                      <Row align="top" key={field.id} gutter={16}>
+                      <Row align="top" key={field.id} gutter={16} wrap={false}>
                         {/* up/down controls */}
                         {isCurrentVersion && !jobProfileData?.jobProfile.is_archived && (
                           <Col flex="none" className="reorder-controls">
@@ -558,7 +558,7 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                             </div>
                           </Row>
                           {isCurrentVersion && !jobProfileData?.jobProfile.is_archived ? (
-                            <Row gutter={10}>
+                            <Row gutter={10} wrap={false}>
                               <Col flex="auto">
                                 <Form.Item>
                                   <Controller
@@ -578,7 +578,6 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                                   />
                                 </Form.Item>
                               </Col>
-
                               <Col flex="none">
                                 <Button
                                   icon={<DeleteOutlined />}
@@ -742,7 +741,7 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                     }
                   >
                     {educationAndWorkExperienceFields.map((field, index) => (
-                      <Row align="top" key={field.id} gutter={16} style={{ marginBottom: '1rem' }}>
+                      <Row align="top" key={field.id} gutter={16} style={{ marginBottom: '1rem' }} wrap={false}>
                         {/* up/down controls */}
                         {isCurrentVersion && !jobProfileData?.jobProfile.is_archived && (
                           <Col flex="none" className="reorder-controls">
@@ -805,7 +804,7 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                             </div>
                           </Row>
                           {isCurrentVersion && !jobProfileData?.jobProfile.is_archived ? (
-                            <Row gutter={10}>
+                            <Row gutter={10} wrap={false}>
                               <Col flex="auto">
                                 {field.tc_is_readonly &&
                                   itemInPickerData(field.text?.toString() ?? '', 'jobProfileMinimumRequirements') && (
