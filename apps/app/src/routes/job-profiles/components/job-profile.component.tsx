@@ -964,9 +964,19 @@ export const JobProfile: React.FC<JobProfileProps> = ({
                                 return null;
                               }
                               if (accountability.text instanceof TrackedFieldArrayItem) {
-                                return <li key={index}>{accountability.text.text}</li>;
+                                return (
+                                  <li
+                                    key={index}
+                                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(accountability.text.text) }}
+                                  />
+                                );
                               } else if (typeof accountability.text === 'string') {
-                                return <li key={index}>{accountability.text}</li>;
+                                return (
+                                  <li
+                                    key={index}
+                                    dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(accountability.text) }}
+                                  />
+                                );
                               }
                             })}
                         </ul>
@@ -997,7 +1007,9 @@ export const JobProfile: React.FC<JobProfileProps> = ({
                     ? compareLists(originalData.education, effectiveData?.education)
                     : effectiveData?.education?.map((requirement, index) => {
                         if (typeof requirement === 'string') {
-                          return <li key={index}>{requirement}</li>;
+                          return (
+                            <li key={index} dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(requirement) }} />
+                          );
                         }
                         if (requirement.disabled) {
                           return null;
@@ -1032,7 +1044,9 @@ export const JobProfile: React.FC<JobProfileProps> = ({
                     ? compareLists(originalData.job_experience, effectiveData?.job_experience)
                     : effectiveData?.job_experience?.map((requirement, index) => {
                         if (typeof requirement === 'string') {
-                          return <li key={index}>{requirement}</li>;
+                          return (
+                            <li key={index} dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(requirement) }} />
+                          );
                         }
                         if (requirement.disabled) {
                           return null;
@@ -1081,7 +1095,14 @@ export const JobProfile: React.FC<JobProfileProps> = ({
                               return null;
                             }
                             if (typeof professional_registration_requirement.text === 'string') {
-                              return <li key={index}>{professional_registration_requirement.text}</li>;
+                              return (
+                                <li
+                                  key={index}
+                                  dangerouslySetInnerHTML={{
+                                    __html: DOMPurify.sanitize(professional_registration_requirement.text),
+                                  }}
+                                />
+                              );
                             }
                           })}
                   </ul>
@@ -1140,7 +1161,14 @@ export const JobProfile: React.FC<JobProfileProps> = ({
                                   return null;
                                 }
                                 if (typeof professional_registration_requirement.text === 'string') {
-                                  return <li key={index}>{professional_registration_requirement.text}</li>;
+                                  return (
+                                    <li
+                                      key={index}
+                                      dangerouslySetInnerHTML={{
+                                        __html: DOMPurify.sanitize(professional_registration_requirement.text),
+                                      }}
+                                    />
+                                  );
                                 }
                               })}
                           </ul>
@@ -1162,12 +1190,16 @@ export const JobProfile: React.FC<JobProfileProps> = ({
                     ? compareLists(originalData.preferences, effectiveData?.preferences)
                     : effectiveData?.preferences?.map((requirement, index) => {
                         if (typeof requirement === 'string') {
-                          return <li key={index}>{requirement}</li>;
+                          return (
+                            <li key={index} dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(requirement) }} />
+                          );
                         }
                         if (requirement.disabled) {
                           return null;
                         }
-                        return <li key={index}>{requirement.text}</li>;
+                        return (
+                          <li key={index} dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(requirement.text) }} />
+                        );
                       })}
                 </ul>
                 <Divider />
@@ -1210,12 +1242,16 @@ export const JobProfile: React.FC<JobProfileProps> = ({
                     ? compareLists(originalData.willingness_statements, effectiveData?.willingness_statements)
                     : effectiveData?.willingness_statements?.map((requirement, index) => {
                         if (typeof requirement === 'string') {
-                          return <li key={index}>{requirement}</li>;
+                          return (
+                            <li key={index} dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(requirement) }} />
+                          );
                         }
                         if (requirement.disabled) {
                           return null;
                         }
-                        return <li key={index}>{requirement.text}</li>;
+                        return (
+                          <li key={index} dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(requirement.text) }} />
+                        );
                       })}
                 </ul>
                 <Divider />
@@ -1325,12 +1361,16 @@ export const JobProfile: React.FC<JobProfileProps> = ({
                     ? compareLists(originalData.optional_requirements, effectiveData?.optional_requirements)
                     : effectiveData?.optional_requirements?.map((requirement, index) => {
                         if (typeof requirement === 'string') {
-                          return <li key={index}>{requirement}</li>;
+                          return (
+                            <li key={index} dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(requirement) }} />
+                          );
                         }
                         if (requirement.disabled) {
                           return null;
                         }
-                        return <li key={index}>{requirement.text}</li>;
+                        return (
+                          <li key={index} dangerouslySetInnerHTML={{ __html: DOMPurify.sanitize(requirement.text) }} />
+                        );
                       })}
                 </ul>
               </>
