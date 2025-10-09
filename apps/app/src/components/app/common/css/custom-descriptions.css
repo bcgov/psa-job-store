@@ -12,6 +12,10 @@
 border-radius: 0;
 }
 
+.ant-descriptions-view p {
+    margin-bottom: 0em !important;
+}
+
 .customDescriptions table{
     background:white;
 }
