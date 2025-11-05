@@ -11,6 +11,9 @@ export default defineConfig({
       name: 'common-kit',
       fileName: 'common-kit',
     },
+    rollupOptions: {
+      external: ['buffer'],
+    },
   },
   plugins: [dts({ rollupTypes: true })],
   test: {},
