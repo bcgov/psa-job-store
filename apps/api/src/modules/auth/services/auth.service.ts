@@ -25,6 +25,7 @@ export class AuthService {
 
   private async getPeoplesoftMetadata(idir: string) {
     const userProfile = await this.peoplesoftService.getProfileV2(idir);
+    console.log(`userProfile [1]`, userProfile);
     const employee = userProfile ? await this.peoplesoftService.getEmployeeV2(userProfile.EMPLID) : undefined;
 
     return {
@@ -109,7 +110,11 @@ export class AuthService {
           }
         : null;
 
+    console.log('crmMetadata ', crmMetadata);
+
     const peoplesoftMetadata = await this.getPeoplesoftMetadata(userinfo.idir_username);
+
+    console.log('peoplesoftMetadata ', peoplesoftMetadata);
 
     // If user doesn't exist, check for subordinates, apply roles, create user,
     // If user does exist, and nothing significant has changed (department_id, employee_id, organization_id, position_id), check roles, simply return
@@ -139,6 +144,10 @@ export class AuthService {
       // If we're e2e testing, use the data from the database as is without updates
       // Check for differences between `existingUser.metadata.peoplesoft` and peoplesoftMetadata
       const metadataUpdates: Record<string, any> = this.getPeoplesoftMetadataUpdates(existingUser, peoplesoftMetadata);
+
+      sessionUser.metadata.org_chart = sessionUser.metadata.org_chart ?? {};
+      sessionUser.metadata.peoplesoft = sessionUser.metadata.peoplesoft ?? peoplesoftMetadata;
+      sessionUser.metadata.crm = sessionUser.metadata.crm ?? crmMetadata;
 
       // Peoplesoft metadata has changed
       if (Object.keys(metadataUpdates).length > 0) {
@@ -198,7 +207,13 @@ export class AuthService {
         //   }
         // }
       }
+    } else {
+      sessionUser.metadata.crm = sessionUser.metadata.crm ?? crmMetadata;
     }
+    sessionUser.metadata.crm = crmMetadata;
+    sessionUser.metadata.peoplesoft = peoplesoftMetadata;
+    sessionUser.metadata.org_chart.department_ids = [peoplesoftMetadata.department_id];
+    sessionUser.roles.push('total-compensation');
 
     const { name, email, username, roles, metadata } = sessionUser;
 
@@ -300,6 +315,8 @@ export class AuthService {
       });
     }
 
+    console.log('sessionUser ', sessionUser);
+
     return sessionUser;
   }
 
@@ -326,6 +343,7 @@ export class AuthService {
 
   async getPeoplesoftDetails(idir: string) {
     const profile = await this.peoplesoftService.getProfileV2(idir);
+    console.log(`userProfile [2]`, profile);
     const employee = profile ? await this.peoplesoftService.getEmployeeV2(profile.EMPLID) : undefined;
 
     return {
@@ -336,6 +354,9 @@ export class AuthService {
         employee_id: profile ? profile.EMPLID : null,
         organization_id: employee ? employee.BUSINESS_UNIT : null,
         position_id: employee ? employee.POSITION_NBR : null,
+        crm: {
+          contact_id: 1,
+        },
       },
     };
   }

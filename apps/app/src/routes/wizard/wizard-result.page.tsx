@@ -39,6 +39,7 @@ import {
   usePositionNeedsRivewQuery,
   useSubmitPositionRequestMutation,
   useUpdatePositionRequestMutation,
+  useWaitForPositionSuccessStatusMutation,
 } from '../../redux/services/graphql-api/position-request.api';
 import { useTestUser } from '../../utils/useTestUser';
 import { OrgChart } from '../org-chart/components/org-chart';
@@ -227,6 +228,8 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
   // const [updatePositionRequest] = useUpdatePositionRequestMutation();
   const [submitPositionRequest, { isLoading: submitPositionRequestIsLoading }] = useSubmitPositionRequestMutation();
 
+  const [waitForPositionStatusAndNumberQuery] = useWaitForPositionSuccessStatusMutation();
+
   // if the status is action required, it means that this come back from review. We do not need to show this message again
   const doSubmit = async () => {
     mode === 'verificationRequired_retry' ? handleOk() : setIsVerificationModalVisible(true);
@@ -245,6 +248,56 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
   };
 
   const isTestUser = useTestUser();
+
+  const waitForPositionStatusAndNumber = async (id: number) => {
+    const poll = async () => {
+      let result;
+
+      try {
+        result = await waitForPositionStatusAndNumberQuery({ id }).unwrap();
+
+        console.log(result);
+      } catch (error) {
+        console.log('Wait for status returned error ' + error);
+        return 'ERROR';
+      }
+
+      if (result && result?.waitForPositionSuccessStatus?.ready) {
+        console.log("I'm ready!! ", result.waitForPositionSuccessStatus.positionCode);
+        return result.waitForPositionSuccessStatus;
+      } else if (result && result?.waitForPositionSuccessStatus?.status?.indexOf('ERROR') > -1) {
+        console.log('We have an error');
+        return result?.waitForPositionSuccessStatus?.status;
+      } else {
+        return 'NOT_READY';
+      }
+    };
+
+    function sleep(ms: number) {
+      return new Promise((resolve) => setTimeout(resolve, ms));
+    }
+
+    const MAX_RETRIES: number = 10;
+
+    for (let i = 0; i < MAX_RETRIES; i++) {
+      await sleep(1000 * 10);
+
+      const result = await poll();
+
+      if (typeof result !== 'string') {
+        return result;
+      } else if (result == 'ERROR') {
+        console.error('Darn, an error');
+        return 'ERROR';
+      } else {
+        console.log('Not ready yet');
+      }
+    }
+
+    console.log('Giving up, too many retries');
+
+    return null;
+  };
 
   const handleOk = async () => {
     // User pressed next on the review screen
@@ -277,7 +330,7 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
             console.error('Error generating PNG..: ', error);
           }
 
-        const result = await submitPositionRequest({
+        let result = await submitPositionRequest({
           id: positionRequestId,
           comment: comment,
           orgchart_png: png,
@@ -286,6 +339,44 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
         // console.log('submitPositionRequest result: ', result);
         // todo - change check for position_number
         if (!result?.submitPositionRequest.id) throw new Error('API failure');
+
+        // Submission worked, now we need to poll Fusion for the actual position number and status
+
+        const positionRequestStatus = await waitForPositionStatusAndNumber(result.submitPositionRequest.id);
+
+        const fusionError = (msg: string) => {
+          notification.error({
+            placement: 'bottomRight',
+            duration: 0,
+            message: 'Could not obtain position ID from Fusion',
+            description: msg,
+            icon: <></>,
+            style: {
+              backgroundColor: 'white',
+              width: '450px',
+            },
+            key: 'error-notification',
+          });
+        };
+
+        if (positionRequestStatus == null) {
+          fusionError('Fusion did not respond with a position code in a timely manner.');
+
+          return console.log('We gave up on getting a code from Fusion');
+        } else if (positionRequestStatus == 'ERROR') {
+          fusionError('Fusion returned an error.');
+          console.log('positionRequestStatus ', positionRequestStatus);
+
+          return console.log('Received an error from Fusion');
+        } else {
+          console.log('positionRequestStatus ', positionRequestStatus);
+        }
+
+        result = await submitPositionRequest({
+          id: positionRequestId,
+          comment: comment,
+          orgchart_png: png,
+        }).unwrap();
 
         // show feedback notification
         notification.success({
@@ -505,6 +596,9 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
                           >
                             Generate position number
                           </Button>
+                          <div style={{ display: submitPositionRequestIsLoading ? 'block' : 'none' }}>
+                            This can take up to 2 minutes. Please don't navigate away from this page.
+                          </div>
                         </Space>
                       </Form>
                     </Card>

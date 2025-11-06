@@ -97,6 +97,9 @@ model PositionRequest {
   department         Department         @relation(fields: [department_id], references: [id])
   CurrentJobProfile  CurrentJobProfile? @relation("currentJobProfilePositionRequests", fields: [parent_job_profile_id, parent_job_profile_version], references: [id, version], map: "current_job_profile_position_requests_fk")
 
+  request_id                        Int?
+  source_system_id                  String?
+
   @@map("position_request")
 }
 
@@ -662,6 +665,48 @@ model Grade {
   grade             String // GradeCode after the underscore
   effective_status  String // ActiveStatus
   effective_date    DateTime @db.Date // EffectiveStartDate
+  grade_uniq_id     String?
 
   @@map("grade")
+}
+
+
+model Employee {
+  id               String   @id // Employee number
+  fusion_id        BigInt  @db.BigInt // Fusion EmployeeId
+  reports_to       String?        
+  
+  @@map("employee")
+}
+
+model Position {
+
+  positionCode String @id
+  uniqId String
+  effectiveStartDate DateTime @db.Date
+  effectiveEndDate DateTime @db.Date
+  name String
+  departmentId String
+  jobId String
+  locationId String
+  activeStatus String
+  shortDescription String
+  hiringStatus String
+  reportsTo String?
+  caseProfile String?
+  fusion_id BigInt @db.BigInt
+
+  @@map("position")
+
+}
+
+model PositionLOV {
+
+  positionId String @id
+  positionsLovV2UniqId String
+  positionCode String
+  parentPositionCode String
+
+  @@map("position_lov")
+
 }

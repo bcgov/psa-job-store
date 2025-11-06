@@ -111,6 +111,7 @@ export class PositionService {
     }
     const positionProfiles = await Promise.all(
       employeesInPosition.map(async (employee) => {
+        console.log(employee);
         const employeeResponse = await this.peoplesoftService.getEmployee(employee.id);
         // console.log('employeeResponse: ', JSON.stringify(employeeResponse, null, 2));
         const employeeDetail = employeeResponse?.data?.query?.rows?.[0];

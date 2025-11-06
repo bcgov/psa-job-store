@@ -15,6 +15,7 @@ export enum ScheduledTask {
   CrmSync = 'crm-sync',
   PeoplesoftSync = 'peoplesoft-sync',
   UserSync = 'user-sync',
+  FusionSync = 'fusion-sync',
   // FastTask = 'fast-task',
   // SlowTask = 'slow-task',
 }
@@ -39,6 +40,11 @@ export class ScheduledTaskService {
     },
     [ScheduledTask.CrmSync]: {
       name: ScheduledTask.CrmSync,
+      lockTimeout: 5 * 60, // 5 minutes
+      frequency: 1 * 60, // 1 minute
+    },
+    [ScheduledTask.FusionSync]: {
+      name: ScheduledTask.FusionSync,
       lockTimeout: 5 * 60, // 5 minutes
       frequency: 1 * 60, // 1 minute
     },
@@ -359,6 +365,12 @@ export class ScheduledTaskService {
           }
         }
       });
+    });
+  }
+
+  async syncFusionData() {
+    await this.executeTask(ScheduledTask.FusionSync, async () => {
+      await this.peoplesoftService.syncManually();
     });
   }
 

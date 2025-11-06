@@ -1,5 +1,5 @@
 import { HttpService } from '@nestjs/axios';
-import { Injectable, Logger } from '@nestjs/common';
+import { Injectable, Logger, NotFoundException } from '@nestjs/common';
 import { ConfigService } from '@nestjs/config';
 import { AxiosHeaders } from 'axios';
 import { catchError, firstValueFrom, map, retry } from 'rxjs';
@@ -7,6 +7,10 @@ import { AppConfigDto } from '../../dtos/app-config.dto';
 import { PrismaService } from '../prisma/prisma.service';
 import { SearchIndex, SearchService } from '../search/search.service';
 import { Employee } from './models/employee.model';
+import { PositionCreateInput } from './models/position-create.input';
+
+import dayjs from 'dayjs';
+import { AlexandriaError } from 'src/utils/alexandria-error';
 
 enum PeoplesoftEndpoint {
   Classifications = 'PJS_TGB_REST_JOB_CODE',
@@ -18,6 +22,22 @@ enum PeoplesoftEndpoint {
   Locations = 'PJS_TGB_REST_LOCATION',
   Organizations = 'PJS_TGB_REST_BUS_UNIT',
   Profile = 'PJS_TGB_REST_USER_PROFILE',
+}
+
+const environment = 'TEST';
+
+enum Endpoints {
+  GetWorker = `/ic/api/integration/v1/flows/rest/HCM_IN_GET_WORKERS_${environment}/1.0/`,
+  Worker = `/ic/api/integration/v1/flows/rest/HCM_IN_PUBLIC_WORKERS_DEV1/1.0/`,
+  Position = `/ic/api/integration/v1/flows/rest/HCM_IN_GET_POSITIONS_${environment}/1.0/`,
+  CreatePosition = `/ic/api/integration/v1/flows/rest/HCM_IN_POSITION_${environment}/1.0/position`,
+  Organization = `/ic/api/integration/v1/flows/rest/HCM_IN_PULL_ORGANIZATIONS_DEV1/1.0/`,
+  Location = `/ic/api/integration/v1/flows/rest/HCM_IN_PULL_LOCATIONS_DEV1/1.0/`,
+  Job = `/ic/api/integration/v1/flows/rest/HCM_IN_PULL_JOBS_DEV1/1.0/`,
+  Grade = `/ic/api/integration/v1/flows/rest/HCM_IN_PULL_GRADES_DEV1/1.0/`,
+  GetGrade = `/ic/api/integration/v1/flows/rest/HCM_IN_GET_GRADES_${environment}/1.0/`,
+  PositionStatus = `/ic/api/integration/v1/flows/rest/HCM_IN_POSITION_STATUS_${environment}/1.0/`,
+  PositionsLov = `/ic/api/integration/v1/flows/rest/HCM_IN_GET_POSITIONSLOV_${environment}/1.0/`,
 }
 
 type HRScopeResponse = {
@@ -39,6 +59,86 @@ type HRScopeResponse = {
   'A.UPDATE_INCUMBENTS': string;
 };
 
+class OAuth2 {
+  private readonly logger = new Logger(FusionService.name);
+  private readonly oauthHeaders: AxiosHeaders;
+  private readonly tokenUrl: string;
+  private readonly clientId: string;
+  private readonly clientSecret: string;
+  private readonly clientScope: string;
+  private readonly payload: Map<string, string> = new Map();
+  private accessToken: string;
+
+  private readonly RENEW_TIMEOUT: number = 3000 * 1000;
+
+  constructor(
+    private readonly configService: ConfigService<AppConfigDto, true>,
+    private readonly httpService: HttpService,
+  ) {
+    this.tokenUrl = this.configService.get('FUSION_TOKEN_URL');
+    this.clientId = this.configService.get('FUSION_CLIENT_ID');
+    this.clientSecret = this.configService.get('FUSION_CLIENT_SECRET');
+    this.clientScope = this.configService.get('FUSION_CLIENT_SCOPE');
+
+    this.payload.set('grant_type', 'client_credentials');
+    this.payload.set('scope', this.clientScope);
+
+    this.oauthHeaders = new AxiosHeaders();
+
+    this.oauthHeaders.set(
+      'Authorization',
+      `Basic ${Buffer.from(`${this.clientId}:${this.clientSecret}`).toString('base64')}`,
+    );
+
+    this.oauthHeaders.set('Content-Type', 'application/x-www-form-urlencoded');
+
+    this.renewAuthToken();
+  }
+
+  renewAuthToken(): void {
+    setTimeout(async () => {
+      this.logger.log('Renewing authentication token.');
+      await this.getAccessToken();
+      this.renewAuthToken();
+    }, this.RENEW_TIMEOUT);
+  }
+
+  async getAccessToken(): Promise<void> {
+    const response = await firstValueFrom(
+      this.httpService
+        .post(
+          this.tokenUrl,
+          {
+            grant_type: this.payload.get('grant_type'),
+            scope: this.payload.get('scope'),
+          },
+          { headers: this.oauthHeaders },
+        )
+        .pipe(
+          map((r) => r.data),
+          retry(3),
+          catchError((err) => {
+            throw new Error(err);
+          }),
+        ),
+    );
+
+    if (response && response.hasOwnProperty('access_token')) {
+      this.accessToken = response['access_token'];
+      return Promise.resolve();
+    } else {
+      this.logger.error('OAuth2 Failed to obtain Fusion access token');
+      return Promise.reject();
+    }
+  }
+
+  getAuthHeader() {
+    return `Bearer ${this.accessToken}`;
+  }
+}
+
+let syncSemaphore: boolean = false;
+
 @Injectable()
 export class FusionService {
   private readonly logger = new Logger(FusionService.name);
@@ -52,13 +152,21 @@ export class FusionService {
     private readonly searchService: SearchService,
   ) {
     this.fusionHeaders = new AxiosHeaders();
-    this.fusionHeaders.set(
-      'Authorization',
-      `Basic ${Buffer.from(
-        `${this.configService.get('FUSION_USERNAME')}:${this.configService.get('FUSION_PASSWORD')}`,
-      ).toString('base64')}`,
-    );
-    this.fusionHeaders.set('REST-Framework-Version', 9);
+
+    const oauth = new OAuth2(this.configService, this.httpService);
+    oauth
+      .getAccessToken()
+      .then(() => {
+        this.fusionHeaders.set('Authorization', oauth.getAuthHeader());
+
+        this.fusionHeaders.set('REST-Framework-Version', 9);
+
+        //this.syncManually();
+        this.logger.log('Obtained OAuth access token.');
+      })
+      .catch(() => {
+        this.logger.error('Failed to get access token.');
+      });
 
     this.peoplesoftHeaders = new AxiosHeaders();
     this.peoplesoftHeaders.set(
@@ -69,11 +177,38 @@ export class FusionService {
     );
   }
 
+  async syncManually() {
+    if (syncSemaphore) {
+      return this.logger.log('Already syncing.');
+    }
+
+    syncSemaphore = true;
+
+    //this.syncGrades(); // WORKS
+    //this.syncLocations(); // WORKS with a fix
+    //this.syncClassifications();
+
+    //this.syncWorkers();
+    //this.syncPositions();
+    //this.syncPositionsLov();
+
+    //this.syncOrganizationsAndDepartments();
+  }
+
   async getClassifications(limit: number = 50, offset: number = 0) {
     const response = await firstValueFrom(
       this.httpService
-        .get(
-          `${this.configService.get('FUSION_URL')}/hcmRestApi/resources/11.13.18.05/jobs?expand=validGrades,JobCustomerFlex&onlyData=true&fields=JobId,JobCode,Name,validGrades,JobCustomerFlex,ActiveStatus,EffectiveStartDate&limit=${limit}&offset=${offset}`,
+        .post(
+          //`${this.configService.get('FUSION_URL')}/hcmRestApi/resources/11.13.18.05/jobs?expand=validGrades,JobCustomerFlex&onlyData=true&fields=JobId,JobCode,Name,validGrades,JobCustomerFlex,ActiveStatus,EffectiveStartDate&limit=${limit}&offset=${offset}`,
+          `${this.configService.get('FUSION_URL')}${Endpoints.Job}`,
+          {
+            jobId: '',
+            jobsUniqId: '',
+            childType: '',
+            childUniqId: '',
+            offset,
+            limit,
+          },
           { headers: this.fusionHeaders },
         )
         .pipe(
@@ -91,8 +226,71 @@ export class FusionService {
   async getDepartments(limit: number = 50, offset: number = 0) {
     const response = await firstValueFrom(
       this.httpService
-        .get(
-          `${this.configService.get('FUSION_URL')}/hcmRestApi/resources/11.13.18.05/organizations?q=ClassificationCode='DEPARTMENT'&expand=all&onlyData=true&fields=OrganizationId,LocationId,Name,Title,LocationId,Status,EffectiveStartDate,OrganizationDFF&limit=${limit}&offset=${offset}`,
+        .post(
+          //`${this.configService.get('FUSION_URL')}/hcmRestApi/resources/11.13.18.05/organizations?q=ClassificationCode='DEPARTMENT'&expand=all&onlyData=true&fields=OrganizationId,LocationId,Name,Title,LocationId,Status,EffectiveStartDate,OrganizationDFF&limit=${limit}&offset=${offset}`,
+          `${this.configService.get('FUSION_URL')}${Endpoints.Organization}`,
+          {
+            organizationsUniqId: '',
+            childType: '',
+            childUniqId: '',
+            offset,
+            limit,
+          },
+          { headers: this.fusionHeaders },
+        )
+        .pipe(
+          map((r) => r.data),
+          retry(3),
+          catchError((err) => {
+            throw new Error(err);
+          }),
+        ),
+    );
+
+    return response;
+  }
+
+  async getPositions(limit: number = 50, offset: number = 0) {
+    // TES - Need to include reportsToPositionId
+    const response = await firstValueFrom(
+      this.httpService
+        .post(
+          `${this.configService.get('FUSION_URL')}${Endpoints.Position}`,
+          {
+            positionsUniqId: '',
+            childType: '',
+            childUniqId: '',
+            limit,
+            offset,
+          },
+          { headers: this.fusionHeaders },
+        )
+        .pipe(
+          map((r) => r.data),
+          retry(3),
+          catchError((err) => {
+            throw new Error(err);
+          }),
+        ),
+    );
+
+    return response;
+  }
+
+  async getWorkers(limit: number = 50, offset: number = 0) {
+    const response = await firstValueFrom(
+      this.httpService
+        .post(
+          `${this.configService.get('FUSION_URL')}${Endpoints.Worker}`,
+          {
+            personId: '',
+            childType: '',
+            childUniqId: '',
+            childType2: '',
+            childUniqId2: '',
+            limit,
+            offset,
+          },
           { headers: this.fusionHeaders },
         )
         .pipe(
@@ -110,6 +308,8 @@ export class FusionService {
   async getEmployee(employee_id: string) {
     const employee = await this.getEmployeeV2(employee_id);
 
+    this.logger.log('Employee is now ', employee);
+
     return {
       data: {
         query: {
@@ -117,6 +317,24 @@ export class FusionService {
         },
       },
     };
+  }
+
+  async getPersonIdFromEmployeeId(employee_id: string): Promise<string> {
+    try {
+      const result = await this.prisma.employee.findFirstOrThrow({
+        select: { id: true, fusion_id: true },
+        where: { id: employee_id },
+      });
+      this.logger.log(result);
+      return new String(result.fusion_id).toString();
+    } catch (e) {
+      this.logger.error('PersonId lookup error', e);
+      return null;
+    }
+  }
+
+  async getSubordinatesV2(reporting_to: string) {
+    return await this.getHRScopeV2(undefined, undefined, reporting_to);
   }
 
   async getEmployeeV2(employee_id: string): Promise<
@@ -145,10 +363,27 @@ export class FusionService {
     | undefined
   > {
     // Get worker which matches the supplied employee_id
-    const worker = await firstValueFrom(
+
+    this.logger.log(`Get worker info for ${employee_id}`);
+
+    const personId = await this.getPersonIdFromEmployeeId(employee_id);
+
+    if (personId == null) {
+      return null;
+    }
+
+    const workerDetails = await firstValueFrom(
       this.httpService
-        .get(
-          `${this.configService.get('FUSION_URL')}/hcmRestApi/resources/11.13.18.05/publicWorkers?limit=500&offset=0&expand=assignments.managers,assignments.allReports&q=PersonNumber='${employee_id}'&onlyData=true`,
+        .post(
+          //`${this.configService.get('FUSION_URL')}/hcmRestApi/resources/11.13.18.05/publicWorkers?limit=500&offset=0&expand=assignments.managers,assignments.allReports&q=PersonNumber='${employee_id}'&onlyData=true`,
+          `${this.configService.get('FUSION_URL')}${Endpoints.GetWorker}`,
+          {
+            personId: personId,
+            childType: '',
+            childUniqId: '',
+            childType2: '',
+            childUniqId2: '',
+          },
           { headers: this.fusionHeaders },
         )
         .pipe(
@@ -161,8 +396,42 @@ export class FusionService {
           }),
         ),
     );
-    const assignment = worker.assignments?.items?.[0];
-    const position = assignment ? (await this.getPosition(assignment.PositionCode))?.data?.query?.rows?.[0] : undefined;
+
+    const workerAssignment = await firstValueFrom(
+      this.httpService
+        .post(
+          //`${this.configService.get('FUSION_URL')}/hcmRestApi/resources/11.13.18.05/publicWorkers?limit=500&offset=0&expand=assignments.managers,assignments.allReports&q=PersonNumber='${employee_id}'&onlyData=true`,
+          `${this.configService.get('FUSION_URL')}${Endpoints.GetWorker}`,
+          {
+            personId: personId,
+            childType: 'assignments',
+            childUniqId: '',
+            childType2: '',
+            childUniqId2: '',
+          },
+          { headers: this.fusionHeaders },
+        )
+        .pipe(
+          map((r) => {
+            return r.data.items?.[0];
+          }),
+          retry(3),
+          catchError((err) => {
+            throw new Error(err);
+          }),
+        ),
+    );
+
+    const worker = Object.assign({}, workerDetails, workerAssignment);
+
+    console.log('Worker ', worker);
+    //const assignment = worker.assignments[0] || {};
+    //const assignmentId = worker.AssignmentId;
+
+    const positionResult = await this.getPosition(worker.PositionCode);
+    this.logger.log('PositionResult ', positionResult);
+    const position = (positionResult ? positionResult?.data?.query?.rows?.[0] : null) ?? {};
+    this.logger.log('Position ', position);
 
     return worker
       ? {
@@ -182,7 +451,7 @@ export class FusionService {
           EMPL_STATUS: position['A.POSN_STATUS'],
           HR_STATUS: position['A.EFF_STATUS'],
           REG_TEMP: '', // Not used anywhere, unavailable in PS-compatible HRScopeV2 endpoints
-          FULL_PART_TIME: assignment.FullPartTime === 'FULL_TIME' ? 'Full Time' : 'Part Time',
+          FULL_PART_TIME: worker.FullPartTime === 'FULL_TIME' ? 'Full Time' : 'Part Time',
           EFFDT: '',
           POSITION_ENTRY_DT: '',
           ACTION_DT: '',
@@ -193,26 +462,17 @@ export class FusionService {
   async getEmployeesForPositions(position_ids: string[]) {
     const positionEmployeesMap: Map<string, Employee[]> = new Map();
 
+    // This can be changed to make use of the local database
+    /*
     const positions = await firstValueFrom(
       this.httpService
-        .get(
-          `${this.configService.get('FUSION_URL')}/hcmRestApi/resources/11.13.18.05/positions?onlyData=true&limit=500&offset=0&fields=PositionCode,ActiveStatus&q=PositionCode IN (${position_ids.map((id) => +id).join(',')})`,
+        .post(
+          //`${this.configService.get('FUSION_URL')}/hcmRestApi/resources/11.13.18.05/positions?onlyData=true&limit=500&offset=0&fields=PositionCode,ActiveStatus&q=PositionCode IN (${position_ids.map((id) => +id).join(',')})`,
+          `${this.configService.get('FUSION_URL')}${Endpoints.Position}`,
           { headers: this.fusionHeaders },
-        )
-        .pipe(
-          map((r) => r.data.items),
-          retry(3),
-          catchError((err) => {
-            throw new Error(err);
-          }),
-        ),
-    );
+          {
 
-    const workers = await firstValueFrom(
-      this.httpService
-        .get(
-          `${this.configService.get('FUSION_URL')}/hcmRestApi/resources/11.13.18.05/publicWorkers?limit=500&offset=0&onlyData=true&fields=PersonNumber,DisplayName,assignments&q=assignments.PositionCode IN (${position_ids.join(',')})`,
-          { headers: this.fusionHeaders },
+          }
         )
         .pipe(
           map((r) => r.data.items),
@@ -222,19 +482,60 @@ export class FusionService {
           }),
         ),
     );
+    */
+
+    this.logger.log('position_ids ', position_ids);
+
+    const positions = await this.prisma.position.findMany({ where: { positionCode: { in: position_ids } } });
+    this.logger.log('Positions are now ', positions);
+
+    // Iterate over the IDs and do individual queries I guess
+    const workers = [];
+
+    for (const position of positions) {
+      const worker = await firstValueFrom(
+        this.httpService
+          .post(
+            //`${this.configService.get('FUSION_URL')}/hcmRestApi/resources/11.13.18.05/publicWorkers?limit=500&offset=0&onlyData=true&fields=PersonNumber,DisplayName,assignments&q=assignments.PositionCode IN (${position_ids.join(',')})`,
+            `${this.configService.get('FUSION_URL')}${Endpoints.Worker}`,
+            {
+              personId: position.uniqId,
+              childType: 'assignments',
+              childUniqId: '',
+              childType2: '',
+              childUniqId2: '',
+              limit: 1,
+              offset: 0,
+            },
+            { headers: this.fusionHeaders },
+          )
+          .pipe(
+            map((r) => r.data.items),
+            retry(3),
+            catchError((err) => {
+              throw new Error(err);
+            }),
+          ),
+      );
+
+      workers.push(worker);
+    }
+
+    this.logger.log('workers ', workers);
+    this.logger.log('workers ', workers);
 
     positions.forEach((position) => {
       const workersForPosition = workers.filter((worker) =>
-        worker.assignments.items.some((assignment) => assignment.PositionCode === position.PositionCode),
+        worker.assignments?.some((assignment) => assignment.PositionCode === position.positionCode),
       );
 
       positionEmployeesMap.set(
-        String(position.PositionCode).padStart(8, '0'),
+        String(position.positionCode).padStart(6, '0'),
         workersForPosition.map((worker) => {
           const value = {
             id: worker.PersonNumber,
             name: worker.DisplayName,
-            status: position.ActiveStatus === 'A' ? 'Active' : 'Inactive',
+            status: position.activeStatus === 'A' ? 'Active' : 'Inactive',
           };
 
           return value;
@@ -248,8 +549,69 @@ export class FusionService {
   async getGrades(limit: number = 50, offset: number = 0) {
     const response = await firstValueFrom(
       this.httpService
-        .get(
-          `${this.configService.get('FUSION_URL')}/hcmRestApi/resources/11.13.18.05/grades?onlyData=true&fields=GradeId,GradeCode,ActiveStatus,EffectiveStartDate&limit=${limit}&offset=${offset}`,
+        .post(
+          //`${this.configService.get('FUSION_URL')}/hcmRestApi/resources/11.13.18.05/grades?onlyData=true&fields=GradeId,GradeCode,ActiveStatus,EffectiveStartDate&limit=${limit}&offset=${offset}`,
+          `${this.configService.get('FUSION_URL')}${Endpoints.GetGrade}`,
+          {
+            gradesUniqId: '',
+            childType: '',
+            childUniqId: '',
+            offset,
+            limit,
+          },
+          { headers: this.fusionHeaders },
+        )
+        .pipe(
+          map((r) => r.data),
+          retry(3),
+          catchError((err) => {
+            throw new Error(err);
+          }),
+        ),
+    );
+
+    return response;
+  }
+
+  async getGradeSteps(gradesUniqId: string) {
+    const response = await firstValueFrom(
+      this.httpService
+        .post(
+          `${this.configService.get('FUSION_URL')}${Endpoints.GetGrade}`,
+          {
+            gradesUniqId: gradesUniqId,
+            childType: 'steps',
+            childUniqId: '',
+            offset: 0,
+            limit: 100,
+          },
+          { headers: this.fusionHeaders },
+        )
+        .pipe(
+          map((r) => r.data),
+          retry(3),
+          catchError((err) => {
+            throw new Error(err);
+          }),
+        ),
+    );
+
+    return response;
+  }
+
+  async getPositionsLov(limit: number = 50, offset: number = 0) {
+    // TES - Have it return ALL positions so that we can map to parent positions
+    // TES - Pagination fails if out of bounds. So if we're on offset 1000 and request 1000 but there's only 500 remaining in the batch API fails
+
+    const response = await firstValueFrom(
+      this.httpService
+        .post(
+          `${this.configService.get('FUSION_URL')}${Endpoints.PositionsLov}`,
+          {
+            positionsLovV2UniqId: '',
+            offset,
+            limit,
+          },
           { headers: this.fusionHeaders },
         )
         .pipe(
@@ -267,8 +629,16 @@ export class FusionService {
   async getLocations(limit: number = 50, offset: number = 0) {
     const response = await firstValueFrom(
       this.httpService
-        .get(
-          `${this.configService.get('FUSION_URL')}/hcmRestApi/resources/11.13.18.05/locationsV2?onlyData=true&limit=${limit}&offset=${offset}&expand=locationsDFF,addresses&fields=LocationId,LocationCode,ActiveStatusMeaning,EffectiveStartDate,addresses,locationsDFF`,
+        .post(
+          //`${this.configService.get('FUSION_URL')}/hcmRestApi/resources/11.13.18.05/locationsV2?onlyData=true&limit=${limit}&offset=${offset}&expand=locationsDFF,addresses&fields=LocationId,LocationCode,ActiveStatusMeaning,EffectiveStartDate,addresses,locationsDFF`,
+          `${this.configService.get('FUSION_URL')}${Endpoints.Location}`,
+          {
+            locationsUniqId: '',
+            childType: '',
+            childUniqId: '',
+            offset,
+            limit,
+          },
           { headers: this.fusionHeaders },
         )
         .pipe(
@@ -286,8 +656,16 @@ export class FusionService {
   async getOrganizations(limit: number = 50, offset: number = 0) {
     const response = await firstValueFrom(
       this.httpService
-        .get(
-          `${this.configService.get('FUSION_URL')}/hcmRestApi/resources/11.13.18.05/organizations/?q=ClassificationCode='FUN_BUSINESS_UNIT';Name LIKE '%(BC???)'&onlyData=true&fields=OrganizationId,Name,Status,EffectiveStartDate&limit=${limit}&offset=${offset}`,
+        .post(
+          //`${this.configService.get('FUSION_URL')}/hcmRestApi/resources/11.13.18.05/organizations/?q=ClassificationCode='FUN_BUSINESS_UNIT';Name LIKE '%(BC???)'&onlyData=true&fields=OrganizationId,Name,Status,EffectiveStartDate&limit=${limit}&offset=${offset}`,
+          `${this.configService.get('FUSION_URL')}${Endpoints.Organization}`,
+          {
+            organizationsUniqId: '',
+            childType: '',
+            childUniqId: '',
+            offset,
+            limit,
+          },
           { headers: this.fusionHeaders },
         )
         .pipe(
@@ -350,6 +728,8 @@ export class FusionService {
       for await (const item of items) {
         const regex = /^(.*?)(?:_(.*))?$/;
         const [_, setId, jobCode] = item.JobCode.match(regex);
+        if (item.validGrades == null || item.validGrades[0]?.GradeId == null) continue;
+
         const [gradeId, employeeGroupId, grade] = ((): [any, any, any] => {
           const gradeId: BigInt = BigInt(item.validGrades[0]?.GradeId);
 
@@ -361,44 +741,49 @@ export class FusionService {
           return [gradeId, employee_group_id, grade];
         })();
 
-        await this.prisma.classification.upsert({
-          where: {
-            id_employee_group_id_peoplesoft_id: {
+        try {
+          await this.prisma.classification.upsert({
+            where: {
+              id_employee_group_id_peoplesoft_id: {
+                id: jobCode,
+                employee_group_id: employeeGroupId,
+                peoplesoft_id: setId,
+              },
+            },
+            create: {
               id: jobCode,
-              employee_group_id: employeeGroupId,
+              employee_group: {
+                connect: {
+                  id: employeeGroupId,
+                },
+              },
               peoplesoft_id: setId,
+              fusion_id: item.JobId,
+              code: item.JobCustomerFlex[0]?.shortDescription,
+              name: item.Name,
+              grade: grade,
+              effective_status: item.ActiveStatus === 'A' ? 'Active' : 'Inactive',
+              effective_date: new Date(item.EffectiveStartDate),
             },
-          },
-          create: {
-            id: jobCode,
-            employee_group: {
-              connect: {
-                id: employeeGroupId,
+            update: {
+              employee_group: {
+                connect: {
+                  id: employeeGroupId,
+                },
               },
+              peoplesoft_id: setId,
+              fusion_id: item.JobId,
+              code: item.JobCustomerFlex[0]?.shortDescription,
+              name: item.Name,
+              grade: grade,
+              effective_status: item.ActiveStatus === 'A' ? 'Active' : 'Inactive',
+              effective_date: new Date(item.EffectiveStartDate),
             },
-            peoplesoft_id: setId,
-            fusion_id: item.JobId,
-            code: item.JobCustomerFlex[0]?.shortDescription,
-            name: item.Name,
-            grade: grade,
-            effective_status: item.ActiveStatus === 'A' ? 'Active' : 'Inactive',
-            effective_date: new Date(item.EffectiveStartDate),
-          },
-          update: {
-            employee_group: {
-              connect: {
-                id: employeeGroupId,
-              },
-            },
-            peoplesoft_id: setId,
-            fusion_id: item.JobId,
-            code: item.JobCustomerFlex[0]?.shortDescription,
-            name: item.Name,
-            grade: grade,
-            effective_status: item.ActiveStatus === 'A' ? 'Active' : 'Inactive',
-            effective_date: new Date(item.EffectiveStartDate),
-          },
-        });
+          });
+        } catch (e) {
+          this.logger.log(gradeId, employeeGroupId, grade);
+          this.logger.log(e);
+        }
       }
 
       fetchNextPage = hasMore;
@@ -418,18 +803,22 @@ export class FusionService {
     // grades.forEach((grade) =>
     //   gradeMap.set(grade.id, { employee_group_id: grade.employee_group_id, grade: grade.grade }),
     // );
-    const ministries = await this.prisma.organization.findMany({ select: { id: true } });
+    const ministries = await this.prisma.department.findMany({ select: { id: true, fusion_id: true } });
     const ministryMap = new Map();
-    ministries.forEach((ministry) => ministryMap.set(ministry.id, ministry.id));
+    ministries.forEach((ministry) => ministryMap.set(ministry.id, ministry.fusion_id));
 
     const locations = await this.prisma.location.findMany({ select: { id: true, fusion_id: true } });
     const locationMap = new Map();
     locations.forEach((location) => locationMap.set(location.fusion_id, location.id));
 
-    await this.searchService.resetIndex();
+    try {
+      await this.searchService.resetIndex();
+    } catch (e) {
+      this.logger.error('Reset index failed ', e);
+    }
 
     let fetchNextPage: boolean = true;
-    const limit: number = 500;
+    const limit: number = 1000;
     let offset: number = 0;
     while (fetchNextPage === true) {
       this.logger.log(`Fetching page ${offset / limit + 1}`);
@@ -437,71 +826,88 @@ export class FusionService {
       const { items, hasMore } = await this.getDepartments(limit, offset);
 
       for await (const item of items) {
-        const ministryId = item.OrganizationDFF[0]?.parentDepartment;
+        const ministryId = item.OrganizationDFF[0]?.parentDepartmentName;
 
         if (ministryId && ministryMap.get(ministryId)) {
-          await this.prisma.department.upsert({
-            where: {
-              id: item.Name,
-            },
-            create: {
-              id: item.Name,
-              location: {
-                connect: {
-                  id: item.LocationId ? locationMap.get(BigInt(item.LocationId)) : '',
-                },
-              },
-              organization: {
-                connect: {
-                  id: ministryId,
-                },
-              },
-              peoplesoft_id: (ministryId ?? '').replace('BC', 'ST'),
-              fusion_id: item.OrganizationId,
-              code: item.OrganizationDFF[0]?.departmentShortDescription,
-              name: item.Title,
-              effective_status: item.Status === 'A' ? 'Active' : 'Inactive',
-              effective_date: new Date(item.EffectiveStartDate),
-            },
-            update: {
-              id: item.Name,
-              location: {
-                connect: {
-                  id: item.LocationId ? locationMap.get(BigInt(item.LocationId)) : '',
-                },
-              },
-              organization: {
-                connect: {
-                  id: ministryId,
-                },
-              },
-              peoplesoft_id: (ministryId ?? '').replace('BC', 'ST'),
-              fusion_id: item.OrganizationId,
-              code: item.OrganizationDFF[0]?.departmentShortDescription,
-              name: item.Title,
-              effective_status: item.Status === 'A' ? 'Active' : 'Inactive',
-              effective_date: new Date(item.EffectiveStartDate),
-            },
-          });
+          if (!/^\d{3}\-/.test(`${item.Name}`)) continue;
 
-          await this.searchService.indexDocument(SearchIndex.SettingsDocument, item.Name, {
-            id: item.Name,
-            name: item.Title,
-          });
+          try {
+            await this.prisma.department.upsert({
+              where: {
+                id: item.Name,
+              },
+              create: {
+                id: item.Name,
+                location: {
+                  connect: {
+                    id: item.LocationId ? locationMap.get(BigInt(item.LocationId)) : '',
+                  },
+                },
+                organization: {
+                  connect: {
+                    id: 'BC100', //ministryId,
+                  },
+                },
+                peoplesoft_id: (ministryId ?? '').replace('BC', 'ST'),
+                fusion_id: item.OrganizationId,
+                code: item.OrganizationDFF[0]?.departmentShortDescription ?? 'N/A',
+                name: item.Title,
+                effective_status: item.Status === 'A' ? 'Active' : 'Inactive', // Change to activeStatus?
+                effective_date: new Date(item.EffectiveStartDate),
+              },
+              update: {
+                id: item.Name,
+                location: {
+                  connect: {
+                    id: item.LocationId ? locationMap.get(BigInt(item.LocationId)) : '',
+                  },
+                },
+                organization: {
+                  connect: {
+                    id: 'BC100', //ministryId,
+                  },
+                },
+                peoplesoft_id: (ministryId ?? '').replace('BC', 'ST'),
+                fusion_id: item.OrganizationId,
+                code: item.OrganizationDFF[0]?.departmentShortDescription ?? 'N/A',
+                name: item.Title,
+                effective_status: item.Status === 'A' ? 'Active' : 'Inactive',
+                effective_date: new Date(item.EffectiveStartDate),
+              },
+            });
+          } catch (e) {
+            this.logger.error(e);
+          }
 
-          await this.prisma.departmentMetadata.upsert({
-            where: {
-              department_id: item.Name,
-            },
-            create: {
-              department: {
-                connect: {
-                  id: item.Name,
+          try {
+            await this.searchService.indexDocument(SearchIndex.SettingsDocument, item.Name, {
+              id: item.Name,
+              name: item.Title,
+            });
+          } catch (e) {
+            this.logger.error(e);
+          }
+
+          try {
+            await this.prisma.departmentMetadata.upsert({
+              where: {
+                department_id: item.Name,
+              },
+              create: {
+                department: {
+                  connect: {
+                    id: item.Name,
+                  },
                 },
               },
-            },
-            update: {},
-          });
+              update: {},
+            });
+          } catch (e) {
+            this.logger.error(e);
+          }
+        } else {
+          this.logger.log('Min id not found ', ministryId);
+          this.logger.log(item);
         }
       }
 
@@ -543,12 +949,14 @@ export class FusionService {
             grade,
             effective_status: item.ActiveStatus === 'A' ? 'Active' : 'Inactive',
             effective_date: new Date(item.EffectiveStartDate),
+            grade_uniq_id: item.GradeUniqId,
           },
           update: {
             employee_group_id,
             grade,
             effective_status: item.ActiveStatus === 'A' ? 'Active' : 'Inactive',
             effective_date: new Date(item.EffectiveStartDate),
+            grade_uniq_id: item.GradeUniqId,
           },
         });
       }
@@ -560,6 +968,58 @@ export class FusionService {
     }
 
     this.logger.log(`End syncGrades @ ${new Date()}`);
+  }
+
+  async syncPositionsLov() {
+    this.logger.log(`Start syncPositionsLov @ ${new Date()}`);
+
+    let fetchNextPage: boolean = true;
+    let limit: number = 1000;
+    let offset: number = 0;
+    let micro: boolean = false;
+
+    while (true) {
+      this.logger.log(`Fetching page ${offset / limit + 1}`);
+
+      const { items = [], hasMore, count } = await this.getPositionsLov(limit, offset);
+      //this.logger.log("HasMore and Count, Offset and Limit ", hasMore, count, offset, limit);
+
+      if (!micro && count == 0) {
+        micro = true;
+        limit = 10;
+        this.logger.log('Reached the end, so trying ' + limit + ' at a time.');
+        continue;
+      }
+
+      for await (const item of items) {
+        await this.prisma.positionLOV.upsert({
+          where: {
+            positionId: item.PositionId,
+          },
+          create: {
+            positionId: item.PositionId,
+            positionsLovV2UniqId: item.PositionsLovV2UniqId,
+            positionCode: item.PositionCode,
+            parentPositionCode: item.ParentPositionCode,
+          },
+          update: {
+            positionId: item.PositionId,
+            positionsLovV2UniqId: item.PositionsLovV2UniqId,
+            positionCode: item.PositionCode,
+            parentPositionCode: item.ParentPositionCode,
+          },
+        });
+      }
+
+      fetchNextPage = hasMore == 'true';
+      if (fetchNextPage) {
+        offset = offset + limit;
+      } else {
+        break;
+      }
+    }
+
+    this.logger.log(`End syncPositionsLov @ ${new Date()}`);
   }
 
   async syncLocations() {
@@ -583,16 +1043,18 @@ export class FusionService {
             id: item.LocationCode,
             peoplesoft_id: 'BCSET',
             fusion_id: item.LocationId,
-            code: item.locationsDFF[0]?.shortDescription ?? '',
-            name: item.addresses[0]?.AddressLine1,
+            code: item.locationCode ?? '',
+            name: item.locationsDFF[0]?.shortDescription ?? '',
+            //name: item.LocationName,
             effective_status: item.ActiveStatusMeaning,
             effective_date: new Date(item.EffectiveStartDate),
           },
           update: {
             peoplesoft_id: 'BCSET',
             fusion_id: item.LocationId,
-            code: item.locationsDFF[0]?.shortDescription ?? '',
-            name: item.addresses[0]?.AddressLine1,
+            name: item.locationsDFF[0]?.shortDescription ?? '',
+            code: item.locationCode,
+            //name: item.LocationName,
             effective_status: item.ActiveStatusMeaning,
             effective_date: new Date(item.EffectiveStartDate),
           },
@@ -612,7 +1074,7 @@ export class FusionService {
     this.logger.log(`Start syncOrganizations @ ${new Date()}`);
 
     let fetchNextPage: boolean = true;
-    const limit: number = 500;
+    const limit: number = 1000;
     let offset: number = 0;
     while (fetchNextPage === true) {
       this.logger.log(`Fetching page ${offset / limit + 1}`);
@@ -624,6 +1086,8 @@ export class FusionService {
         const [_, name, id] = parts;
 
         if (id && name) {
+          this.logger.log('ClassificationCode ', item.ClassificationCode, name, id);
+          this.logger.log(item);
           await this.prisma.organization.upsert({
             where: {
               id: id,
@@ -649,7 +1113,7 @@ export class FusionService {
         }
       });
 
-      fetchNextPage = false;
+      fetchNextPage = hasMore;
       if (fetchNextPage) {
         offset = offset + limit;
       }
@@ -658,10 +1122,130 @@ export class FusionService {
     this.logger.log(`End syncOrganizations @ ${new Date()}`);
   }
 
+  async syncWorkers() {
+    this.logger.log(`Start syncWorkers @ ${new Date()}`);
+
+    let fetchNextPage: boolean = true;
+    const limit: number = 500;
+    let offset: number = 0;
+    while (fetchNextPage === true) {
+      this.logger.log(`Fetching page ${offset / limit + 1}`);
+
+      const { items, hasMore } = await this.getWorkers(limit, offset);
+
+      items.forEach(async (item) => {
+        const { PersonId, PersonNumber } = item;
+        const { PositionCode } = item.assignments[0] ?? {};
+
+        await this.prisma.employee.upsert({
+          where: {
+            id: PersonNumber,
+          },
+          create: {
+            id: PersonNumber,
+            fusion_id: PersonId,
+            reports_to: PositionCode,
+          },
+          update: {
+            id: PersonNumber,
+            fusion_id: PersonId,
+            reports_to: PositionCode,
+          },
+        });
+      });
+
+      fetchNextPage = hasMore;
+      if (fetchNextPage) {
+        offset = offset + limit;
+      }
+    }
+
+    this.logger.log(`End syncOrganizations @ ${new Date()}`);
+  }
+
+  async syncPositions() {
+    this.logger.log(`Start syncPositions @ ${new Date()}`);
+
+    let fetchNextPage: boolean = true;
+    const limit: number = 1000;
+    let offset: number = 0;
+    while (fetchNextPage === true) {
+      this.logger.log(`Fetching page ${offset / limit + 1}`);
+
+      const { items, hasMore } = await this.getPositions(limit, offset);
+
+      if (items == null) break;
+
+      items.forEach(async (item) => {
+        const {
+          PositionCode,
+          PositionsUniqId,
+          EffectiveStartDate,
+          EffectiveEndDate,
+          Name,
+          DepartmentId,
+          JobId,
+          LocationId,
+          ActiveStatus,
+          ShortDescription,
+          HiringStatus,
+          ReportsToPositionId,
+          CaseProfile,
+          PositionId,
+        } = item;
+
+        await this.prisma.position.upsert({
+          where: {
+            positionCode: PositionCode,
+          },
+          create: {
+            positionCode: PositionCode,
+            uniqId: PositionsUniqId,
+            effectiveStartDate: new Date(EffectiveStartDate),
+            effectiveEndDate: new Date(EffectiveEndDate),
+            name: Name,
+            departmentId: DepartmentId,
+            jobId: JobId,
+            locationId: LocationId,
+            activeStatus: ActiveStatus,
+            shortDescription: ShortDescription ?? 'N/A',
+            hiringStatus: HiringStatus,
+            reportsTo: ReportsToPositionId ?? 'N/A',
+            caseProfile: CaseProfile ?? 'N/A',
+            fusion_id: PositionId,
+          },
+          update: {
+            positionCode: PositionCode,
+            uniqId: PositionsUniqId,
+            effectiveStartDate: new Date(EffectiveStartDate),
+            effectiveEndDate: new Date(EffectiveEndDate),
+            name: Name,
+            departmentId: DepartmentId,
+            jobId: JobId,
+            locationId: LocationId,
+            activeStatus: ActiveStatus,
+            shortDescription: ShortDescription ?? 'N/A',
+            hiringStatus: HiringStatus,
+            reportsTo: ReportsToPositionId ?? 'N/A',
+            caseProfile: CaseProfile ?? 'N/A',
+            fusion_id: PositionId,
+          },
+        });
+      });
+
+      fetchNextPage = hasMore;
+      if (fetchNextPage) {
+        offset = offset + limit;
+      }
+    }
+
+    this.logger.log(`End syncPositions @ ${new Date()}`);
+  }
+
   async syncOrganizationsAndDepartments() {
     // Use this function instead of calling syncOrganizations, syncDepartments independently
     // Departments rely on organizations which must exist prior to syncing departments
-    await this.syncOrganizations();
+    //await this.syncOrganizations();
     await this.syncDepartments();
   }
 
@@ -678,12 +1262,21 @@ export class FusionService {
           : reports_to != null
             ? `${reports_to}`
             : null;
+
+    this.logger.log('positionQ ', positionQ);
     if (positionQ === null) throw new Error('Must have one of: dept_id, position_nbr or reports_to');
 
+    /*
     const positions = await firstValueFrom(
       this.httpService
-        .get(
-          `${this.configService.get('FUSION_URL')}/hcmRestApi/resources/11.13.18.05/positions?onlyData=true&expand=all&limit=25&offset=0&q=${positionQ}`,
+        .post(
+          //`${this.configService.get('FUSION_URL')}/hcmRestApi/resources/11.13.18.05/positions?onlyData=true&expand=all&limit=25&offset=0&q=${positionQ}`,
+          `${this.configService.get('FUSION_URL')}${Endpoints.Position}`,
+          {
+            "positionsUniqId" : position_nbr,
+            "childType" : "",
+            "childUniqId" : ""
+          },
           { headers: this.fusionHeaders },
         )
         .pipe(
@@ -696,33 +1289,60 @@ export class FusionService {
           }),
         ),
     );
+    */
+
+    this.logger.log('getPosition ', +position_nbr);
+
+    let where = {};
+
+    if (position_nbr != null) {
+      where = { positionCode: new String(+position_nbr).valueOf() };
+    } else if (dept_id != null) {
+      where = { departmentId: dept_id };
+    } else if (reports_to != null) {
+      where = { reportsTo: new String(+reports_to).valueOf() };
+    }
+
+    const positions = await this.prisma.position.findMany({ where });
+
+    this.logger.log('Positions ', positions);
 
     const results = [];
     for await (const item of positions) {
-      const positionNumber = String(item.PositionCode).padStart(8, '0');
+      if (item === null) continue;
 
-      const department = await this.prisma.department.findUnique({ where: { fusion_id: item.DepartmentId } });
-      const classification = await this.prisma.classification.findUnique({ where: { fusion_id: item.JobId } });
-      const location = await this.prisma.location.findUnique({ where: { fusion_id: item.LocationId } });
-      const worker = await this.getPublicWorker(positionNumber);
+      const positionNumber = String(item.positionCode).padStart(6, '0');
+
+      const department = await this.prisma.department.findFirst({ where: { fusion_id: BigInt(item.departmentId) } });
+      this.logger.log('Department ', item.departmentId, department);
+      const classification = await this.prisma.classification.findFirst({ where: { fusion_id: BigInt(item.jobId) } });
+      this.logger.log('Class ', item.jobId, classification);
+      const location = await this.prisma.location.findFirst({ where: { fusion_id: BigInt(item.locationId) } });
+      this.logger.log('Loc ', item.locationId, location);
+      /*
+        Using local DB for worker assignments now
+      */
+      const worker = await this.prisma.employee.findFirst({ where: { id: positionNumber } });
+      this.logger.log('Worker ', positionNumber, worker);
+
+      const lov = await this.prisma.positionLOV.findFirst({ where: { positionCode: positionNumber } });
+      this.logger.log('LOV ', lov);
 
       results.push({
         'A.POSITION_NBR': positionNumber,
-        'A.EFFDT': item.EffectiveStartDate,
-        'A.EFF_STATUS': item.ActiveStatus === 'A' ? 'Active' : item.ActiveStatus === 'D' ? 'Deleted' : 'Frozen',
-        'A.DESCR': item.Name,
-        'A.DESCRSHORT': item.PositionCustomerFlex?.items?.[0]?.shortDescription,
+        'A.EFFDT': item.effectiveStartDate,
+        'A.EFF_STATUS': item.activeStatus === 'A' ? 'Active' : item.activeStatus === 'D' ? 'Deleted' : 'Frozen',
+        'A.DESCR': item.name,
+        'A.DESCRSHORT': item.shortDescription,
         'A.BUSINESS_UNIT': department?.organization_id,
         'A.DEPTID': department?.id ?? '',
         'B.DESCR': department?.name ?? '',
         'A.JOBCODE': classification?.id ?? '',
-        'A.POSN_STATUS': item.HiringStatus === 'APPROVED' ? 'Approved' : item.HiringStatus === 'FROZEN' ? 'Frozen' : '',
+        'A.POSN_STATUS': item.hiringStatus === 'APPROVED' ? 'Approved' : item.hiringStatus === 'FROZEN' ? 'Frozen' : '',
         'A.STATUS_DT': '',
-        'A.REPORTS_TO': worker?.assignments?.items?.[0]?.managers?.items?.[0]?.PositionCode
-          ? String(worker?.assignments?.items?.[0]?.managers?.items?.[0]?.PositionCode ?? '').padStart(8, '0')
-          : '',
+        'A.REPORTS_TO': lov?.parentPositionCode ?? '',
         'A.SAL_ADMIN_PLAN': classification.employee_group_id,
-        'A.TGB_E_CLASS': item.PositionCustomerFlex?.items?.[0]?.caseProfile ?? '',
+        'A.TGB_E_CLASS': item.caseProfile ?? '',
         'A.LOCATION': location?.id ?? '',
         'A.UPDATE_INCUMBENTS': '',
       });
@@ -744,26 +1364,26 @@ export class FusionService {
       }
     | undefined
   > {
+    const url = [
+      this.configService.get('PEOPLESOFT_URL'),
+      [
+        [PeoplesoftEndpoint.Profile, 'JSON', 'NONFILE'].join('/'),
+        [
+          'isconnectedquery=n',
+          'maxrows=1',
+          'prompt_uniquepromptname=USERID,EMPLID',
+          `prompt_fieldvalue=${idir ? idir + ',' : ',' + emplid}`,
+          'json_resp=true',
+        ].join('&'),
+      ].join('?'),
+    ].join('/');
+
+    this.logger.log('getProfileV2 ', url);
     const response = await firstValueFrom(
       this.httpService
-        .get(
-          [
-            this.configService.get('PEOPLESOFT_URL'),
-            [
-              [PeoplesoftEndpoint.Profile, 'JSON', 'NONFILE'].join('/'),
-              [
-                'isconnectedquery=n',
-                'maxrows=1',
-                'prompt_uniquepromptname=USERID,EMPLID',
-                `prompt_fieldvalue=${idir ? idir + ',' : ',' + emplid}`,
-                'json_resp=true',
-              ].join('&'),
-            ].join('?'),
-          ].join('/'),
-          {
-            headers: this.peoplesoftHeaders,
-          },
-        )
+        .get(url, {
+          headers: this.peoplesoftHeaders,
+        })
         .pipe(
           map((r) => {
             if (r.data.status === 'success') {
@@ -772,7 +1392,7 @@ export class FusionService {
               if (rows.length > 0) {
                 const profile = rows[0];
                 delete profile['attr:rownumber'];
-
+                profile['DEPTID'] = '100-3528'; // TODO
                 return profile;
               } else {
                 return undefined;
@@ -796,10 +1416,19 @@ export class FusionService {
   }
 
   private async getPublicWorkers(position_numbers: string[]) {
+    this.logger.log('Lookup workers for ', position_numbers);
     const result = await firstValueFrom(
       this.httpService
-        .get(
-          `${this.configService.get('FUSION_URL')}/hcmRestApi/resources/11.13.18.05/publicWorkers?limit=500&offset=0&expand=assignments.managers,assignments.allReports&q=assignments.PositionCode IN (${position_numbers.map((id) => `'${+id}'`).join(',')})&onlyData=true`,
+        .post(
+          //`${this.configService.get('FUSION_URL')}/hcmRestApi/resources/11.13.18.05/publicWorkers?limit=500&offset=0&expand=assignments.managers,assignments.allReports&q=assignments.PositionCode IN (${position_numbers.map((id) => `'${+id}'`).join(',')})&onlyData=true`,
+          `${this.configService.get('FUSION_URL')}${Endpoints.Worker}`,
+          {
+            personId: position_numbers[0],
+            childType: 'assignments',
+            childUniqId: '',
+            childType2: '',
+            childUniqId2: '',
+          },
           { headers: this.fusionHeaders },
         )
         .pipe(
@@ -814,5 +1443,131 @@ export class FusionService {
     );
 
     return result;
+  }
+
+  async createPosition(data: PositionCreateInput, positionRequest: Map<string, any>) {
+    this.logger.log('createPosition ', data);
+    this.logger.log('positionRequest ', positionRequest);
+
+    const classificationId = positionRequest['classification_id'],
+      classificationEmployeeGroupId = positionRequest['classification_employee_group_id'],
+      classificationPeoplesoftId = positionRequest['classification_peoplesoft_id'];
+
+    const additionalInfo = positionRequest['additional_info'] ?? {};
+
+    const classification = await this.prisma.classification.findFirst({
+      where: {
+        id: classificationId,
+        employee_group_id: classificationEmployeeGroupId,
+        peoplesoft_id: classificationPeoplesoftId,
+      },
+    });
+
+    //this.logger.log("Classification ", classification);
+
+    if (classification != null) {
+      const grade = await this.prisma.grade.findFirst({
+        where: { grade: classification.grade, employee_group_id: classification.employee_group_id },
+      });
+      if (grade != null) {
+        //this.logger.log("Grade ", grade);
+        data['entry_grade_id'] = new String(grade.id).valueOf();
+
+        const rawSteps = ((await this.getGradeSteps(grade['grade_uniq_id'])) ?? {}).items;
+        //this.logger.log(rawSteps);
+
+        const steps = Array.isArray(rawSteps)
+          ? rawSteps.sort((a, b) => {
+              return +a['GradeStepSequence'] > +b['GradeStepSequence'] ? 1 : -1;
+            })
+          : [];
+
+        const step = steps[0]; // TODO Or possibly the index of positionRequest["step"]
+
+        //this.logger.log("Step ", steps);
+
+        if (step != null && step['GradeStepId']) {
+          data['grade_ladder_id'] = step['GradeStepId'];
+        }
+      }
+    }
+
+    const fusionData = {
+      PositionId: '',
+      ReportsToPositionCode: data['REPORTS_TO'],
+      BusinessUnitId: data['BUSINESS_UNIT'],
+      RegularTemporary: 'R',
+      ActiveStatus: 'A',
+      Name: data['DESCR'],
+      FullPartTime: data['FULL_PART_TIME'] === 'F' ? 'FULL_TIME' : 'PART_TIME',
+      JobId: data['JOBCODE'],
+      CaseProfile: 'E11128', // TODO
+      AuthorizingId: additionalInfo['excluded_mgr_position_number'],
+      DepartmentId: data['DEPTID'],
+      HiringStatus: 'PROPOSED',
+      EffectiveStartDate: dayjs().format('YYYY-MM-DD'),
+      ActionReasonCode: 'NEW',
+      LocationId: data['LOCATION_ID'],
+      EntryGradeId: data['entry_grade_id'],
+      GradeLadderId: data['grade_ladder_id'],
+      UnionName: "BC General Employees' Union",
+      StandardWorkingHours: '35',
+      StandardWorkingFrequency: 'W',
+    };
+
+    this.logger.log('FusionData ', fusionData);
+
+    throw AlexandriaError('Just because');
+
+    const result = await firstValueFrom(
+      this.httpService
+        .post(`${this.configService.get('FUSION_URL')}${Endpoints.CreatePosition}`, fusionData, {
+          headers: this.fusionHeaders,
+        })
+        .pipe(
+          map((r) => r),
+          retry(3),
+          catchError((err) => {
+            throw new Error(err);
+          }),
+        ),
+    );
+
+    this.logger.log('Fusion result', result.data);
+
+    return result.data;
+  }
+
+  async getPositionRequestStatusAndNumber(requestId: number, sourceSystemId: string) {
+    const result = await firstValueFrom(
+      this.httpService
+        .post(
+          `${this.configService.get('FUSION_URL')}${Endpoints.PositionStatus}`,
+          {
+            RequestId: requestId,
+            SourceSystemId: sourceSystemId,
+          },
+          { headers: this.fusionHeaders },
+        )
+        .pipe(
+          map((r) => r),
+          retry(3),
+          catchError((err) => {
+            throw new Error(err);
+          }),
+        ),
+    );
+
+    this.logger.log('Fusion result', result.data);
+
+    const data = {};
+    Object.keys(result.data).forEach((k) => {
+      const key = k.replace(/^(\w)/, (_, firstChar) => {
+        return firstChar.toLocaleLowerCase();
+      });
+      data[key] = result.data[k];
+    });
+
+    return data;
   }
 }

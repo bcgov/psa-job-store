@@ -45,6 +45,8 @@ export class UserService {
     const profile = await this.peoplesoftService.getProfileV2(username);
     const employee = profile ? await this.peoplesoftService.getEmployeeV2(profile.EMPLID) : undefined;
 
+    console.log('getPeoplesoftMetadata ', employee);
+
     // todo: how will potential null values here have downstream effects?
     return {
       profile,
@@ -479,24 +481,28 @@ export class UserService {
       // Filter out undefined profiles and get employee details
       const validProfiles = profiles.filter((profile) => profile !== undefined);
       const employeeDetails = await Promise.all(
-        validProfiles.map((profile) => this.peoplesoftService.getEmployee(profile.EMPLID)),
+        validProfiles
+          .map((profile) => this.peoplesoftService.getEmployee(profile.EMPLID))
+          .filter((employee) => employee != null),
       );
 
-      // console.log('employeeDetails: ', JSON.stringify(employeeDetails, null, 2));
+      console.log('validProfiles: ', JSON.stringify(validProfiles, null, 2));
+      console.log('employeeDetails: ', JSON.stringify(employeeDetails, null, 2));
 
       // Compile final results
       const ret = employeeDetails
         .filter((detail) => detail?.data?.query?.rows?.[0])
         .map((detail) => {
           const employeeData = detail.data.query.rows[0];
-          // console.log('employeeData: ', JSON.stringify(employeeData, null, 2));
+          console.log('employeeData: ', JSON.stringify(employeeData, null, 2));
           return {
             position_number: employeeData.POSITION_NBR,
             name: employeeData.NAME_DISPLAY,
           };
-        });
+        })
+        .filter((entry) => entry.position_number != null);
 
-      // console.log('ret: ', JSON.stringify(ret, null, 2));
+      console.log('ret: ', JSON.stringify(ret, null, 2));
       return { numberOfResults: searchCount, results: ret };
     }
   }
