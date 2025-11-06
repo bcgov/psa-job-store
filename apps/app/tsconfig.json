@@ -1,7 +1,7 @@
 {
   "extends": "tsconfig/vite.json",
   "compilerOptions": {
-    "baseUrl": ".",
+    "baseUrl": "./",
     "paths": {
       "common-kit": ["../../node_modules/common-kit"]
     },
