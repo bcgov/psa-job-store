@@ -10,4 +10,7 @@ export class Employee {
 
   @Field(() => String, { nullable: false })
   status?: string;
+
+  @Field(() => String, { nullable: true })
+  fusionId?: string;
 }

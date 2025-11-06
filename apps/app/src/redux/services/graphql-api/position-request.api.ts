@@ -246,6 +246,19 @@ export interface PositionRequestUserClassification {
   code: string;
 }
 
+export interface PositionRequestStatusResponse {
+  waitForPositionSuccessStatus: PositionRequestStatus;
+}
+
+export interface PositionRequestStatus {
+  ready: boolean;
+  requestId: number;
+  sourceSystemId: string;
+  status: string;
+  positionId: number;
+  positionCode: number;
+}
+
 export const positionRequestApi = graphqlApi.injectEndpoints({
   endpoints: (build) => ({
     getPositionRequests: build.query<GetPositionsRequestResponse, GetPositionRequestsArgs | undefined>({
@@ -770,6 +783,27 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
         };
       },
     }),
+    waitForPositionSuccessStatus: build.mutation<PositionRequestStatusResponse, GetPositionRequestArgs>({
+      query: (args: GetPositionRequestArgs) => {
+        return {
+          document: gql`
+            mutation WaitForPositionSuccessStatus {
+              waitForPositionSuccessStatus(id: ${args.id}) {
+                ready 
+                requestId 
+                sourceSystemId 
+                status 
+                positionId 
+                positionCode
+              }
+            }
+          `,
+          variables: {
+            id: args.id,
+          },
+        };
+      },
+    }),
   }),
 });
 
@@ -796,4 +830,5 @@ export const {
   useLazyGetSharedPositionRequestQuery,
   useGetSuggestedManagersQuery,
   useLazyGetPositionRequestByPositionNumberQuery,
+  useWaitForPositionSuccessStatusMutation,
 } = positionRequestApi;
