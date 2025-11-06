@@ -4,14 +4,15 @@ services:
   db:
     image: postgres:16
     user: postgres
-    container_name: db
+    container_name: fusion-db
     hostname: db
     environment:
       POSTGRES_PASSWORD: ${POSTGRES_PASSWORD}
+      POSTGRES_USER: ${POSTGRES_USER}
     ports:
-      - 5432:5432
+      - 5431:5432
     volumes:
-      - postgres:/var/lib/postgresql/data:delegated
+      - fusion-postgres:/var/lib/postgresql/data:delegated
     healthcheck:
       test: ['CMD-SHELL', 'pg_isready -U ${POSTGRES_USER}']
       interval: 10s
@@ -39,6 +40,6 @@ networks:
     name: psa-job-store
 
 volumes:
-  postgres:
+  fusion-postgres:
   api-nodemodules:
   elasticsearch-data:

@@ -127,4 +127,16 @@ export class AppConfigDto {
 
   @IsString()
   E2E_TESTING: string;
+
+  @IsString()
+  FUSION_TOKEN_URL: string;
+
+  @IsString()
+  FUSION_CLIENT_ID: string;
+
+  @IsString()
+  FUSION_CLIENT_SECRET: string;
+
+  @IsString()
+  FUSION_CLIENT_SCOPE: string;
 }

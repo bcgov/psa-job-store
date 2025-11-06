@@ -485,7 +485,7 @@ export class PeoplesoftService {
   async updateMockPosition(positionNbr: string, data: UpdateMockPositionInput) {}
   async resetMockData() {}
 
-  async createPosition(data: PositionCreateInput) {
+  async createPosition(data: PositionCreateInput, positionRequest?) {
     const response = await firstValueFrom(
       this.httpService
         .post(
@@ -701,4 +701,14 @@ export class PeoplesoftService {
   async getSubordinatesV2(reporting_to: string) {
     return await this.getHRScopeV2(undefined, undefined, reporting_to);
   }
+
+  async getPositionRequestStatusAndNumber(requestId: number, sourceSystemId: string) {
+    return {};
+  }
+
+  async waitForPositionSuccessStatus(id: number) {
+    return {};
+  }
+
+  async syncManually() {}
 }

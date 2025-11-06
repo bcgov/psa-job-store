@@ -51,9 +51,11 @@ export class OrgChartService {
     const positionsWithIncumbentsIds = filteredPositions.map((row) => row['A.POSITION_NBR']);
 
     const employees: Map<string, Employee[]> = await this.peoplesoftService.getEmployeesForPositions(
-      this.configService.get('TEST_ENV') === 'true'
+      /*this.configService.get('TEST_ENV') === 'true'
         ? ['00054971', '00100306', '00033584', '00109865', '00078742', '00022287']
         : positionsWithIncumbentsIds,
+        */
+      positionsWithIncumbentsIds,
     );
 
     // const flatEmployees = Array.from(employees.entries()).flatMap(([positionId, empArray]) =>
