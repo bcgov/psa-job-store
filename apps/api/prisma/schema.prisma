@@ -674,7 +674,8 @@ model Grade {
 model Employee {
   id               String   @id // Employee number
   fusion_id        BigInt  @db.BigInt // Fusion EmployeeId
-  reports_to       String?        
+  reports_to       String?      
+  position_code    String?  
   
   @@map("employee")
 }

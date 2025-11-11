@@ -47,6 +47,7 @@ export class UserService {
 
     console.log('getPeoplesoftMetadata ', employee);
 
+    profile['DEPTID'] = employee['department_id'];
     // todo: how will potential null values here have downstream effects?
     return {
       profile,
