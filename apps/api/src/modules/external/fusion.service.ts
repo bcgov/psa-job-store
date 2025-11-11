@@ -161,7 +161,7 @@ export class FusionService {
 
         this.fusionHeaders.set('REST-Framework-Version', 9);
 
-        //this.syncManually();
+        this.syncManually();
         this.logger.log('Obtained OAuth access token.');
       })
       .catch(() => {
@@ -184,15 +184,19 @@ export class FusionService {
 
     syncSemaphore = true;
 
-    //this.syncGrades(); // WORKS
-    //this.syncLocations(); // WORKS with a fix
-    //this.syncClassifications();
+    await this.syncWorkers();
+    return;
 
-    //this.syncWorkers();
-    //this.syncPositions();
-    //this.syncPositionsLov();
+    await this.syncGrades(); //
+    await this.syncLocations(); //
+    await this.syncClassifications();
 
-    //this.syncOrganizationsAndDepartments();
+    await this.syncPositions();
+    //await this.syncPositionsLov(); // Removed, because LOV can not return all the results, see BGCO-4457
+
+    await this.syncOrganizationsAndDepartments();
+
+    syncSemaphore = false;
   }
 
   async getClassifications(limit: number = 50, offset: number = 0) {
@@ -492,36 +496,13 @@ export class FusionService {
     // Iterate over the IDs and do individual queries I guess
     const workers = [];
 
-    for (const position of positions) {
-      const worker = await firstValueFrom(
-        this.httpService
-          .post(
-            //`${this.configService.get('FUSION_URL')}/hcmRestApi/resources/11.13.18.05/publicWorkers?limit=500&offset=0&onlyData=true&fields=PersonNumber,DisplayName,assignments&q=assignments.PositionCode IN (${position_ids.join(',')})`,
-            `${this.configService.get('FUSION_URL')}${Endpoints.Worker}`,
-            {
-              personId: position.uniqId,
-              childType: 'assignments',
-              childUniqId: '',
-              childType2: '',
-              childUniqId2: '',
-              limit: 1,
-              offset: 0,
-            },
-            { headers: this.fusionHeaders },
-          )
-          .pipe(
-            map((r) => r.data.items),
-            retry(3),
-            catchError((err) => {
-              throw new Error(err);
-            }),
-          ),
-      );
+    for (const position of position_ids) {
+      // This does not work, so do a local lookup instead
+      const worker = await this.prisma.employee.findMany({ where: { position_code: position } });
 
       workers.push(worker);
     }
 
-    this.logger.log('workers ', workers);
     this.logger.log('workers ', workers);
 
     positions.forEach((position) => {
@@ -601,7 +582,7 @@ export class FusionService {
 
   async getPositionsLov(limit: number = 50, offset: number = 0) {
     // TES - Have it return ALL positions so that we can map to parent positions
-    // TES - Pagination fails if out of bounds. So if we're on offset 1000 and request 1000 but there's only 500 remaining in the batch API fails
+    // Update:: This is not possible BGCO-4457
 
     const response = await firstValueFrom(
       this.httpService
@@ -654,6 +635,7 @@ export class FusionService {
   }
 
   async getOrganizations(limit: number = 50, offset: number = 0) {
+    console.log('Sync ', limit, offset);
     const response = await firstValueFrom(
       this.httpService
         .post(
@@ -719,11 +701,16 @@ export class FusionService {
     let fetchNextPage: boolean = true;
     const limit: number = 500;
     let offset: number = 0;
+    let totalNumberOfResults: number = limit;
 
     while (fetchNextPage === true) {
       this.logger.log(`Fetching page ${offset / limit + 1}`);
 
-      const { items, hasMore } = await this.getClassifications(limit, offset);
+      const { items, hasMore, totalResults } = await this.getClassifications(
+        this.getAvailableBatchSize(limit, offset, totalNumberOfResults),
+        offset,
+      );
+      totalNumberOfResults = totalResults;
 
       for await (const item of items) {
         const regex = /^(.*?)(?:_(.*))?$/;
@@ -818,18 +805,27 @@ export class FusionService {
     }
 
     let fetchNextPage: boolean = true;
-    const limit: number = 1000;
+    const limit: number = 500;
     let offset: number = 0;
+    let totalNumberOfResults: number = limit;
+
     while (fetchNextPage === true) {
       this.logger.log(`Fetching page ${offset / limit + 1}`);
 
-      const { items, hasMore } = await this.getDepartments(limit, offset);
+      const { items, hasMore, totalResults } = await this.getDepartments(
+        this.getAvailableBatchSize(limit, offset, totalNumberOfResults),
+        offset,
+      );
+      totalNumberOfResults = totalResults;
 
       for await (const item of items) {
         const ministryId = item.OrganizationDFF[0]?.parentDepartmentName;
 
         if (ministryId && ministryMap.get(ministryId)) {
           if (!/^\d{3}\-/.test(`${item.Name}`)) continue;
+          //console.log("Min ", ministryId);
+          //console.log("Loc ", item.LocationId );
+          // TES, this is still "039-9999" vs "BC100"
 
           try {
             await this.prisma.department.upsert({
@@ -876,7 +872,7 @@ export class FusionService {
               },
             });
           } catch (e) {
-            this.logger.error(e);
+            //this.logger.error(e);
           }
 
           try {
@@ -888,6 +884,7 @@ export class FusionService {
             this.logger.error(e);
           }
 
+          //console.log("Meta connect to ", item.Name);
           try {
             await this.prisma.departmentMetadata.upsert({
               where: {
@@ -903,11 +900,11 @@ export class FusionService {
               update: {},
             });
           } catch (e) {
-            this.logger.error(e);
+            //this.logger.error(e);
           }
         } else {
-          this.logger.log('Min id not found ', ministryId);
-          this.logger.log(item);
+          //this.logger.log('Min id not found ', ministryId);
+          //this.logger.log(item);
         }
       }
 
@@ -926,11 +923,16 @@ export class FusionService {
     let fetchNextPage: boolean = true;
     const limit: number = 500;
     let offset: number = 0;
+    let totalNumberOfResults: number = limit;
 
     while (fetchNextPage === true) {
       this.logger.log(`Fetching page ${offset / limit + 1}`);
 
-      const { items, hasMore } = await this.getGrades(limit, offset);
+      const { items, hasMore, totalResults } = await this.getGrades(
+        this.getAvailableBatchSize(limit, offset, totalNumberOfResults),
+        offset,
+      );
+      totalNumberOfResults = totalResults;
 
       for await (const item of items) {
         const regex = /^(.*?)(?:_(.*))?$/;
@@ -974,22 +976,18 @@ export class FusionService {
     this.logger.log(`Start syncPositionsLov @ ${new Date()}`);
 
     let fetchNextPage: boolean = true;
-    let limit: number = 1000;
+    let limit: number = 500;
     let offset: number = 0;
-    let micro: boolean = false;
+    let totalNumberOfResults: number = limit;
 
     while (true) {
       this.logger.log(`Fetching page ${offset / limit + 1}`);
 
-      const { items = [], hasMore, count } = await this.getPositionsLov(limit, offset);
-      //this.logger.log("HasMore and Count, Offset and Limit ", hasMore, count, offset, limit);
-
-      if (!micro && count == 0) {
-        micro = true;
-        limit = 10;
-        this.logger.log('Reached the end, so trying ' + limit + ' at a time.');
-        continue;
-      }
+      const { items, hasMore, totalResults } = await this.getPositionsLov(
+        this.getAvailableBatchSize(limit, offset, totalNumberOfResults),
+        offset,
+      );
+      totalNumberOfResults = totalResults;
 
       for await (const item of items) {
         await this.prisma.positionLOV.upsert({
@@ -1011,7 +1009,7 @@ export class FusionService {
         });
       }
 
-      fetchNextPage = hasMore == 'true';
+      fetchNextPage = hasMore;
       if (fetchNextPage) {
         offset = offset + limit;
       } else {
@@ -1028,11 +1026,16 @@ export class FusionService {
     let fetchNextPage: boolean = true;
     const limit: number = 500;
     let offset: number = 0;
+    let totalNumberOfResults: number = limit;
 
     while (fetchNextPage === true) {
       this.logger.log(`Fetching page ${offset / limit + 1}`);
 
-      const { items, hasMore } = await this.getLocations(limit, offset);
+      const { items, hasMore, totalResults } = await this.getLocations(
+        this.getAvailableBatchSize(limit, offset, totalNumberOfResults),
+        offset,
+      );
+      totalNumberOfResults = totalResults;
 
       for await (const item of items) {
         await this.prisma.location.upsert({
@@ -1045,7 +1048,6 @@ export class FusionService {
             fusion_id: item.LocationId,
             code: item.locationCode ?? '',
             name: item.locationsDFF[0]?.shortDescription ?? '',
-            //name: item.LocationName,
             effective_status: item.ActiveStatusMeaning,
             effective_date: new Date(item.EffectiveStartDate),
           },
@@ -1054,7 +1056,6 @@ export class FusionService {
             fusion_id: item.LocationId,
             name: item.locationsDFF[0]?.shortDescription ?? '',
             code: item.locationCode,
-            //name: item.LocationName,
             effective_status: item.ActiveStatusMeaning,
             effective_date: new Date(item.EffectiveStartDate),
           },
@@ -1074,12 +1075,19 @@ export class FusionService {
     this.logger.log(`Start syncOrganizations @ ${new Date()}`);
 
     let fetchNextPage: boolean = true;
-    const limit: number = 1000;
+    const limit: number = 500;
     let offset: number = 0;
+    let totalNumberOfResults: number = limit;
+
     while (fetchNextPage === true) {
       this.logger.log(`Fetching page ${offset / limit + 1}`);
 
-      const { items, hasMore } = await this.getOrganizations(limit, offset);
+      // chicken or egg
+      const { items, hasMore, totalResults } = await this.getOrganizations(
+        this.getAvailableBatchSize(limit, offset, totalNumberOfResults),
+        offset,
+      );
+      totalNumberOfResults = totalResults;
 
       items.forEach(async (item) => {
         const parts = item.Name.match(/^(.+?)\s*\(([^()]+)\)$/) ?? [];
@@ -1128,10 +1136,16 @@ export class FusionService {
     let fetchNextPage: boolean = true;
     const limit: number = 500;
     let offset: number = 0;
+    let totalNumberOfResults: number = limit;
+
     while (fetchNextPage === true) {
       this.logger.log(`Fetching page ${offset / limit + 1}`);
 
-      const { items, hasMore } = await this.getWorkers(limit, offset);
+      const { items, hasMore, totalResults } = await this.getWorkers(
+        this.getAvailableBatchSize(limit, offset, totalNumberOfResults),
+        offset,
+      );
+      totalNumberOfResults = totalResults;
 
       items.forEach(async (item) => {
         const { PersonId, PersonNumber } = item;
@@ -1144,12 +1158,14 @@ export class FusionService {
           create: {
             id: PersonNumber,
             fusion_id: PersonId,
-            reports_to: PositionCode,
+            reports_to: '0',
+            position_code: PositionCode,
           },
           update: {
             id: PersonNumber,
             fusion_id: PersonId,
-            reports_to: PositionCode,
+            reports_to: '0',
+            position_code: PositionCode,
           },
         });
       });
@@ -1160,19 +1176,25 @@ export class FusionService {
       }
     }
 
-    this.logger.log(`End syncOrganizations @ ${new Date()}`);
+    this.logger.log(`End syncWorkers @ ${new Date()}`);
   }
 
   async syncPositions() {
     this.logger.log(`Start syncPositions @ ${new Date()}`);
 
     let fetchNextPage: boolean = true;
-    const limit: number = 1000;
+    const limit: number = 500;
     let offset: number = 0;
+    let totalNumberOfResults: number = limit;
+
     while (fetchNextPage === true) {
       this.logger.log(`Fetching page ${offset / limit + 1}`);
 
-      const { items, hasMore } = await this.getPositions(limit, offset);
+      const { items, hasMore, totalResults } = await this.getPositions(
+        this.getAvailableBatchSize(limit, offset, totalNumberOfResults),
+        offset,
+      );
+      totalNumberOfResults = totalResults;
 
       if (items == null) break;
 
@@ -1501,7 +1523,7 @@ export class FusionService {
       Name: data['DESCR'],
       FullPartTime: data['FULL_PART_TIME'] === 'F' ? 'FULL_TIME' : 'PART_TIME',
       JobId: data['JOBCODE'],
-      CaseProfile: 'E11128', // TODO
+      CaseProfile: data['TGB_E_CLASS'], // TES still need to confirm 100%
       AuthorizingId: additionalInfo['excluded_mgr_position_number'],
       DepartmentId: data['DEPTID'],
       HiringStatus: 'PROPOSED',
@@ -1538,6 +1560,29 @@ export class FusionService {
     return result.data;
   }
 
+  async getPositionCaseProfile(uniqId: string) {
+    const response = await firstValueFrom(
+      this.httpService
+        .post(
+          `${this.configService.get('FUSION_URL')}${Endpoints.Position}`,
+          {
+            positionsUniqId: uniqId,
+            childType: 'PositionCustomerFlex',
+          },
+          { headers: this.fusionHeaders },
+        )
+        .pipe(
+          map((r) => r.data),
+          retry(3),
+          catchError((err) => {
+            throw new Error(err);
+          }),
+        ),
+    );
+
+    return response;
+  }
+
   async getPositionRequestStatusAndNumber(requestId: number, sourceSystemId: string) {
     const result = await firstValueFrom(
       this.httpService
@@ -1569,5 +1614,11 @@ export class FusionService {
     });
 
     return data;
+  }
+
+  private getAvailableBatchSize(limit: number, offset: number, totalResults: number) {
+    const batchSize = limit + offset <= totalResults ? limit : totalResults - offset;
+    console.log('getAvailableBatchSize ', limit, offset, totalResults, batchSize);
+    return batchSize;
   }
 }
