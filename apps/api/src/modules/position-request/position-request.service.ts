@@ -420,6 +420,14 @@ export class PositionRequestApiService {
           resubmitted_at: new Date(),
         },
       });
+
+      const fusionData = positionRequest.fusion_data ?? {};
+
+      await this.peoplesoftService.storeLocalPositionEntry(
+        positionRequest.position_number,
+        positionRequest.id,
+        fusionData,
+      );
     } catch (error) {
       this.logger.error(error);
       throw AlexandriaError('Failed to update manager information.');
@@ -2051,7 +2059,7 @@ export class PositionRequestApiService {
 
     const classificationInfo = await this.prisma.classification.findFirst({
       select: { id: true, fusion_id: true },
-      where: { id: positionRequest.classification_id },
+      where: { id: positionRequest.classification_id, peoplesoft_id: positionRequest.classification_peoplesoft_id },
     });
 
     // if excluded_mgr_position_number is not in a format like this '0123456 | First Last', then it's legacy, where it

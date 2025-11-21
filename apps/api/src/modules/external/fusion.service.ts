@@ -11,6 +11,7 @@ import { PositionCreateInput } from './models/position-create.input';
 
 import dayjs from 'dayjs';
 import { AlexandriaError } from 'src/utils/alexandria-error';
+import { integer } from '@elastic/elasticsearch/lib/api/types';
 
 enum PeoplesoftEndpoint {
   Classifications = 'PJS_TGB_REST_JOB_CODE',
@@ -24,20 +25,41 @@ enum PeoplesoftEndpoint {
   Profile = 'PJS_TGB_REST_USER_PROFILE',
 }
 
+enum EmployeeGroup {
+  GEU = "BC General Employees' Union",
+  NUR = 'BC Nurses Union',
+  UPN = 'Union of Psychiatric Nurses',
+  CEP = 'Com. Energy & Paperwrk Union',
+  CIU = 'Unifor', // Fusion still has Graphic Communications Union
+  CC = 'Crown Counsel Association',
+  LGL = 'Legal Services Branch',
+  LRB = 'Labour Relations Board',
+  GMA = "BC Excluded Employees' Assn.",
+  OEX = "BC Excluded Employees' Assn.",
+  PEA = 'Prof. Employees Association',
+  TNU = 'TI Corp Non Union',
+  Default = 'Not Applicable',
+
+  BCN = 'BC Nurses Union',
+  LSA = 'Legal Services Branch',
+  MGT = 'Management Exclusion Plan',
+}
+
 const environment = 'TEST';
 
 enum Endpoints {
   GetWorker = `/ic/api/integration/v1/flows/rest/HCM_IN_GET_WORKERS_${environment}/1.0/`,
-  Worker = `/ic/api/integration/v1/flows/rest/HCM_IN_PUBLIC_WORKERS_DEV1/1.0/`,
+  Worker = `/ic/api/integration/v1/flows/rest/HCM_IN_PUBLIC_WORKERS_${environment}/1.0/`,
   Position = `/ic/api/integration/v1/flows/rest/HCM_IN_GET_POSITIONS_${environment}/1.0/`,
   CreatePosition = `/ic/api/integration/v1/flows/rest/HCM_IN_POSITION_${environment}/1.0/position`,
-  Organization = `/ic/api/integration/v1/flows/rest/HCM_IN_PULL_ORGANIZATIONS_DEV1/1.0/`,
-  Location = `/ic/api/integration/v1/flows/rest/HCM_IN_PULL_LOCATIONS_DEV1/1.0/`,
-  Job = `/ic/api/integration/v1/flows/rest/HCM_IN_PULL_JOBS_DEV1/1.0/`,
-  Grade = `/ic/api/integration/v1/flows/rest/HCM_IN_PULL_GRADES_DEV1/1.0/`,
+  Organization = `/ic/api/integration/v1/flows/rest/HCM_IN_PULL_ORGANIZATIONS_${environment}/1.0/`,
+  Location = `/ic/api/integration/v1/flows/rest/HCM_IN_PULL_LOCATIONS_${environment}/1.0/`,
+  Job = `/ic/api/integration/v1/flows/rest/HCM_IN_PULL_JOBS_${environment}/1.0/`,
+  Grade = `/ic/api/integration/v1/flows/rest/HCM_IN_PULL_GRADES_${environment}/1.0/`,
   GetGrade = `/ic/api/integration/v1/flows/rest/HCM_IN_GET_GRADES_${environment}/1.0/`,
   PositionStatus = `/ic/api/integration/v1/flows/rest/HCM_IN_POSITION_STATUS_${environment}/1.0/`,
   PositionsLov = `/ic/api/integration/v1/flows/rest/HCM_IN_GET_POSITIONSLOV_${environment}/1.0/`,
+  PositionInfo = `/ic/api/integration/v1/flows/rest/HCM_IN_GET_POSITIONS_PARENTINFO/1.0/`,
 }
 
 type HRScopeResponse = {
@@ -184,18 +206,20 @@ export class FusionService {
 
     syncSemaphore = true;
 
-    await this.syncWorkers();
-    return;
+    //await this.syncPositions();
 
+    //await this.syncWorkers();
+    /*
+    
     await this.syncGrades(); //
     await this.syncLocations(); //
     await this.syncClassifications();
 
-    await this.syncPositions();
-    //await this.syncPositionsLov(); // Removed, because LOV can not return all the results, see BGCO-4457
-
+    
     await this.syncOrganizationsAndDepartments();
+    */
 
+    //await this.syncPositionsLov(); // Removed, because LOV can not return all the results, see BGCO-4457
     syncSemaphore = false;
   }
 
@@ -259,11 +283,11 @@ export class FusionService {
     const response = await firstValueFrom(
       this.httpService
         .post(
-          `${this.configService.get('FUSION_URL')}${Endpoints.Position}`,
+          `${this.configService.get('FUSION_URL')}${Endpoints.PositionInfo}`,
           {
-            positionsUniqId: '',
-            childType: '',
-            childUniqId: '',
+            //positionsUniqId: '',
+            //childType: '',
+            //childUniqId: '',
             limit,
             offset,
           },
@@ -532,7 +556,7 @@ export class FusionService {
       this.httpService
         .post(
           //`${this.configService.get('FUSION_URL')}/hcmRestApi/resources/11.13.18.05/grades?onlyData=true&fields=GradeId,GradeCode,ActiveStatus,EffectiveStartDate&limit=${limit}&offset=${offset}`,
-          `${this.configService.get('FUSION_URL')}${Endpoints.GetGrade}`,
+          `${this.configService.get('FUSION_URL')}${Endpoints.Grade}`,
           {
             gradesUniqId: '',
             childType: '',
@@ -554,17 +578,13 @@ export class FusionService {
     return response;
   }
 
-  async getGradeSteps(gradesUniqId: string) {
+  async getJobInfo(jobId: string) {
     const response = await firstValueFrom(
       this.httpService
         .post(
-          `${this.configService.get('FUSION_URL')}${Endpoints.GetGrade}`,
+          `${this.configService.get('FUSION_URL')}${Endpoints.Job}`,
           {
-            gradesUniqId: gradesUniqId,
-            childType: 'steps',
-            childUniqId: '',
-            offset: 0,
-            limit: 100,
+            JobId: jobId,
           },
           { headers: this.fusionHeaders },
         )
@@ -937,6 +957,7 @@ export class FusionService {
       for await (const item of items) {
         const regex = /^(.*?)(?:_(.*))?$/;
         const match = item.GradeCode.match(regex);
+        console.log(item);
 
         const employee_group_id = match[1];
         const grade = match[2] ?? employee_group_id;
@@ -1151,6 +1172,8 @@ export class FusionService {
         const { PersonId, PersonNumber } = item;
         const { PositionCode } = item.assignments[0] ?? {};
 
+        const position = (await this.prisma.position.findFirst({ where: { positionCode: PositionCode } })) ?? {};
+
         await this.prisma.employee.upsert({
           where: {
             id: PersonNumber,
@@ -1158,13 +1181,13 @@ export class FusionService {
           create: {
             id: PersonNumber,
             fusion_id: PersonId,
-            reports_to: '0',
+            reports_to: position['reportsTo'] ?? null,
             position_code: PositionCode,
           },
           update: {
             id: PersonNumber,
             fusion_id: PersonId,
-            reports_to: '0',
+            reports_to: position['reportsTo'] ?? null,
             position_code: PositionCode,
           },
         });
@@ -1183,8 +1206,8 @@ export class FusionService {
     this.logger.log(`Start syncPositions @ ${new Date()}`);
 
     let fetchNextPage: boolean = true;
-    const limit: number = 500;
-    let offset: number = 0;
+    const limit: number = 250;
+    let offset: number = 48000;
     let totalNumberOfResults: number = limit;
 
     while (fetchNextPage === true) {
@@ -1199,7 +1222,7 @@ export class FusionService {
       if (items == null) break;
 
       items.forEach(async (item) => {
-        const {
+        /*const {
           PositionCode,
           PositionsUniqId,
           EffectiveStartDate,
@@ -1215,6 +1238,32 @@ export class FusionService {
           CaseProfile,
           PositionId,
         } = item;
+        */
+
+        const {
+          PositionCode,
+          PositionId,
+          EffectiveStartDate,
+          EffectiveEndDate,
+          PositionName,
+          HiringStatus,
+          JobCode,
+          DepartmentName,
+          LocationCode,
+          JobName,
+          ParentPositionCode,
+        } = item;
+
+        const //PositionCode = new String(PositionCode).valueOf(),
+          PositionsUniqId = '',
+          Name = PositionName,
+          DepartmentId = DepartmentName,
+          JobId = JobCode,
+          LocationId = LocationCode,
+          ActiveStatus = 'A',
+          ShortDescription = JobName,
+          ReportsToPositionId = ParentPositionCode,
+          CaseProfile = 'E';
 
         await this.prisma.position.upsert({
           where: {
@@ -1335,11 +1384,27 @@ export class FusionService {
 
       const positionNumber = String(item.positionCode).padStart(6, '0');
 
-      const department = await this.prisma.department.findFirst({ where: { fusion_id: BigInt(item.departmentId) } });
+      const departmentQuery = /^\d+$/.test(item.departmentId)
+        ? { where: { fusion_id: BigInt(item.departmentId) } }
+        : { where: { id: item.departmentId } };
+
+      const department = await this.prisma.department.findFirst(departmentQuery);
+      //const department = await this.prisma.department.findFirst({ where: { fusion_id: BigInt(item.departmentId) } });
       this.logger.log('Department ', item.departmentId, department);
-      const classification = await this.prisma.classification.findFirst({ where: { fusion_id: BigInt(item.jobId) } });
+      console.log(item);
+      const jobIdParts = new String(item.jobId).valueOf().split('_');
+      const classificationQuery = /^\d+$/.test(item.jobId)
+        ? { where: { fusion_id: BigInt(item.jobId) } }
+        : { where: { id: jobIdParts[1], peoplesoft_id: jobIdParts[0] } };
+      console.log('classificationQuery ', classificationQuery);
+      const classification = await this.prisma.classification.findFirst(classificationQuery);
       this.logger.log('Class ', item.jobId, classification);
-      const location = await this.prisma.location.findFirst({ where: { fusion_id: BigInt(item.locationId) } });
+
+      const locationQuery = /^\d+$/.test(item.locationId)
+        ? { where: { fusion_id: BigInt(item.locationId) } }
+        : { where: { id: item.locationId } };
+      console.log('locationQuery ', locationQuery);
+      const location = await this.prisma.location.findFirst(locationQuery);
       this.logger.log('Loc ', item.locationId, location);
       /*
         Using local DB for worker assignments now
@@ -1347,8 +1412,8 @@ export class FusionService {
       const worker = await this.prisma.employee.findFirst({ where: { id: positionNumber } });
       this.logger.log('Worker ', positionNumber, worker);
 
-      const lov = await this.prisma.positionLOV.findFirst({ where: { positionCode: positionNumber } });
-      this.logger.log('LOV ', lov);
+      //const lov = await this.prisma.positionLOV.findFirst({ where: { positionCode: positionNumber } });
+      //this.logger.log('LOV ', lov);
 
       results.push({
         'A.POSITION_NBR': positionNumber,
@@ -1362,7 +1427,7 @@ export class FusionService {
         'A.JOBCODE': classification?.id ?? '',
         'A.POSN_STATUS': item.hiringStatus === 'APPROVED' ? 'Approved' : item.hiringStatus === 'FROZEN' ? 'Frozen' : '',
         'A.STATUS_DT': '',
-        'A.REPORTS_TO': lov?.parentPositionCode ?? '',
+        'A.REPORTS_TO': item.reportsTo ?? '',
         'A.SAL_ADMIN_PLAN': classification.employee_group_id,
         'A.TGB_E_CLASS': item.caseProfile ?? '',
         'A.LOCATION': location?.id ?? '',
@@ -1485,31 +1550,25 @@ export class FusionService {
       },
     });
 
-    //this.logger.log("Classification ", classification);
+    this.logger.log('Classification ', classification);
 
     if (classification != null) {
       const grade = await this.prisma.grade.findFirst({
         where: { grade: classification.grade, employee_group_id: classification.employee_group_id },
       });
       if (grade != null) {
-        //this.logger.log("Grade ", grade);
+        this.logger.log('Grade ', grade);
         data['entry_grade_id'] = new String(grade.id).valueOf();
 
-        const rawSteps = ((await this.getGradeSteps(grade['grade_uniq_id'])) ?? {}).items;
-        //this.logger.log(rawSteps);
+        const jobInfo = ((await this.getJobInfo(data['JOBCODE'])) ?? {}).items ?? [{}];
+        this.logger.log(jobInfo[0]);
 
-        const steps = Array.isArray(rawSteps)
-          ? rawSteps.sort((a, b) => {
-              return +a['GradeStepSequence'] > +b['GradeStepSequence'] ? 1 : -1;
-            })
-          : [];
+        const gradeLadderId = jobInfo[0]?.['GradeLadderId'];
 
-        const step = steps[0]; // TODO Or possibly the index of positionRequest["step"]
+        this.logger.log('Ladder ', gradeLadderId);
 
-        //this.logger.log("Step ", steps);
-
-        if (step != null && step['GradeStepId']) {
-          data['grade_ladder_id'] = step['GradeStepId'];
+        if (gradeLadderId != null) {
+          data['grade_ladder_id'] = gradeLadderId;
         }
       }
     }
@@ -1532,12 +1591,25 @@ export class FusionService {
       LocationId: data['LOCATION_ID'],
       EntryGradeId: data['entry_grade_id'],
       GradeLadderId: data['grade_ladder_id'],
-      UnionName: "BC General Employees' Union",
+      UnionName: EmployeeGroup[classificationEmployeeGroupId] ?? EmployeeGroup.Default,
       StandardWorkingHours: '35',
       StandardWorkingFrequency: 'W',
     };
 
     this.logger.log('FusionData ', fusionData);
+
+    // Store fusion data here.
+
+    await this.prisma.positionRequest.update({
+      where: {
+        id: +positionRequest['id'],
+      },
+      data: {
+        fusion_data: fusionData,
+      },
+    });
+
+    await this.storeLocalPositionEntry('0', +positionRequest['id'], fusionData);
 
     throw AlexandriaError('Just because');
 
@@ -1558,6 +1630,60 @@ export class FusionService {
     this.logger.log('Fusion result', result.data);
 
     return result.data;
+  }
+
+  async storeLocalPositionEntry(positionCode: number, requestId: number, fusionData: any) {
+    const positionsUniqId = '',
+      effectiveStartDate = new Date(),
+      effectiveEndDate = new Date('4712-12-31'),
+      name = fusionData['Name'],
+      departmentId = fusionData['DepartmentId'],
+      jobId = fusionData['JobId'],
+      locationId = fusionData['LocationId'],
+      activeStatus = fusionData['ActiveStatus'],
+      shortDescription = fusionData['Name'],
+      hiringStatus = fusionData['HiringStatus'],
+      reportsToPositionId = fusionData['ReportsToPositionCode'],
+      caseProfile = fusionData['CaseProfile'],
+      positionId = '';
+
+    await this.prisma.position.upsert({
+      where: {
+        positionCode: new String(positionCode).valueOf(),
+      },
+      create: {
+        positionCode: new String(positionCode).valueOf(),
+        uniqId: positionsUniqId,
+        effectiveStartDate: effectiveStartDate,
+        effectiveEndDate: effectiveEndDate,
+        name: name,
+        departmentId: departmentId,
+        jobId: jobId,
+        locationId: locationId,
+        activeStatus: activeStatus,
+        shortDescription: shortDescription ?? 'N/A',
+        hiringStatus: hiringStatus,
+        reportsTo: reportsToPositionId ?? 'N/A',
+        caseProfile: caseProfile ?? 'N/A',
+        fusion_id: +positionId,
+      },
+      update: {
+        positionCode: new String(positionCode).valueOf(),
+        uniqId: positionsUniqId,
+        effectiveStartDate: effectiveStartDate,
+        effectiveEndDate: effectiveEndDate,
+        name: name,
+        departmentId: departmentId,
+        jobId: jobId,
+        locationId: locationId,
+        activeStatus: activeStatus,
+        shortDescription: shortDescription ?? 'N/A',
+        hiringStatus: hiringStatus,
+        reportsTo: reportsToPositionId ?? 'N/A',
+        caseProfile: caseProfile ?? 'N/A',
+        fusion_id: +positionId,
+      },
+    });
   }
 
   async getPositionCaseProfile(uniqId: string) {

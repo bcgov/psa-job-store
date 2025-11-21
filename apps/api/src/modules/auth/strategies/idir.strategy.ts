@@ -33,6 +33,11 @@ export class IDIRStrategy extends PassportStrategy(Strategy, 'idir') {
 
   async validate(tokenSet: TokenSet) {
     const userinfo: IDIRUserinfoResponse = await this.oidcClient.userinfo(tokenSet);
+    //userinfo["idir_username"] = "SARCHER";
+    //userinfo["idir_user_guid"] = "88F4E39A8DA74C889EB4C4EEE50087A5";
+
+    console.log('Validate user ', userinfo);
+
     const sessionUser = await this.authService.validateUserinfo(userinfo);
 
     try {

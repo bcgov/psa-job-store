@@ -99,6 +99,7 @@ model PositionRequest {
 
   request_id                        Int?
   source_system_id                  String?
+  fusion_data                       Json?                 @db.JsonB
 
   @@map("position_request")
 }

@@ -596,7 +596,7 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
                           >
                             Generate position number
                           </Button>
-                          <div style={{ display: submitPositionRequestIsLoading ? 'block' : 'none' }}>
+                          <div style={{ display: submitPositionRequestIsLoading || isLoading ? 'block' : 'none' }}>
                             This can take up to 2 minutes. Please don't navigate away from this page.
                           </div>
                         </Space>
