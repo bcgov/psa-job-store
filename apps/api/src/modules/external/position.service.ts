@@ -43,6 +43,8 @@ export class PositionService {
     if (rows?.length > 0) {
       const raw = rows[0] as PeoplesoftPosition;
 
+      console.log('Raw ', raw);
+
       const classification = await this.classificationService.getClassificationForPeoplesoftPosition(raw);
 
       const department =
