@@ -70,7 +70,9 @@ export class OrgChartService {
     filteredPositions.forEach((position) => {
       // In rare cases, positions do _not_ include a value for A.REPORTS_TO, which causes the org chart to crash.
       // This workaround prevents a crash and allows positions to float in space with no reporting relationship
-      const reportsTo = position['A.REPORTS_TO'].length > 0 ? position['A.REPORTS_TO'] : '-1';
+      console.log('Chart Position ', position);
+      const reportsTo =
+        position['A.REPORTS_TO'].length > 0 && position['A.REPORTS_TO'] != 'N/A' ? position['A.REPORTS_TO'] : '-1';
 
       const existingEdge = edgeMap.get(`${reportsTo}-${position['A.POSITION_NBR']}`);
       if (existingEdge == null) {
