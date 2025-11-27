@@ -99,6 +99,7 @@ export class CrmService {
         map((r) => r.data),
         retry(3),
         catchError((err) => {
+          console.log(err);
           throw new Error(err);
         }),
       ),

@@ -419,17 +419,22 @@ export class PositionRequestApiService {
           resubmitted_at: new Date(),
         },
       });
+    } catch (error) {
+      this.logger.error(error);
+      throw AlexandriaError('Failed to update manager information.');
+    }
 
+    try {
       const fusionData = positionRequest.fusion_data ?? {};
 
       await this.peoplesoftService.storeLocalPositionEntry(
+        positionRequest['id'],
         positionRequest.position_number,
-        positionRequest.id,
+        { positionId },
         fusionData,
       );
     } catch (error) {
       this.logger.error(error);
-      throw AlexandriaError('Failed to update manager information.');
     }
 
     // CRM Incident Managements
