@@ -712,5 +712,5 @@ export class PeoplesoftService {
 
   async syncManually() {}
 
-  async storeLocalPositionEntry(positionCode: number, requestId: number, fusionData: any) {}
+  async storeLocalPositionEntry(positionRequestId: number, positionCode: number, positionData: any, fusionData: any) {}
 }

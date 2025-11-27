@@ -45,19 +45,24 @@ enum EmployeeGroup {
   MGT = 'Management Exclusion Plan',
 }
 
-const environment = 'TEST';
+const environment = 'DEV1';
 
 enum Endpoints {
-  GetWorker = `/ic/api/integration/v1/flows/rest/HCM_IN_GET_WORKERS_${environment}/1.0/`,
+  //GetWorker = `/ic/api/integration/v1/flows/rest/HCM_IN_GET_WORKERS_${environment}/1.0/`,
+  GetWorker = `/ic/api/integration/v1/flows/rest/HCM_IN_GET_WORKERS/1.0/`,
+
   Worker = `/ic/api/integration/v1/flows/rest/HCM_IN_PUBLIC_WORKERS_${environment}/1.0/`,
-  Position = `/ic/api/integration/v1/flows/rest/HCM_IN_GET_POSITIONS_${environment}/1.0/`,
+  //Position = `/ic/api/integration/v1/flows/rest/HCM_IN_GET_POSITIONS_${environment}/1.0/`,
+  Position = `/ic/api/integration/v1/flows/rest/HCM_IN_GET_POSITIONS/1.0/`,
   CreatePosition = `/ic/api/integration/v1/flows/rest/HCM_IN_POSITION_${environment}/1.0/position`,
   Organization = `/ic/api/integration/v1/flows/rest/HCM_IN_PULL_ORGANIZATIONS_${environment}/1.0/`,
   Location = `/ic/api/integration/v1/flows/rest/HCM_IN_PULL_LOCATIONS_${environment}/1.0/`,
   Job = `/ic/api/integration/v1/flows/rest/HCM_IN_PULL_JOBS_${environment}/1.0/`,
   Grade = `/ic/api/integration/v1/flows/rest/HCM_IN_PULL_GRADES_${environment}/1.0/`,
-  GetGrade = `/ic/api/integration/v1/flows/rest/HCM_IN_GET_GRADES_${environment}/1.0/`,
-  PositionStatus = `/ic/api/integration/v1/flows/rest/HCM_IN_POSITION_STATUS_${environment}/1.0/`,
+  //GetGrade = `/ic/api/integration/v1/flows/rest/HCM_IN_GET_GRADES_${environment}/1.0/`,
+  GetGrade = `/ic/api/integration/v1/flows/rest/HCM_IN_GET_GRADES/1.0/`,
+  //PositionStatus = `/ic/api/integration/v1/flows/rest/HCM_IN_POSITION_STATUS_${environment}/1.0/`,
+  PositionStatus = `/ic/api/integration/v1/flows/rest/HCM_IN_GET_POSIT_IMPOR_STATU/1.0/`,
   PositionsLov = `/ic/api/integration/v1/flows/rest/HCM_IN_GET_POSITIONSLOV_${environment}/1.0/`,
   PositionInfo = `/ic/api/integration/v1/flows/rest/HCM_IN_GET_POSITIONS_PARENTINFO/1.0/`,
 }
@@ -208,8 +213,7 @@ export class FusionService {
 
     //await this.syncPositions();
 
-    //await this.syncWorkers();
-    /*
+    /*await this.syncWorkers();
     
     await this.syncGrades(); //
     await this.syncLocations(); //
@@ -217,9 +221,9 @@ export class FusionService {
 
     
     await this.syncOrganizationsAndDepartments();
+    
     */
 
-    //await this.syncPositionsLov(); // Removed, because LOV can not return all the results, see BGCO-4457
     syncSemaphore = false;
   }
 
@@ -584,7 +588,7 @@ export class FusionService {
         .post(
           `${this.configService.get('FUSION_URL')}${Endpoints.Job}`,
           {
-            JobId: jobId,
+            jobId: jobId,
           },
           { headers: this.fusionHeaders },
         )
@@ -599,34 +603,6 @@ export class FusionService {
 
     return response;
   }
-
-  async getPositionsLov(limit: number = 50, offset: number = 0) {
-    // TES - Have it return ALL positions so that we can map to parent positions
-    // Update:: This is not possible BGCO-4457
-
-    const response = await firstValueFrom(
-      this.httpService
-        .post(
-          `${this.configService.get('FUSION_URL')}${Endpoints.PositionsLov}`,
-          {
-            positionsLovV2UniqId: '',
-            offset,
-            limit,
-          },
-          { headers: this.fusionHeaders },
-        )
-        .pipe(
-          map((r) => r.data),
-          retry(3),
-          catchError((err) => {
-            throw new Error(err);
-          }),
-        ),
-    );
-
-    return response;
-  }
-
   async getLocations(limit: number = 50, offset: number = 0) {
     const response = await firstValueFrom(
       this.httpService
@@ -693,12 +669,13 @@ export class FusionService {
   }
 
   async getPositionsForDepartment(department_id: string) {
-    const { fusion_id } = await this.prisma.department.findUnique({
+    const department = await this.prisma.department.findUnique({
       where: { id: department_id },
-      select: { fusion_id: true },
     });
 
-    const positions = await this.getHRScopeV2(fusion_id.toString(), undefined, undefined);
+    console.log('getPositionsForDepartment', department);
+
+    const positions = await this.getHRScopeV2(department.id.toString(), undefined, undefined);
 
     return {
       data: {
@@ -993,54 +970,6 @@ export class FusionService {
     this.logger.log(`End syncGrades @ ${new Date()}`);
   }
 
-  async syncPositionsLov() {
-    this.logger.log(`Start syncPositionsLov @ ${new Date()}`);
-
-    let fetchNextPage: boolean = true;
-    let limit: number = 500;
-    let offset: number = 0;
-    let totalNumberOfResults: number = limit;
-
-    while (true) {
-      this.logger.log(`Fetching page ${offset / limit + 1}`);
-
-      const { items, hasMore, totalResults } = await this.getPositionsLov(
-        this.getAvailableBatchSize(limit, offset, totalNumberOfResults),
-        offset,
-      );
-      totalNumberOfResults = totalResults;
-
-      for await (const item of items) {
-        await this.prisma.positionLOV.upsert({
-          where: {
-            positionId: item.PositionId,
-          },
-          create: {
-            positionId: item.PositionId,
-            positionsLovV2UniqId: item.PositionsLovV2UniqId,
-            positionCode: item.PositionCode,
-            parentPositionCode: item.ParentPositionCode,
-          },
-          update: {
-            positionId: item.PositionId,
-            positionsLovV2UniqId: item.PositionsLovV2UniqId,
-            positionCode: item.PositionCode,
-            parentPositionCode: item.ParentPositionCode,
-          },
-        });
-      }
-
-      fetchNextPage = hasMore;
-      if (fetchNextPage) {
-        offset = offset + limit;
-      } else {
-        break;
-      }
-    }
-
-    this.logger.log(`End syncPositionsLov @ ${new Date()}`);
-  }
-
   async syncLocations() {
     this.logger.log(`Start syncLocations @ ${new Date()}`);
 
@@ -1202,21 +1131,37 @@ export class FusionService {
     this.logger.log(`End syncWorkers @ ${new Date()}`);
   }
 
+  async sleep(time: number) {
+    setTimeout(() => {
+      return Promise.resolve();
+    }, time * 1000);
+  }
+
   async syncPositions() {
     this.logger.log(`Start syncPositions @ ${new Date()}`);
 
     let fetchNextPage: boolean = true;
     const limit: number = 250;
-    let offset: number = 48000;
+    let offset: number = 0;
     let totalNumberOfResults: number = limit;
 
     while (fetchNextPage === true) {
       this.logger.log(`Fetching page ${offset / limit + 1}`);
 
-      const { items, hasMore, totalResults } = await this.getPositions(
-        this.getAvailableBatchSize(limit, offset, totalNumberOfResults),
-        offset,
-      );
+      let items, hasMore, totalResults;
+
+      try {
+        ({ items, hasMore, totalResults } = await this.getPositions(
+          this.getAvailableBatchSize(limit, offset, totalNumberOfResults),
+          offset,
+        ));
+      } catch (e) {
+        await this.sleep(5);
+
+        this.logger.error('Sync Error, ', e);
+        continue;
+      }
+
       totalNumberOfResults = totalResults;
 
       if (items == null) break;
@@ -1366,13 +1311,15 @@ export class FusionService {
 
     let where = {};
 
-    if (position_nbr != null) {
+    if (position_nbr != null && !isNaN(+position_nbr)) {
       where = { positionCode: new String(+position_nbr).valueOf() };
     } else if (dept_id != null) {
       where = { departmentId: dept_id };
     } else if (reports_to != null) {
       where = { reportsTo: new String(+reports_to).valueOf() };
     }
+
+    this.logger.log('getPosition where ', where);
 
     const positions = await this.prisma.position.findMany({ where });
 
@@ -1550,7 +1497,13 @@ export class FusionService {
       },
     });
 
+    const positionData = {
+      department_id: additionalInfo['department_id'],
+      location_id: additionalInfo['work_location_id'],
+    };
+
     this.logger.log('Classification ', classification);
+    this.logger.log('positionData ', positionData);
 
     if (classification != null) {
       const grade = await this.prisma.grade.findFirst({
@@ -1564,6 +1517,7 @@ export class FusionService {
         this.logger.log(jobInfo[0]);
 
         const gradeLadderId = jobInfo[0]?.['GradeLadderId'];
+        positionData['job_id'] = jobInfo[0]?.['JobCode'];
 
         this.logger.log('Ladder ', gradeLadderId);
 
@@ -1609,9 +1563,9 @@ export class FusionService {
       },
     });
 
-    await this.storeLocalPositionEntry('0', +positionRequest['id'], fusionData);
+    await this.storeLocalPositionEntry(+positionRequest['id'], 0, positionData, fusionData);
 
-    throw AlexandriaError('Just because');
+    //throw AlexandriaError('Just because');
 
     const result = await firstValueFrom(
       this.httpService
@@ -1632,58 +1586,55 @@ export class FusionService {
     return result.data;
   }
 
-  async storeLocalPositionEntry(positionCode: number, requestId: number, fusionData: any) {
-    const positionsUniqId = '',
-      effectiveStartDate = new Date(),
+  async storeLocalPositionEntry(positionRequestId: number, positionCode: number, positionData: any, fusionData: any) {
+    const effectiveStartDate = new Date(),
       effectiveEndDate = new Date('4712-12-31'),
       name = fusionData['Name'],
-      departmentId = fusionData['DepartmentId'],
-      jobId = fusionData['JobId'],
-      locationId = fusionData['LocationId'],
+      departmentId = positionData['department_id'],
+      jobId = positionData['job_id'],
+      locationId = positionData['location_id'],
       activeStatus = fusionData['ActiveStatus'],
       shortDescription = fusionData['Name'],
       hiringStatus = fusionData['HiringStatus'],
       reportsToPositionId = fusionData['ReportsToPositionCode'],
       caseProfile = fusionData['CaseProfile'],
-      positionId = '';
+      positionId = positionData['positionId'];
 
-    await this.prisma.position.upsert({
-      where: {
-        positionCode: new String(positionCode).valueOf(),
-      },
-      create: {
-        positionCode: new String(positionCode).valueOf(),
-        uniqId: positionsUniqId,
-        effectiveStartDate: effectiveStartDate,
-        effectiveEndDate: effectiveEndDate,
-        name: name,
-        departmentId: departmentId,
-        jobId: jobId,
-        locationId: locationId,
-        activeStatus: activeStatus,
-        shortDescription: shortDescription ?? 'N/A',
-        hiringStatus: hiringStatus,
-        reportsTo: reportsToPositionId ?? 'N/A',
-        caseProfile: caseProfile ?? 'N/A',
-        fusion_id: +positionId,
-      },
-      update: {
-        positionCode: new String(positionCode).valueOf(),
-        uniqId: positionsUniqId,
-        effectiveStartDate: effectiveStartDate,
-        effectiveEndDate: effectiveEndDate,
-        name: name,
-        departmentId: departmentId,
-        jobId: jobId,
-        locationId: locationId,
-        activeStatus: activeStatus,
-        shortDescription: shortDescription ?? 'N/A',
-        hiringStatus: hiringStatus,
-        reportsTo: reportsToPositionId ?? 'N/A',
-        caseProfile: caseProfile ?? 'N/A',
-        fusion_id: +positionId,
-      },
-    });
+    if (positionCode == 0) {
+      await this.prisma.position.create({
+        data: {
+          positionCode: new String(positionRequestId).valueOf(),
+          uniqId: new String(positionRequestId).valueOf(),
+          effectiveStartDate: effectiveStartDate,
+          effectiveEndDate: effectiveEndDate,
+          name: name,
+          departmentId: departmentId ?? 'N/A',
+          jobId: jobId ?? 'N/A',
+          locationId: locationId ?? 'N/A',
+          activeStatus: activeStatus,
+          shortDescription: shortDescription ?? 'N/A',
+          hiringStatus: hiringStatus,
+          reportsTo: reportsToPositionId ?? 'N/A',
+          caseProfile: caseProfile ?? 'N/A',
+          fusion_id: 0,
+        },
+      });
+    } else {
+      try {
+        await this.prisma.position.updateMany({
+          where: {
+            positionCode: new String(positionRequestId).valueOf(),
+            uniqId: { equals: new String(positionRequestId).valueOf() },
+          },
+          data: {
+            positionCode: new String(positionCode).valueOf(),
+            fusion_id: positionId,
+          },
+        });
+      } catch (error) {
+        this.logger.error(error);
+      }
+    }
   }
 
   async getPositionCaseProfile(uniqId: string) {
@@ -1710,24 +1661,31 @@ export class FusionService {
   }
 
   async getPositionRequestStatusAndNumber(requestId: number, sourceSystemId: string) {
-    const result = await firstValueFrom(
-      this.httpService
-        .post(
-          `${this.configService.get('FUSION_URL')}${Endpoints.PositionStatus}`,
-          {
-            RequestId: requestId,
-            SourceSystemId: sourceSystemId,
-          },
-          { headers: this.fusionHeaders },
-        )
-        .pipe(
-          map((r) => r),
-          retry(3),
-          catchError((err) => {
-            throw new Error(err);
-          }),
-        ),
-    );
+    let result;
+
+    try {
+      result = await firstValueFrom(
+        this.httpService
+          .post(
+            `${this.configService.get('FUSION_URL')}${Endpoints.PositionStatus}`,
+            {
+              RequestId: requestId,
+              SourceSystemId: sourceSystemId,
+            },
+            { headers: this.fusionHeaders },
+          )
+          .pipe(
+            map((r) => r),
+            retry(3),
+            catchError((err) => {
+              throw new Error(err);
+            }),
+          ),
+      );
+    } catch (err) {
+      this.logger.error(err);
+      return {};
+    }
 
     this.logger.log('Fusion result', result.data);
 

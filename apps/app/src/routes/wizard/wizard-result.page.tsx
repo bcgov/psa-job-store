@@ -277,7 +277,7 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
       return new Promise((resolve) => setTimeout(resolve, ms));
     }
 
-    const MAX_RETRIES: number = 10;
+    const MAX_RETRIES: number = 12;
 
     for (let i = 0; i < MAX_RETRIES; i++) {
       await sleep(1000 * 10);
