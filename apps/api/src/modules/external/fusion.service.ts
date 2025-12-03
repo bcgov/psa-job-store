@@ -45,26 +45,29 @@ enum EmployeeGroup {
   MGT = 'Management Exclusion Plan',
 }
 
-const environment = 'DEV1';
+const environment = 'DEV2';
 
 enum Endpoints {
-  //GetWorker = `/ic/api/integration/v1/flows/rest/HCM_IN_GET_WORKERS_${environment}/1.0/`,
-  GetWorker = `/ic/api/integration/v1/flows/rest/HCM_IN_GET_WORKERS/1.0/`,
+  GetWorker = `/ic/api/integration/v1/flows/rest/HCM_IN_GET_WORKERS_${environment}/1.0/`,
+  //GetWorker = `/ic/api/integration/v1/flows/rest/HCM_IN_GET_WORKERS/1.0/`,
 
   Worker = `/ic/api/integration/v1/flows/rest/HCM_IN_PUBLIC_WORKERS_${environment}/1.0/`,
-  //Position = `/ic/api/integration/v1/flows/rest/HCM_IN_GET_POSITIONS_${environment}/1.0/`,
-  Position = `/ic/api/integration/v1/flows/rest/HCM_IN_GET_POSITIONS/1.0/`,
-  CreatePosition = `/ic/api/integration/v1/flows/rest/HCM_IN_POSITION_${environment}/1.0/position`,
+  Position = `/ic/api/integration/v1/flows/rest/HCM_IN_GET_POSITIONS_${environment}/1.0/`,
+  //Position = `/ic/api/integration/v1/flows/rest/HCM_IN_GET_POSITIONS/1.0/`,
+  CreatePosition = `/ic/api/integration/v1/flows/rest/HCM_IN_POSITI_INT_DEV2/1.0/position`,
+  //CreatePosition = `/ic/api/integration/v1/flows/rest/HCM_IN_POSITION_${environment}/1.0/position`,
   Organization = `/ic/api/integration/v1/flows/rest/HCM_IN_PULL_ORGANIZATIONS_${environment}/1.0/`,
   Location = `/ic/api/integration/v1/flows/rest/HCM_IN_PULL_LOCATIONS_${environment}/1.0/`,
   Job = `/ic/api/integration/v1/flows/rest/HCM_IN_PULL_JOBS_${environment}/1.0/`,
   Grade = `/ic/api/integration/v1/flows/rest/HCM_IN_PULL_GRADES_${environment}/1.0/`,
-  //GetGrade = `/ic/api/integration/v1/flows/rest/HCM_IN_GET_GRADES_${environment}/1.0/`,
-  GetGrade = `/ic/api/integration/v1/flows/rest/HCM_IN_GET_GRADES/1.0/`,
+  GetGrade = `/ic/api/integration/v1/flows/rest/HCM_IN_GET_GRADES_${environment}/1.0/`,
+  //GetGrade = `/ic/api/integration/v1/flows/rest/HCM_IN_GET_GRADES/1.0/`,
+  PositionStatus = `/ic/api/integration/v1/flows/rest/HCM_IN_GET_POSITION_STATUS_DEV2/1.0/`,
   //PositionStatus = `/ic/api/integration/v1/flows/rest/HCM_IN_POSITION_STATUS_${environment}/1.0/`,
-  PositionStatus = `/ic/api/integration/v1/flows/rest/HCM_IN_GET_POSIT_IMPOR_STATU/1.0/`,
+  //PositionStatus = `/ic/api/integration/v1/flows/rest/HCM_IN_GET_POSIT_IMPOR_STATU/1.0/`,
   PositionsLov = `/ic/api/integration/v1/flows/rest/HCM_IN_GET_POSITIONSLOV_${environment}/1.0/`,
-  PositionInfo = `/ic/api/integration/v1/flows/rest/HCM_IN_GET_POSITIONS_PARENTINFO/1.0/`,
+  //PositionInfo = `/ic/api/integration/v1/flows/rest/HCM_IN_GET_POSITIONS_PARENTINFO/1.0/`,
+  PositionInfo = `/ic/api/integration/v1/flows/rest/HCM_IN_GET_POSITIONS_PARENT_${environment}/1.0/`,
 }
 
 type HRScopeResponse = {
@@ -188,8 +191,8 @@ export class FusionService {
 
         this.fusionHeaders.set('REST-Framework-Version', 9);
 
-        this.syncManually();
         this.logger.log('Obtained OAuth access token.');
+        this.syncManually();
       })
       .catch(() => {
         this.logger.error('Failed to get access token.');
@@ -205,6 +208,8 @@ export class FusionService {
   }
 
   async syncManually() {
+    this.logger.log('Starting manual syncing.');
+
     if (syncSemaphore) {
       return this.logger.log('Already syncing.');
     }
@@ -212,8 +217,9 @@ export class FusionService {
     syncSemaphore = true;
 
     //await this.syncPositions();
+    /*
 
-    /*await this.syncWorkers();
+    await this.syncWorkers();
     
     await this.syncGrades(); //
     await this.syncLocations(); //
