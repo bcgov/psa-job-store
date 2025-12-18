@@ -702,11 +702,11 @@ export class PeoplesoftService {
     return await this.getHRScopeV2(undefined, undefined, reporting_to);
   }
 
-  async getPositionRequestStatusAndNumber(requestId: number, sourceSystemId: string) {
+  async getPositionRequestStatusAndNumber(positionRequestId: number, requestId: number, sourceSystemId: string) {
     return {};
   }
 
-  async waitForPositionSuccessStatus(id: number) {
+  async updatePositionToApproved(id: number) {
     return {};
   }
 
