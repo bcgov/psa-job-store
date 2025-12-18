@@ -277,7 +277,7 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
       return new Promise((resolve) => setTimeout(resolve, ms));
     }
 
-    const MAX_RETRIES: number = 12;
+    const MAX_RETRIES: number = 16;
 
     for (let i = 0; i < MAX_RETRIES; i++) {
       await sleep(1000 * 10);
@@ -593,7 +593,7 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
                             Generate position number
                           </Button>
                           <div style={{ display: submitPositionRequestIsLoading || isLoading ? 'block' : 'none' }}>
-                            This can take up to 2 minutes. Please don't navigate away from this page.
+                            This can take up to 3 minutes. Please don't navigate away from this page.
                           </div>
                         </Space>
                       </Form>
