@@ -438,6 +438,13 @@ export class PositionRequestApiService {
       this.logger.error(error);
     }
 
+    try {
+      await this.peoplesoftService.updatePositionToApproved(positionRequest.position_number);
+    } catch (error) {
+      this.logger.error(error);
+      throw AlexandriaError('Failed to update position request status');
+    }
+
     // CRM Incident Managements
     let crm_id;
     let crm_lookup_name;
@@ -668,6 +675,7 @@ export class PositionRequestApiService {
 
     try {
       position = await this.peoplesoftService.getPositionRequestStatusAndNumber(
+        id,
         positionRequest.request_id,
         positionRequest.source_system_id,
       );

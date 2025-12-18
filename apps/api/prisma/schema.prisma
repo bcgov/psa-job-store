@@ -101,6 +101,8 @@ model PositionRequest {
   source_system_id                  String?
   fusion_data                       Json?                 @db.JsonB
 
+  ///fusionRequests             FusionRequest[]
+
   @@map("position_request")
 }
 
@@ -698,6 +700,8 @@ model Position {
   caseProfile String?
   fusion_id BigInt @db.BigInt
 
+  ///fusionRequests             FusionRequest[]
+
   @@map("position")
 
 }
@@ -710,5 +714,23 @@ model PositionLOV {
   parentPositionCode String
 
   @@map("position_lov")
+
+}
+
+model FusionRequest {
+
+  id                  Int             @id @default(autoincrement())
+  positionRequestRef   Int?
+  ///positionRequest     PositionRequest? @relation(fields: [positionRequestRef], references: [id]) 
+
+  positionRef      String?
+  ///positionCode      Position? @relation(fields: [positionRef], references: [positionCode]) 
+  
+  endpoint            String?
+  payload             Json?     @db.JsonB
+  response            Json?     @db.JsonB
+  date                DateTime  @default(now())
+
+  @@map("fusion_request")
 
 }
