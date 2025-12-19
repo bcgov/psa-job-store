@@ -203,6 +203,7 @@ export class AuthService {
     sessionUser.metadata.peoplesoft = peoplesoftMetadata;
     sessionUser.metadata.org_chart.department_ids = [peoplesoftMetadata.department_id];
     sessionUser.roles.push('total-compensation');
+    //sessionUser.roles.push('super-admin');
 
     const { name, email, username, roles, metadata } = sessionUser;
 

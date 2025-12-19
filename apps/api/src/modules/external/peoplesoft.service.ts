@@ -712,5 +712,7 @@ export class PeoplesoftService {
 
   async syncManually() {}
 
+  async queryFusionRequestStatus() {}
+
   async storeLocalPositionEntry(positionRequestId: number, positionCode: number, positionData: any, fusionData: any) {}
 }
