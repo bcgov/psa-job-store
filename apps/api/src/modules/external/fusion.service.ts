@@ -14,6 +14,8 @@ import { AlexandriaError } from 'src/utils/alexandria-error';
 import { integer } from '@elastic/elasticsearch/lib/api/types';
 import { PositionRequest } from 'src/@generated/prisma-nestjs-graphql';
 
+import { Prisma } from '@prisma/client';
+
 enum PeoplesoftEndpoint {
   Classifications = 'PJS_TGB_REST_JOB_CODE',
   CreatePosition = 'TGB_PJS_POSITION.v1',
@@ -169,6 +171,9 @@ class OAuth2 {
 }
 
 let syncSemaphore: boolean = false;
+let fusionStatusSemaphore: boolean = false;
+
+const skipFusion: boolean = !true;
 
 @Injectable()
 export class FusionService {
@@ -194,7 +199,8 @@ export class FusionService {
         this.fusionHeaders.set('REST-Framework-Version', 9);
 
         this.logger.log('Obtained OAuth access token.');
-        this.syncManually();
+        //this.syncManually();
+        //this.queryFusionRequestStatus();
       })
       .catch(() => {
         this.logger.error('Failed to get access token.');
@@ -224,7 +230,7 @@ export class FusionService {
 
     syncSemaphore = true;
 
-    //await this.updatePositionToApproved(154645);
+    //await this.updatePositionToApproved(154646);
 
     //await this.syncPositions();
 
@@ -1144,10 +1150,12 @@ export class FusionService {
     this.logger.log(`End syncWorkers @ ${new Date()}`);
   }
 
-  async sleep(time: number) {
-    setTimeout(() => {
-      return Promise.resolve();
-    }, time * 1000);
+  async sleep(seconds: number): Promise<void> {
+    await new Promise<void>((resolve) => {
+      setTimeout(() => {
+        resolve();
+      }, seconds * 1000);
+    });
   }
 
   async syncPositions() {
@@ -1585,29 +1593,30 @@ export class FusionService {
 
     await this.storeLocalPositionEntry(+positionRequest['id'], 0, positionData, fusionData);
 
-    /*
-    const result = await firstValueFrom(
-      this.httpService
-        .post(`${this.configService.get('FUSION_URL')}${Endpoints.CreatePosition}`, fusionData, {
-          headers: this.getFusionHeaders(),
-        })
-        .pipe(
-          map((r) => r),
-          retry(3),
-          catchError((err) => {
-            throw new Error(err);
-          }),
-        ),
-    );
+    let result: Record<string, any>;
 
-    */
-
-    const result = {
-      data: {
-        RequestId: '2474861',
-        SourceSystemId: 'POS_123',
-      },
-    };
+    if (!skipFusion) {
+      result = await firstValueFrom(
+        this.httpService
+          .post(`${this.configService.get('FUSION_URL')}${Endpoints.CreatePosition}`, fusionData, {
+            headers: this.getFusionHeaders(),
+          })
+          .pipe(
+            map((r) => r),
+            retry(3),
+            catchError((err) => {
+              throw new Error(err);
+            }),
+          ),
+      );
+    } else {
+      result = {
+        data: {
+          RequestId: '2474861',
+          SourceSystemId: 'POS_123',
+        },
+      };
+    }
 
     this.logger.log('Fusion result', result.data);
 
@@ -1643,7 +1652,7 @@ export class FusionService {
     }
 
     const fusionData = positionRequest.fusion_data,
-      //sourceSystemId = positionRequest.source_system_id,
+      sourceSystemId = positionRequest.source_system_id,
       positionId = new String(position.fusion_id).valueOf();
 
     fusionData['HiringStatus'] = 'APPROVED';
@@ -1651,31 +1660,39 @@ export class FusionService {
 
     console.log('setPositionToApproved ', fusionData);
 
-    let result;
+    let result: Record<string, any> = {};
 
-    /*
-      result = await firstValueFrom(
-      this.httpService
-        .post(`${this.configService.get('FUSION_URL')}${Endpoints.CreatePosition}`, fusionData, {
-          headers: this.getFusionHeaders(),
-        })
-        .pipe(
-          map((r) => r),
-          retry(3),
-          catchError((err) => {
-            throw new Error(err);
-          }),
-        ),
-    );
-
-    */
-
-    result = {
-      data: {
-        RequestId: '2474861',
-        SourceSystemId: 'POS_123',
-      },
-    };
+    if (!skipFusion) {
+      try {
+        result = await firstValueFrom(
+          this.httpService
+            .post(`${this.configService.get('FUSION_URL')}${Endpoints.CreatePosition}`, fusionData, {
+              headers: this.getFusionHeaders(),
+            })
+            .pipe(
+              map((r) => r),
+              retry(3),
+              catchError((err) => {
+                throw new Error(err);
+              }),
+            ),
+        );
+      } catch (error) {
+        this.logger.error('fusion update failed ', error);
+        result = {
+          data: {
+            Status: 'ERROR',
+          },
+        };
+      }
+    } else {
+      result = {
+        data: {
+          RequestId: '2474861',
+          SourceSystemId: sourceSystemId,
+        },
+      };
+    }
 
     this.logger.log('Fusion result', result.data);
 
@@ -1692,36 +1709,59 @@ export class FusionService {
 
     let statusPayload = {
       RequestId: result.data.RequestId,
-      SourceSystemId: result.data.SourceSystemId,
+      SourceSystemId: sourceSystemId,
     };
 
-    /*
-    try {
-      result = await firstValueFrom(
-        this.httpService
-          .post(
-            `${this.configService.get('FUSION_URL')}${Endpoints.PositionStatus}`,
-            statusPayload,
-            { headers: this.getFusionHeaders() },
-          )
-          .pipe(
-            map((r) => r),
-            retry(3),
-            catchError((err) => {
-              throw new Error(err);
-            }),
-          ),
-      );
-    } catch (err) {
-      this.logger.error(err);
-      
+    if (!skipFusion) {
+      try {
+        result = await firstValueFrom(
+          this.httpService
+            .post(`${this.configService.get('FUSION_URL')}${Endpoints.PositionStatus}`, statusPayload, {
+              headers: this.getFusionHeaders(),
+            })
+            .pipe(
+              map((r) => r),
+              retry(3),
+              catchError((err) => {
+                throw new Error(err);
+              }),
+            ),
+        );
+      } catch (error) {
+        this.logger.error('fusion update status ', error);
+        result = {
+          data: {
+            Status: 'IN_PROGRESS',
+          },
+        };
+      }
+    } else {
+      result = {
+        data: {
+          RequestId: '2474861',
+          SourceSystemId: sourceSystemId,
+          Status: 'IN_PROGRESS',
+        },
+      };
     }
-    */
+
+    await this.prisma.fusionRequest.create({
+      data: {
+        positionRequestRef: positionRequest.id,
+        positionRef: positionId,
+        endpoint: Endpoints.PositionStatus,
+        payload: statusPayload,
+        response: result.data,
+        date: new Date(),
+      },
+    });
 
     // PositionHierarchy
 
     const reportsToPositionId = positionRequest.reports_to_position_id,
-      parentPosition = await this.prisma.position.findFirst({ where: { positionCode: reportsToPositionId } });
+      parentPosition = await this.prisma.position.findFirst({
+        where: { positionCode: new String(+reportsToPositionId).valueOf() },
+      });
 
     if (parentPosition == null) {
       this.logger.error('setPositionToApproved could not find parent position for ', positionCode);
@@ -1740,29 +1780,38 @@ export class FusionService {
 
     console.log('hierarchyData ', hierarchyData);
 
-    /*
-    result = await firstValueFrom(
-      this.httpService
-        .post(`${this.configService.get('FUSION_URL')}${Endpoints.PositionHierarchy}`, hierarchyData, {
-          headers: this.getFusionHeaders(),
-        })
-        .pipe(
-          map((r) => r),
-          retry(3),
-          catchError((err) => {
-            throw new Error(err);
-          }),
-        ),
-    );
+    if (!skipFusion) {
+      try {
+        result = await firstValueFrom(
+          this.httpService
+            .post(`${this.configService.get('FUSION_URL')}${Endpoints.PositionHierarchy}`, hierarchyData, {
+              headers: this.getFusionHeaders(),
+            })
+            .pipe(
+              map((r) => r),
+              retry(3),
+              catchError((err) => {
+                throw new Error(err);
+              }),
+            ),
+        );
+      } catch (error) {
+        this.logger.error('fusion position hierarchy failed ', error);
 
-    */
-
-    result = {
-      data: {
-        RequestId: '2474861',
-        SourceSystemId: 'POS_123',
-      },
-    };
+        result = {
+          data: {
+            Status: 'ERROR',
+          },
+        };
+      }
+    } else {
+      result = {
+        data: {
+          RequestId: '2474861',
+          SourceSystemId: sourceSystemId,
+        },
+      };
+    }
 
     this.logger.log('Fusion result', result.data);
 
@@ -1778,42 +1827,42 @@ export class FusionService {
     });
 
     statusPayload = {
-      RequestId: '2474861',
-      SourceSystemId: 'POS_123',
+      RequestId: result.data.RequestId,
+      SourceSystemId: sourceSystemId,
     };
 
-    /*
-
-    try {
-      result = await firstValueFrom(
-        this.httpService
-          .post(
-            `${this.configService.get('FUSION_URL')}${Endpoints.PositionStatus}`,
-            statusPayload,
-            { headers: this.getFusionHeaders() },
-          )
-          .pipe(
-            map((r) => r),
-            retry(3),
-            catchError((err) => {
-              throw new Error(err);
-            }),
-          ),
-      );
-    } catch (err) {
-      this.logger.error(err);
-      
+    if (!skipFusion) {
+      try {
+        result = await firstValueFrom(
+          this.httpService
+            .post(`${this.configService.get('FUSION_URL')}${Endpoints.PositionStatus}`, statusPayload, {
+              headers: this.getFusionHeaders(),
+            })
+            .pipe(
+              map((r) => r),
+              retry(3),
+              catchError((err) => {
+                throw new Error(err);
+              }),
+            ),
+        );
+      } catch (error) {
+        this.logger.error('fusion update status failed ', error);
+        result = {
+          data: {
+            Status: 'IN_PROGRESS',
+          },
+        };
+      }
+    } else {
+      result = {
+        data: {
+          RequestId: '2474861',
+          SourceSystemId: sourceSystemId,
+          Status: 'IN_PROGRESS',
+        },
+      };
     }
-
-    */
-
-    result = {
-      data: {
-        RequestId: '2474861',
-        SourceSystemId: 'POS_123',
-        Status: 'NOT_READY',
-      },
-    };
 
     await this.prisma.fusionRequest.create({
       data: {
@@ -1928,40 +1977,36 @@ export class FusionService {
       SourceSystemId: sourceSystemId,
     };
 
-    /*
-
-    try {
-      result = await firstValueFrom(
-        this.httpService
-          .post(
-            `${this.configService.get('FUSION_URL')}${Endpoints.PositionStatus}`,
-            payload,
-            { headers: this.getFusionHeaders() },
-          )
-          .pipe(
-            map((r) => r),
-            retry(3),
-            catchError((err) => {
-              throw new Error(err);
-            }),
-          ),
-      );
-    } catch (err) {
-      this.logger.error(err);
-      return {};
+    if (!skipFusion) {
+      try {
+        result = await firstValueFrom(
+          this.httpService
+            .post(`${this.configService.get('FUSION_URL')}${Endpoints.PositionStatus}`, payload, {
+              headers: this.getFusionHeaders(),
+            })
+            .pipe(
+              map((r) => r),
+              retry(3),
+              catchError((err) => {
+                throw new Error(err);
+              }),
+            ),
+        );
+      } catch (err) {
+        this.logger.error(err);
+        return {};
+      }
+    } else {
+      result = {
+        data: {
+          RequestId: '2474861',
+          SourceSystemId: 'POS_123',
+          Status: 'SUCCESS',
+          PositionId: '1234568',
+          PositionCode: '123458',
+        },
+      };
     }
-
-    */
-
-    result = {
-      data: {
-        RequestId: '2474861',
-        SourceSystemId: 'POS_123',
-        Status: 'SUCCESS',
-        PositionId: '1234568',
-        PositionCode: '123458',
-      },
-    };
 
     this.logger.log('Fusion result', result.data);
 
@@ -1994,5 +2039,91 @@ export class FusionService {
     const batchSize = limit + offset <= totalResults ? limit : totalResults - offset;
     console.log('getAvailableBatchSize ', limit, offset, totalResults, batchSize);
     return batchSize;
+  }
+
+  private async queryFusionRequestStatus() {
+    if (fusionStatusSemaphore == true) {
+      return;
+    }
+
+    fusionStatusSemaphore = true;
+
+    type FusionRequestRow = {
+      id: number;
+      positionRequestRef: number;
+      positionRef: string;
+      payload: Prisma.JsonValue;
+      response: Prisma.JsonValue;
+      endpoint: string;
+      date: Date;
+    };
+
+    const runQuery = async () => {
+      let results: FusionRequestRow[];
+
+      try {
+        results = await this.prisma.$queryRaw<FusionRequestRow[]>`
+
+          SELECT 
+            * 
+          FROM 
+            fusion_request 
+          WHERE 
+            "date" > CURRENT_DATE - INTERVAL '1 day' AND 
+            (
+              "response" @> '{"Status": "NOT_READY"}'::jsonb OR
+              "response" @> '{"Status": "IN_PROGRESS"}'::jsonb OR
+              "response" @> '{"Status": "UNPROCESSED"}'::jsonb
+            )
+        `;
+      } catch (err) {
+        this.logger.error('Could not retrieve status rows ', err);
+      }
+
+      if (results != null) {
+        this.logger.log('queryFusionRequestStatus returned ' + results.length + ' results');
+
+        for (let result of results) {
+          console.log(result.id, result.payload, result.response);
+
+          try {
+            const response = await firstValueFrom(
+              this.httpService
+                .post(`${this.configService.get('FUSION_URL')}${result.endpoint}`, result.payload, {
+                  headers: this.getFusionHeaders(),
+                })
+                .pipe(
+                  map((r) => r.data),
+                  retry(3),
+                  catchError((err) => {
+                    throw new Error(err);
+                  }),
+                ),
+            );
+
+            console.log(response);
+
+            await this.prisma.fusionRequest.update({
+              where: {
+                id: result.id,
+              },
+              data: {
+                response: response,
+              },
+            });
+          } catch (err) {
+            this.logger.error('Could not retrieve and update row ', err);
+          }
+        }
+      }
+
+      this.sleep(60).then(() => {
+        runQuery();
+      });
+    };
+
+    await runQuery();
+
+    fusionStatusSemaphore = false;
   }
 }
