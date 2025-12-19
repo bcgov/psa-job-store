@@ -264,9 +264,7 @@ export class PositionRequestApiService {
       // we already have a position number assigned to this position request
       // this happens if something went wrong previously and we did not get to changing the status of this position request
       // or if user is re-submitting after CS requested HM to make changes
-
       // check crm status etc
-
       // update submitted_at
       // try {
       //   positionRequest = await this.prisma.positionRequest.update({
@@ -279,7 +277,9 @@ export class PositionRequestApiService {
       //   this.logger.error('Failed to update submitted_at: ' + positionRequest.position_number.toString());
       //   this.logger.error(error);
       // }
-
+      /*
+      TODO: Check if this is needed, also called in this.waitForPositionSuccessStatus
+      
       positionRequest = await this.submitPositionRequest_afterCreatePosition(
         `${positionRequest.position_number.toString()}`.padStart(8, '0'),
         '', // TODO, get positionId from fusion
@@ -288,6 +288,8 @@ export class PositionRequestApiService {
         orgchart_png,
         comment,
       );
+
+      */
     }
     //} catch (error) {
     //  if (!(error instanceof AlexandriaErrorClass)) {
