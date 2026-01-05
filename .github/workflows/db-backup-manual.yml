@@ -69,7 +69,7 @@ jobs:
       - name: Login to OpenShift
         run: |
           
-          oc login ${{ secrets.OPENSHIFT_SERVER }} \
+          oc login --server=${{ secrets.OPENSHIFT_SERVER }} \
             --token=${{ secrets.OPENSHIFT_API_TOKEN }} \
             --insecure-skip-tls-verify=true
           oc project ${{ env.NAMESPACE }}
