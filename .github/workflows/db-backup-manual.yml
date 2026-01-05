@@ -20,6 +20,9 @@ on:
           - stage
           - main
 
+env: 
+  OPENSHIFT_API_TOKEN: ${{ secrets.SA_TOKEN }}
+
 jobs:
   backup-database:
     runs-on: ubuntu-latest
@@ -61,17 +64,13 @@ jobs:
       - name: Display Backup ID
         run: echo "Generated Backup ID is ${{ steps.set-backup-id.outputs.id }}"
 
-      - name: Echo secrets
-        id: echo-s
-        run: |
-          SERVER=${{ secrets.OPENSHIFT_SERVER }}
-          TOKEN=${{ secrets.OPENSHIFT_API_TOKEN }}
-          echo "url=$SERVER token=$TOKEN" >> $GITHUB_OUTPUT
+     
 
       - name: Login to OpenShift
         run: |
+          
           oc login ${{ secrets.OPENSHIFT_SERVER }} \
-            --token=${{ secrets.OPENSHIFT_API_TOKEN }} \
+            --token=${{ env.OPENSHIFT_API_TOKEN }} \
             --insecure-skip-tls-verify=true
           oc project ${{ env.NAMESPACE }}
 
