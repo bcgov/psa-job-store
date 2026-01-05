@@ -69,9 +69,7 @@ jobs:
 
       - name: Login to OpenShift
         run: |
-          
-          oc login --token=${{ secrets.OPENSHIFT_API_TOKEN }} \ 
-            --server=${{ env.OPENSHIFT_SERVER }} 
+          oc login --token=${{ secrets.OPENSHIFT_API_TOKEN }} --server=${{ env.OPENSHIFT_SERVER }} 
           oc project ${{ env.NAMESPACE }}
 
       - name: Configure Manual Backup
