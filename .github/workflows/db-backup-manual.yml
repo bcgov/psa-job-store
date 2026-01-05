@@ -31,6 +31,11 @@ jobs:
       test-start-time: ${{ steps.set-time.outputs.time }}
 
     steps:
+      - name: Install OpenShift CLI
+        run: |
+          curl -L https://mirror.openshift.com/pub/openshift-v4/clients/oc/latest/linux/oc.tar.gz -o oc.tar.gz
+          tar -xzvf oc.tar.gz
+          sudo mv oc /usr/local/bin/
       - name: Set environment variables
         run: |
           echo "NAMESPACE=f3c07a-${{ github.event_name == 'workflow_dispatch' && github.event.inputs.environment || (github.ref_name == 'main' && 'prod' || github.ref_name == 'stage' && 'test' || 'dev') }}" >> $GITHUB_ENV
