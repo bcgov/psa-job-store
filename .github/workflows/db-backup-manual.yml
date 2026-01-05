@@ -70,7 +70,7 @@ jobs:
         run: |
           
           oc login ${{ secrets.OPENSHIFT_SERVER }} \
-            --token=${{ env.OPENSHIFT_API_TOKEN }} \
+            --token=${{ secrets.OPENSHIFT_API_TOKEN }} \
             --insecure-skip-tls-verify=true
           oc project ${{ env.NAMESPACE }}
 
