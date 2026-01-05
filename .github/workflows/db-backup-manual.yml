@@ -13,10 +13,11 @@ on:
       environment:
         description: 'Environment to backup'
         required: true
-        default: 'development'
+        default: 'dev'
         type: choice
         options:
           - development
+          - dev
           - stage
           - main
 
