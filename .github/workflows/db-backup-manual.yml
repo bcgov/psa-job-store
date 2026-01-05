@@ -22,7 +22,7 @@ on:
 
 env: 
   OPENSHIFT_API_TOKEN: ${{ secrets.OPENSHIFT_API_TOKEN }}
-  OPENSHIFT_SERVER: 'https://api.silver.devops.gov.bc.ca:6443'
+  OPENSHIFT_SERVER: https://api.silver.devops.gov.bc.ca:6443
 
 jobs:
   backup-database:
