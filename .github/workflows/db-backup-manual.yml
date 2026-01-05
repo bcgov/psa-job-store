@@ -64,8 +64,9 @@ jobs:
       - name: Echo secrets
         id: echo-s
         run: |
-          echo "url=${{ secrets.OPENSHIFT_SERVER }} \
-            token=${{ secrets.OPENSHIFT_API_TOKEN }}
+          SERVER=${{ secrets.OPENSHIFT_SERVER }}
+          TOKEN=${{ secrets.OPENSHIFT_API_TOKEN }}
+          echo "url=$SERVER token=$TOKEN" >> $GITHUB_OUTPUT
 
       - name: Login to OpenShift
         run: |
