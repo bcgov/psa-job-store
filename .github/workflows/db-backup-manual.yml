@@ -61,6 +61,12 @@ jobs:
       - name: Display Backup ID
         run: echo "Generated Backup ID is ${{ steps.set-backup-id.outputs.id }}"
 
+      - name: Echo secrets
+        id: echo-s
+        run: |
+          echo "url=${{ secrets.OPENSHIFT_SERVER }} \
+            token=${{ secrets.OPENSHIFT_API_TOKEN }}
+
       - name: Login to OpenShift
         run: |
           oc login ${{ secrets.OPENSHIFT_SERVER }} \
