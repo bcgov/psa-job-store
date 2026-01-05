@@ -21,7 +21,7 @@ on:
           - main
 
 env: 
-  OPENSHIFT_API_TOKEN: ${{ secrets.SA_TOKEN }}
+  OPENSHIFT_API_TOKEN: ${{ secrets.OPENSHIFT_API_TOKEN }}
 
 jobs:
   backup-database:
