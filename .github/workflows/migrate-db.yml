@@ -46,6 +46,11 @@ jobs:
     environment:
       name: ${{ github.ref_name == 'main' && 'prod' || github.ref_name == 'stage' && 'test' || 'dev' }}
     steps:
+      - name: Install OpenShift CLI
+        run: |
+          curl -L https://mirror.openshift.com/pub/openshift-v4/clients/oc/latest/linux/oc.tar.gz -o oc.tar.gz
+          tar -xzvf oc.tar.gz
+          sudo mv oc /usr/local/bin/
       - name: Checkout
         uses: actions/checkout@v3
         with:
