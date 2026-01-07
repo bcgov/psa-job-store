@@ -172,6 +172,8 @@ export class PositionRequestApiService {
 
     if (!positionRequest) throw AlexandriaError('Position request not found');
 
+    this.logger.log('positionRequest.request_id is ', positionRequest.request_id);
+
     // ensure comments are saved
     try {
       if (comment != null && comment.length > 0) {
@@ -191,45 +193,62 @@ export class PositionRequestApiService {
       throw AlexandriaError('Failed to save comments');
     }
 
-    try {
-      // there is no position number associated with this position request - create position in peoplesoft
-      if (positionRequest.position_number == null) {
-        // in testmode, we can skip the peoplesoft call to create position
-        let position, positionRequestNeedsReview;
-        try {
-          if (this.configService.get('TEST_ENV') === 'true') {
-            positionRequestNeedsReview = (await this.positionRequestNeedsReview(id)).result;
+    //try {
+    // there is no position number associated with this position request - create position in peoplesoft
+    if (positionRequest.position_number == null) {
+      // in testmode, we can skip the peoplesoft call to create position
+      let position, positionRequestNeedsReview;
+      //try {
+      if (this.configService.get('TEST_ENV') === 'true') {
+        positionRequestNeedsReview = (await this.positionRequestNeedsReview(id)).result;
 
-            if (positionRequestNeedsReview === true)
-              position = { positionNbr: '00142558' }; // 00142558 is proposed (for verification required test)
-            else position = { positionNbr: '00132136' }; // this position needs to be in approved status in order to have valid final state
-          } else {
-            // note this returns data with this format (string with leading zeros): { positionNbr: '00132136', errMessage: '' }
-            [position, positionRequestNeedsReview] = await this.createPositionForPositionRequest(id);
-          }
-        } catch (error) {
-          this.logger.error(error);
-          throw AlexandriaError('Failed to create position in Peoplesoft');
+        if (positionRequestNeedsReview === true)
+          position = { positionNbr: '00142558' }; // 00142558 is proposed (for verification required test)
+        else position = { positionNbr: '00132136' }; // this position needs to be in approved status in order to have valid final state
+      } else {
+        // note this returns data with this format (string with leading zeros): { positionNbr: '00132136', errMessage: '' }
+
+        /*
+              We have to check if there's already a request id. If we have one, continue on and poll the status from Fusion.
+              If we don't have one, this is a new Fusion request and submit it
+            */
+
+        if (positionRequest.request_id == null || isNaN(positionRequest.request_id)) {
+          [position, positionRequestNeedsReview] = await this.createPositionForPositionRequest(id);
+        } else {
+          position = { RequestId: positionRequest['request_id'], SourceSystemId: positionRequest['source_system_id'] };
+          positionRequestNeedsReview = positionRequest['approval_type'] == 'VERIFIED';
         }
+      }
+      //} catch (error) {
+      //  this.logger.error(error);
+      //  throw AlexandriaError('Failed to create position in Peoplesoft');
+      //}
 
-        // write position number back to position request immidietely to prevent data loss and duplicate position creation
-        // also set submitted_at date
-        try {
-          positionRequest = await this.prisma.positionRequest.update({
-            where: { id },
-            data: {
-              approval_type: positionRequestNeedsReview ? 'VERIFIED' : 'AUTOMATIC',
-              position_number: +position.positionNbr,
-              submitted_at: dayjs().toDate(),
-            },
-          });
-        } catch (error) {
-          this.logger.error('Failed to save position number: ' + position.positionNbr);
-          this.logger.error(error);
-          throw AlexandriaError('Failed to save position number');
-        }
+      // write position number back to position request immidietely to prevent data loss and duplicate position creation
+      // also set submitted_at date
+      try {
+        positionRequest = await this.prisma.positionRequest.update({
+          where: { id },
+          data: {
+            approval_type: positionRequestNeedsReview ? 'VERIFIED' : 'AUTOMATIC',
+            //position_number: +position.positionNbr,
+            request_id: +position.RequestId,
+            source_system_id: position.SourceSystemId,
+            submitted_at: dayjs().toDate(),
+          },
+        });
+      } catch (error) {
+        this.logger.error('Failed to save position request id: ' + position.RequestId);
+        this.logger.error(error);
+        throw AlexandriaError('Failed to save position request id');
+      }
 
-        if (position.positionNbr.length > 0) {
+      /*
+          We don't have a position number yet, so we need to poll Fusion to get it
+        
+
+        if ( (position.RequestId+"").length > 0) {
           positionRequest = await this.submitPositionRequest_afterCreatePosition(
             position.positionNbr,
             id,
@@ -240,46 +259,86 @@ export class PositionRequestApiService {
         } else {
           throw AlexandriaError('Peoplesoft returned a blank position number');
         }
-      } else {
-        // we already have a position number assigned to this position request
-        // this happens if something went wrong previously and we did not get to changing the status of this position request
-        // or if user is re-submitting after CS requested HM to make changes
+          */
+    } else {
+      // we already have a position number assigned to this position request
+      // this happens if something went wrong previously and we did not get to changing the status of this position request
+      // or if user is re-submitting after CS requested HM to make changes
+      // check crm status etc
+      // update submitted_at
+      // try {
+      //   positionRequest = await this.prisma.positionRequest.update({
+      //     where: { id },
+      //     data: {
+      //       submitted_at: dayjs().toDate(),
+      //     },
+      //   });
+      // } catch (error) {
+      //   this.logger.error('Failed to update submitted_at: ' + positionRequest.position_number.toString());
+      //   this.logger.error(error);
+      // }
+      /*
+      TODO: Check if this is needed, also called in this.waitForPositionSuccessStatus
+      
+      positionRequest = await this.submitPositionRequest_afterCreatePosition(
+        `${positionRequest.position_number.toString()}`.padStart(8, '0'),
+        '', // TODO, get positionId from fusion
+        id,
+        positionRequest,
+        orgchart_png,
+        comment,
+      );
 
-        // check crm status etc
-
-        // update submitted_at
-        // try {
-        //   positionRequest = await this.prisma.positionRequest.update({
-        //     where: { id },
-        //     data: {
-        //       submitted_at: dayjs().toDate(),
-        //     },
-        //   });
-        // } catch (error) {
-        //   this.logger.error('Failed to update submitted_at: ' + positionRequest.position_number.toString());
-        //   this.logger.error(error);
-        // }
-
-        positionRequest = await this.submitPositionRequest_afterCreatePosition(
-          `${positionRequest.position_number.toString()}`.padStart(8, '0'),
-          id,
-          positionRequest,
-          orgchart_png,
-          comment,
-        );
-      }
-    } catch (error) {
-      if (!(error instanceof AlexandriaErrorClass)) {
-        this.logger.error(error);
-        throw AlexandriaError('An unexpected error occurred');
-      }
-      throw error;
+      */
     }
+    //} catch (error) {
+    //  if (!(error instanceof AlexandriaErrorClass)) {
+    //    this.logger.error(error);
+    //    throw AlexandriaError('An unexpected error occurred');
+    //  }
+    //  throw error;
+    //}
     return positionRequest;
+  }
+
+  async waitForPositionSuccessStatus(id: number) {
+    const positionResult = await this.getPositionRequestStatusAndNumber(id);
+
+    const status = positionResult['status'];
+
+    this.logger.log('waitForPositionSuccessStatus ', status);
+
+    if (status != 'SUCCESS') {
+      return positionResult;
+    } else if (status == 'SUCCESS') {
+      const positionNumber = positionResult['positionCode'];
+      const positionId = positionResult['positionId'];
+      let positionRequest = await this.prisma.positionRequest.findUnique({ where: { id } });
+
+      if (!positionRequest) throw AlexandriaError('Position request not found');
+
+      try {
+        positionRequest = await this.prisma.positionRequest.update({
+          where: { id },
+          data: {
+            position_number: +positionNumber,
+          },
+        });
+      } catch (error) {
+        this.logger.error('Failed to save position request id: ' + positionId);
+        this.logger.error(error);
+        throw AlexandriaError('Failed to save position request id');
+      }
+
+      this.submitPositionRequest_afterCreatePosition(positionNumber, positionId, id, positionRequest, '', '');
+
+      return positionResult;
+    }
   }
 
   private async submitPositionRequest_afterCreatePosition(
     positionNumber: string,
+    positionId: string,
     id,
     positionRequest: PositionRequest,
     orgchart_png,
@@ -290,17 +349,34 @@ export class PositionRequestApiService {
     // create or update CRM incident, and update position request status
 
     // retrieve position we just created from peoplesoft
-    let positionObj: Record<string, any> | null;
-    try {
-      // console.log('getting position from peoplesoft: ', positionNumber);
 
-      const result = await this.peoplesoftService.getPosition(positionNumber);
-      const rows = result?.data?.query?.rows;
-      positionObj = (rows ?? []).length > 0 ? rows[0] : null;
-    } catch (error) {
-      this.logger.error(error);
-      throw AlexandriaError('Failed to retrieve position from Peoplesoft');
-    }
+    let positionObj: Record<string, any> | null;
+    /*
+      // Opting to create the object from the positionRequest instead, because all the information is already contained in it 
+
+      try {
+        console.log('getting position from peoplesoft: ', positionId);
+
+        const result = await this.peoplesoftService.getPosition(positionId);
+        const rows = result?.data?.query?.rows;
+        positionObj = (rows ?? []).length > 0 ? rows[0] : null;
+      } catch (error) {
+        this.logger.error(error);
+        throw AlexandriaError('Failed to retrieve position from Peoplesoft');
+      
+      }
+    */
+
+    positionObj = {
+      'A.POSN_STATUS': 'Approved',
+      'A.EFF_STATUS': '', // Blank
+      'A.REPORTS_TO': positionRequest.reports_to_position_id,
+      'A.POSITION_NBR': positionRequest.position_number,
+      'A.DESCR': positionRequest['title'],
+      'A.DEPTID': positionRequest.department_id,
+    };
+
+    this.logger.log('Created positionObject ', positionObj);
 
     if (!positionObj) throw AlexandriaError('Failed to retrieve position from Peoplesoft');
 
@@ -351,6 +427,26 @@ export class PositionRequestApiService {
       throw AlexandriaError('Failed to update manager information.');
     }
 
+    try {
+      const fusionData = positionRequest.fusion_data ?? {};
+
+      await this.peoplesoftService.storeLocalPositionEntry(
+        positionRequest['id'],
+        positionRequest.position_number,
+        { positionId },
+        fusionData,
+      );
+    } catch (error) {
+      this.logger.error(error);
+    }
+
+    try {
+      await this.peoplesoftService.updatePositionToApproved(positionRequest.position_number);
+    } catch (error) {
+      this.logger.error(error);
+      throw AlexandriaError('Failed to update position request status');
+    }
+
     // CRM Incident Managements
     let crm_id;
     let crm_lookup_name;
@@ -358,6 +454,8 @@ export class PositionRequestApiService {
     let crm_category;
     try {
       const incident = await this.createOrUpdateCrmIncidentForPositionRequest(id, orgchart_png, comment);
+      this.logger.log('Incident ', incident);
+
       ({ crm_id, crm_lookup_name, crm_status, crm_category } = incident);
       await this.prisma.positionRequest.update({
         where: { id },
@@ -553,6 +651,51 @@ export class PositionRequestApiService {
     return positionRequestNew;
   }
 
+  async getPositionRequestStatusAndNumber(id: number) {
+    let positionRequest;
+    try {
+      positionRequest = await this.prisma.positionRequest.findFirstOrThrow({
+        where: { id },
+      });
+
+      this.logger.log('getPositionRequestStatusAndNumberFromFusion position ', positionRequest);
+    } catch (error) {
+      if (error instanceof AlexandriaErrorClass) {
+        return {};
+      } else {
+        this.logger.error(error);
+        //throw AlexandriaError('Failed to retrieve position request ' +id);
+        return {};
+      }
+    }
+
+    if (!positionRequest) {
+      return null;
+    }
+
+    let position;
+
+    try {
+      position = await this.peoplesoftService.getPositionRequestStatusAndNumber(
+        id,
+        positionRequest.request_id,
+        positionRequest.source_system_id,
+      );
+    } catch (error) {
+      this.logger.error(error);
+      throw AlexandriaError('Failed to retrieve position ' + id);
+    }
+
+    if (position == null) {
+      return null;
+    }
+
+    position['ready'] = position['status'] === 'SUCCESS';
+
+    this.logger.log('getPositionRequestStatusAndNumberFromFusion position ', position);
+    return position;
+  }
+
   // eslint-disable-next-line @typescript-eslint/no-unused-vars
   async getPositionRequests(
     { search, where, ...args }: ExtendedFindManyPositionRequestWithSearch,
@@ -718,7 +861,7 @@ export class PositionRequestApiService {
       NOT?: Array<PositionRequestWhereInput>;
     } = { id };
     const user: User = await this.userService.getUser({ where: { id: userId } });
-    console.log(user.metadata.org_chart.department_ids);
+    this.logger.log(user.metadata.org_chart.department_ids);
 
     whereCondition = {
       ...whereCondition,
@@ -1464,89 +1607,94 @@ export class PositionRequestApiService {
 
     // Get section significance settings from total_comp_create_form_misc
     const totalCompCreateFormMisc = (jobProfile.total_comp_create_form_misc as Record<string, any>) || {};
-    const isAccountabilitiesSectionSignificant = 
-      totalCompCreateFormMisc.isAccountabilitiesSectionSignificant ?? true;
-    const isEducationSectionSignificant = 
-      totalCompCreateFormMisc.isEducationSectionSignificant ?? true;
-    const isRelatedExperienceSectionSignificant = 
-      totalCompCreateFormMisc.isRelatedExperienceSectionSignificant ?? true;
-    const isProfessionalRegistrationSectionSignificant = 
+    const isAccountabilitiesSectionSignificant = totalCompCreateFormMisc.isAccountabilitiesSectionSignificant ?? true;
+    const isEducationSectionSignificant = totalCompCreateFormMisc.isEducationSectionSignificant ?? true;
+    const isRelatedExperienceSectionSignificant = totalCompCreateFormMisc.isRelatedExperienceSectionSignificant ?? true;
+    const isProfessionalRegistrationSectionSignificant =
       totalCompCreateFormMisc.isProfessionalRegistrationSectionSignificant ?? true;
-    const isSecurityScreeningsSectionSignificant = 
+    const isSecurityScreeningsSectionSignificant =
       totalCompCreateFormMisc.isSecurityScreeningsSectionSignificant ?? true;
 
     // Find position request job profile signficant sections
     const prJobProfileSignificantSections = {
       accountabilities: prJobProfile.accountabilities
-        .filter(
-          (obj) => {
-            // For custom items, check section significance flag
-            if (obj.isCustom === true) {
-              return isAccountabilitiesSectionSignificant && 
-                (obj.is_significant === true && (Object.keys(obj).indexOf('disabled') === -1 || obj.disabled === false));
-            }
-            // For non-custom items, check individual significance
-            return (obj.is_significant === true && (Object.keys(obj).indexOf('disabled') === -1 || obj.disabled === false)) ||
-              ((Object.keys(obj).indexOf('is_significant') === -1 || obj.is_significant === false) &&
-                obj.isCustom === true);
+        .filter((obj) => {
+          // For custom items, check section significance flag
+          if (obj.isCustom === true) {
+            return (
+              isAccountabilitiesSectionSignificant &&
+              obj.is_significant === true &&
+              (Object.keys(obj).indexOf('disabled') === -1 || obj.disabled === false)
+            );
           }
-        )
+          // For non-custom items, check individual significance
+          return (
+            (obj.is_significant === true && (Object.keys(obj).indexOf('disabled') === -1 || obj.disabled === false)) ||
+            ((Object.keys(obj).indexOf('is_significant') === -1 || obj.is_significant === false) &&
+              obj.isCustom === true)
+          );
+        })
         .map((obj) => obj.text),
       education: prJobProfile.education
-        .filter(
-          (obj) => {
-            // For custom items, check section significance flag
-            if (obj.isCustom === true) {
-              return isEducationSectionSignificant && 
-                (obj.is_significant === true && (Object.keys(obj).indexOf('disabled') === -1 || obj.disabled === false));
-            }
-            // For non-custom items, check individual significance
-            return obj.is_significant === true && (Object.keys(obj).indexOf('disabled') === -1 || obj.disabled === false);
+        .filter((obj) => {
+          // For custom items, check section significance flag
+          if (obj.isCustom === true) {
+            return (
+              isEducationSectionSignificant &&
+              obj.is_significant === true &&
+              (Object.keys(obj).indexOf('disabled') === -1 || obj.disabled === false)
+            );
           }
-        )
+          // For non-custom items, check individual significance
+          return obj.is_significant === true && (Object.keys(obj).indexOf('disabled') === -1 || obj.disabled === false);
+        })
         .map((obj) => obj.text),
       job_experience: prJobProfile.job_experience
-        .filter(
-          (obj) => {
-            // For custom items, check section significance flag
-            if (obj.isCustom === true) {
-              return isRelatedExperienceSectionSignificant && 
-                (obj.is_significant === true && (Object.keys(obj).indexOf('disabled') === -1 || obj.disabled === false));
-            }
-            // For non-custom items, check individual significance
-            return obj.is_significant === true && (Object.keys(obj).indexOf('disabled') === -1 || obj.disabled === false);
+        .filter((obj) => {
+          // For custom items, check section significance flag
+          if (obj.isCustom === true) {
+            return (
+              isRelatedExperienceSectionSignificant &&
+              obj.is_significant === true &&
+              (Object.keys(obj).indexOf('disabled') === -1 || obj.disabled === false)
+            );
           }
-        )
+          // For non-custom items, check individual significance
+          return obj.is_significant === true && (Object.keys(obj).indexOf('disabled') === -1 || obj.disabled === false);
+        })
         .map((obj) => obj.text),
       professional_registration_requirements: prJobProfile.professional_registration_requirements
-        .filter(
-          (obj) => {
-            // For custom items, check section significance flag
-            if (obj.isCustom === true) {
-              return isProfessionalRegistrationSectionSignificant && 
-                (obj.is_significant === true && (Object.keys(obj).indexOf('disabled') === -1 || obj.disabled === false));
-            }
-            // For non-custom items, check individual significance
-            return obj.is_significant === true && (Object.keys(obj).indexOf('disabled') === -1 || obj.disabled === false);
+        .filter((obj) => {
+          // For custom items, check section significance flag
+          if (obj.isCustom === true) {
+            return (
+              isProfessionalRegistrationSectionSignificant &&
+              obj.is_significant === true &&
+              (Object.keys(obj).indexOf('disabled') === -1 || obj.disabled === false)
+            );
           }
-        )
+          // For non-custom items, check individual significance
+          return obj.is_significant === true && (Object.keys(obj).indexOf('disabled') === -1 || obj.disabled === false);
+        })
         .map((obj) => obj.text),
       security_screenings: prJobProfile.security_screenings
         // check for undefined and treat it as significant, since significant flag was added later
         // initially all security screenings were treated as significant
-        .filter(
-          (obj) => {
-            // For custom items, check section significance flag
-            if (obj.isCustom === true) {
-              return isSecurityScreeningsSectionSignificant && 
-                ((obj.is_significant === true || obj.is_significant === undefined) && 
-                (Object.keys(obj).indexOf('disabled') === -1 || obj.disabled === false));
-            }
-            // For non-custom items, check individual significance
-            return (obj.is_significant === true || obj.is_significant === undefined) &&
-              (Object.keys(obj).indexOf('disabled') === -1 || obj.disabled === false);
+        .filter((obj) => {
+          // For custom items, check section significance flag
+          if (obj.isCustom === true) {
+            return (
+              isSecurityScreeningsSectionSignificant &&
+              (obj.is_significant === true || obj.is_significant === undefined) &&
+              (Object.keys(obj).indexOf('disabled') === -1 || obj.disabled === false)
+            );
           }
-        )
+          // For non-custom items, check individual significance
+          return (
+            (obj.is_significant === true || obj.is_significant === undefined) &&
+            (Object.keys(obj).indexOf('disabled') === -1 || obj.disabled === false)
+          );
+        })
         .map((obj) => obj.text),
     };
 
@@ -1675,6 +1823,8 @@ export class PositionRequestApiService {
       }
 
       const additionalInfo = positionRequest.additional_info as AdditionalInfo | null;
+
+      this.logger.log('additionalInfo ', additionalInfo);
 
       // Fetch the parent job profile with its classification info
       const parentJobProfile = await this.prisma.jobProfile.findUnique({
@@ -1893,7 +2043,7 @@ export class PositionRequestApiService {
         });
       }
 
-      // console.log('incident is ', incident);
+      this.logger.log('incident is ', incident);
 
       return incident;
     } catch (error) {
@@ -1913,8 +2063,18 @@ export class PositionRequestApiService {
     const additionalInfo = positionRequest.additional_info as AdditionalInfo | null;
 
     const paylist_department = await this.prisma.department.findUnique({
-      select: { id: true, organization: { select: { id: true } } },
+      select: { id: true, organization: { select: { id: true, fusion_id: true } }, fusion_id: true },
       where: { id: additionalInfo.department_id },
+    });
+
+    const locationInfo = await this.prisma.location.findUnique({
+      select: { id: true, fusion_id: true },
+      where: { id: additionalInfo.work_location_id },
+    });
+
+    const classificationInfo = await this.prisma.classification.findFirst({
+      select: { id: true, fusion_id: true },
+      where: { id: positionRequest.classification_id, peoplesoft_id: positionRequest.classification_peoplesoft_id },
     });
 
     // if excluded_mgr_position_number is not in a format like this '0123456 | First Last', then it's legacy, where it
@@ -1932,13 +2092,13 @@ export class PositionRequestApiService {
       excludedPositionNumber = additionalInfo.excluded_mgr_position_number;
     }
 
-    // console.log('excludedPositionNumber/Name: ', excludedPositionNumber, excludedEmployeeName);
+    this.logger.log('excludedPositionNumber/Name: ', excludedPositionNumber, excludedEmployeeName);
     const employees = (await this.peoplesoftService.getEmployeesForPositions([excludedPositionNumber])).get(
       excludedPositionNumber,
     );
 
     // Filter employees based on name if available
-    if (employees.length > 0) {
+    if (employees != null && employees.length > 0) {
       if (excludedEmployeeName) {
         const employee = employees.find((employee) => employee.name === excludedEmployeeName);
         if (employee) {
@@ -1955,9 +2115,9 @@ export class PositionRequestApiService {
     const employeeId = employees.length > 0 ? employees[0].id : null;
 
     const data = {
-      BUSINESS_UNIT: paylist_department.organization.id,
-      DEPTID: paylist_department.id,
-      JOBCODE: positionRequest.classification_id,
+      BUSINESS_UNIT: new String(paylist_department.organization.fusion_id).valueOf(),
+      DEPTID: new String(paylist_department.fusion_id).valueOf(),
+      JOBCODE: new String(classificationInfo.fusion_id).valueOf(),
       REPORTS_TO: positionRequest.reports_to_position_id,
       POSN_STATUS: positionRequestNeedsReview.result === true ? PositionStatus.Proposed : PositionStatus.Active,
       DESCR: positionRequest.title,
@@ -1965,12 +2125,19 @@ export class PositionRequestApiService {
       FULL_PART_TIME: PositionType.FullTime,
       TGB_E_CLASS: `P${(positionRequest.profile_json as Record<string, any>).number}`,
       TGB_APPRV_MGR: employeeId,
+
+      LOCATION_ID: new String(locationInfo.fusion_id).valueOf(),
     };
 
     let position;
     try {
-      position = await this.peoplesoftService.createPosition(data as PositionCreateInput);
-      if (position.positionNbr == null || position.positionNbr === '') {
+      position = await this.peoplesoftService.createPosition(data as PositionCreateInput, positionRequest);
+      /*
+        We're not receiving a positionNbr directly, so we're going to have to poll Fusion to get the new number.
+        createPosition now returns the RequestId and SourceSystemId
+      */
+
+      if (position.RequestId == null || position.RequestId === '') {
         this.logger.error('Failed to create position in PeopleSoft: ' + position.errMessage);
         throw AlexandriaError('Failed to create position in PeopleSoft');
       }

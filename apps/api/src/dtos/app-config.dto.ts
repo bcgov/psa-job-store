@@ -1,4 +1,4 @@
-import { IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
+import { IsBoolean, IsEnum, IsNotEmpty, IsOptional, IsString } from 'class-validator';
 import { Environment } from '../enums/environment.enum';
 import { SSOEnvironment } from '../enums/sso-environment.enum';
 
@@ -102,6 +102,22 @@ export class AppConfigDto {
   @IsString()
   PEOPLESOFT_PASSWORD: string;
 
+  @IsOptional()
+  @IsString()
+  FUSION_URL?: string;
+
+  @IsOptional()
+  @IsString()
+  FUSION_USERNAME?: string;
+
+  @IsOptional()
+  @IsString()
+  FUSION_PASSWORD?: string;
+
+  @IsOptional()
+  @IsBoolean()
+  USE_FUSION?: boolean;
+
   @IsString()
   USE_MOCKS: string;
 
@@ -111,4 +127,16 @@ export class AppConfigDto {
 
   @IsString()
   E2E_TESTING: string;
+
+  @IsString()
+  FUSION_TOKEN_URL: string;
+
+  @IsString()
+  FUSION_CLIENT_ID: string;
+
+  @IsString()
+  FUSION_CLIENT_SECRET: string;
+
+  @IsString()
+  FUSION_CLIENT_SCOPE: string;
 }

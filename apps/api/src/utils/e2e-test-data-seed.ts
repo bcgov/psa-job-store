@@ -1373,7 +1373,6 @@ export async function seed(prismaInp?: ExtendedPrismaClientType | ExtendedPrisma
       { id: 'SYS', name: 'SYS' },
       { id: 'SRS', name: 'SRS' },
       { id: 'QPA', name: 'QPA' },
-      { id: '', name: '' },
     ],
   };
 

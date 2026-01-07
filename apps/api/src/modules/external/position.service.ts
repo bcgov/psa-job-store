@@ -9,7 +9,6 @@ import { FindUniquePositionArgs } from './models/find-unique-position.args';
 import { PeoplesoftPosition } from './models/peoplesoft-position.model';
 import { PositionProfile } from './models/position-profile.model';
 import { Position } from './models/position.model';
-import { PeoplesoftV2Service } from './peoplesoft-v2.service';
 import { PeoplesoftService } from './peoplesoft.service';
 
 @Injectable()
@@ -21,7 +20,6 @@ export class PositionService {
     private readonly classificationService: ClassificationService,
     private readonly departmentService: DepartmentService,
     private readonly peoplesoftService: PeoplesoftService,
-    private readonly peoplesoftV2Service: PeoplesoftV2Service,
     private readonly organizationService: OrganizationService,
   ) {
     // (async () => {
@@ -44,6 +42,8 @@ export class PositionService {
 
     if (rows?.length > 0) {
       const raw = rows[0] as PeoplesoftPosition;
+
+      console.log('Raw ', raw);
 
       const classification = await this.classificationService.getClassificationForPeoplesoftPosition(raw);
 
@@ -113,11 +113,12 @@ export class PositionService {
     }
     const positionProfiles = await Promise.all(
       employeesInPosition.map(async (employee) => {
+        console.log(employee);
         const employeeResponse = await this.peoplesoftService.getEmployee(employee.id);
         // console.log('employeeResponse: ', JSON.stringify(employeeResponse, null, 2));
         const employeeDetail = employeeResponse?.data?.query?.rows?.[0];
         // console.log('employeeDetail: ', employeeDetail);
-        const profile = await this.peoplesoftV2Service.getProfileV2(null, employeeDetail?.EMPLID ?? '');
+        const profile = await this.peoplesoftService.getProfileV2(null, employeeDetail?.EMPLID ?? '');
         // console.log('profile: ', JSON.stringify(profile, null, 2));
         return {
           positionNumber: positionNumber,

@@ -32,4 +32,6 @@ export interface PositionCreateInput {
   TGB_APPRV_MGR?: string;
   TGB_SCRTY_SCRN_REQ?: PositionSecurityScreenRequired;
   TGB_SCRTY_SCRN_DT?: string;
+
+  LOCATION_ID?: string;
 }

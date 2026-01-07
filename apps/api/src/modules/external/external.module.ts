@@ -19,11 +19,11 @@ import { ClassificationService } from './classification.service';
 import { MockIncidentResolver } from './crm.mock.resolver';
 import { CrmService } from './crm.service';
 import { MockCrmService } from './crm.service.mock';
+import { FusionService } from './fusion.service';
 import { LocationResolver } from './location.resolver';
 import { LocationService } from './location.service';
 import { OrgChartResolver } from './org-chart.resolver';
 import { OrgChartService } from './org-chart.service';
-import { PeoplesoftV2Service } from './peoplesoft-v2.service';
 import { MockPeopleSoftResolver } from './peoplesoft.mock.resolver';
 import { PeoplesoftService } from './peoplesoft.service';
 import { MockPeoplesoftService } from './peoplesoft.service.mock';
@@ -45,6 +45,7 @@ import { PositionService } from './position.service';
     ClassificationService,
     DepartmentResolver,
     DepartmentService,
+    FusionService,
     OrganizationResolver,
     OrganizationService,
     PositionResolver,
@@ -63,7 +64,9 @@ import { PositionService } from './position.service';
         if (configService.get('USE_MOCKS') === 'true') {
           return new MockPeoplesoftService(configService);
         } else {
-          return new PeoplesoftService(configService, httpService, prisma, searchService);
+          return configService.get('USE_FUSION') === true
+            ? new FusionService(configService, httpService, prisma, searchService)
+            : new PeoplesoftService(configService, httpService, prisma, searchService);
         }
       },
       inject: [ConfigService, HttpService, PrismaService, SearchService],
@@ -87,25 +90,8 @@ import { PositionService } from './position.service';
     LocationResolver,
     PositionService,
     KeycloakService,
-    {
-      provide: PeoplesoftV2Service,
-      useFactory: (
-        configService: ConfigService<AppConfigDto, true>,
-        httpService: HttpService,
-        prisma: PrismaService,
-      ) => {
-        if (configService.get('USE_MOCKS') === 'true') {
-          // return new PeoplesoftV2Service(configService, httpService, prisma);
-          return new MockPeoplesoftService(configService);
-        } else {
-          return new PeoplesoftV2Service(configService, httpService, prisma);
-        }
-      },
-      inject: [ConfigService, HttpService, PrismaService],
-    },
-    // PeoplesoftV2Service,
     // SearchService,
   ],
-  exports: [PeoplesoftService, PeoplesoftV2Service, CrmService],
+  exports: [PeoplesoftService, CrmService],
 })
 export class ExternalModule {}

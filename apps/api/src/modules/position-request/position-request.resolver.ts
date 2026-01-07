@@ -38,6 +38,27 @@ export class PositionNeedsReviewResult {
 }
 
 @ObjectType()
+export class PositionStatusResult {
+  @Field(() => String)
+  requestId: string;
+
+  @Field(() => String)
+  sourceSystemId: string;
+
+  @Field(() => String)
+  status: string;
+
+  @Field(() => String)
+  positionId: string;
+
+  @Field(() => String)
+  positionCode: string;
+
+  @Field(() => Boolean)
+  ready: boolean;
+}
+
+@ObjectType()
 export class PositionRequestUserClassification {
   @Field(() => String, { nullable: false })
   id!: string;
@@ -220,6 +241,17 @@ export class PositionRequestApiResolver {
   ) {
     return this.positionRequestService.getPositionRequestByNumber(+positionNumber, user.id, user.roles);
   }
+
+  @Query(() => PositionStatusResult, { name: 'positionRequestStatusAndNumber' })
+  async getPositionRequestStatusAndNumber(@Args('id') id: number) {
+    return this.positionRequestService.getPositionRequestStatusAndNumber(id);
+  }
+
+  @Mutation(() => PositionStatusResult, { name: 'waitForPositionSuccessStatus' })
+  async waitForPositionSuccessStatus(@Args('id') id: number) {
+    return this.positionRequestService.waitForPositionSuccessStatus(id);
+  }
+
   @Query(() => PositionRequest, { name: 'positionRequestForDept', nullable: true })
   async getPositionRequestForDept(@GqlCurrentUser() user: Express.User, @Args('id') id: number) {
     return this.positionRequestService.getPositionRequestForDept(+id, user.id);

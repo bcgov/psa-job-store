@@ -7,7 +7,6 @@ import { FindManyUserArgs, FindUniqueUserArgs, User, UserUpdateInput } from '../
 import { globalLogger } from '../../utils/logging/logger.factory';
 import { CACHE_USER_PREFIX } from '../auth/auth.constants';
 import { CrmService } from '../external/crm.service';
-import { PeoplesoftV2Service } from '../external/peoplesoft-v2.service';
 import { PeoplesoftService } from '../external/peoplesoft.service';
 import { KeycloakService } from '../keycloak/keycloak.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -31,7 +30,6 @@ export class UserService {
     @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
     private readonly crmService: CrmService,
     private readonly keycloakService: KeycloakService,
-    private readonly peoplesoftV2Service: PeoplesoftV2Service,
     private readonly peoplesoftService: PeoplesoftService,
     private readonly prisma: PrismaService,
   ) {}
@@ -44,9 +42,12 @@ export class UserService {
   }
 
   private async getPeoplesoftMetadata(username: string) {
-    const profile = await this.peoplesoftV2Service.getProfileV2(username);
-    const employee = profile ? await this.peoplesoftV2Service.getEmployee(profile.EMPLID) : undefined;
+    const profile = await this.peoplesoftService.getProfileV2(username);
+    const employee = profile ? await this.peoplesoftService.getEmployeeV2(profile.EMPLID) : undefined;
 
+    console.log('getPeoplesoftMetadata ', employee);
+
+    profile['DEPTID'] = employee['department_id'];
     // todo: how will potential null values here have downstream effects?
     return {
       profile,
@@ -473,7 +474,7 @@ export class UserService {
 
       // Get profiles for each IDIR username
       const profiles = await Promise.all(
-        idirUsernames.map((username) => this.peoplesoftV2Service.getProfileV2(username, null)),
+        idirUsernames.map((username) => this.peoplesoftService.getProfileV2(username, null)),
       );
 
       // console.log('profiles: ', JSON.stringify(profiles, null, 2));
@@ -481,24 +482,28 @@ export class UserService {
       // Filter out undefined profiles and get employee details
       const validProfiles = profiles.filter((profile) => profile !== undefined);
       const employeeDetails = await Promise.all(
-        validProfiles.map((profile) => this.peoplesoftService.getEmployee(profile.EMPLID)),
+        validProfiles
+          .map((profile) => this.peoplesoftService.getEmployee(profile.EMPLID))
+          .filter((employee) => employee != null),
       );
 
-      // console.log('employeeDetails: ', JSON.stringify(employeeDetails, null, 2));
+      console.log('validProfiles: ', JSON.stringify(validProfiles, null, 2));
+      console.log('employeeDetails: ', JSON.stringify(employeeDetails, null, 2));
 
       // Compile final results
       const ret = employeeDetails
         .filter((detail) => detail?.data?.query?.rows?.[0])
         .map((detail) => {
           const employeeData = detail.data.query.rows[0];
-          // console.log('employeeData: ', JSON.stringify(employeeData, null, 2));
+          console.log('employeeData: ', JSON.stringify(employeeData, null, 2));
           return {
             position_number: employeeData.POSITION_NBR,
             name: employeeData.NAME_DISPLAY,
           };
-        });
+        })
+        .filter((entry) => entry.position_number != null);
 
-      // console.log('ret: ', JSON.stringify(ret, null, 2));
+      console.log('ret: ', JSON.stringify(ret, null, 2));
       return { numberOfResults: searchCount, results: ret };
     }
   }
