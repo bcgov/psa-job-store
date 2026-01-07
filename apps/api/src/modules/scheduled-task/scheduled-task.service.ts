@@ -16,6 +16,7 @@ export enum ScheduledTask {
   PeoplesoftSync = 'peoplesoft-sync',
   UserSync = 'user-sync',
   FusionSync = 'fusion-sync',
+  FusionPositionSync = 'fusion-position-sync',
   FusionRequestStatus = 'fusion-request-status',
   // FastTask = 'fast-task',
   // SlowTask = 'slow-task',
@@ -46,14 +47,20 @@ export class ScheduledTaskService {
     },
     [ScheduledTask.FusionSync]: {
       name: ScheduledTask.FusionSync,
-      lockTimeout: 5 * 60, // 5 minutes
-      frequency: 1 * 60, // 1 minute
+      lockTimeout: 15 * 60, // 15 minutes
+      frequency: 60 * 60, // 1 hour
+    },
+
+    [ScheduledTask.FusionPositionSync]: {
+      name: ScheduledTask.FusionPositionSync,
+      lockTimeout: 4 * 60 * 60, // 4 hours
+      frequency: 24 * 60 * 60, // 24 hours
     },
 
     [ScheduledTask.FusionRequestStatus]: {
       name: ScheduledTask.FusionRequestStatus,
-      lockTimeout: 5 * 60,
-      frequency: 1 * 60,
+      lockTimeout: 5 * 60, // 5 minutes
+      frequency: 1 * 60, // 5 minutes
     },
     // [ScheduledTask.FastTask]: {
     //   name: ScheduledTask.FastTask,
@@ -375,12 +382,23 @@ export class ScheduledTaskService {
     });
   }
 
+  // @Cron('36 */1 * * * *')
   async syncFusionData() {
     await this.executeTask(ScheduledTask.FusionSync, async () => {
-      await this.peoplesoftService.syncManually();
+      this.logger.log('syncFusionData');
+      await this.peoplesoftService.syncFusionData();
     });
   }
 
+  // @Cron('35 10 * * * *')
+  async syncFusionPositionData() {
+    await this.executeTask(ScheduledTask.FusionPositionSync, async () => {
+      this.logger.log('syncFusionPositionData');
+      await this.peoplesoftService.syncFusionPositionData();
+    });
+  }
+
+  // @Cron('*/1 * * * * *')
   async queryFusionRequestStatus() {
     await this.executeTask(ScheduledTask.FusionRequestStatus, async () => {
       this.logger.log('queryFusionRequestStatus');

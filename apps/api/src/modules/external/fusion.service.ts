@@ -171,6 +171,7 @@ class OAuth2 {
 }
 
 let syncSemaphore: boolean = false;
+let syncPositionSemaphore: boolean = false;
 let fusionStatusSemaphore: boolean = false;
 
 const skipFusion: boolean = !true;
@@ -199,8 +200,6 @@ export class FusionService {
         this.fusionHeaders.set('REST-Framework-Version', 9);
 
         this.logger.log('Obtained OAuth access token.');
-        //this.syncManually();
-        //this.queryFusionRequestStatus();
       })
       .catch(() => {
         this.logger.error('Failed to get access token.');
@@ -221,8 +220,8 @@ export class FusionService {
     return this.fusionHeaders;
   }
 
-  async syncManually() {
-    this.logger.log('Starting manual syncing.');
+  async syncFusionData() {
+    this.logger.log('Starting data syncing.');
 
     if (syncSemaphore) {
       return this.logger.log('Already syncing.');
@@ -230,22 +229,38 @@ export class FusionService {
 
     syncSemaphore = true;
 
-    //await this.updatePositionToApproved(154646);
-
-    //await this.syncPositions();
-
     /*
+    
     await this.syncWorkers();
     
-    await this.syncGrades(); //
-    await this.syncLocations(); //
+    await this.syncGrades(); 
+    await this.syncLocations(); 
     await this.syncClassifications();
     
-    
     await this.syncOrganizationsAndDepartments();
+
     */
 
+    this.logger.log('Finished data syncing.');
+
     syncSemaphore = false;
+  }
+
+  async syncFusionPositionData() {
+    this.logger.log('Starting position data syncing.');
+
+    if (syncPositionSemaphore) {
+      return this.logger.log('Already syncing.');
+    }
+
+    syncPositionSemaphore = true;
+
+    /*
+    await this.syncPositions();
+    */
+    this.logger.log('Finished position data syncing.');
+
+    syncPositionSemaphore = false;
   }
 
   async getClassifications(limit: number = 50, offset: number = 0) {
@@ -835,13 +850,18 @@ export class FusionService {
       totalNumberOfResults = totalResults;
 
       for await (const item of items) {
-        const ministryId = item.OrganizationDFF[0]?.parentDepartmentName;
+        const parentDepartmentName = item.OrganizationDFF[0]?.parentDepartmentName;
+        //console.log(item);
 
-        if (ministryId && ministryMap.get(ministryId)) {
+        if (parentDepartmentName /*&& ministryMap.get(ministryId)*/) {
+          //console.log("Insert dept ", item.Name);
           if (!/^\d{3}\-/.test(`${item.Name}`)) continue;
-          //console.log("Min ", ministryId);
-          //console.log("Loc ", item.LocationId );
-          // TES, this is still "039-9999" vs "BC100"
+
+          let ministryId = parentDepartmentName.split(/-/).shift();
+
+          if (!ministryId.startsWith('BC')) {
+            ministryId = 'BC' + ministryId;
+          }
 
           try {
             await this.prisma.department.upsert({
@@ -857,7 +877,7 @@ export class FusionService {
                 },
                 organization: {
                   connect: {
-                    id: 'BC100', //ministryId,
+                    id: ministryId,
                   },
                 },
                 peoplesoft_id: (ministryId ?? '').replace('BC', 'ST'),
@@ -866,6 +886,7 @@ export class FusionService {
                 name: item.Title,
                 effective_status: item.Status === 'A' ? 'Active' : 'Inactive', // Change to activeStatus?
                 effective_date: new Date(item.EffectiveStartDate),
+                parent_department_id: parentDepartmentName,
               },
               update: {
                 id: item.Name,
@@ -876,7 +897,7 @@ export class FusionService {
                 },
                 organization: {
                   connect: {
-                    id: 'BC100', //ministryId,
+                    id: ministryId,
                   },
                 },
                 peoplesoft_id: (ministryId ?? '').replace('BC', 'ST'),
@@ -885,6 +906,7 @@ export class FusionService {
                 name: item.Title,
                 effective_status: item.Status === 'A' ? 'Active' : 'Inactive',
                 effective_date: new Date(item.EffectiveStartDate),
+                parent_department_id: parentDepartmentName,
               },
             });
           } catch (e) {
@@ -1282,7 +1304,7 @@ export class FusionService {
   async syncOrganizationsAndDepartments() {
     // Use this function instead of calling syncOrganizations, syncDepartments independently
     // Departments rely on organizations which must exist prior to syncing departments
-    await this.syncOrganizations();
+    //await this.syncOrganizations();
     await this.syncDepartments();
   }
 
@@ -1366,6 +1388,9 @@ export class FusionService {
         : { where: { id: jobIdParts[1], peoplesoft_id: jobIdParts[0] } };
       console.log('classificationQuery ', classificationQuery);
       const classification = await this.prisma.classification.findFirst(classificationQuery);
+
+      if (classification == null) continue;
+
       this.logger.log('Class ', item.jobId, classification);
 
       const locationQuery = /^\d+$/.test(item.locationId)
@@ -1396,7 +1421,7 @@ export class FusionService {
         'A.POSN_STATUS': item.hiringStatus === 'APPROVED' ? 'Approved' : item.hiringStatus === 'FROZEN' ? 'Frozen' : '',
         'A.STATUS_DT': '',
         'A.REPORTS_TO': item.reportsTo ?? '',
-        'A.SAL_ADMIN_PLAN': classification.employee_group_id,
+        'A.SAL_ADMIN_PLAN': classification.employee_group_id ?? '',
         'A.TGB_E_CLASS': item.caseProfile ?? '',
         'A.LOCATION': location?.id ?? '',
         'A.UPDATE_INCUMBENTS': '',
@@ -2042,9 +2067,10 @@ export class FusionService {
   }
 
   private async queryFusionRequestStatus() {
-    if (fusionStatusSemaphore == true) {
+    /*if (fusionStatusSemaphore == true) {
       return;
     }
+    */
 
     fusionStatusSemaphore = true;
 
@@ -2118,7 +2144,7 @@ export class FusionService {
       }
 
       this.sleep(60).then(() => {
-        runQuery();
+        //  runQuery();
       });
     };
 

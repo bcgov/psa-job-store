@@ -710,7 +710,8 @@ export class PeoplesoftService {
     return {};
   }
 
-  async syncManually() {}
+  async syncFusionData() {}
+  async syncFusionPositionData() {}
 
   async queryFusionRequestStatus() {}
 
