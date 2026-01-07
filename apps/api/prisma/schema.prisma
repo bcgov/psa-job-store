@@ -558,6 +558,8 @@ model Department {
   PositionRequest PositionRequest[]
   metadata        DepartmentMetadata?
 
+  parent_department_id String?
+
   @@map("department")
 }
 
