@@ -25,7 +25,6 @@ export class AuthService {
 
   private async getPeoplesoftMetadata(idir: string) {
     const userProfile = await this.peoplesoftService.getProfileV2(idir);
-    console.log(`userProfile [1]`, userProfile);
     const employee = userProfile ? await this.peoplesoftService.getEmployeeV2(userProfile.EMPLID) : undefined;
 
     return {

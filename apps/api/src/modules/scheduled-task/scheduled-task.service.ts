@@ -382,7 +382,7 @@ export class ScheduledTaskService {
     });
   }
 
-  // @Cron('36 */1 * * * *')
+  @Cron('* 25 */1 * * *')
   async syncFusionData() {
     await this.executeTask(ScheduledTask.FusionSync, async () => {
       this.logger.log('syncFusionData');
@@ -390,7 +390,7 @@ export class ScheduledTaskService {
     });
   }
 
-  // @Cron('35 10 * * * *')
+  @Cron('* 35 10 * * *')
   async syncFusionPositionData() {
     await this.executeTask(ScheduledTask.FusionPositionSync, async () => {
       this.logger.log('syncFusionPositionData');
@@ -398,7 +398,7 @@ export class ScheduledTaskService {
     });
   }
 
-  // @Cron('*/1 * * * * *')
+  @Cron('* */1 * * * *')
   async queryFusionRequestStatus() {
     await this.executeTask(ScheduledTask.FusionRequestStatus, async () => {
       this.logger.log('queryFusionRequestStatus');
