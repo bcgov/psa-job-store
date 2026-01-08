@@ -382,7 +382,7 @@ export class ScheduledTaskService {
     });
   }
 
-  @Cron('* 25 */1 * * *')
+  @Cron('* 15 */1 * * *')
   async syncFusionData() {
     await this.executeTask(ScheduledTask.FusionSync, async () => {
       this.logger.log('syncFusionData');
@@ -390,7 +390,7 @@ export class ScheduledTaskService {
     });
   }
 
-  @Cron('* 35 10 * * *')
+  @Cron('* 20 15 * * *')
   async syncFusionPositionData() {
     await this.executeTask(ScheduledTask.FusionPositionSync, async () => {
       this.logger.log('syncFusionPositionData');

@@ -229,17 +229,13 @@ export class FusionService {
 
     syncSemaphore = true;
 
-    /*
-    
     await this.syncWorkers();
-    
-    await this.syncGrades(); 
-    await this.syncLocations(); 
-    await this.syncClassifications();
-    
-    await this.syncOrganizationsAndDepartments();
 
-    */
+    await this.syncGrades();
+    await this.syncLocations();
+    await this.syncClassifications();
+
+    await this.syncOrganizationsAndDepartments();
 
     this.logger.log('Finished data syncing.');
 
