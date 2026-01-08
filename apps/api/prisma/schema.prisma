@@ -284,7 +284,7 @@ view CurrentJobProfile {
   valid_to                               DateTime?
   views                                  Int?
 
-  @@id(name: "id_version", [id, version])
+  @@unique([id, version])
   @@map("current_job_profiles")
 }
 
