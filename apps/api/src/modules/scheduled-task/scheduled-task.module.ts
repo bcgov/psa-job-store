@@ -22,8 +22,9 @@ export class ScheduledTaskModule implements OnApplicationBootstrap {
     await this.scheduledTaskService.syncPeoplesoftData();
     */
     await this.scheduledTaskService.syncUsers();
-    await this.scheduledTaskService.syncFusionData();
-    await this.scheduledTaskService.syncFusionPositionData();
-    await this.scheduledTaskService.queryFusionRequestStatus();
+
+    //await this.scheduledTaskService.syncFusionData();
+    //await this.scheduledTaskService.syncFusionPositionData();
+    //await this.scheduledTaskService.queryFusionRequestStatus();
   }
 }
