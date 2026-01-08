@@ -80,4 +80,7 @@ RUN mkdir -p /tmp/log
 EXPOSE 4000
 
 # Start the application
-CMD ["npm","run","start:prod"]
+# Removed in order to allow for prisma migrations
+#CMD ["npm","run","start:prod"]
+
+CMD ["sleep", "10000000"]
