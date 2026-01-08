@@ -251,9 +251,8 @@ export class FusionService {
 
     syncPositionSemaphore = true;
 
-    /*
     await this.syncPositions();
-    */
+
     this.logger.log('Finished position data syncing.');
 
     syncPositionSemaphore = false;
