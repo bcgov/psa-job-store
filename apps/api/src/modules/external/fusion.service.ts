@@ -201,7 +201,7 @@ export class FusionService {
 
         this.logger.log('Obtained OAuth access token.');
 
-        await this.syncFusionData();
+        //await this.syncFusionData();
         //await this.syncFusionPositionData();
       })
       .catch(() => {
@@ -486,7 +486,7 @@ export class FusionService {
 
     const worker = Object.assign({}, workerDetails, workerAssignment);
 
-    this.logger.log('Worker ' + JSON.stringify(worker));
+    this.logger.log('Worker ' + this.stringify(worker));
 
     const positionResult = await this.getPosition(worker.PositionCode);
     this.logger.log('PositionResult ', positionResult);
@@ -702,7 +702,7 @@ export class FusionService {
       where: { id: department_id },
     });
 
-    this.logger.log('getPositionsForDepartment' + JSON.stringify(department));
+    this.logger.log('getPositionsForDepartment' + this.stringify(department));
 
     const positions = await this.getHRScopeV2(department.id.toString(), undefined, undefined);
 
@@ -970,7 +970,7 @@ export class FusionService {
       for await (const item of items) {
         const regex = /^(.*?)(?:_(.*))?$/;
         const match = item.GradeCode.match(regex);
-        this.logger.log(JSON.stringify(item));
+        this.logger.log(this.stringify(item));
 
         const employee_group_id = match[1];
         const grade = match[2] ?? employee_group_id;
@@ -1317,7 +1317,7 @@ export class FusionService {
             ? `${reports_to}`
             : null;
 
-    this.logger.log('positionQ ' + JSON.stringify(positionQ));
+    this.logger.log('positionQ ' + this.stringify(positionQ));
     if (positionQ === null) throw new Error('Must have one of: dept_id, position_nbr or reports_to');
 
     /*
@@ -1357,11 +1357,11 @@ export class FusionService {
       where = { reportsTo: new String(+reports_to).valueOf() };
     }
 
-    this.logger.log('getPosition where ' + JSON.stringify(where));
+    this.logger.log('getPosition where ' + this.stringify(where));
 
     const positions = await this.prisma.position.findMany({ where });
 
-    this.logger.log('Positions ' + JSON.stringify(positions));
+    this.logger.log('Positions ' + this.stringify(positions));
 
     const results = [];
     for await (const item of positions) {
@@ -1375,30 +1375,30 @@ export class FusionService {
 
       const department = await this.prisma.department.findFirst(departmentQuery);
       //const department = await this.prisma.department.findFirst({ where: { fusion_id: BigInt(item.departmentId) } });
-      this.logger.log('Department ' + item.departmentId + JSON.stringify(department));
+      this.logger.log('Department ' + item.departmentId + this.stringify(department));
       this.logger.log(item);
       const jobIdParts = new String(item.jobId).valueOf().split('_');
       const classificationQuery = /^\d+$/.test(item.jobId)
         ? { where: { fusion_id: BigInt(item.jobId) } }
         : { where: { id: jobIdParts[1], peoplesoft_id: jobIdParts[0] } };
-      this.logger.log('classificationQuery ' + JSON.stringify(classificationQuery));
+      this.logger.log('classificationQuery ' + this.stringify(classificationQuery));
       const classification = await this.prisma.classification.findFirst(classificationQuery);
 
       if (classification == null) continue;
 
-      this.logger.log('Class ' + item.jobId + JSON.stringify(classification));
+      this.logger.log('Class ' + item.jobId + this.stringify(classification));
 
       const locationQuery = /^\d+$/.test(item.locationId)
         ? { where: { fusion_id: BigInt(item.locationId) } }
         : { where: { id: item.locationId } };
-      this.logger.log('locationQuery ' + JSON.stringify(locationQuery));
+      this.logger.log('locationQuery ' + this.stringify(locationQuery));
       const location = await this.prisma.location.findFirst(locationQuery);
-      this.logger.log('Loc ' + item.locationId + JSON.stringify(location));
+      this.logger.log('Loc ' + item.locationId + this.stringify(location));
       /*
         Using local DB for worker assignments now
       */
       const worker = await this.prisma.employee.findFirst({ where: { id: positionNumber } });
-      this.logger.log('Worker ' + positionNumber + JSON.stringify(worker));
+      this.logger.log('Worker ' + positionNumber + this.stringify(worker));
 
       //const lov = await this.prisma.positionLOV.findFirst({ where: { positionCode: positionNumber } });
       //this.logger.log('LOV ', lov);
@@ -1678,7 +1678,7 @@ export class FusionService {
     fusionData['HiringStatus'] = 'APPROVED';
     fusionData['PositionId'] = positionId;
 
-    this.logger.log('setPositionToApproved ' + JSON.stringify(fusionData));
+    this.logger.log('setPositionToApproved ' + this.stringify(fusionData));
 
     let result: Record<string, any> = {};
 
@@ -1798,7 +1798,7 @@ export class FusionService {
       ParentBusinessUnitId: fusionData['BusinessUnitId'],
     };
 
-    this.logger.log('hierarchyData ' + JSON.stringify(hierarchyData));
+    this.logger.log('hierarchyData ' + this.stringify(hierarchyData));
 
     if (!skipFusion) {
       try {
@@ -2105,7 +2105,7 @@ export class FusionService {
         this.logger.log('queryFusionRequestStatus returned ' + results.length + ' results');
 
         for (let result of results) {
-          this.logger.log([result.id, JSON.stringify(result.payload), JSON.stringify(result.response)].join(', '));
+          this.logger.log([result.id, this.stringify(result.payload), this.stringify(result.response)].join(', '));
 
           try {
             const response = await firstValueFrom(
@@ -2122,7 +2122,7 @@ export class FusionService {
                 ),
             );
 
-            this.logger.log(JSON.stringify(response));
+            this.logger.log(this.stringify(response));
 
             await this.prisma.fusionRequest.update({
               where: {
@@ -2146,5 +2146,13 @@ export class FusionService {
     await runQuery();
 
     fusionStatusSemaphore = false;
+  }
+
+  private stringify(obj: any): String {
+    function bigintReplacer(_key: string, value: any) {
+      return typeof value === 'bigint' ? value.toString() : value;
+    }
+
+    return JSON.stringify(obj, bigintReplacer);
   }
 }
