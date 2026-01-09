@@ -21,6 +21,11 @@ export const loggerFactory = () => {
         return 'silent';
       }
 
+      // filter out /auth/callback requests from logs
+      if (req.url.startsWith('/auth/callback/')) {
+        return 'silent';
+      }
+
       return 'info';
     },
     genReqId: (req, res) => {
