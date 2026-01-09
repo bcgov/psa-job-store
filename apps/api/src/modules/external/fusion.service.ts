@@ -1609,7 +1609,8 @@ export class FusionService {
       },
     });
 
-    //throw AlexandriaError('Just because');
+    // Testing payload data w/o sending to Fusion
+    throw AlexandriaError('Just because');
 
     await this.storeLocalPositionEntry(+positionRequest['id'], 0, positionData, fusionData);
 
