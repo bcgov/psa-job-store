@@ -194,12 +194,15 @@ export class FusionService {
     this.oauth = new OAuth2(this.configService, this.httpService);
     this.oauth
       .getAccessToken()
-      .then(() => {
+      .then(async () => {
         this.fusionHeaders.set('Authorization', this.oauth.getAuthHeader());
 
         this.fusionHeaders.set('REST-Framework-Version', 9);
 
         this.logger.log('Obtained OAuth access token.');
+
+        await this.syncFusionData();
+        await this.syncFusionPositionData();
       })
       .catch(() => {
         this.logger.error('Failed to get access token.');
