@@ -172,7 +172,7 @@ export class PositionRequestApiService {
 
     if (!positionRequest) throw AlexandriaError('Position request not found');
 
-    this.logger.log('positionRequest.request_id is ', positionRequest.request_id);
+    this.logger.log('positionRequest.request_id is ' + positionRequest.request_id);
 
     // ensure comments are saved
     try {
@@ -306,7 +306,7 @@ export class PositionRequestApiService {
 
     const status = positionResult['status'];
 
-    this.logger.log('waitForPositionSuccessStatus ', status);
+    this.logger.log('waitForPositionSuccessStatus ' + status);
 
     if (status != 'SUCCESS') {
       return positionResult;
@@ -376,7 +376,7 @@ export class PositionRequestApiService {
       'A.DEPTID': positionRequest.department_id,
     };
 
-    this.logger.log('Created positionObject ', positionObj);
+    this.logger.log('Created positionObject ' + positionObj);
 
     if (!positionObj) throw AlexandriaError('Failed to retrieve position from Peoplesoft');
 
@@ -454,7 +454,7 @@ export class PositionRequestApiService {
     let crm_category;
     try {
       const incident = await this.createOrUpdateCrmIncidentForPositionRequest(id, orgchart_png, comment);
-      this.logger.log('Incident ', incident);
+      this.logger.log('Incident ' + incident);
 
       ({ crm_id, crm_lookup_name, crm_status, crm_category } = incident);
       await this.prisma.positionRequest.update({
@@ -658,7 +658,7 @@ export class PositionRequestApiService {
         where: { id },
       });
 
-      this.logger.log('getPositionRequestStatusAndNumberFromFusion position ', positionRequest);
+      this.logger.log('getPositionRequestStatusAndNumberFromFusion position ' + positionRequest);
     } catch (error) {
       if (error instanceof AlexandriaErrorClass) {
         return {};
@@ -692,7 +692,7 @@ export class PositionRequestApiService {
 
     position['ready'] = position['status'] === 'SUCCESS';
 
-    this.logger.log('getPositionRequestStatusAndNumberFromFusion position ', position);
+    this.logger.log('getPositionRequestStatusAndNumberFromFusion position ' + position);
     return position;
   }
 
@@ -1824,7 +1824,7 @@ export class PositionRequestApiService {
 
       const additionalInfo = positionRequest.additional_info as AdditionalInfo | null;
 
-      this.logger.log('additionalInfo ', additionalInfo);
+      this.logger.log('additionalInfo ' + additionalInfo);
 
       // Fetch the parent job profile with its classification info
       const parentJobProfile = await this.prisma.jobProfile.findUnique({
@@ -2043,7 +2043,7 @@ export class PositionRequestApiService {
         });
       }
 
-      this.logger.log('incident is ', incident);
+      this.logger.log('incident is ' + incident);
 
       return incident;
     } catch (error) {
@@ -2092,7 +2092,7 @@ export class PositionRequestApiService {
       excludedPositionNumber = additionalInfo.excluded_mgr_position_number;
     }
 
-    this.logger.log('excludedPositionNumber/Name: ', excludedPositionNumber, excludedEmployeeName);
+    this.logger.log('excludedPositionNumber/Name: ' + excludedPositionNumber + ', ' + excludedEmployeeName);
     const employees = (await this.peoplesoftService.getEmployeesForPositions([excludedPositionNumber])).get(
       excludedPositionNumber,
     );
