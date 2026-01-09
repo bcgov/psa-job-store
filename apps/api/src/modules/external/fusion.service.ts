@@ -201,7 +201,7 @@ export class FusionService {
 
         this.logger.log('Obtained OAuth access token.');
 
-        //await this.syncFusionData();
+        await this.syncFusionData();
         //await this.syncFusionPositionData();
       })
       .catch(() => {
@@ -233,7 +233,6 @@ export class FusionService {
     syncSemaphore = true;
 
     await this.syncWorkers();
-
     await this.syncGrades();
     await this.syncLocations();
     await this.syncClassifications();
