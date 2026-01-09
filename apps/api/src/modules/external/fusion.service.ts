@@ -370,7 +370,7 @@ export class FusionService {
   async getEmployee(employee_id: string) {
     const employee = await this.getEmployeeV2(employee_id);
 
-    this.logger.log('Employee is now ', employee);
+    this.logger.log('Employee is now ' + this.stringify(employee));
 
     return {
       data: {
@@ -489,9 +489,9 @@ export class FusionService {
     this.logger.log('Worker ' + this.stringify(worker));
 
     const positionResult = await this.getPosition(worker.PositionCode);
-    this.logger.log('PositionResult ', positionResult);
+    this.logger.log('PositionResult ' + this.stringify(positionResult));
     const position = (positionResult ? positionResult?.data?.query?.rows?.[0] : null) ?? {};
-    this.logger.log('Position ', position);
+    this.logger.log('Position ' + this.stringify(position));
 
     return worker
       ? {
@@ -544,10 +544,10 @@ export class FusionService {
     );
     */
 
-    this.logger.log('position_ids ', position_ids);
+    this.logger.log('position_ids ' + this.stringify(position_ids));
 
     const positions = await this.prisma.position.findMany({ where: { positionCode: { in: position_ids } } });
-    this.logger.log('Positions are now ', positions);
+    this.logger.log('Positions are now ' + this.stringify(positions));
 
     // Iterate over the IDs and do individual queries I guess
     const workers = [];
@@ -559,7 +559,7 @@ export class FusionService {
       workers.push(worker);
     }
 
-    this.logger.log('workers ', workers);
+    this.logger.log('workers ' + this.stringify(workers));
 
     positions.forEach((position) => {
       const workersForPosition = workers.filter((worker) =>
@@ -797,7 +797,7 @@ export class FusionService {
             },
           });
         } catch (e) {
-          this.logger.log(gradeId, employeeGroupId, grade);
+          this.logger.log([gradeId, employeeGroupId, grade].join(', '));
           this.logger.log(e);
         }
       }
@@ -936,7 +936,7 @@ export class FusionService {
             //this.logger.error(e);
           }
         } else {
-          //this.logger.log('Min id not found ', ministryId);
+          //this.logger.log('Min id not found ' +ministryId);
           //this.logger.log(item);
         }
       }
@@ -1080,7 +1080,7 @@ export class FusionService {
         const [_, name, id] = parts;
 
         if (id && name) {
-          this.logger.log('ClassificationCode ', item.ClassificationCode, name, id);
+          this.logger.log('ClassificationCode ' + [item.ClassificationCode, name, id].join(', '));
           this.logger.log(item);
           await this.prisma.organization.upsert({
             where: {
@@ -1453,7 +1453,7 @@ export class FusionService {
       ].join('?'),
     ].join('/');
 
-    this.logger.log('getProfileV2 ', url);
+    this.logger.log('getProfileV2 ' + url);
     const response = await firstValueFrom(
       this.httpService
         .get(url, {
@@ -1491,7 +1491,7 @@ export class FusionService {
   }
 
   private async getPublicWorkers(position_numbers: string[]) {
-    this.logger.log('Lookup workers for ', position_numbers);
+    this.logger.log('Lookup workers for ' + position_numbers);
     const result = await firstValueFrom(
       this.httpService
         .post(
@@ -1521,8 +1521,8 @@ export class FusionService {
   }
 
   async createPosition(data: PositionCreateInput, positionRequest: Map<string, any>) {
-    this.logger.log('createPosition ', data);
-    this.logger.log('positionRequest ', positionRequest);
+    this.logger.log('createPosition ' + this.stringify(data));
+    this.logger.log('positionRequest ' + this.stringify(positionRequest));
 
     const classificationId = positionRequest['classification_id'],
       classificationEmployeeGroupId = positionRequest['classification_employee_group_id'],
@@ -1543,15 +1543,15 @@ export class FusionService {
       location_id: additionalInfo['work_location_id'],
     };
 
-    this.logger.log('Classification ', classification);
-    this.logger.log('positionData ', positionData);
+    this.logger.log('Classification ' + this.stringify(classification));
+    this.logger.log('positionData ' + this.stringify(positionData));
 
     if (classification != null) {
       const grade = await this.prisma.grade.findFirst({
         where: { grade: classification.grade, employee_group_id: classification.employee_group_id },
       });
       if (grade != null) {
-        this.logger.log('Grade ', grade);
+        this.logger.log('Grade ' + this.stringify(grade));
         data['entry_grade_id'] = new String(grade.id).valueOf();
 
         const jobInfo = ((await this.getJobInfo(data['JOBCODE'])) ?? {}).items ?? [{}];
@@ -1560,7 +1560,7 @@ export class FusionService {
         const gradeLadderId = jobInfo[0]?.['GradeLadderId'];
         positionData['job_id'] = jobInfo[0]?.['JobCode'];
 
-        this.logger.log('Ladder ', gradeLadderId);
+        this.logger.log('Ladder ' + gradeLadderId);
 
         if (gradeLadderId != null) {
           data['grade_ladder_id'] = gradeLadderId;
@@ -1596,7 +1596,7 @@ export class FusionService {
       StandardWorkingFrequency: 'W',
     };
 
-    this.logger.log('FusionData ', fusionData);
+    this.logger.log('FusionData ' + this.stringify(fusionData));
 
     // Store fusion data here.
 
@@ -1638,7 +1638,7 @@ export class FusionService {
       };
     }
 
-    this.logger.log('Fusion result', result.data);
+    this.logger.log('Fusion result' + this.stringify(result.data));
 
     await this.prisma.fusionRequest.create({
       data: {
@@ -1714,7 +1714,7 @@ export class FusionService {
       };
     }
 
-    this.logger.log('Fusion result', result.data);
+    this.logger.log('Fusion result ' + this.stringify(result.data));
 
     await this.prisma.fusionRequest.create({
       data: {
@@ -1833,7 +1833,7 @@ export class FusionService {
       };
     }
 
-    this.logger.log('Fusion result', result.data);
+    this.logger.log('Fusion result ' + this.stringify(result.data));
 
     await this.prisma.fusionRequest.create({
       data: {
@@ -2028,7 +2028,7 @@ export class FusionService {
       };
     }
 
-    this.logger.log('Fusion result', result.data);
+    this.logger.log('Fusion result ' + this.stringify(result.data));
 
     const status = result.data.Status;
 
