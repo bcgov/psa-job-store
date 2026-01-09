@@ -483,7 +483,7 @@ export class FusionService {
 
     const worker = Object.assign({}, workerDetails, workerAssignment);
 
-    console.log('Worker ', worker);
+    this.logger.log('Worker ' + JSON.stringify(worker));
 
     const positionResult = await this.getPosition(worker.PositionCode);
     this.logger.log('PositionResult ', positionResult);
@@ -657,7 +657,7 @@ export class FusionService {
   }
 
   async getOrganizations(limit: number = 50, offset: number = 0) {
-    console.log('Sync ', limit, offset);
+    this.logger.log('Sync ' + limit + ', ' + offset);
     const response = await firstValueFrom(
       this.httpService
         .post(
@@ -699,7 +699,7 @@ export class FusionService {
       where: { id: department_id },
     });
 
-    console.log('getPositionsForDepartment', department);
+    this.logger.log('getPositionsForDepartment' + JSON.stringify(department));
 
     const positions = await this.getHRScopeV2(department.id.toString(), undefined, undefined);
 
@@ -846,10 +846,8 @@ export class FusionService {
 
       for await (const item of items) {
         const parentDepartmentName = item.OrganizationDFF[0]?.parentDepartmentName;
-        //console.log(item);
 
         if (parentDepartmentName /*&& ministryMap.get(ministryId)*/) {
-          //console.log("Insert dept ", item.Name);
           if (!/^\d{3}\-/.test(`${item.Name}`)) continue;
 
           let ministryId = parentDepartmentName.split(/-/).shift();
@@ -917,7 +915,6 @@ export class FusionService {
             this.logger.error(e);
           }
 
-          //console.log("Meta connect to ", item.Name);
           try {
             await this.prisma.departmentMetadata.upsert({
               where: {
@@ -970,7 +967,7 @@ export class FusionService {
       for await (const item of items) {
         const regex = /^(.*?)(?:_(.*))?$/;
         const match = item.GradeCode.match(regex);
-        console.log(item);
+        this.logger.log(JSON.stringify(item));
 
         const employee_group_id = match[1];
         const grade = match[2] ?? employee_group_id;
@@ -1317,7 +1314,7 @@ export class FusionService {
             ? `${reports_to}`
             : null;
 
-    this.logger.log('positionQ ', positionQ);
+    this.logger.log('positionQ ' + JSON.stringify(positionQ));
     if (positionQ === null) throw new Error('Must have one of: dept_id, position_nbr or reports_to');
 
     /*
@@ -1345,7 +1342,7 @@ export class FusionService {
     );
     */
 
-    this.logger.log('getPosition ', +position_nbr);
+    this.logger.log('getPosition ' + position_nbr);
 
     let where = {};
 
@@ -1357,11 +1354,11 @@ export class FusionService {
       where = { reportsTo: new String(+reports_to).valueOf() };
     }
 
-    this.logger.log('getPosition where ', where);
+    this.logger.log('getPosition where ' + JSON.stringify(where));
 
     const positions = await this.prisma.position.findMany({ where });
 
-    this.logger.log('Positions ', positions);
+    this.logger.log('Positions ' + JSON.stringify(positions));
 
     const results = [];
     for await (const item of positions) {
@@ -1375,30 +1372,30 @@ export class FusionService {
 
       const department = await this.prisma.department.findFirst(departmentQuery);
       //const department = await this.prisma.department.findFirst({ where: { fusion_id: BigInt(item.departmentId) } });
-      this.logger.log('Department ', item.departmentId, department);
-      console.log(item);
+      this.logger.log('Department ' + item.departmentId + JSON.stringify(department));
+      this.logger.log(item);
       const jobIdParts = new String(item.jobId).valueOf().split('_');
       const classificationQuery = /^\d+$/.test(item.jobId)
         ? { where: { fusion_id: BigInt(item.jobId) } }
         : { where: { id: jobIdParts[1], peoplesoft_id: jobIdParts[0] } };
-      console.log('classificationQuery ', classificationQuery);
+      this.logger.log('classificationQuery ' + JSON.stringify(classificationQuery));
       const classification = await this.prisma.classification.findFirst(classificationQuery);
 
       if (classification == null) continue;
 
-      this.logger.log('Class ', item.jobId, classification);
+      this.logger.log('Class ' + item.jobId + JSON.stringify(classification));
 
       const locationQuery = /^\d+$/.test(item.locationId)
         ? { where: { fusion_id: BigInt(item.locationId) } }
         : { where: { id: item.locationId } };
-      console.log('locationQuery ', locationQuery);
+      this.logger.log('locationQuery ' + JSON.stringify(locationQuery));
       const location = await this.prisma.location.findFirst(locationQuery);
-      this.logger.log('Loc ', item.locationId, location);
+      this.logger.log('Loc ' + item.locationId + JSON.stringify(location));
       /*
         Using local DB for worker assignments now
       */
       const worker = await this.prisma.employee.findFirst({ where: { id: positionNumber } });
-      this.logger.log('Worker ', positionNumber, worker);
+      this.logger.log('Worker ' + positionNumber + JSON.stringify(worker));
 
       //const lov = await this.prisma.positionLOV.findFirst({ where: { positionCode: positionNumber } });
       //this.logger.log('LOV ', lov);
@@ -1678,7 +1675,7 @@ export class FusionService {
     fusionData['HiringStatus'] = 'APPROVED';
     fusionData['PositionId'] = positionId;
 
-    console.log('setPositionToApproved ', fusionData);
+    this.logger.log('setPositionToApproved ' + JSON.stringify(fusionData));
 
     let result: Record<string, any> = {};
 
@@ -1798,7 +1795,7 @@ export class FusionService {
       ParentBusinessUnitId: fusionData['BusinessUnitId'],
     };
 
-    console.log('hierarchyData ', hierarchyData);
+    this.logger.log('hierarchyData ' + JSON.stringify(hierarchyData));
 
     if (!skipFusion) {
       try {
@@ -2057,7 +2054,7 @@ export class FusionService {
 
   private getAvailableBatchSize(limit: number, offset: number, totalResults: number) {
     const batchSize = limit + offset <= totalResults ? limit : totalResults - offset;
-    console.log('getAvailableBatchSize ', limit, offset, totalResults, batchSize);
+    this.logger.log('getAvailableBatchSize ' + [limit, offset, totalResults, batchSize].join(', '));
     return batchSize;
   }
 
@@ -2105,7 +2102,7 @@ export class FusionService {
         this.logger.log('queryFusionRequestStatus returned ' + results.length + ' results');
 
         for (let result of results) {
-          console.log(result.id, result.payload, result.response);
+          this.logger.log([result.id, JSON.stringify(result.payload), JSON.stringify(result.response)].join(', '));
 
           try {
             const response = await firstValueFrom(
@@ -2122,7 +2119,7 @@ export class FusionService {
                 ),
             );
 
-            console.log(response);
+            this.logger.log(JSON.stringify(response));
 
             await this.prisma.fusionRequest.update({
               where: {
