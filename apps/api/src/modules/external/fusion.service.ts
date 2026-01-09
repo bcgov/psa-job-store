@@ -202,7 +202,7 @@ export class FusionService {
         this.logger.log('Obtained OAuth access token.');
 
         await this.syncFusionData();
-        await this.syncFusionPositionData();
+        //await this.syncFusionPositionData();
       })
       .catch(() => {
         this.logger.error('Failed to get access token.');
