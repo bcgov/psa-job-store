@@ -204,8 +204,9 @@ export class FusionService {
         await this.syncFusionData();
         //await this.syncFusionPositionData();
       })
-      .catch(() => {
+      .catch((err) => {
         this.logger.error('Failed to get access token.');
+        this.logger.error(err);
       });
 
     this.peoplesoftHeaders = new AxiosHeaders();
