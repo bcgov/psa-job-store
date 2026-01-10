@@ -233,9 +233,12 @@ export class FusionService {
 
     syncSemaphore = true;
 
+    /*
+
     await this.syncGrades();
     await this.syncLocations();
     await this.syncClassifications();
+    */
 
     await this.syncOrganizationsAndDepartments();
     await this.syncWorkers();
