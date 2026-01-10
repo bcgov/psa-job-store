@@ -232,12 +232,12 @@ export class FusionService {
 
     syncSemaphore = true;
 
-    await this.syncWorkers();
     await this.syncGrades();
     await this.syncLocations();
     await this.syncClassifications();
 
     await this.syncOrganizationsAndDepartments();
+    await this.syncWorkers();
 
     this.logger.log('Finished data syncing.');
 
@@ -1298,7 +1298,8 @@ export class FusionService {
   async syncOrganizationsAndDepartments() {
     // Use this function instead of calling syncOrganizations, syncDepartments independently
     // Departments rely on organizations which must exist prior to syncing departments
-    //await this.syncOrganizations();
+
+    await this.syncOrganizations();
     await this.syncDepartments();
   }
 
