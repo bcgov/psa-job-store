@@ -233,12 +233,9 @@ export class FusionService {
 
     syncSemaphore = true;
 
-    /*
-
     await this.syncGrades();
     await this.syncLocations();
     await this.syncClassifications();
-    */
 
     await this.syncOrganizationsAndDepartments();
     await this.syncWorkers();
@@ -737,11 +734,18 @@ export class FusionService {
 
       const ss = this.getAvailableBatchSize(limit, offset, totalNumberOfResults);
 
-      const { items, hasMore, totalResults } = await this.getClassifications(
+      const bypassTestError = environment == 'TEST' && ss == 53;
+
+      let { items, hasMore, totalResults } = await this.getClassifications(
         // Fix to bypass last entry in batch that fails in TEST
-        environment == 'TEST' && ss == 53 ? 52 : ss,
+        bypassTestError ? 52 : ss,
         offset,
       );
+
+      if (bypassTestError) {
+        hasMore = false;
+      }
+
       totalNumberOfResults = totalResults;
 
       for await (const item of items) {
