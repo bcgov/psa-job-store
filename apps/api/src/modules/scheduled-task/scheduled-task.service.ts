@@ -382,7 +382,7 @@ export class ScheduledTaskService {
     });
   }
 
-  //@Cron('31 * * * *', { timeZone: 'America/Vancouver' })
+  @Cron('40 * * * *', { timeZone: 'America/Vancouver' })
   async syncFusionData() {
     await this.executeTask(ScheduledTask.FusionSync, async () => {
       this.logger.log('syncFusionData');

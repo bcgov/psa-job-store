@@ -201,7 +201,7 @@ export class FusionService {
 
         this.logger.log('Obtained OAuth access token.');
 
-        await this.syncFusionData();
+        //await this.syncFusionData();
         //await this.syncFusionPositionData();
       })
       .catch((err) => {
@@ -233,15 +233,11 @@ export class FusionService {
 
     syncSemaphore = true;
 
-    /*
-
     await this.syncGrades();
     await this.syncLocations();
     await this.syncClassifications();
 
     await this.syncOrganizationsAndDepartments();
-
-    */
 
     await this.syncWorkers();
 
@@ -548,6 +544,11 @@ export class FusionService {
         ),
     );
     */
+
+    // String leading zeros because database uses string comparisons
+    position_ids.forEach((v, idx, arr) => {
+      arr[idx] = new String(+v).valueOf();
+    });
 
     this.logger.log('position_ids ' + this.stringify(position_ids));
 
