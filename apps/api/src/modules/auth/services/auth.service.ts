@@ -27,6 +27,7 @@ export class AuthService {
     const userProfile = await this.peoplesoftService.getProfileV2(idir);
     const employee = userProfile ? await this.peoplesoftService.getEmployeeV2(userProfile.EMPLID) : undefined;
 
+    console.log('Employee is ', employee);
     return {
       department_id: employee ? employee.DEPTID : null,
       employee_id: userProfile ? userProfile.EMPLID : null,

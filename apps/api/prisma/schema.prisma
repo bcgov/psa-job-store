@@ -681,6 +681,7 @@ model Employee {
   fusion_id        BigInt  @db.BigInt // Fusion EmployeeId
   reports_to       String?      
   position_code    String?  
+  display_name      String?
   
   @@map("employee")
 }

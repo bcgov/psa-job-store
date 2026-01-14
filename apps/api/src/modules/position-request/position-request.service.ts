@@ -658,7 +658,7 @@ export class PositionRequestApiService {
         where: { id },
       });
 
-      this.logger.log('getPositionRequestStatusAndNumberFromFusion position ' + positionRequest);
+      this.logger.log('getPositionRequestStatusAndNumberFromFusion position ' + JSON.stringify(positionRequest));
     } catch (error) {
       if (error instanceof AlexandriaErrorClass) {
         return {};

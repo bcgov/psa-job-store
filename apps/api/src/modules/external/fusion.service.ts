@@ -233,11 +233,16 @@ export class FusionService {
 
     syncSemaphore = true;
 
+    /*
+
     await this.syncGrades();
     await this.syncLocations();
     await this.syncClassifications();
 
     await this.syncOrganizationsAndDepartments();
+
+    */
+
     await this.syncWorkers();
 
     this.logger.log('Finished data syncing.');
@@ -554,30 +559,39 @@ export class FusionService {
 
     for (const position of position_ids) {
       // This does not work, so do a local lookup instead
-      const worker = await this.prisma.employee.findMany({ where: { position_code: position } });
+      const worker = (await this.prisma.employee.findMany({ where: { position_code: position } })) ?? [];
 
-      workers.push(worker);
+      if (worker.length != 0 && worker[0] != null && worker[0].hasOwnProperty('id')) {
+        workers.push(worker[0]);
+      }
     }
 
     this.logger.log('workers ' + this.stringify(workers));
 
     positions.forEach((position) => {
-      const workersForPosition = workers.filter((worker) =>
-        worker.assignments?.some((assignment) => assignment.PositionCode === position.positionCode),
+      const workersForPosition = workers.filter(
+        (worker) =>
+          //worker.assignments?.some((assignment) => assignment.PositionCode === position.positionCode),
+          worker.position_code == position.positionCode,
       );
 
-      positionEmployeesMap.set(
-        String(position.positionCode).padStart(6, '0'),
-        workersForPosition.map((worker) => {
-          const value = {
-            id: worker.PersonNumber,
-            name: worker.DisplayName,
-            status: position.activeStatus === 'A' ? 'Active' : 'Inactive',
-          };
+      console.log('workersForPosition ', workersForPosition);
 
-          return value;
-        }),
-      );
+      if (workersForPosition.length > 0) {
+        positionEmployeesMap.set(
+          String(position.positionCode).padStart(6, '0'),
+          workersForPosition.map((worker) => {
+            const value = {
+              //id: worker.PersonNumber,
+              id: worker.id,
+              name: worker.display_name || 'Unknown',
+              status: position.activeStatus === 'A' ? 'Active' : 'Inactive',
+            };
+
+            return value;
+          }),
+        );
+      }
     });
 
     return positionEmployeesMap;
@@ -1134,35 +1148,51 @@ export class FusionService {
     while (fetchNextPage === true) {
       this.logger.log(`Fetching page ${offset / limit + 1}`);
 
-      const { items, hasMore, totalResults } = await this.getWorkers(
-        this.getAvailableBatchSize(limit, offset, totalNumberOfResults),
-        offset,
-      );
-      totalNumberOfResults = totalResults;
+      let items, hasMore, totalResults;
+
+      try {
+        ({ items, hasMore, totalResults } = await this.getWorkers(
+          this.getAvailableBatchSize(limit, offset, totalNumberOfResults),
+          offset,
+        ));
+        totalNumberOfResults = totalResults;
+      } catch (err) {
+        this.logger.error(err);
+      }
 
       items.forEach(async (item) => {
-        const { PersonId, PersonNumber } = item;
-        const { PositionCode } = item.assignments[0] ?? {};
+        try {
+          const { PersonId, PersonNumber, DisplayName } = item;
+          const { PositionCode } = item.assignments[0] ?? {};
 
-        const position = (await this.prisma.position.findFirst({ where: { positionCode: PositionCode } })) ?? {};
+          const position = (await this.prisma.position.findFirst({ where: { positionCode: PositionCode } })) ?? {};
 
-        await this.prisma.employee.upsert({
-          where: {
-            id: PersonNumber,
-          },
-          create: {
-            id: PersonNumber,
-            fusion_id: PersonId,
-            reports_to: position['reportsTo'] ?? null,
-            position_code: PositionCode,
-          },
-          update: {
-            id: PersonNumber,
-            fusion_id: PersonId,
-            reports_to: position['reportsTo'] ?? null,
-            position_code: PositionCode,
-          },
-        });
+          const initials = DisplayName?.split(/\s/)
+            .map((c) => c?.charAt(0) ?? '')
+            .join('');
+
+          await this.prisma.employee.upsert({
+            where: {
+              id: PersonNumber,
+            },
+            create: {
+              id: PersonNumber,
+              fusion_id: PersonId,
+              reports_to: position['reportsTo'] ?? null,
+              position_code: PositionCode,
+              display_name: initials,
+            },
+            update: {
+              id: PersonNumber,
+              fusion_id: PersonId,
+              reports_to: position['reportsTo'] ?? null,
+              position_code: PositionCode,
+              display_name: initials,
+            },
+          });
+        } catch (err) {
+          this.logger.error(err);
+        }
       });
 
       fetchNextPage = hasMore;
@@ -1405,8 +1435,8 @@ export class FusionService {
       /*
         Using local DB for worker assignments now
       */
-      const worker = await this.prisma.employee.findFirst({ where: { id: positionNumber } });
-      this.logger.log('Worker ' + positionNumber + this.stringify(worker));
+      //const worker = await this.prisma.employee.findFirst({ where: { id: positionNumber } });
+      this.logger.log('Worker ' + positionNumber);
 
       //const lov = await this.prisma.positionLOV.findFirst({ where: { positionCode: positionNumber } });
       //this.logger.log('LOV ', lov);
@@ -1447,7 +1477,7 @@ export class FusionService {
       }
     | undefined
   > {
-    const url = [
+    let url = [
       this.configService.get('PEOPLESOFT_URL'),
       [
         [PeoplesoftEndpoint.Profile, 'JSON', 'NONFILE'].join('/'),
@@ -1462,8 +1492,71 @@ export class FusionService {
     ].join('/');
 
     this.logger.log('getProfileV2 ' + url);
-    const response = await firstValueFrom(
-      this.httpService
+
+    let response;
+
+    try {
+      response = await firstValueFrom(
+        this.httpService
+          .get(url, {
+            headers: this.peoplesoftHeaders,
+          })
+          .pipe(
+            map((r) => {
+              if (r.data.status === 'success') {
+                const { rows } = r.data.data.query;
+
+                if (rows.length > 0) {
+                  const profile = rows[0];
+                  console.log('Profile ', profile);
+                  delete profile['attr:rownumber'];
+
+                  return profile;
+                } else {
+                  return undefined;
+                }
+              }
+
+              return undefined;
+            }),
+            retry(3),
+            catchError((err) => {
+              console.log(err);
+              throw new Error(err);
+            }),
+          ),
+      );
+    } catch (err) {
+      this.logger.error(err);
+      response = {
+        EMPLID: '203635',
+      };
+    }
+
+    url = [
+      this.configService.get('PEOPLESOFT_URL'),
+      [
+        [PeoplesoftEndpoint.Employees, 'JSON', 'NONFILE'].join('/'),
+        [
+          'isconnectedquery=n',
+          'maxrows=1',
+          'prompt_uniquepromptname=POSITION_NBR,EMPLID',
+          `prompt_fieldvalue=,${response['EMPLID']}`,
+          'json_resp=true',
+        ].join('&'),
+      ].join('?'),
+    ].join('/');
+
+    /*
+    this.logger.log('getProfileV2 employee ' + url);
+
+    
+    let employeeResponse;
+    
+    try {
+
+      employeeResponse = await firstValueFrom(
+        this.httpService
         .get(url, {
           headers: this.peoplesoftHeaders,
         })
@@ -1471,11 +1564,13 @@ export class FusionService {
           map((r) => {
             if (r.data.status === 'success') {
               const { rows } = r.data.data.query;
-
+              
               if (rows.length > 0) {
                 const profile = rows[0];
-                delete profile['attr:rownumber'];
-                profile['DEPTID'] = '100-3528'; // TODO
+                console.log("Profile ", profile);
+                  
+                  
+                  
                 return profile;
               } else {
                 return undefined;
@@ -1486,12 +1581,22 @@ export class FusionService {
           }),
           retry(3),
           catchError((err) => {
+            console.log(err);
             throw new Error(err);
           }),
         ),
-    );
+      );
+    } catch ( err ) {
 
-    return response;
+      employeeResponse = {
+        DEPTID: "100-3528"
+      };
+      this.logger.error(err);
+    }
+
+    */
+
+    return Object.assign({}, response /*, employeeResponse*/);
   }
 
   private async getPublicWorker(position_number: string) {
