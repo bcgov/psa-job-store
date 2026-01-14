@@ -66,6 +66,8 @@ export class OrgChartService {
     // );
     // console.log('employees: ', JSON.stringify(flatEmployees, null, 2));
 
+    console.log('employees ', employees);
+
     // Loop through response and generate the tree for everyone in the _current department_
     filteredPositions.forEach((position) => {
       // In rare cases, positions do _not_ include a value for A.REPORTS_TO, which causes the org chart to crash.

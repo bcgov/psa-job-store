@@ -9,7 +9,7 @@ export const apolloPinoLoggingPlugin: ApolloServerPlugin = {
       async didEncounterErrors(rc) {
         // remove png data from log if error happened during pr submission
         const vars = rc.request.variables;
-        if (vars.orgchart_png) vars.orgchart_png = '[REDACTED]';
+        if (vars && vars.orgchart_png) vars.orgchart_png = '[REDACTED]';
 
         globalLogger.error(
           {
