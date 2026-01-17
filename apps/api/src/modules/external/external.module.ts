@@ -29,6 +29,8 @@ import { PeoplesoftService } from './peoplesoft.service';
 import { MockPeoplesoftService } from './peoplesoft.service.mock';
 import { PositionResolver } from './position.resolver';
 import { PositionService } from './position.service';
+import { MailService } from '../mail/mail.service';
+import { MailModule } from '../mail/mail.module';
 
 @Module({
   imports: [
@@ -39,6 +41,7 @@ import { PositionService } from './position.service';
     forwardRef(() => OrganizationModule),
     PrismaModule,
     SearchModule,
+    MailModule,
   ],
   providers: [
     ClassificationResolver,
@@ -60,16 +63,17 @@ import { PositionService } from './position.service';
         httpService: HttpService,
         prisma: PrismaService,
         searchService: SearchService,
+        mailService: MailService,
       ) => {
         if (configService.get('USE_MOCKS') === 'true') {
           return new MockPeoplesoftService(configService);
         } else {
           return configService.get('USE_FUSION') === true
-            ? new FusionService(configService, httpService, prisma, searchService)
+            ? new FusionService(configService, httpService, prisma, searchService, mailService)
             : new PeoplesoftService(configService, httpService, prisma, searchService);
         }
       },
-      inject: [ConfigService, HttpService, PrismaService, SearchService],
+      inject: [ConfigService, HttpService, PrismaService, SearchService, MailService],
     },
     {
       provide: CrmService,
