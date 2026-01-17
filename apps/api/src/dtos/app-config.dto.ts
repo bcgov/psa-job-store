@@ -139,4 +139,12 @@ export class AppConfigDto {
 
   @IsString()
   FUSION_CLIENT_SCOPE: string;
+
+  @IsOptional()
+  @IsString()
+  SMTP_HOST?: string;
+
+  @IsOptional()
+  @IsString()
+  SMTP_PORT?: string;
 }
