@@ -59,6 +59,13 @@ export class PositionStatusResult {
 }
 
 @ObjectType()
+export class PositionApprovedStatusResult {
+  @Field(() => String)
+  @Field(() => String)
+  status: string;
+}
+
+@ObjectType()
 export class PositionRequestUserClassification {
   @Field(() => String, { nullable: false })
   id!: string;
@@ -248,8 +255,12 @@ export class PositionRequestApiResolver {
   }
 
   @Mutation(() => PositionStatusResult, { name: 'waitForPositionSuccessStatus' })
-  async waitForPositionSuccessStatus(@Args('id') id: number) {
-    return this.positionRequestService.waitForPositionSuccessStatus(id);
+  async waitForPositionSuccessStatus(
+    @Args('id') id: number,
+    @Args('orgchart_png', { nullable: true }) orgchart_png?: string,
+    @Args('comment', { nullable: true }) comment?: string,
+  ) {
+    return this.positionRequestService.waitForPositionSuccessStatus(id, orgchart_png, comment);
   }
 
   @Query(() => PositionRequest, { name: 'positionRequestForDept', nullable: true })
@@ -320,5 +331,22 @@ export class PositionRequestApiResolver {
   @Query(() => [PositionRequest], { name: 'staleUnknownPositionRequests' })
   async getStaleUnknownPositionRequests() {
     return this.positionRequestService.getStaleUnknownPositionRequests();
+  }
+
+  @Roles('total-compensation', 'classification')
+  @Mutation(() => PositionApprovedStatusResult, { name: 'updatePositionApprovedStatus' })
+  async updatePositionApprovedStatus(
+    @Args('id', { type: () => Int }) id: number,
+    @Args('code', { type: () => String }) code: string,
+  ) {
+    let status;
+
+    try {
+      status = await this.positionRequestService.updatePositionToApproved(id, code);
+    } catch (error) {
+      return { status: false };
+    }
+
+    return { status };
   }
 }

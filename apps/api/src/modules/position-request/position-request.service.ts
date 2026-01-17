@@ -301,7 +301,7 @@ export class PositionRequestApiService {
     return positionRequest;
   }
 
-  async waitForPositionSuccessStatus(id: number) {
+  async waitForPositionSuccessStatus(id: number, orgchart_png: string, comment: string) {
     const positionResult = await this.getPositionRequestStatusAndNumber(id);
 
     const status = positionResult['status'];
@@ -330,10 +330,32 @@ export class PositionRequestApiService {
         throw AlexandriaError('Failed to save position request id');
       }
 
-      this.submitPositionRequest_afterCreatePosition(positionNumber, positionId, id, positionRequest, '', '');
+      await this.submitPositionRequest_afterCreatePosition(
+        positionNumber,
+        positionId,
+        id,
+        positionRequest,
+        orgchart_png,
+        comment,
+      );
+
+      positionRequest = await this.prisma.positionRequest.findUnique({ where: { id } });
+
+      positionResult.status = positionRequest.status;
 
       return positionResult;
     }
+  }
+
+  async updatePositionToApproved(id: number, code: string) {
+    try {
+      await this.peoplesoftService.updatePositionToApproved(id);
+    } catch (error) {
+      this.logger.error(error);
+      throw AlexandriaError('Failed to update position request status');
+    }
+
+    return true;
   }
 
   private async submitPositionRequest_afterCreatePosition(
@@ -368,7 +390,7 @@ export class PositionRequestApiService {
     */
 
     positionObj = {
-      'A.POSN_STATUS': 'Approved',
+      'A.POSN_STATUS': 'Proposed', // UAT This should be checked, because not all positions are "approved"
       'A.EFF_STATUS': '', // Blank
       'A.REPORTS_TO': positionRequest.reports_to_position_id,
       'A.POSITION_NBR': positionRequest.position_number,
@@ -376,7 +398,7 @@ export class PositionRequestApiService {
       'A.DEPTID': positionRequest.department_id,
     };
 
-    this.logger.log('Created positionObject ' + positionObj);
+    this.logger.log('Created positionObject ' + JSON.stringify(positionObj));
 
     if (!positionObj) throw AlexandriaError('Failed to retrieve position from Peoplesoft');
 
@@ -440,11 +462,16 @@ export class PositionRequestApiService {
       this.logger.error(error);
     }
 
-    try {
-      await this.peoplesoftService.updatePositionToApproved(positionRequest.position_number);
-    } catch (error) {
-      this.logger.error(error);
-      throw AlexandriaError('Failed to update position request status');
+    // Only do this part if the position does not need to be approved first
+    const positionRequestNeedsReview = await this.positionRequestNeedsReview(positionRequest.id);
+
+    if (positionRequestNeedsReview.result != true) {
+      try {
+        await this.peoplesoftService.updatePositionToApproved(positionRequest.position_number);
+      } catch (error) {
+        this.logger.error(error);
+        throw AlexandriaError('Failed to update position request status');
+      }
     }
 
     // CRM Incident Managements
@@ -692,7 +719,7 @@ export class PositionRequestApiService {
 
     position['ready'] = position['status'] === 'SUCCESS';
 
-    this.logger.log('getPositionRequestStatusAndNumberFromFusion position ' + position);
+    this.logger.log('getPositionRequestStatusAndNumberFromFusion position ' + JSON.stringify(position));
     return position;
   }
 
@@ -1824,7 +1851,7 @@ export class PositionRequestApiService {
 
       const additionalInfo = positionRequest.additional_info as AdditionalInfo | null;
 
-      this.logger.log('additionalInfo ' + additionalInfo);
+      this.logger.log('additionalInfo ' + JSON.stringify(additionalInfo));
 
       // Fetch the parent job profile with its classification info
       const parentJobProfile = await this.prisma.jobProfile.findUnique({
@@ -1866,12 +1893,43 @@ export class PositionRequestApiService {
               supervisorProfile: supervisorProfile.length > 0 ? supervisorProfile[0] : null,
             })
           : null;
-      const jobProfileBase64 = await Packer.toBase64String(jobProfileDocument);
+
+      console.log(jobProfileDocument);
+      let jobProfileBase64;
+
+      try {
+        jobProfileBase64 = await Packer.toBase64String(jobProfileDocument);
+      } catch (err) {
+        this.logger.error('Could not pack profile document ' + err);
+        jobProfileBase64 = '';
+      }
 
       const zeroFilledPositionNumber =
         positionRequest.position_number != null ? String(positionRequest.position_number).padStart(8, '0') : null;
 
       const pngFileName = `Organization Chart ${zeroFilledPositionNumber} ${positionRequest.title} ${formattedDate}.png`;
+
+      const fileAttachments = [
+        ...(orgchartPng && orgchartPng.trim() !== ''
+          ? [
+              {
+                name: 'Org chart',
+                fileName: pngFileName,
+                contentType: 'image/png',
+                data: orgchartPng,
+              },
+            ]
+          : []),
+      ];
+
+      if (jobProfileBase64 != '') {
+        fileAttachments.push({
+          name: `${zeroFilledPositionNumber} - ${positionRequest.title} ${classification.code}.docx`.substring(0, 40),
+          fileName: `${zeroFilledPositionNumber} - ${positionRequest.title} ${classification.code}.docx`,
+          contentType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
+          data: jobProfileBase64,
+        });
+      }
 
       const data: IncidentCreateUpdateInput = {
         subject: `Job Store - Position Number Request - ${classification.code}`,
@@ -1995,29 +2053,15 @@ export class PositionRequestApiService {
               <li>Please attach a copy of the job profile you will be using.    Attached</li>
               <li>Please attach a copy of your Organization Chart that shows the topic position and the job titles, position numbers and classification levels, of the supervisor, peer and subordinate positions.    Attached</li>
             </ul>
+
+            <br />
+            <a href="http://localhost:3000/requests/positions/manage/approved/${positionRequest.id}?code=${positionRequest.submission_id}">View and approve this position in the Job Store</a>
           </div>
 
           `,
           },
         ],
-        fileAttachments: [
-          {
-            name: `${zeroFilledPositionNumber} - ${positionRequest.title} ${classification.code}.docx`.substring(0, 40),
-            fileName: `${zeroFilledPositionNumber} - ${positionRequest.title} ${classification.code}.docx`,
-            contentType: 'application/vnd.openxmlformats-officedocument.wordprocessingml.document',
-            data: jobProfileBase64,
-          },
-          ...(orgchartPng && orgchartPng.trim() !== ''
-            ? [
-                {
-                  name: 'Org chart',
-                  fileName: pngFileName,
-                  contentType: 'image/png',
-                  data: orgchartPng,
-                },
-              ]
-            : []),
-        ],
+        fileAttachments,
       };
 
       let incident: Record<string, any> = {};
