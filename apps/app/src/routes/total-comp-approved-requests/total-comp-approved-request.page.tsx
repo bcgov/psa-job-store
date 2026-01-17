@@ -20,6 +20,8 @@ import { OrgChartType } from '../org-chart/enums/org-chart-type.enum';
 import './total-comp-approved-request.page.css';
 const { Text } = Typography;
 
+import { useUpdatePositionApprovedStatusMutation } from '../../redux/services/graphql-api/position-request.api';
+
 // Import your API service to fetch position request
 
 export const TotalCompApprovedRequestPage = () => {
@@ -48,6 +50,8 @@ export const TotalCompApprovedRequestPage = () => {
     { where: { id: `${data?.positionRequest?.position_number?.toString().padStart(8, '0')}` } },
     { skip: data?.positionRequest?.reports_to_position != null || !data?.positionRequest?.position_number },
   );
+
+  const [updatePositionApprovedStatusMutation] = useUpdatePositionApprovedStatusMutation();
 
   const submissionDetailsItems = [
     {
@@ -285,6 +289,25 @@ export const TotalCompApprovedRequestPage = () => {
     message.success('Link copied to clipboard!');
   };
 
+  const handleApprovePosition = async () => {
+    console.log(data);
+    const urlParams = new URLSearchParams(window.location.search);
+
+    const code = urlParams.get('code') || '';
+    console.log('Using code ', code);
+
+    const result = await updatePositionApprovedStatusMutation({
+      id: data?.positionRequest?.position_number ?? 0,
+      code,
+    }).unwrap();
+
+    console.log(result);
+    if (result && result?.updatePositionApprovedStatus.status) {
+      message.success('Position has been marked as approved');
+      return;
+    }
+  };
+
   const tabItems = [
     {
       key: '1',
@@ -504,6 +527,21 @@ export const TotalCompApprovedRequestPage = () => {
                               Copy URL
                             </Button>
                           </Space> */}
+                        </div>
+                        <Divider />
+                        <div>
+                          <Text strong>Position request status</Text>
+
+                          {data?.positionRequest?.status == 'VERIFICATION' ? (
+                            <>
+                              <p>Once a position has received approval, update the status here.</p>
+                              <Button onClick={handleApprovePosition}>Approve request</Button>
+                            </>
+                          ) : (
+                            <>
+                              <p>Position status is {data?.positionRequest?.status}</p>
+                            </>
+                          )}
                         </div>
                         <Divider />
                         <div>
