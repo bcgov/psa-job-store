@@ -9,6 +9,8 @@ import { SearchIndex, SearchService } from '../search/search.service';
 import { Employee } from './models/employee.model';
 import { PositionCreateInput } from './models/position-create.input';
 
+import { MailService, SendEmailParams } from '../mail/mail.service';
+
 import dayjs from 'dayjs';
 import { AlexandriaError } from 'src/utils/alexandria-error';
 import { integer } from '@elastic/elasticsearch/lib/api/types';
@@ -188,6 +190,7 @@ export class FusionService {
     private readonly httpService: HttpService,
     private readonly prisma: PrismaService,
     private readonly searchService: SearchService,
+    private readonly mail: MailService,
   ) {
     this.fusionHeaders = new AxiosHeaders();
 
@@ -1696,7 +1699,7 @@ export class FusionService {
       Name: data['DESCR'],
       FullPartTime: data['FULL_PART_TIME'] === 'F' ? 'FULL_TIME' : 'PART_TIME',
       JobId: data['JOBCODE'],
-      CaseProfile: data['TGB_E_CLASS'], // TES still need to confirm 100%
+      CaseProfile: data['TGB_E_CLASS'],
       AuthorizingId: authorizingEmployee['id'],
       DepartmentId: data['DEPTID'],
       HiringStatus: 'PROPOSED',
@@ -1724,7 +1727,7 @@ export class FusionService {
     });
 
     // Testing payload data w/o sending to Fusion
-    //throw AlexandriaError('Just because');
+    //throw AlexandriaError('Short circuit to bypass Fusion');
 
     await this.storeLocalPositionEntry(+positionRequest['id'], 0, positionData, fusionData);
 
@@ -1755,17 +1758,76 @@ export class FusionService {
 
     this.logger.log('Fusion result' + this.stringify(result.data));
 
+    await this.logFusionPayloadAndResponse(
+      positionRequest['id'],
+      null,
+      'Created a new position',
+      Endpoints.CreatePosition,
+      fusionData,
+      result.data,
+    );
+
+    return result.data;
+  }
+
+  private async logFusionPayloadAndResponse(
+    positionRequestRef: string | number,
+    positionRef: string | number | null,
+    text: string,
+    endpoint: string,
+    payload: Record<string, any> | Prisma.JsonValue,
+    response: Record<string, any>,
+  ) {
     await this.prisma.fusionRequest.create({
       data: {
-        positionRequestRef: positionRequest['id'],
-        endpoint: Endpoints.CreatePosition,
-        payload: fusionData,
-        response: result.data,
+        positionRequestRef: +positionRequestRef,
+        positionRef: positionRef === null ? null : new String(positionRef).valueOf(),
+        endpoint,
+        payload,
+        response,
         date: new Date(),
       },
     });
 
-    return result.data;
+    if (response.Status && ['ERROR', 'WARNING'].includes(response.Status)) {
+      this.logFusionError(positionRequestRef, positionRef, text, endpoint, payload, response);
+    }
+  }
+
+  private async logFusionError(
+    positionRequestRef: string | number,
+    positionRef: string | number | null,
+    text: string,
+    endpoint: string,
+    payload: Record<string, any> | Prisma.JsonValue,
+    response: Record<string, any>,
+  ) {
+    const params: SendEmailParams = {
+      to: 'paul.bothma@gov.bc.ca',
+      subject: 'JobStore Fusion log',
+      text: `
+        <strong>Date: </strong> ${new Date()}<br />
+        <strong>Position Request: </strong> ${positionRequestRef}<br />
+        <strong>Position Number: </strong> ${positionRef}<br />
+        <strong>Endpoint: </strong> ${endpoint}<br />
+        <br />
+        ${text}
+      `,
+      attachments: [
+        {
+          filename: 'payload.json',
+          content: Buffer.from(JSON.stringify(payload), 'utf8'),
+          contentType: 'application/json',
+        },
+        {
+          filename: 'response.json',
+          content: Buffer.from(JSON.stringify(response), 'utf8'),
+          contentType: 'application/json',
+        },
+      ],
+    };
+
+    this.mail.sendMail(params);
   }
 
   async updatePositionToApproved(id: number) {
@@ -1813,7 +1875,7 @@ export class FusionService {
             ),
         );
       } catch (error) {
-        this.logger.error('fusion update failed ', error);
+        this.logger.error('fusion update failed ' + error);
         result = {
           data: {
             Status: 'ERROR',
@@ -1831,16 +1893,14 @@ export class FusionService {
 
     this.logger.log('Fusion result ' + this.stringify(result.data));
 
-    await this.prisma.fusionRequest.create({
-      data: {
-        positionRequestRef: positionRequest.id,
-        positionRef: positionId,
-        endpoint: Endpoints.CreatePosition,
-        payload: fusionData,
-        response: result.data,
-        date: new Date(),
-      },
-    });
+    await this.logFusionPayloadAndResponse(
+      positionRequest.id,
+      positionId,
+      'Updated position status',
+      Endpoints.CreatePosition,
+      fusionData,
+      result.data,
+    );
 
     let statusPayload = {
       RequestId: result.data.RequestId,
@@ -1863,7 +1923,7 @@ export class FusionService {
             ),
         );
       } catch (error) {
-        this.logger.error('fusion update status ', error);
+        this.logger.error('fusion update status ' + error);
         result = {
           data: {
             Status: 'IN_PROGRESS',
@@ -1880,16 +1940,14 @@ export class FusionService {
       };
     }
 
-    await this.prisma.fusionRequest.create({
-      data: {
-        positionRequestRef: positionRequest.id,
-        positionRef: positionId,
-        endpoint: Endpoints.PositionStatus,
-        payload: statusPayload,
-        response: result.data,
-        date: new Date(),
-      },
-    });
+    await this.logFusionPayloadAndResponse(
+      positionRequest.id,
+      positionId,
+      'Check position update status',
+      Endpoints.PositionStatus,
+      statusPayload,
+      result.data,
+    );
 
     // PositionHierarchy
 
@@ -1931,7 +1989,7 @@ export class FusionService {
             ),
         );
       } catch (error) {
-        this.logger.error('fusion position hierarchy failed ', error);
+        this.logger.error('fusion position hierarchy failed ' + error);
 
         result = {
           data: {
@@ -1950,16 +2008,14 @@ export class FusionService {
 
     this.logger.log('Fusion result ' + this.stringify(result.data));
 
-    await this.prisma.fusionRequest.create({
-      data: {
-        positionRequestRef: positionRequest.id,
-        positionRef: positionId,
-        endpoint: Endpoints.PositionHierarchy,
-        payload: hierarchyData,
-        response: result.data,
-        date: new Date(),
-      },
-    });
+    await this.logFusionPayloadAndResponse(
+      positionRequest.id,
+      positionId,
+      'Update position hierarchy',
+      Endpoints.PositionHierarchy,
+      hierarchyData,
+      result.data,
+    );
 
     statusPayload = {
       RequestId: result.data.RequestId,
@@ -1999,16 +2055,14 @@ export class FusionService {
       };
     }
 
-    await this.prisma.fusionRequest.create({
-      data: {
-        positionRequestRef: positionRequest.id,
-        positionRef: positionId,
-        endpoint: Endpoints.PositionStatus,
-        payload: statusPayload,
-        response: result.data,
-        date: new Date(),
-      },
-    });
+    await this.logFusionPayloadAndResponse(
+      positionRequest.id,
+      positionId,
+      'Check position hierarchy update status',
+      Endpoints.PositionStatus,
+      statusPayload,
+      result.data,
+    );
 
     try {
       await this.prisma.position.updateMany({
@@ -2017,6 +2071,19 @@ export class FusionService {
         },
         data: {
           hiringStatus: 'APPROVED',
+        },
+      });
+    } catch (error) {
+      this.logger.error(error);
+    }
+
+    try {
+      await this.prisma.positionRequest.updateMany({
+        where: {
+          position_number: positionCode,
+        },
+        data: {
+          status: 'COMPLETED',
         },
       });
     } catch (error) {
@@ -2129,7 +2196,16 @@ export class FusionService {
         );
       } catch (err) {
         this.logger.error(err);
-        return {};
+        // This happens usually when we're too quick.
+        // Figure out a way to return a valid response and still have client poll
+        result = {
+          data: {
+            ...payload,
+            Status: 'NOT_READY',
+            PositionId: '',
+            PositionCode: '',
+          },
+        };
       }
     } else {
       result = {
@@ -2147,16 +2223,15 @@ export class FusionService {
 
     const status = result.data.Status;
 
-    if (status == 'ERROR' || status == 'SUCCESS') {
-      await this.prisma.fusionRequest.create({
-        data: {
-          positionRequestRef: positionRequest,
-          endpoint: Endpoints.PositionStatus,
-          payload: payload,
-          response: result.data,
-          date: new Date(),
-        },
-      });
+    if (['ERROR', 'WARNING', 'SUCCESS'].includes(status)) {
+      await this.logFusionPayloadAndResponse(
+        positionRequest,
+        null,
+        'Check status of new position',
+        Endpoints.PositionStatus,
+        payload,
+        result.data,
+      );
     }
 
     const data = {};
@@ -2213,7 +2288,7 @@ export class FusionService {
             )
         `;
       } catch (err) {
-        this.logger.error('Could not retrieve status rows ', err);
+        this.logger.error('Could not retrieve status rows ' + err);
       }
 
       if (results != null) {
@@ -2239,6 +2314,17 @@ export class FusionService {
 
             this.logger.log(this.stringify(response));
 
+            if (['WARNING', 'ERROR'].includes(response.Status)) {
+              await this.logFusionError(
+                result.positionRequestRef,
+                result.positionRef,
+                'Background status checked',
+                result.endpoint,
+                result.payload,
+                response,
+              );
+            }
+
             await this.prisma.fusionRequest.update({
               where: {
                 id: result.id,
@@ -2248,14 +2334,10 @@ export class FusionService {
               },
             });
           } catch (err) {
-            this.logger.error('Could not retrieve and update row ', err);
+            this.logger.error('Could not retrieve and update row ' + err);
           }
         }
       }
-
-      this.sleep(60).then(() => {
-        //  runQuery();
-      });
     };
 
     await runQuery();
