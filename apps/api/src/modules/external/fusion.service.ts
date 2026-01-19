@@ -1789,7 +1789,7 @@ export class FusionService {
       },
     });
 
-    if (response.Status && ['ERROR', 'WARNING'].includes(response.Status)) {
+    if (response.Status && ['ERROR', 'WARNING', 'SUCCESS'].includes(response.Status)) {
       this.logFusionError(positionRequestRef, positionRef, text, endpoint, payload, response);
     }
   }
@@ -1809,6 +1809,7 @@ export class FusionService {
         <strong>Date: </strong> ${new Date()}<br />
         <strong>Position Request: </strong> ${positionRequestRef}<br />
         <strong>Position Number: </strong> ${positionRef}<br />
+        <strong>Status: </strong> ${response.Status}<br />
         <strong>Endpoint: </strong> ${endpoint}<br />
         <br />
         ${text}
@@ -2314,7 +2315,7 @@ export class FusionService {
 
             this.logger.log(this.stringify(response));
 
-            if (['WARNING', 'ERROR'].includes(response.Status)) {
+            if (['WARNING', 'ERROR', 'SUCCESS'].includes(response.Status)) {
               await this.logFusionError(
                 result.positionRequestRef,
                 result.positionRef,

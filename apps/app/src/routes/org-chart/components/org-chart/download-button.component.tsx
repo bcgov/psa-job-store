@@ -66,7 +66,10 @@ export async function generateSVG(getNodes: () => any[]): Promise<string> {
       toSvg(el, {
         width: width,
         height: height,
+        skipFonts: true, // do not detect, fetch, or embed any fonts
+
         style: {
+          fontFamily: 'sans-serif',
           transform: `translate(${transform[0]}px, ${transform[1]}px) scale(${transform[2]})`,
         },
       }),
@@ -517,7 +520,14 @@ async function renderAndCombineTiles(
       // console.log(`Drawing tile at (${x}, ${y})`);
       // ctx.drawImage(tileImage, x, y);
 
-      const tileCanvas = await renderTile(useTileWidth, useTileHeight, col, row, transform, tileWidth, tileHeight, c);
+      let tileCanvas;
+
+      try {
+        tileCanvas = await renderTile(useTileWidth, useTileHeight, col, row, transform, tileWidth, tileHeight, c);
+      } catch (e) {
+        console.log('Error creating tile ', e);
+        continue;
+      }
 
       // //  DEBUG
       // // Create a temporary canvas for the tile
@@ -595,7 +605,9 @@ function renderTile(
       width: useTileWidth,
       height: useTileHeight,
       pixelRatio: 1,
+      skipFonts: true, // do not detect, fetch, or embed any fonts
       style: {
+        fontFamily: 'sans-serif',
         width: `${useTileWidth}px`,
         height: `${useTileHeight}px`,
         transform: `translate(${transform[0] - col * tileWidth}px, ${transform[1] - row * tileHeight}px) scale(${
