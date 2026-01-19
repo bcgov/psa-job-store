@@ -1729,7 +1729,7 @@ export class FusionService {
     // Testing payload data w/o sending to Fusion
     //throw AlexandriaError('Short circuit to bypass Fusion');
 
-    await this.storeLocalPositionEntry(+positionRequest['id'], 0, positionData, fusionData);
+    await this.storeLocalPositionEntry(+positionRequest['id'], +positionRequest['id'], positionData, fusionData);
 
     let result: Record<string, any>;
 
@@ -1805,7 +1805,7 @@ export class FusionService {
     const params: SendEmailParams = {
       to: 'paul.bothma@gov.bc.ca',
       subject: 'JobStore Fusion log',
-      text: `
+      html: `
         <strong>Date: </strong> ${new Date()}<br />
         <strong>Position Request: </strong> ${positionRequestRef}<br />
         <strong>Position Number: </strong> ${positionRef}<br />
@@ -2106,11 +2106,14 @@ export class FusionService {
       caseProfile = fusionData['CaseProfile'],
       positionId = positionData['positionId'];
 
-    if (positionCode == 0) {
+    const prefix = 999999; // Adding this so that we don't have overlap between existing and new positionCodes
+
+    // This is a new entry based on the 2 values being the same
+    if (positionCode == positionRequestId) {
       try {
         await this.prisma.position.create({
           data: {
-            positionCode: new String(positionRequestId).valueOf(),
+            positionCode: new String(prefix + positionRequestId).valueOf(),
             uniqId: new String(positionRequestId).valueOf(),
             effectiveStartDate: effectiveStartDate,
             effectiveEndDate: effectiveEndDate,
@@ -2134,7 +2137,7 @@ export class FusionService {
         try {
           await this.prisma.position.updateMany({
             where: {
-              positionCode: new String(positionRequestId).valueOf(),
+              positionCode: new String(prefix + positionRequestId).valueOf(),
               uniqId: { equals: new String(positionRequestId).valueOf() },
             },
             data: {
