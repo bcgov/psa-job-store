@@ -517,7 +517,14 @@ async function renderAndCombineTiles(
       // console.log(`Drawing tile at (${x}, ${y})`);
       // ctx.drawImage(tileImage, x, y);
 
-      const tileCanvas = await renderTile(useTileWidth, useTileHeight, col, row, transform, tileWidth, tileHeight, c);
+      let tileCanvas;
+
+      try {
+        tileCanvas = await renderTile(useTileWidth, useTileHeight, col, row, transform, tileWidth, tileHeight, c);
+      } catch (e) {
+        console.log('Error creating tile ', e);
+        continue;
+      }
 
       // //  DEBUG
       // // Create a temporary canvas for the tile
