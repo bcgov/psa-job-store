@@ -21,7 +21,7 @@ export class MailService {
   ) {}
 
   async sendMail(params: SendEmailParams) {
-    const from = params.from ?? process.env.MAIL_FROM ?? 'no-reply@example.com';
+    const from = params.from ?? process.env.MAIL_FROM ?? 'noreply@gov.bc.ca';
     return this.transporter.sendMail({
       from,
       to: params.to,
