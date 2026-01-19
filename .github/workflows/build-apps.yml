@@ -99,6 +99,10 @@ jobs:
             KEYCLOAK_CLIENT_SECRET=${{ secrets.KEYCLOAK_CLIENT_SECRET }}
             KEYCLOAK_ISSUER=${{ secrets.KEYCLOAK_ISSUER }}
 
+            SMTP_PORT=${{ secrets.SMTP_PORT }}
+            SMTP_HOST=${{ secrets.SMTP_HOST }}
+            USE_FUSION=${{ secrets.USE_FUSION }}
+
   trigger_migration:
     needs: [metadata, build-apps] # Add metadata to needs
     runs-on: ubuntu-latest
