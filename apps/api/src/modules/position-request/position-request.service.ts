@@ -2056,7 +2056,7 @@ export class PositionRequestApiService {
             </ul>
 
             <br />
-            <a href="http://localhost:3000/requests/positions/manage/approved/${positionRequest.id}?code=${positionRequest.submission_id}">View and approve this position in the Job Store</a>
+            <a href="https://${this.configService.get('NODE_ENV') == 'development' ? 'pjs-dev.apps.silver.devops' : 'jobstore'}.gov.bc.ca/requests/positions/manage/approved/${positionRequest.id}?code=${positionRequest.submission_id}">View and approve this position in the Job Store</a>
           </div>
 
           `,
