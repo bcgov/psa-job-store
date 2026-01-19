@@ -66,7 +66,10 @@ export async function generateSVG(getNodes: () => any[]): Promise<string> {
       toSvg(el, {
         width: width,
         height: height,
+        skipFonts: true, // do not detect, fetch, or embed any fonts
+
         style: {
+          fontFamily: 'sans-serif',
           transform: `translate(${transform[0]}px, ${transform[1]}px) scale(${transform[2]})`,
         },
       }),
@@ -602,7 +605,9 @@ function renderTile(
       width: useTileWidth,
       height: useTileHeight,
       pixelRatio: 1,
+      skipFonts: true, // do not detect, fetch, or embed any fonts
       style: {
+        fontFamily: 'sans-serif',
         width: `${useTileWidth}px`,
         height: `${useTileHeight}px`,
         transform: `translate(${transform[0] - col * tileWidth}px, ${transform[1] - row * tileHeight}px) scale(${
