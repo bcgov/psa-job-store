@@ -159,6 +159,8 @@ export interface GetPositionRequestArgs {
   id?: number;
   positionNumber?: string;
   uuid?: string; // this is for GetSharedPositionRequestArgs
+  orgchart_png?: string;
+  comment?: string;
 }
 
 export interface CreatePositionRequestResponse {
@@ -276,6 +278,15 @@ export interface PositionRequestWithUnknownState {
 
 interface GetStaleUnknownPositionRequestsResponse {
   staleUnknownPositionRequests: PositionRequestWithUnknownState[];
+}
+
+export interface PositionApprovedStatusResponse {
+  updatePositionApprovedStatus: { status: Boolean };
+}
+
+export interface GetPositionApproveStatusArgs {
+  id: number;
+  code: string;
 }
 
 export const positionRequestApi = graphqlApi.injectEndpoints({
@@ -812,19 +823,38 @@ export const positionRequestApi = graphqlApi.injectEndpoints({
       query: (args: GetPositionRequestArgs) => {
         return {
           document: gql`
-            mutation WaitForPositionSuccessStatus {
-              waitForPositionSuccessStatus(id: ${args.id}) {
-                ready 
-                requestId 
-                sourceSystemId 
-                status 
-                positionId 
+            mutation WaitForPositionSuccessStatus($id: Float!, $orgchart_png: String!, $comment: String!) {
+              waitForPositionSuccessStatus(id: $id, orgchart_png: $orgchart_png, comment: $comment) {
+                ready
+                requestId
+                sourceSystemId
+                status
+                positionId
                 positionCode
               }
             }
           `,
           variables: {
             id: args.id,
+            orgchart_png: args.orgchart_png,
+            comment: args.comment,
+          },
+        };
+      },
+    }),
+    updatePositionApprovedStatus: build.mutation<PositionApprovedStatusResponse, GetPositionApproveStatusArgs>({
+      query: (args: GetPositionApproveStatusArgs) => {
+        return {
+          document: gql`
+            mutation UpdatePositionApprovedStatus($id: Int!, $code: String!) {
+              updatePositionApprovedStatus(id: $id, code: $code) {
+                status
+              }
+            }
+          `,
+          variables: {
+            id: args.id,
+            code: args.code,
           },
         };
       },
@@ -869,5 +899,6 @@ export const {
   useGetSuggestedManagersQuery,
   useLazyGetPositionRequestByPositionNumberQuery,
   useWaitForPositionSuccessStatusMutation,
+  useUpdatePositionApprovedStatusMutation,
   useGetStaleUnknownPositionRequestsQuery,
 } = positionRequestApi;

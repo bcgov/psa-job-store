@@ -249,12 +249,12 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
 
   const isTestUser = useTestUser();
 
-  const waitForPositionStatusAndNumber = async (id: number) => {
+  const waitForPositionStatusAndNumber = async (id: number, orgchart_png: string, comment: string) => {
     const poll = async () => {
       let result;
 
       try {
-        result = await waitForPositionStatusAndNumberQuery({ id }).unwrap();
+        result = await waitForPositionStatusAndNumberQuery({ id, orgchart_png, comment }).unwrap();
 
         console.log(result);
       } catch (error) {
@@ -342,7 +342,11 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
 
         // Submission worked, now we need to poll Fusion for the actual position number and status
 
-        const positionRequestStatus = await waitForPositionStatusAndNumber(result.submitPositionRequest.id);
+        const positionRequestStatus = await waitForPositionStatusAndNumber(
+          result.submitPositionRequest.id,
+          png,
+          comment,
+        );
 
         const fusionError = (msg: string) => {
           notification.error({
@@ -377,6 +381,8 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
           comment: comment,
           orgchart_png: png,
         }).unwrap();
+
+        console.log('result?.submitPositionRequest ', result?.submitPositionRequest);
 
         // show feedback notification
         notification.success({
@@ -764,6 +770,9 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
                       >
                         Submit for verification
                       </Button>
+                      <div style={{ display: submitPositionRequestIsLoading || isLoading ? 'block' : 'none' }}>
+                        This can take up to 3 minutes. Please don't navigate away from this page.
+                      </div>
                       <Divider />
                       <h3>Get support</h3>
                       <Typography.Paragraph>
