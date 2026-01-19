@@ -389,8 +389,10 @@ export class PositionRequestApiService {
       }
     */
 
+    const positionRequestNeedsReview = await this.positionRequestNeedsReview(positionRequest.id);
+
     positionObj = {
-      'A.POSN_STATUS': 'Proposed', // UAT This should be checked, because not all positions are "approved"
+      'A.POSN_STATUS': positionRequestNeedsReview.result != true ? 'Approved' : 'Proposed', // UAT This should be checked, because not all positions are "approved"
       'A.EFF_STATUS': '', // Blank
       'A.REPORTS_TO': positionRequest.reports_to_position_id,
       'A.POSITION_NBR': positionRequest.position_number,
@@ -463,7 +465,6 @@ export class PositionRequestApiService {
     }
 
     // Only do this part if the position does not need to be approved first
-    const positionRequestNeedsReview = await this.positionRequestNeedsReview(positionRequest.id);
 
     if (positionRequestNeedsReview.result != true) {
       try {
