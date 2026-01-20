@@ -1936,6 +1936,15 @@ export class PositionRequestApiService {
         return `https://${this.configService.get('SSO_ENVIRONMENT') == 'dev' ? 'pjs-dev.apps.silver.devops' : 'jobstore'}.gov.bc.ca`;
       };
 
+      this.logger.log(
+        'positionRequest.status == PositionRequestStatus.VERIFICATION, needsReview ' +
+          positionRequest.status +
+          ', ' +
+          PositionRequestStatus.VERIFICATION +
+          ', ' +
+          needsReview,
+      );
+
       const data: IncidentCreateUpdateInput = {
         subject: `Job Store - Position Number Request - ${classification.code}`,
         primaryContact: { id: contactId },
@@ -2002,24 +2011,26 @@ export class PositionRequestApiService {
             </strong> 
           </div>`,
           },
-          ...(positionRequest.status == 'VERIFICATION' && [
-            {
-              channel: {
-                id: IncidentThreadChannel.CSSWeb,
-              },
-              contentType: {
-                id: IncidentThreadContentType.TextHtml,
-              },
-              entryType: {
-                id: IncidentThreadEntryType.PrivateNote,
-              },
-              text: `   
+          ...(needsReview
+            ? [
+                {
+                  channel: {
+                    id: IncidentThreadChannel.CSSWeb,
+                  },
+                  contentType: {
+                    id: IncidentThreadContentType.TextHtml,
+                  },
+                  entryType: {
+                    id: IncidentThreadEntryType.PrivateNote,
+                  },
+                  text: `   
                 <div>         
                   This position requires verification. Once approval has been obtained, 
                   <a href="${getJobStoreUrl()}/requests/positions/manage/approved/${positionRequest.id}?code=${positionRequest.submission_id}">approve this position in the Job Store</a>
                 </div>`,
-            },
-          ]),
+                },
+              ]
+            : []),
           {
             channel: {
               id: IncidentThreadChannel.CSSWeb,

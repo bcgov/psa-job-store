@@ -2217,8 +2217,8 @@ export class FusionService {
           RequestId: '2474861',
           SourceSystemId: 'POS_123',
           Status: 'SUCCESS',
-          PositionId: '1234568',
-          PositionCode: '123458',
+          PositionId: '999998',
+          PositionCode: '787879',
         },
       };
     }
