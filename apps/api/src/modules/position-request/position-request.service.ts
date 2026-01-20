@@ -1932,6 +1932,10 @@ export class PositionRequestApiService {
         });
       }
 
+      const getJobStoreUrl = () => {
+        return `https://${this.configService.get('SSO_ENVIRONMENT') == 'dev' ? 'pjs-dev.apps.silver.devops' : 'jobstore'}.gov.bc.ca`;
+      };
+
       const data: IncidentCreateUpdateInput = {
         subject: `Job Store - Position Number Request - ${classification.code}`,
         primaryContact: { id: contactId },
@@ -1979,7 +1983,7 @@ export class PositionRequestApiService {
             },
             text: `   
           <div>         
-            <a href="https://jobstore.gov.bc.ca/requests/positions/manage/${
+            <a href="${getJobStoreUrl()}/requests/positions/manage/approved/${
               positionRequest.id
             }">View this position in the Job Store</a>
             <br />
@@ -2056,7 +2060,7 @@ export class PositionRequestApiService {
             </ul>
 
             <br />
-            <a href="https://${this.configService.get('NODE_ENV') == 'development' ? 'pjs-dev.apps.silver.devops' : 'jobstore'}.gov.bc.ca/requests/positions/manage/approved/${positionRequest.id}?code=${positionRequest.submission_id}">View and approve this position in the Job Store</a>
+            <a href="${getJobStoreUrl()}/requests/positions/manage/approved/${positionRequest.id}?code=${positionRequest.submission_id}">View and approve this position in the Job Store</a>
           </div>
 
           `,
