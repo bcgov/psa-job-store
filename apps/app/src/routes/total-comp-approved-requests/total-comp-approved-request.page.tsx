@@ -291,10 +291,11 @@ export const TotalCompApprovedRequestPage = () => {
 
   const handleApprovePosition = async () => {
     console.log(data);
+
     const urlParams = new URLSearchParams(window.location.search);
 
     const code = urlParams.get('code') || '';
-    console.log('Using code ', code);
+    console.log('Using code for update ', code);
 
     const result = await updatePositionApprovedStatusMutation({
       id: data?.positionRequest?.position_number ?? 0,
@@ -306,6 +307,15 @@ export const TotalCompApprovedRequestPage = () => {
       message.success('Position has been marked as approved');
       return;
     }
+  };
+
+  const allowPositionStatusChange = () => {
+    const urlParams = new URLSearchParams(window.location.search);
+
+    const code = urlParams.get('code') || '';
+    console.log('Using code for check ', code);
+
+    return data?.positionRequest?.status == 'VERIFICATION' && code == data?.positionRequest?.submission_id;
   };
 
   const tabItems = [
@@ -532,7 +542,7 @@ export const TotalCompApprovedRequestPage = () => {
                         <div>
                           <Text strong>Position request status</Text>
 
-                          {data?.positionRequest?.status == 'VERIFICATION' ? (
+                          {allowPositionStatusChange() ? (
                             <>
                               <p>Once a position has received approval, update the status here.</p>
                               <Button onClick={handleApprovePosition}>Approve request</Button>
