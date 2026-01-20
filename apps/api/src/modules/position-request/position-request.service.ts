@@ -2002,6 +2002,24 @@ export class PositionRequestApiService {
             </strong> 
           </div>`,
           },
+          ...(positionRequest.status == 'VERIFICATION' && [
+            {
+              channel: {
+                id: IncidentThreadChannel.CSSWeb,
+              },
+              contentType: {
+                id: IncidentThreadContentType.TextHtml,
+              },
+              entryType: {
+                id: IncidentThreadEntryType.PrivateNote,
+              },
+              text: `   
+                <div>         
+                  This position requires verification. Once approval has been obtained, 
+                  <a href="${getJobStoreUrl()}/requests/positions/manage/approved/${positionRequest.id}?code=${positionRequest.submission_id}">approve this position in the Job Store</a>
+                </div>`,
+            },
+          ]),
           {
             channel: {
               id: IncidentThreadChannel.CSSWeb,
@@ -2057,10 +2075,7 @@ export class PositionRequestApiService {
               <li>Has the classification been approved by Classification Services? If so, what is the E-Class case number? (Not required if using Job Store profile)    n/a</li>
               <li>Please attach a copy of the job profile you will be using.    Attached</li>
               <li>Please attach a copy of your Organization Chart that shows the topic position and the job titles, position numbers and classification levels, of the supervisor, peer and subordinate positions.    Attached</li>
-            </ul>
-
-            <br />
-            <a href="${getJobStoreUrl()}/requests/positions/manage/approved/${positionRequest.id}?code=${positionRequest.submission_id}">View and approve this position in the Job Store</a>
+            </ul>            
           </div>
 
           `,
