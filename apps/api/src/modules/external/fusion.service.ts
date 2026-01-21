@@ -1802,6 +1802,40 @@ export class FusionService {
     payload: Record<string, any> | Prisma.JsonValue,
     response: Record<string, any>,
   ) {
+    const logs = await this.prisma.fusionRequest.findMany({ where: { positionRequestRef: +positionRequestRef } });
+
+    const attachments = [];
+
+    let attachment: Record<string, any>;
+
+    for (attachment of logs) {
+      attachments.push({
+        filename: attachment['id'] + '.txt',
+        content: Buffer.from(
+          `
+            Payload:
+
+            ${JSON.stringify(attachment['payload'])}  
+
+            Response:
+            
+            ${JSON.stringify(attachment['response'])}
+            
+            Endpoint:
+
+            ${attachment['endpoint']}
+
+            Date:
+
+            ${attachment['date']}
+
+          `,
+          'utf8',
+        ),
+        contentType: 'text/plain',
+      });
+    }
+
     const params: SendEmailParams = {
       to: 'paul.bothma@gov.bc.ca',
       subject: 'JobStore Fusion log',
@@ -1809,23 +1843,11 @@ export class FusionService {
         <strong>Date: </strong> ${new Date()}<br />
         <strong>Position Request: </strong> ${positionRequestRef}<br />
         <strong>Position Number: </strong> ${positionRef}<br />
-        <strong>Status: </strong> ${response.Status}<br />
-        <strong>Endpoint: </strong> ${endpoint}<br />
+        
         <br />
         ${text}
       `,
-      attachments: [
-        {
-          filename: 'payload.json',
-          content: Buffer.from(JSON.stringify(payload), 'utf8'),
-          contentType: 'application/json',
-        },
-        {
-          filename: 'response.json',
-          content: Buffer.from(JSON.stringify(response), 'utf8'),
-          contentType: 'application/json',
-        },
-      ],
+      attachments,
     };
 
     this.mail.sendMail(params);
