@@ -579,7 +579,7 @@ export class FusionService {
           worker.position_code == position.positionCode,
       );
 
-      console.log('workersForPosition ', workersForPosition);
+      this.logger.log('workersForPosition ' + this.stringify(workersForPosition));
 
       if (workersForPosition.length > 0) {
         positionEmployeesMap.set(
@@ -995,7 +995,7 @@ export class FusionService {
       for await (const item of items) {
         const regex = /^(.*?)(?:_(.*))?$/;
         const match = item.GradeCode.match(regex);
-        this.logger.log(this.stringify(item));
+        //this.logger.log(this.stringify(item));
 
         const employee_group_id = match[1];
         const grade = match[2] ?? employee_group_id;
@@ -1105,8 +1105,8 @@ export class FusionService {
         const [_, name, id] = parts;
 
         if (id && name) {
-          this.logger.log('ClassificationCode ' + [item.ClassificationCode, name, id].join(', '));
-          this.logger.log(item);
+          //this.logger.log('ClassificationCode ' + [item.ClassificationCode, name, id].join(', '));
+          //this.logger.log(item);
           await this.prisma.organization.upsert({
             where: {
               id: id,
@@ -1512,7 +1512,7 @@ export class FusionService {
 
                 if (rows.length > 0) {
                   const profile = rows[0];
-                  console.log('Profile ', profile);
+                  //console.log('Profile ', profile);
                   delete profile['attr:rownumber'];
 
                   return profile;
@@ -1525,7 +1525,7 @@ export class FusionService {
             }),
             retry(3),
             catchError((err) => {
-              console.log(err);
+              this.logger.log(err);
               throw new Error(err);
             }),
           ),

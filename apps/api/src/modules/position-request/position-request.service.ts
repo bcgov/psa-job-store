@@ -1895,7 +1895,7 @@ export class PositionRequestApiService {
             })
           : null;
 
-      console.log(jobProfileDocument);
+      //console.log(jobProfileDocument);
       let jobProfileBase64;
 
       try {
