@@ -75,6 +75,16 @@ enum Endpoints {
   PositionHierarchy = `/ic/api/integration/v1/flows/rest/HCM_IN_POSITIONHIERARCHY_${environment}/1.0/position`,
 }
 
+export type FusionRequestRow = {
+  id: number;
+  positionRequestRef: number;
+  positionRef: string;
+  payload: Prisma.JsonValue;
+  response: Prisma.JsonValue;
+  endpoint: string;
+  date: Date;
+};
+
 type HRScopeResponse = {
   'A.POSITION_NBR': string;
   'A.EFFDT': string;
@@ -204,7 +214,7 @@ export class FusionService {
 
         this.logger.log('Obtained OAuth access token.');
 
-        //await this.syncFusionData();
+        //await this.syncDepartments();
         //await this.syncFusionPositionData();
       })
       .catch((err) => {
@@ -932,6 +942,14 @@ export class FusionService {
             });
           } catch (e) {
             //this.logger.error(e);
+            /*
+            if ( item.LocationId != null ) {
+              this.logger.error("No location found for " + ", " +item.Name+ ", " +item.OrganizationId+ ", " +item.LocationId+ ", " +locationMap.get(BigInt(item.LocationId)));
+            } else {
+              
+              this.logger.error("No location found for " +item.LocationId+ ", " +item.Name+ ", " +item.OrganizationId);
+            }
+            */
           }
 
           try {
@@ -1246,24 +1264,6 @@ export class FusionService {
       if (items == null) break;
 
       items.forEach(async (item) => {
-        /*const {
-          PositionCode,
-          PositionsUniqId,
-          EffectiveStartDate,
-          EffectiveEndDate,
-          Name,
-          DepartmentId,
-          JobId,
-          LocationId,
-          ActiveStatus,
-          ShortDescription,
-          HiringStatus,
-          ReportsToPositionId,
-          CaseProfile,
-          PositionId,
-        } = item;
-        */
-
         const {
           PositionCode,
           PositionId,
@@ -1361,31 +1361,6 @@ export class FusionService {
 
     this.logger.log('positionQ ' + this.stringify(positionQ));
     if (positionQ === null) throw new Error('Must have one of: dept_id, position_nbr or reports_to');
-
-    /*
-    const positions = await firstValueFrom(
-      this.httpService
-        .post(
-          //`${this.configService.get('FUSION_URL')}/hcmRestApi/resources/11.13.18.05/positions?onlyData=true&expand=all&limit=25&offset=0&q=${positionQ}`,
-          `${this.configService.get('FUSION_URL')}${Endpoints.Position}`,
-          {
-            "positionsUniqId" : position_nbr,
-            "childType" : "",
-            "childUniqId" : ""
-          },
-          { headers: this.getFusionHeaders() },
-        )
-        .pipe(
-          map((r) => {
-            return r.data.items ?? undefined;
-          }),
-          retry(3),
-          catchError((err) => {
-            throw new Error(err);
-          }),
-        ),
-    );
-    */
 
     this.logger.log('getPosition ' + position_nbr);
 
@@ -2278,22 +2253,11 @@ export class FusionService {
   }
 
   private async queryFusionRequestStatus() {
-    /*if (fusionStatusSemaphore == true) {
+    if (fusionStatusSemaphore == true) {
       return;
     }
-    */
 
     fusionStatusSemaphore = true;
-
-    type FusionRequestRow = {
-      id: number;
-      positionRequestRef: number;
-      positionRef: string;
-      payload: Prisma.JsonValue;
-      response: Prisma.JsonValue;
-      endpoint: string;
-      date: Date;
-    };
 
     const runQuery = async () => {
       let results: FusionRequestRow[];
