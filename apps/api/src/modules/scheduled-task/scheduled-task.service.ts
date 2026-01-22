@@ -8,6 +8,7 @@ import dayjs from 'dayjs';
 import { globalLogger } from '../../utils/logging/logger.factory';
 import { CrmService } from '../external/crm.service';
 import { PeoplesoftService } from '../external/peoplesoft.service';
+import { PositionRequestApiService } from '../position-request/position-request.service';
 import { PrismaService } from '../prisma/prisma.service';
 import { UserService } from '../user/user.service';
 
@@ -18,6 +19,7 @@ export enum ScheduledTask {
   FusionSync = 'fusion-sync',
   FusionPositionSync = 'fusion-position-sync',
   FusionRequestStatus = 'fusion-request-status',
+  FusionOrphanPositions = 'fusion-orphan-positions',
   // FastTask = 'fast-task',
   // SlowTask = 'slow-task',
 }
@@ -60,7 +62,13 @@ export class ScheduledTaskService {
     [ScheduledTask.FusionRequestStatus]: {
       name: ScheduledTask.FusionRequestStatus,
       lockTimeout: 5 * 60, // 5 minutes
-      frequency: 1 * 60, // 5 minutes
+      frequency: 2 * 60, // 2 minutes
+    },
+
+    [ScheduledTask.FusionOrphanPositions]: {
+      name: ScheduledTask.FusionOrphanPositions,
+      lockTimeout: 5 * 60, // 5 minutes
+      frequency: 2 * 60, // 5 minutes
     },
     // [ScheduledTask.FastTask]: {
     //   name: ScheduledTask.FastTask,
@@ -81,6 +89,7 @@ export class ScheduledTaskService {
     private readonly peoplesoftService: PeoplesoftService,
     private readonly prisma: PrismaService,
     private readonly userService: UserService,
+    private readonly positionRequestService: PositionRequestApiService,
     @Inject(CACHE_MANAGER) private cacheManager: Cache,
   ) {}
 
@@ -404,6 +413,15 @@ export class ScheduledTaskService {
       this.logger.log('queryFusionRequestStatus');
 
       this.peoplesoftService.queryFusionRequestStatus();
+    });
+  }
+
+  @Cron('*/2 * * * *', { timeZone: 'America/Vancouver' })
+  async queryFusionOrphanedPositions() {
+    await this.executeTask(ScheduledTask.FusionOrphanPositions, async () => {
+      this.logger.log('queryFusionOrphanedPositions');
+
+      this.positionRequestService.queryFusionOrphanedPositions();
     });
   }
 
