@@ -50,6 +50,8 @@ import {
   SuggestedManager,
 } from './position-request.resolver';
 
+import { FusionRequestRow } from '../external/fusion.service';
+
 @ObjectType()
 export class PositionRequestResponse {
   @Field()
@@ -104,6 +106,8 @@ interface AdditionalInfo {
   division?: string;
   excluded_mgr_name?: string;
 }
+
+let fusionOrphanSemaphore: boolean = false;
 
 function generateShortId(length: number): string {
   const characters = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
@@ -2316,5 +2320,69 @@ export class PositionRequestApiService {
         unknownStateSince: 'asc',
       },
     });
+  }
+
+  async queryFusionOrphanedPositions() {
+    if (fusionOrphanSemaphore == true) {
+      return;
+    }
+
+    fusionOrphanSemaphore = true;
+
+    const runQuery = async () => {
+      let results: FusionRequestRow[];
+
+      try {
+        results = await this.prisma.$queryRaw<FusionRequestRow[]>`
+
+          SELECT 
+            fr.*
+          FROM 
+            public.fusion_request fr
+          WHERE 
+            fr."positionRequestRef" IN (
+              SELECT 
+                "positionRequestRef"
+                
+              FROM 
+                public.fusion_request
+              WHERE 
+                "date" > CURRENT_DATE - INTERVAL '1 day' AND
+                "positionRef" IS NULL
+              GROUP BY 
+                "positionRequestRef"
+              HAVING 
+                COUNT(*) = 1
+            )
+        `;
+      } catch (err) {
+        this.logger.error('Could not retrieve orphan rows ' + err);
+      }
+
+      // Query the DB and find entries where there's only 1 entry for a position request and also null for position id.
+      // Then we use the response payload to query and if the position is finally created, we do the CRM, etc in the background
+
+      if (results != null) {
+        this.logger.log('queryFusionOrphanedPositions returned ' + results.length + ' results');
+
+        for (let result of results) {
+          this.logger.log([result.id, this.stringify(result.payload), this.stringify(result.response)].join(', '));
+
+          await this.waitForPositionSuccessStatus(result.positionRequestRef, '', '');
+        }
+      }
+    };
+
+    await runQuery();
+
+    fusionOrphanSemaphore = false;
+  }
+
+  private stringify(obj: any): String {
+    function bigintReplacer(_key: string, value: any) {
+      return typeof value === 'bigint' ? value.toString() : value;
+    }
+
+    return JSON.stringify(obj, bigintReplacer);
   }
 }
