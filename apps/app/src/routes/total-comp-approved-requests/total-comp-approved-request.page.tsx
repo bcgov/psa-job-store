@@ -21,6 +21,7 @@ import './total-comp-approved-request.page.css';
 const { Text } = Typography;
 
 import { useUpdatePositionApprovedStatusMutation } from '../../redux/services/graphql-api/position-request.api';
+import { useState } from 'react';
 
 // Import your API service to fetch position request
 
@@ -289,7 +290,10 @@ export const TotalCompApprovedRequestPage = () => {
     message.success('Link copied to clipboard!');
   };
 
+  const [approvePositionLoading, setApprovePositionLoading] = useState(false);
+
   const handleApprovePosition = async () => {
+    setApprovePositionLoading(true);
     console.log(data);
 
     const urlParams = new URLSearchParams(window.location.search);
@@ -301,6 +305,8 @@ export const TotalCompApprovedRequestPage = () => {
       id: data?.positionRequest?.position_number ?? 0,
       code,
     }).unwrap();
+
+    setApprovePositionLoading(false);
 
     console.log(result);
     if (result && result?.updatePositionApprovedStatus.status) {
@@ -545,7 +551,9 @@ export const TotalCompApprovedRequestPage = () => {
                           {allowPositionStatusChange() ? (
                             <>
                               <p>Once a position has received approval, update the status here.</p>
-                              <Button onClick={handleApprovePosition}>Approve request</Button>
+                              <Button onClick={handleApprovePosition} loading={approvePositionLoading}>
+                                Approve position request
+                              </Button>
                             </>
                           ) : (
                             <>
