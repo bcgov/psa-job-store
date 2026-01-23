@@ -1678,7 +1678,7 @@ export class FusionService {
       AuthorizingId: authorizingEmployee['id'],
       DepartmentId: data['DEPTID'],
       HiringStatus: 'PROPOSED',
-      EffectiveStartDate: dayjs().format('YYYY-MM-DD'),
+      EffectiveStartDate: '2025-07-01', //dayjs().format('YYYY-MM-DD'),
       ActionReasonCode: 'NEW',
       LocationId: data['LOCATION_ID'],
       EntryGradeId: data['entry_grade_id'],
