@@ -1189,9 +1189,11 @@ export class FusionService {
 
           const position = (await this.prisma.position.findFirst({ where: { positionCode: PositionCode } })) ?? {};
 
+          /*
           const initials = DisplayName?.split(/\s/)
             .map((c) => c?.charAt(0) ?? '')
             .join('');
+          */
 
           await this.prisma.employee.upsert({
             where: {
@@ -1202,14 +1204,14 @@ export class FusionService {
               fusion_id: PersonId,
               reports_to: position['reportsTo'] ?? null,
               position_code: PositionCode,
-              display_name: initials,
+              display_name: DisplayName,
             },
             update: {
               id: PersonNumber,
               fusion_id: PersonId,
               reports_to: position['reportsTo'] ?? null,
               position_code: PositionCode,
-              display_name: initials,
+              display_name: DisplayName,
             },
           });
         } catch (err) {
