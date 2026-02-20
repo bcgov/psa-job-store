@@ -17,6 +17,7 @@ export const HelpButton = () => {
           Jobstore@gov.bc.ca <CopyOutlined style={{ cursor: 'pointer' }} aria-hidden />
         </>
       </Menu.Item>
+      {/*
       <Menu.Item key="teams" icon={<TeamOutlined aria-hidden />}>
         <a
           target="_blank"
@@ -26,6 +27,7 @@ export const HelpButton = () => {
           Help desk
         </a>
       </Menu.Item>
+      */}
       {/*
       <Menu.Item key="feedback" icon={<QuestionCircleOutlined aria-hidden />}>
         <a target="_blank" rel="noopener noreferrer" href="https://jobstore-feedback.apps.silver.devops.gov.bc.ca/">
