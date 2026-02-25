@@ -480,7 +480,7 @@ export class UserService {
       // console.log('profiles: ', JSON.stringify(profiles, null, 2));
 
       // Filter out undefined profiles and get employee details
-      const validProfiles = profiles.filter((profile) => profile !== undefined);
+      const validProfiles = profiles.filter((profile) => profile !== undefined && profile.EMPLID);
       const employeeDetails = await Promise.all(
         validProfiles
           .map((profile) => this.peoplesoftService.getEmployee(profile.EMPLID))
