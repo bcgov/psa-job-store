@@ -1515,6 +1515,7 @@ export class FusionService {
       };
     }
 
+    /*
     url = [
       this.configService.get('PEOPLESOFT_URL'),
       [
@@ -1529,7 +1530,6 @@ export class FusionService {
       ].join('?'),
     ].join('/');
 
-    /*
     this.logger.log('getProfileV2 employee ' + url);
 
     
