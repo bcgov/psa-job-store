@@ -43,13 +43,14 @@ enum EmployeeGroup {
   OEX = "BC Excluded Employees' Assn.",
   PEA = 'Prof. Employees Association',
   TNU = 'TI Corp Non Union',
-  Default = 'Not Applicable',
+  Default = 'Non Applicable',
 
   BCN = 'BC Nurses Union',
   LSA = 'Legal Services Branch',
-  MGT = 'Management Exclusion Plan',
+  MGT = 'Non Applicable', //'Management Exclusion Plan',
 }
 
+// ['MGT', 'GEU', 'OEX', 'NUR', 'PEA', 'LGL'];
 const environment = 'TEST';
 
 enum Endpoints {
