@@ -47,7 +47,7 @@ enum EmployeeGroup {
 
   BCN = 'BC Nurses Union',
   LSA = 'Legal Services Branch',
-  MGT = 'Non Applicable', //'Management Exclusion Plan',
+  MGT = 'Management Exclusion Plan',
 }
 
 // ['MGT', 'GEU', 'OEX', 'NUR', 'PEA', 'LGL'];
@@ -1686,7 +1686,7 @@ export class FusionService {
       LocationId: data['LOCATION_ID'],
       EntryGradeId: data['entry_grade_id'],
       GradeLadderId: data['grade_ladder_id'],
-      UnionName: EmployeeGroup[classificationEmployeeGroupId] ?? EmployeeGroup.Default,
+      UnionName: EmployeeGroup.Default, // We don't care about Union, because Fusion handles that. //EmployeeGroup[classificationEmployeeGroupId] ?? EmployeeGroup.Default,
       StandardWorkingHours: '35',
       StandardWorkingFrequency: 'W',
     };
