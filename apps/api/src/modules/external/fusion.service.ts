@@ -1689,6 +1689,8 @@ export class FusionService {
       UnionName: EmployeeGroup.Default, // We don't care about Union, because Fusion handles that. //EmployeeGroup[classificationEmployeeGroupId] ?? EmployeeGroup.Default,
       StandardWorkingHours: '35',
       StandardWorkingFrequency: 'W',
+      WorkingHours: '35',
+      WorkingHoursFrequency: 'W',
     };
 
     this.logger.log('FusionData ' + this.stringify(fusionData));
