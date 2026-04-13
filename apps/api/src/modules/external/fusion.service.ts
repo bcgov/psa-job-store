@@ -1690,7 +1690,7 @@ export class FusionService {
       StandardWorkingHours: '35',
       StandardWorkingFrequency: 'W',
       WorkingHours: '35',
-      WorkingHoursFrequency: 'W',
+      WorkingFrequency: 'W',
     };
 
     this.logger.log('FusionData ' + this.stringify(fusionData));
