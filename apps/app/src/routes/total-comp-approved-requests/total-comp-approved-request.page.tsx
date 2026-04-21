@@ -77,7 +77,7 @@ export const TotalCompApprovedRequestPage = () => {
     {
       key: 'positionNumber',
       label: 'Position number',
-      children: <div>{data?.positionRequest?.parent_job_profile?.number}</div>,
+      children: <div>{data?.positionRequest?.position_number}</div>, // this was wrong, need to get position number from position request, not job profile
       span: { xs: 24, sm: 24, md: 24, lg: 12, xl: 12 },
     },
   ];
