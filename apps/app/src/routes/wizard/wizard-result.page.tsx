@@ -603,7 +603,7 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
                             Generate position number
                           </Button>
                           <div style={{ display: submitPositionRequestIsLoading || isLoading ? 'block' : 'none' }}>
-                            This can take up to 3 minutes. Please don't navigate away from this page.
+                            This will take at least 3 minutes to complete. Please don't navigate away from this page.
                           </div>
                         </Space>
                       </Form>
@@ -771,7 +771,7 @@ export const WizardResultPage: React.FC<WizardResultPageProps> = ({
                         Submit for verification
                       </Button>
                       <div style={{ display: submitPositionRequestIsLoading || isLoading ? 'block' : 'none' }}>
-                        This can take up to 3 minutes. Please don't navigate away from this page.
+                        This will take at least 3 minutes to complete. Please don't navigate away from this page.
                       </div>
                       <Divider />
                       <h3>Get support</h3>
