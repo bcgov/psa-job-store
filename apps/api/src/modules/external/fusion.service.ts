@@ -1663,9 +1663,10 @@ export class FusionService {
       }
     }
 
+    // Changed to converting position number to Int first, because in DB we don't have the leading 0's
     const authorizingEmployee =
       (await this.prisma.employee.findFirst({
-        where: { position_code: additionalInfo['excluded_mgr_position_number'] },
+        where: { position_code: String(+additionalInfo['excluded_mgr_position_number']).valueOf() },
       })) ?? {};
 
     const fusionData = {
