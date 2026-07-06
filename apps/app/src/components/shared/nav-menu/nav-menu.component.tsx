@@ -66,13 +66,17 @@ export const NavMenu = ({ collapsed }: NavMenuProps) => {
   }, []);
 
   const helpMenuItem = useMemo(() => {
-    return createMenuItem({
-      key: '/help',
-      icon: <BookOutlined aria-hidden />,
-      label: 'Resources',
-      title: 'Resources',
-    });
-  }, []);
+    if (userCanAccess(auth.user, ['super-admin'])) {
+      return createMenuItem({
+        key: '/help',
+        icon: <BookOutlined aria-hidden />,
+        label: 'Resources',
+        title: 'Resources',
+        // Renamed to match Prod, #2223
+      });
+    }
+    return null;
+  }, [auth.user]);
 
   const menuItems = useMemo(
     () => [
@@ -141,6 +145,7 @@ export const NavMenu = ({ collapsed }: NavMenuProps) => {
       ...(userCanAccess(auth.user, ['bceid', 'idir'])
         ? [createMenuItem({ key: '/', icon: <HomeOutlined aria-hidden className="" />, label: 'Home', title: 'Home' })]
         : []),
+      helpMenuItem, // Moved resources to the top #2223
       ...(userCanAccess(auth.user, ['idir'])
         ? [
             createMenuItem({
@@ -375,7 +380,9 @@ export const NavMenu = ({ collapsed }: NavMenuProps) => {
         onOpenChange={onOpenChange}
         style={{ flex: '1 1 auto' }}
       />
-      {helpMenuItem && (
+      {/*
+      Moved help menu to the top, #2223
+      helpMenuItem && (
         <>
           <Divider />
           <Menu
@@ -389,7 +396,7 @@ export const NavMenu = ({ collapsed }: NavMenuProps) => {
             style={{ flex: '0 0 auto' }}
           />
         </>
-      )}
+      )*/}
     </Flex>
   );
 };
