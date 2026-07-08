@@ -51,7 +51,7 @@ interface MinimumRequirementsSectionProps {
   formErrors: any;
   trigger: UseFormTrigger<JobProfileValidationModel>;
   pickerData: any;
-  
+
   // Add new props for section significance
   educationSectionSignificant?: boolean;
   relatedExperienceSectionSignificant?: boolean;
@@ -103,7 +103,7 @@ const MinimumRequirementsSection: React.FC<MinimumRequirementsSectionProps> = ({
   formErrors,
   trigger,
   pickerData,
-  
+
   // Default to true for backward compatibility
   educationSectionSignificant = true,
   relatedExperienceSectionSignificant = true,
@@ -241,7 +241,7 @@ const MinimumRequirementsSection: React.FC<MinimumRequirementsSectionProps> = ({
               useFormReturn={useFormReturn}
               originalFields={originalOptionalRequirementsFields}
               validateVerification={validateVerification}
-              label="Other requirements"
+              label="Optional requirements"
               fieldName="optional_requirements"
               testId="optional-requirement"
               addButtonText="Add an optional requirement"
