@@ -1816,7 +1816,7 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                               onClick={() => appendWillingnessStatement({ text: '' })}
                               icon={<PlusOutlined />}
                             >
-                              Add a custom proviso
+                              Add a custom proviso or willingness statement
                             </Button>
                           </Col>
                         </Row>
@@ -2113,7 +2113,7 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                     labelCol={{ className: 'full-width-label card-label' }}
                     label={
                       <Row justify="space-between" align="middle">
-                        <Col>Other requirements</Col>
+                        <Col>Optional requirements</Col>
                       </Row>
                     }
                   >
