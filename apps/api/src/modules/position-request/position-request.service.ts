@@ -1464,89 +1464,94 @@ export class PositionRequestApiService {
 
     // Get section significance settings from total_comp_create_form_misc
     const totalCompCreateFormMisc = (jobProfile.total_comp_create_form_misc as Record<string, any>) || {};
-    const isAccountabilitiesSectionSignificant = 
-      totalCompCreateFormMisc.isAccountabilitiesSectionSignificant ?? true;
-    const isEducationSectionSignificant = 
-      totalCompCreateFormMisc.isEducationSectionSignificant ?? true;
-    const isRelatedExperienceSectionSignificant = 
-      totalCompCreateFormMisc.isRelatedExperienceSectionSignificant ?? true;
-    const isProfessionalRegistrationSectionSignificant = 
+    const isAccountabilitiesSectionSignificant = totalCompCreateFormMisc.isAccountabilitiesSectionSignificant ?? true;
+    const isEducationSectionSignificant = totalCompCreateFormMisc.isEducationSectionSignificant ?? true;
+    const isRelatedExperienceSectionSignificant = totalCompCreateFormMisc.isRelatedExperienceSectionSignificant ?? true;
+    const isProfessionalRegistrationSectionSignificant =
       totalCompCreateFormMisc.isProfessionalRegistrationSectionSignificant ?? true;
-    const isSecurityScreeningsSectionSignificant = 
+    const isSecurityScreeningsSectionSignificant =
       totalCompCreateFormMisc.isSecurityScreeningsSectionSignificant ?? true;
 
     // Find position request job profile signficant sections
     const prJobProfileSignificantSections = {
       accountabilities: prJobProfile.accountabilities
-        .filter(
-          (obj) => {
-            // For custom items, check section significance flag
-            if (obj.isCustom === true) {
-              return isAccountabilitiesSectionSignificant && 
-                (obj.is_significant === true && (Object.keys(obj).indexOf('disabled') === -1 || obj.disabled === false));
-            }
-            // For non-custom items, check individual significance
-            return (obj.is_significant === true && (Object.keys(obj).indexOf('disabled') === -1 || obj.disabled === false)) ||
-              ((Object.keys(obj).indexOf('is_significant') === -1 || obj.is_significant === false) &&
-                obj.isCustom === true);
+        .filter((obj) => {
+          // For custom items, check section significance flag
+          if (obj.isCustom === true) {
+            return (
+              isAccountabilitiesSectionSignificant &&
+              obj.is_significant === true &&
+              (Object.keys(obj).indexOf('disabled') === -1 || obj.disabled === false)
+            );
           }
-        )
+          // For non-custom items, check individual significance
+          return (
+            (obj.is_significant === true && (Object.keys(obj).indexOf('disabled') === -1 || obj.disabled === false)) ||
+            ((Object.keys(obj).indexOf('is_significant') === -1 || obj.is_significant === false) &&
+              obj.isCustom === true)
+          );
+        })
         .map((obj) => obj.text),
       education: prJobProfile.education
-        .filter(
-          (obj) => {
-            // For custom items, check section significance flag
-            if (obj.isCustom === true) {
-              return isEducationSectionSignificant && 
-                (obj.is_significant === true && (Object.keys(obj).indexOf('disabled') === -1 || obj.disabled === false));
-            }
-            // For non-custom items, check individual significance
-            return obj.is_significant === true && (Object.keys(obj).indexOf('disabled') === -1 || obj.disabled === false);
+        .filter((obj) => {
+          // For custom items, check section significance flag
+          if (obj.isCustom === true) {
+            return (
+              isEducationSectionSignificant &&
+              obj.is_significant === true &&
+              (Object.keys(obj).indexOf('disabled') === -1 || obj.disabled === false)
+            );
           }
-        )
+          // For non-custom items, check individual significance
+          return obj.is_significant === true && (Object.keys(obj).indexOf('disabled') === -1 || obj.disabled === false);
+        })
         .map((obj) => obj.text),
       job_experience: prJobProfile.job_experience
-        .filter(
-          (obj) => {
-            // For custom items, check section significance flag
-            if (obj.isCustom === true) {
-              return isRelatedExperienceSectionSignificant && 
-                (obj.is_significant === true && (Object.keys(obj).indexOf('disabled') === -1 || obj.disabled === false));
-            }
-            // For non-custom items, check individual significance
-            return obj.is_significant === true && (Object.keys(obj).indexOf('disabled') === -1 || obj.disabled === false);
+        .filter((obj) => {
+          // For custom items, check section significance flag
+          if (obj.isCustom === true) {
+            return (
+              isRelatedExperienceSectionSignificant &&
+              obj.is_significant === true &&
+              (Object.keys(obj).indexOf('disabled') === -1 || obj.disabled === false)
+            );
           }
-        )
+          // For non-custom items, check individual significance
+          return obj.is_significant === true && (Object.keys(obj).indexOf('disabled') === -1 || obj.disabled === false);
+        })
         .map((obj) => obj.text),
       professional_registration_requirements: prJobProfile.professional_registration_requirements
-        .filter(
-          (obj) => {
-            // For custom items, check section significance flag
-            if (obj.isCustom === true) {
-              return isProfessionalRegistrationSectionSignificant && 
-                (obj.is_significant === true && (Object.keys(obj).indexOf('disabled') === -1 || obj.disabled === false));
-            }
-            // For non-custom items, check individual significance
-            return obj.is_significant === true && (Object.keys(obj).indexOf('disabled') === -1 || obj.disabled === false);
+        .filter((obj) => {
+          // For custom items, check section significance flag
+          if (obj.isCustom === true) {
+            return (
+              isProfessionalRegistrationSectionSignificant &&
+              obj.is_significant === true &&
+              (Object.keys(obj).indexOf('disabled') === -1 || obj.disabled === false)
+            );
           }
-        )
+          // For non-custom items, check individual significance
+          return obj.is_significant === true && (Object.keys(obj).indexOf('disabled') === -1 || obj.disabled === false);
+        })
         .map((obj) => obj.text),
       security_screenings: prJobProfile.security_screenings
         // check for undefined and treat it as significant, since significant flag was added later
         // initially all security screenings were treated as significant
-        .filter(
-          (obj) => {
-            // For custom items, check section significance flag
-            if (obj.isCustom === true) {
-              return isSecurityScreeningsSectionSignificant && 
-                ((obj.is_significant === true || obj.is_significant === undefined) && 
-                (Object.keys(obj).indexOf('disabled') === -1 || obj.disabled === false));
-            }
-            // For non-custom items, check individual significance
-            return (obj.is_significant === true || obj.is_significant === undefined) &&
-              (Object.keys(obj).indexOf('disabled') === -1 || obj.disabled === false);
+        .filter((obj) => {
+          // For custom items, check section significance flag
+          if (obj.isCustom === true) {
+            return (
+              isSecurityScreeningsSectionSignificant &&
+              (obj.is_significant === true || obj.is_significant === undefined) &&
+              (Object.keys(obj).indexOf('disabled') === -1 || obj.disabled === false)
+            );
           }
-        )
+          // For non-custom items, check individual significance
+          return (
+            (obj.is_significant === true || obj.is_significant === undefined) &&
+            (Object.keys(obj).indexOf('disabled') === -1 || obj.disabled === false)
+          );
+        })
         .map((obj) => obj.text),
     };
 
@@ -1961,7 +1966,7 @@ export class PositionRequestApiService {
       REPORTS_TO: positionRequest.reports_to_position_id,
       POSN_STATUS: positionRequestNeedsReview.result === true ? PositionStatus.Proposed : PositionStatus.Active,
       DESCR: positionRequest.title,
-      REG_TEMP: PositionDuration.Regular,
+      REG_TEMP: PositionDuration.Temporary, // JS 2225, investigate feasibility of Temp positions
       FULL_PART_TIME: PositionType.FullTime,
       TGB_E_CLASS: `P${(positionRequest.profile_json as Record<string, any>).number}`,
       TGB_APPRV_MGR: employeeId,
