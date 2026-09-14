@@ -755,7 +755,7 @@ const generateJobProfile = ({ jobProfile, positionRequest, supervisorProfile }: 
 
           ...(transformedJobProfile.optional_requirements && transformedJobProfile.optional_requirements.length > 0
             ? [
-                createHeading('Other Requirements', false),
+                createHeading('Optional requirements', false),
                 ...transformedJobProfile.optional_requirements.map(
                   (obj: string) =>
                     new Paragraph({

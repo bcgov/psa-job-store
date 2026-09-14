@@ -80,7 +80,7 @@ const Provisos: React.FC<ProvisosProps> = ({
   return (
     <>
       <Form.Item
-        label={<h4>Provisos</h4>}
+        label={<h4>Willingness Statements or Provisos</h4>}
         labelCol={{ className: 'card-label' }}
         className="label-only"
         colon={false}
@@ -99,7 +99,7 @@ const Provisos: React.FC<ProvisosProps> = ({
                 handleAddNew();
               }}
             >
-              Add a custom proviso
+              Add a custom proviso or willingness statement
             </WizardEditAddButton>
           </Col>
         </Row>

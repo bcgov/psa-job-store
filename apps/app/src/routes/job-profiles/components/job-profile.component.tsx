@@ -702,7 +702,11 @@ export const JobProfile: React.FC<JobProfileProps> = ({
       label: <h3 tabIndex={0}>Ministries</h3>,
       children: (
         <span tabIndex={0}>
-          <ul>{effectiveDataExtra?.organizations.map((org, index) => <li key={index}>{org.organization.name}</li>)}</ul>
+          <ul>
+            {effectiveDataExtra?.organizations.map((org, index) => (
+              <li key={index}>{org.organization.name}</li>
+            ))}
+          </ul>
         </span>
       ),
       span: { xs: 24, sm: 24, md: 24, lg: 24, xl: 24, xxl: 12 },
@@ -757,7 +761,9 @@ export const JobProfile: React.FC<JobProfileProps> = ({
                 <ul>
                   {effectiveDataExtra?.streams
                     .filter((streamItem) => streamItem.stream.job_family_id === jobFamily.id)
-                    .map((streamItem, index) => <li key={index}>{streamItem.stream.name}</li>)}
+                    .map((streamItem, index) => (
+                      <li key={index}>{streamItem.stream.name}</li>
+                    ))}
                 </ul>
               </div>
             );
@@ -1355,7 +1361,7 @@ export const JobProfile: React.FC<JobProfileProps> = ({
             {((showDiff && (effectiveData?.optional_requirements?.length ?? 0) > 0) ||
               (!showDiff && (effectiveData?.optional_requirements.filter((ed) => !ed.disabled)?.length ?? 0) > 0)) && (
               <>
-                <h4>Other requirements</h4>
+                <h4>Optional requirements</h4>
                 <ul data-testid="optional-requirements">
                   {showDiff && originalData
                     ? compareLists(originalData.optional_requirements, effectiveData?.optional_requirements)
