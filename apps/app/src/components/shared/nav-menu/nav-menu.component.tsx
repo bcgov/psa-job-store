@@ -145,7 +145,7 @@ export const NavMenu = ({ collapsed }: NavMenuProps) => {
       ...(userCanAccess(auth.user, ['bceid', 'idir'])
         ? [createMenuItem({ key: '/', icon: <HomeOutlined aria-hidden className="" />, label: 'Home', title: 'Home' })]
         : []),
-      helpMenuItem, // Moved resources to the top #2223
+      ...(helpMenuItem ? [helpMenuItem] : []), // Moved resources to the top #2223. Added spread to avoid null errors of Sept 15.
       ...(userCanAccess(auth.user, ['idir'])
         ? [
             createMenuItem({
