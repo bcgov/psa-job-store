@@ -7,7 +7,6 @@ import { FindManyUserArgs, FindUniqueUserArgs, User, UserUpdateInput } from '../
 import { globalLogger } from '../../utils/logging/logger.factory';
 import { CACHE_USER_PREFIX } from '../auth/auth.constants';
 import { CrmService } from '../external/crm.service';
-import { PeoplesoftV2Service } from '../external/peoplesoft-v2.service';
 import { PeoplesoftService } from '../external/peoplesoft.service';
 import { KeycloakService } from '../keycloak/keycloak.service';
 import { PrismaService } from '../prisma/prisma.service';
@@ -31,7 +30,6 @@ export class UserService {
     @Inject(CACHE_MANAGER) private readonly cacheManager: Cache,
     private readonly crmService: CrmService,
     private readonly keycloakService: KeycloakService,
-    private readonly peoplesoftV2Service: PeoplesoftV2Service,
     private readonly peoplesoftService: PeoplesoftService,
     private readonly prisma: PrismaService,
   ) {}
@@ -44,8 +42,8 @@ export class UserService {
   }
 
   private async getPeoplesoftMetadata(username: string) {
-    const profile = await this.peoplesoftV2Service.getProfileV2(username);
-    const employee = profile ? await this.peoplesoftV2Service.getEmployee(profile.EMPLID) : undefined;
+    const profile = await this.peoplesoftService.getProfileV2(username);
+    const employee = profile ? await this.peoplesoftService.getEmployeeV2(profile.EMPLID) : undefined;
 
     // todo: how will potential null values here have downstream effects?
     return {
@@ -473,7 +471,7 @@ export class UserService {
 
       // Get profiles for each IDIR username
       const profiles = await Promise.all(
-        idirUsernames.map((username) => this.peoplesoftV2Service.getProfileV2(username, null)),
+        idirUsernames.map((username) => this.peoplesoftService.getProfileV2(username, null)),
       );
 
       // console.log('profiles: ', JSON.stringify(profiles, null, 2));

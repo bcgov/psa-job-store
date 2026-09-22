@@ -1,5 +1,15 @@
 # PSA Job Store Deployments
 
+## Migrating to Oracle Fusion
+
+> In the future, Job Store must be migrated to Oracle Fusion.
+>
+> **Before migrating, make a backup.**
+>
+> This can be accomplished by populating the Fusion, Oracle Cloud Settings as seen in the `.env` instructions below.
+>
+> Once the server is running with these environment variables, Job Store will be in `Fusion` mode. Delete the scheduled_task_metadata to force a sync to ingest data from Fusion.
+
 ## Overview
 
 The `PSA Job Store` project consists of two main applications and several supporting services:
@@ -53,6 +63,19 @@ ELASTIC_PASSWORD=
 
 # `express-session` Settings
 SESSION_SECRET=
+
+# Fusion Settings (Optional - Set only when migrating to Fusion)
+USE_FUSION=
+FUSION_URL=
+FUSION_USERNAME=
+FUSION_PASSWORD=
+
+# Oracle Cloud Settings (Optional - Set only when migrating to Fusion)
+ORACLE_IDP_TOKEN_URL=
+ORACLE_IDP_ID=
+ORACLE_IDP_SECRET=
+ORACLE_IDP_SCOPE=
+OIC_URL=
 
 # PeopleSoft Settings
 PEOPLESOFT_URL=
