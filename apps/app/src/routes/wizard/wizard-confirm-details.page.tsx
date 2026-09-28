@@ -570,9 +570,13 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
 
                               return (
                                 <>
+                                  {checked ? 'Temporary assignment' : 'Full Time position'}.
+                                  <br />
+                                  <br />
                                   <Switch checked={checked} ref={ref} disabled={false} onClick={onClick} />
                                   <span className="ant-form-text" style={{ marginLeft: '0.8rem' }}>
-                                    Set this to <strong>on</strong> for a temporary assignment.
+                                    Set this to <strong>{checked ? 'off' : 'on'}</strong> for a{' '}
+                                    {!checked ? 'Temporary assignment' : 'Full Time position'}.
                                   </span>
                                 </>
                               );
