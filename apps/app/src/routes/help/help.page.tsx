@@ -20,6 +20,7 @@ import { FilterOperator } from '../../components/shared/data-list/lib/prisma-fil
 import { useTypedSelector } from '../../redux/redux.hooks';
 import { useLazyGetDocumentsQuery } from '../../redux/services/graphql-api/document.api';
 import { useGetJobProfileStreamsQuery } from '../../redux/services/graphql-api/job-profile-stream';
+import DOMPurify from 'dompurify';
 
 const { Text } = Typography;
 
@@ -103,6 +104,7 @@ export const HelpPage = () => {
           }}
           // ---------- TABLE PROPS ----------
           tableProps={{
+            scroll: {}, // 2284 - New scroll attribute to overcome descriptions being too long
             columns: [
               {
                 key: 'file_extension',
@@ -139,7 +141,22 @@ export const HelpPage = () => {
               {
                 key: 'description',
                 dataIndex: 'description',
-                render: (value: string) => <Text>{value}</Text>,
+                render: (value: string) => {
+                  // 2284 - Replace HTTP links with <A> to allow for videos in descriptions
+                  value = value.replace(/\b(https?:\/\/[^\s]+)\b|$/g, (match) => {
+                    return `<a href="${match}" target="_blank">${match}</a>`;
+                  });
+                  return (
+                    <span
+                      dangerouslySetInnerHTML={{
+                        __html: DOMPurify.sanitize(value ?? '', {
+                          ALLOWED_TAGS: ['a'],
+                          ALLOWED_ATTR: ['href', 'target'],
+                        }),
+                      }}
+                    ></span>
+                  );
+                },
                 sorter: false,
                 title: 'Description',
               },

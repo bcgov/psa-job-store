@@ -551,6 +551,10 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
                         </Row>
                       </Card>
 
+                      {/*
+                        2225 - Add toggle for Temporary vs Regular assignments.
+                      */}
+
                       <Card title={<h3>Assignment type</h3>} className="custom-card" style={{ marginTop: 16 }}>
                         <Form.Item name="confirmation" validateStatus={errors.temporaryAssignment ? 'error' : ''}>
                           <Controller
@@ -568,15 +572,17 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
                                 setValue('temporaryAssignment', checked);
                               }, [checked]);
 
+                              // 2225 Renamed "Full time" to "Regular"
+
                               return (
                                 <>
-                                  {checked ? 'Temporary assignment' : 'Full Time position'}.
+                                  {checked ? 'Temporary assignment' : 'Regular assignment'}.
                                   <br />
                                   <br />
                                   <Switch checked={checked} ref={ref} disabled={false} onClick={onClick} />
                                   <span className="ant-form-text" style={{ marginLeft: '0.8rem' }}>
                                     Set this to <strong>{checked ? 'off' : 'on'}</strong> for a{' '}
-                                    {!checked ? 'Temporary assignment' : 'Full Time position'}.
+                                    {!checked ? 'Temporary assignment' : 'Regular assignment'}.
                                   </span>
                                 </>
                               );
