@@ -144,7 +144,12 @@ export const HelpPage = () => {
                 render: (value: string) => {
                   // 2284 - Replace HTTP links with <A> to allow for videos in descriptions
                   value = value.replace(/\b(https?:\/\/[^\s]+)\b|$/g, (match) => {
-                    return `<a href="${match}" target="_blank">${match}</a>`;
+                    try {
+                      const url = new URL(match);
+
+                      return `<a href="${match}" target="_blank">${url.protocol}//${url.hostname}</a>`;
+                    } catch {}
+                    return match;
                   });
                   return (
                     <span
