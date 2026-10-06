@@ -11,14 +11,16 @@ export interface DataTableProps {
   data?: { data?: TableProps<AnyObject>['dataSource']; pageInfo: PageInfo };
   filterBuilder: FilterBuilder;
   loading?: boolean;
+  scroll?: Record<string, string | boolean | number>;
 }
 
-export const DataTable = ({ columns, data, filterBuilder, loading }: DataTableProps) => {
+// 2284 - Added configurable scroll attribute
+export const DataTable = ({ columns, data, filterBuilder, loading, scroll = { x: 'max-content' } }: DataTableProps) => {
   const filter = useMemo(() => filterBuilder.toFilter(), [filterBuilder]);
 
   return (
     <Table
-      scroll={{ x: 'max-content' }}
+      scroll={scroll}
       onChange={(pagination, _filters, sorter) => {
         const { current, pageSize } = pagination;
 
