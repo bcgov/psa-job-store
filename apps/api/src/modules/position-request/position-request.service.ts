@@ -103,6 +103,7 @@ interface AdditionalInfo {
   branch?: string;
   division?: string;
   excluded_mgr_name?: string;
+  temporary_assignment?: boolean;
 }
 
 function generateShortId(length: number): string {
@@ -1354,6 +1355,11 @@ export class PositionRequestApiService {
               }
             });
           }
+
+          if (additionalInfo.temporary_assignment !== undefined) {
+            (updatePayload.additional_info as Record<string, Prisma.JsonValue>).temporary_assignment =
+              additionalInfo.temporary_assignment;
+          }
         }
       }
     } else if (additionalInfo === null) {
@@ -1966,7 +1972,10 @@ export class PositionRequestApiService {
       REPORTS_TO: positionRequest.reports_to_position_id,
       POSN_STATUS: positionRequestNeedsReview.result === true ? PositionStatus.Proposed : PositionStatus.Active,
       DESCR: positionRequest.title,
-      REG_TEMP: PositionDuration.Regular,
+      REG_TEMP:
+        additionalInfo && additionalInfo.temporary_assignment === true
+          ? PositionDuration.Temporary
+          : PositionDuration.Regular,
       FULL_PART_TIME: PositionType.FullTime,
       TGB_E_CLASS: `P${(positionRequest.profile_json as Record<string, any>).number}`,
       TGB_APPRV_MGR: employeeId,

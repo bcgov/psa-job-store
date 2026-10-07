@@ -115,6 +115,7 @@ export interface AdditionalInfo {
   branch?: string;
   division?: string;
   excluded_mgr_name?: string;
+  temporary_assignment?: boolean;
 }
 
 export interface GetPositionRequestResponse {

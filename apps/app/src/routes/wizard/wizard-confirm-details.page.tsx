@@ -2,9 +2,9 @@
 /* eslint-disable @typescript-eslint/no-unused-vars */
 import { ArrowLeftOutlined } from '@ant-design/icons';
 import { classValidatorResolver } from '@hookform/resolvers/class-validator';
-import { Button, Card, Col, Form, Input, Modal, Row, Tooltip, Typography } from 'antd';
+import { Button, Card, Col, Form, Input, Modal, Row, Tooltip, Typography, Switch } from 'antd';
 import { IsNotEmpty } from 'class-validator';
-import { useEffect, useState } from 'react';
+import { useEffect, useRef, useState } from 'react';
 import { Controller, useForm } from 'react-hook-form';
 import { Link } from 'react-router-dom';
 import '../../components/app/common/css/custom-form.css';
@@ -51,6 +51,8 @@ export class WizardConfirmDetailsModel {
   excludedManagerName: string | null;
 
   noPositions: boolean;
+
+  temporaryAssignment: boolean;
 }
 
 // export const WizardReviewPage = () => {
@@ -168,7 +170,6 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
       // console.log('formData: ', formData);
 
       if (positionRequestId) {
-        // console.log('updatePositionRequest');
         const resp = await updatePositionRequest({
           id: positionRequestId,
           step: step == -1 ? (updateStep ? (action == 'next' ? 2 : 0) : 1) : step,
@@ -193,6 +194,7 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
             excluded_mgr_name: formData.excludedManagerPositionNumberAndName?.split('|')[1] ?? '',
             branch: formData.branch,
             division: formData.division,
+            temporary_assignment: formData.temporaryAssignment,
           },
           returnFullObject: true,
         }).unwrap();
@@ -229,6 +231,7 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
       payListDepartmentId: null as string | null,
       branch: '',
       division: '',
+      temporaryAssignment: false,
     },
   });
 
@@ -242,6 +245,7 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
         excluded_mgr_name,
         branch,
         division,
+        temporary_assignment,
       } = positionRequestData.additional_info ?? {};
 
       setValue('branch', branch || '');
@@ -287,6 +291,8 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
       );
 
       setSelectedDepartmentId(setDeptIdVal);
+      const temporaryAssignment = temporary_assignment === true;
+      setValue('temporaryAssignment', temporaryAssignment);
       setSetupDone(true);
       // console.log('setup done');
     }
@@ -543,6 +549,46 @@ export const WizardConfirmDetailsPage: React.FC<WizardConfirmPageProps> = ({
                             </Form.Item>
                           </Col>
                         </Row>
+                      </Card>
+
+                      {/*
+                        2225 - Add toggle for Temporary vs Regular assignments.
+                      */}
+
+                      <Card title={<h3>Assignment type</h3>} className="custom-card" style={{ marginTop: 16 }}>
+                        <Form.Item name="confirmation" validateStatus={errors.temporaryAssignment ? 'error' : ''}>
+                          <Controller
+                            control={control}
+                            name="temporaryAssignment"
+                            render={() => {
+                              const ref = useRef<null | HTMLButtonElement>(null);
+                              const [checked, setChecked] = useState<boolean>(getValues('temporaryAssignment'));
+
+                              const onClick = () => {
+                                setChecked(!checked);
+                              };
+
+                              useEffect(() => {
+                                setValue('temporaryAssignment', checked);
+                              }, [checked]);
+
+                              // 2225 Renamed "Full time" to "Regular"
+
+                              return (
+                                <>
+                                  {checked ? 'Temporary assignment' : 'Regular assignment'}.
+                                  <br />
+                                  <br />
+                                  <Switch checked={checked} ref={ref} disabled={false} onClick={onClick} />
+                                  <span className="ant-form-text" style={{ marginLeft: '0.8rem' }}>
+                                    Set this to <strong>{checked ? 'off' : 'on'}</strong> for a{' '}
+                                    {!checked ? 'Temporary assignment' : 'Regular assignment'}.
+                                  </span>
+                                </>
+                              );
+                            }}
+                          />
+                        </Form.Item>
                       </Card>
                     </Form>
                   </Col>

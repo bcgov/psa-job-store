@@ -66,16 +66,17 @@ export const NavMenu = ({ collapsed }: NavMenuProps) => {
   }, []);
 
   const helpMenuItem = useMemo(() => {
-    if (userCanAccess(auth.user, ['super-admin'])) {
-      return createMenuItem({
-        key: '/help',
-        icon: <BookOutlined aria-hidden />,
-        label: 'Resources',
-        title: 'Resources',
-        // Renamed to match Prod, #2223
-      });
-    }
-    return null;
+    //if (userCanAccess(auth.user, ['super-admin'])) {
+    return createMenuItem({
+      key: '/help',
+      icon: <BookOutlined aria-hidden />,
+      label: 'Resources',
+      title: 'Resources',
+      // Renamed to match Prod, #2223
+      // Allow all users access to resources tab, #1369
+    });
+    //}
+    //return null;
   }, [auth.user]);
 
   const menuItems = useMemo(

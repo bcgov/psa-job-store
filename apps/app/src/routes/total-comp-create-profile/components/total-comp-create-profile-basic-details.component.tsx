@@ -1083,6 +1083,7 @@ export const BasicDetails: React.FC<BasicDetailsProps> = ({}) => {
               formErrors={basicFormErrors}
               useFormReturn={basicUseFormReturn}
               readOnly={!isCurrentVersion || jobProfileData?.jobProfile.is_archived}
+              editingProfile={true}
             />
             <Card title="JobStore Number" style={{ marginTop: 16 }} bordered={false} className="custom-card">
               <Row justify="start">
@@ -1705,7 +1706,11 @@ export const BasicDetails: React.FC<BasicDetailsProps> = ({}) => {
                         <WizardValidationError formErrors={basicFormErrors} fieldName="scopeOfResponsibility" />
                       </>
                     ) : (
-                      <>{jobProfileData?.jobProfile.scopes.map((s: any) => <Tag>{s.scope.name}</Tag>)}</>
+                      <>
+                        {jobProfileData?.jobProfile.scopes.map((s: any) => (
+                          <Tag>{s.scope.name}</Tag>
+                        ))}
+                      </>
                     )}
                   </Form.Item>
                 </Col>
@@ -1757,7 +1762,11 @@ export const BasicDetails: React.FC<BasicDetailsProps> = ({}) => {
                         <WizardValidationError formErrors={basicFormErrors} fieldName="ministries" />
                       </>
                     ) : (
-                      <>{jobProfileData?.jobProfile.organizations.map((o: any) => <Tag>{o.organization.name}</Tag>)}</>
+                      <>
+                        {jobProfileData?.jobProfile.organizations.map((o: any) => (
+                          <Tag>{o.organization.name}</Tag>
+                        ))}
+                      </>
                     )}
                   </Form.Item>
                 </Col>
