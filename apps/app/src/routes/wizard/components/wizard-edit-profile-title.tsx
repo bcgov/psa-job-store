@@ -12,25 +12,34 @@ interface SingleTextFieldProps {
   trigger: UseFormTrigger<JobProfileValidationModel> | UseFormTrigger<BasicDetailsValidationModel>;
   formErrors: any;
   readOnly?: boolean;
+  editingProfile?: boolean;
 }
 
-const WizardTitle: React.FC<SingleTextFieldProps> = ({ useFormReturn, formErrors, trigger, readOnly }) => {
+const WizardTitle: React.FC<SingleTextFieldProps> = ({
+  useFormReturn,
+  formErrors,
+  trigger,
+  readOnly,
+  editingProfile,
+}) => {
   // 2297 - Force more descriptive title for Work-able job positions
   const { getValues, formState } = useFormReturn;
   const { title } = getValues();
   let showTitleWarning = false;
-  if (typeof title === 'object' && 'text' in title) {
-    showTitleWarning = /^work(?:\-|\s)?able/.test(title.text.toLocaleLowerCase());
-    if (showTitleWarning) {
-      formState.errors['title'] = {
-        root: {
-          message: 'Default title "Work-able Intern" must be updated to reflect the duties of the position.',
+  if (!editingProfile) {
+    if (typeof title === 'object' && 'text' in title) {
+      showTitleWarning = /^work(?:\-|\s)?able/.test(title.text.toLocaleLowerCase());
+      if (showTitleWarning) {
+        formState.errors['title'] = {
+          root: {
+            message: 'Default title "Work-able Intern" must be updated to reflect the duties of the position.',
+            type: 'value',
+          },
           type: 'value',
-        },
-        type: 'value',
-      };
-    } else {
-      delete formState.errors['title'];
+        };
+      } else {
+        delete formState.errors['title'];
+      }
     }
   }
 
