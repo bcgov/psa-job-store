@@ -10,6 +10,9 @@ import { SearchService } from '../search/search.service';
 import { FindManyJobProfileWithSearch } from './args/find-many-job-profile-with-search.args';
 import { ClassificationInput } from './inputs/classification-requirements.inputs';
 import { ExtendedJobProfileCreateInput } from './inputs/extended-job-profile-create.input';
+
+import { readFile } from 'node:fs/promises';
+
 @Injectable()
 export class JobProfileService {
   constructor(
@@ -2034,6 +2037,15 @@ export class JobProfileService {
       );
     });
 
+    // 2220 Add "Global" Willing Statements to this list so that Picker has them
+    try {
+      const contents = await readFile('/tmp/willingness_statements.json', 'utf8');
+      const data = JSON.parse(contents);
+      processRequirements(data as any[], willingnessStatementsMap, {}, excludedProfile?.willingness_statements);
+    } catch (error) {
+      console.error('Willingness statements - Failed to read JSON file:', error);
+    }
+
     function filterExcludedFields(requirements: any[], excludedFields: any[] | undefined) {
       if (!excludedFields) return requirements;
       // filter out fields that are present in the current profile:
@@ -2066,8 +2078,12 @@ export class JobProfileService {
               });
             }
             const entry = map.get(text)!;
-            entry.jobFamilies.push(...profile.jobFamilies.map((jf: any) => ({ id: jf.jobFamily.id })));
-            entry.streams.push(...profile.streams.map((s: any) => ({ id: s.stream.id })));
+            if (profile.jobFamilies) {
+              entry.jobFamilies.push(...profile.jobFamilies?.map((jf: any) => ({ id: jf.jobFamily.id })));
+            }
+            if (profile.jobFamilies) {
+              entry.streams.push(...profile.streams?.map((s: any) => ({ id: s.stream.id })));
+            }
           });
       }
     }
