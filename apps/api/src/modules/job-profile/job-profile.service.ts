@@ -2043,7 +2043,7 @@ export class JobProfileService {
       const data = JSON.parse(contents);
       processRequirements(data as any[], willingnessStatementsMap, {}, excludedProfile?.willingness_statements);
     } catch (error) {
-      console.error('Failed to read JSON file:', error);
+      console.error('Willingness statements - Failed to read JSON file:', error);
     }
 
     function filterExcludedFields(requirements: any[], excludedFields: any[] | undefined) {
