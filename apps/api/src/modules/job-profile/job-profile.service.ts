@@ -2038,7 +2038,6 @@ export class JobProfileService {
     });
 
     // 2220 Add "Global" Willing Statements to this list so that Picker has them
-
     try {
       const contents = await readFile('/tmp/willingness_statements.json', 'utf8');
       const data = JSON.parse(contents);
