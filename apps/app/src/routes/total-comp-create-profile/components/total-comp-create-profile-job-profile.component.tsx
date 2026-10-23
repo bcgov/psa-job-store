@@ -1806,7 +1806,7 @@ export const TotalCompCreateJobProfile: React.FC<TotalCompCreateJobProfileProps>
                               removeAction={removeWillingnessStatement}
                               triggerValidation={triggerProfileValidation}
                               title="Willingness statements or provisos"
-                              buttonText="Browse and add provisos"
+                              buttonText="Browse and add provisos or willingness statements"
                               tc_is_readonly={true}
                             />
                           </Col>
