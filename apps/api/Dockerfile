@@ -1,4 +1,4 @@
-FROM node:22.11.0-alpine AS base
+FROM node:22.23.4-bookworm AS base
 
 FROM base AS builder
 WORKDIR /tmp/build
