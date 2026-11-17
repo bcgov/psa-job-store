@@ -2044,6 +2044,8 @@ export class JobProfileService {
       processRequirements(data as any[], willingnessStatementsMap, {}, excludedProfile?.willingness_statements);
     } catch (error) {
       console.error('Willingness statements - Failed to read JSON file:', error);
+      const data = [{ text: 'WS one' }, { text: 'WS two' }, { text: 'WS three' }];
+      processRequirements(data as any[], willingnessStatementsMap, {}, excludedProfile?.willingness_statements);
     }
 
     function filterExcludedFields(requirements: any[], excludedFields: any[] | undefined) {

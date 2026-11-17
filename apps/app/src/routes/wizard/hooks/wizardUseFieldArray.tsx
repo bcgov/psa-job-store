@@ -67,14 +67,14 @@ const useFormFields = ({
         }));
   };
 
-  const handleAddNew = () => {
+  const handleAddNew = (text?: string) => {
     // When adding a new item, mark it for verification if it's significant
     // The section significance flag should not affect the verification of existing items
     if (significant && significant_add)
       setEditedFields && setEditedFields((prev) => ({ ...prev, [fields.length]: true }));
-    
+
     append({
-      text: '',
+      text: text ?? '',
       isCustom: true,
       disabled: false,
       ...(significant && significant_add ? { is_significant: true } : {}),

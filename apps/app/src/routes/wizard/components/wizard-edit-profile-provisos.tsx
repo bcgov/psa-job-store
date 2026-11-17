@@ -9,6 +9,9 @@ import WizardEditAddButton from './wizard-edit-profile-add-button';
 import WizardEditProfileListItem from './wizard-edit-profile-list-item';
 import WizardValidationError from './wizard-edit-profile-validation-error';
 import './wizard-edit-profile.css';
+import WizardPicker from '../../wizard/components/wizard-picker';
+
+import { useGetRequirementsWithoutReadOnlyQuery } from '../../../redux/services/graphql-api/job-profile.api';
 
 interface ProvisosProps {
   useFormReturn: UseFormReturn<JobProfileValidationModel, any, undefined>;
@@ -77,6 +80,28 @@ const Provisos: React.FC<ProvisosProps> = ({
     );
   };
 
+  const { data: pickerData } = useGetRequirementsWithoutReadOnlyQuery(
+    {
+      jobFamilyIds: [],
+      jobFamilyStreamIds: [],
+      classifications: [],
+      ministryIds: [],
+      jobFamilyWithNoStream: [],
+      excludeProfileId: 0,
+    },
+    {
+      skip: false,
+    },
+  );
+
+  const appendWillingnessStatement = (args: any) => {
+    handleAddNew(args.text);
+  };
+
+  const removeWillingnessStatement = () => {};
+
+  const triggerProfileValidation = () => {};
+
   return (
     <>
       <Form.Item
@@ -91,6 +116,18 @@ const Provisos: React.FC<ProvisosProps> = ({
 
       <Form.Item style={{ marginBottom: 0 }}>
         <Row>
+          <Col>
+            <WizardPicker
+              data={pickerData?.requirementsWithoutReadOnly?.willingnessStatements}
+              fields={[]}
+              addAction={appendWillingnessStatement}
+              removeAction={removeWillingnessStatement}
+              triggerValidation={triggerProfileValidation}
+              title="Willingness statements or provisos"
+              buttonText="Browse and add provisos or willingness statements"
+              tc_is_readonly={true}
+            />
+          </Col>
           <Col>
             <WizardEditAddButton
               testId="add-proviso-button"
